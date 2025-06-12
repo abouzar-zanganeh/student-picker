@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دستیار هوشمند معلم</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
+
+        body { 
+            font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 20px; 
+            max-width: 600px;
+            margin: auto;
+            background-color: #f4f4f9;
+            padding-bottom: 5rem;
+        }
+        .page { display: none; }
+        .page.active { display: block; }
+        h1, h2 { color: #333; }
+        h3 { border-bottom: 2px solid #ddd; padding-bottom: 5px; margin-top: 30px;}
+        button { 
+            font-family: 'Vazirmatn', sans-serif;
+            padding: 10px 15px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        button:hover { background-color: #0056b3; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .btn-success { background-color: #28a745; }
+        .btn-success:hover { background-color: #218838; }
+        .btn-icon {
+            background: none;
+            border: none;
+            padding: 5px;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            color: #6c757d;
+        }
+        .btn-icon:hover { color: #333; }
+
+        input[type="text"], textarea { 
+            font-family: 'Vazirmatn', sans-serif;
+            padding: 10px; 
+            font-size: 16px; 
+            width: calc(100% - 22px);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        textarea { min-height: 100px; resize: vertical; margin-bottom: 10px; }
+        ul { list-style-type: none; padding: 0; }
+        li { 
+            padding: 12px; 
+            background-color: white;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        li:first-child { border-top-left-radius: 5px; border-top-right-radius: 5px; }
+        li:last-child { border-bottom: none; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; }
+        
+        .preview-item { display: flex; align-items: center; gap: 10px; }
+        
+        .accordion-toggle { cursor: pointer; display: flex; align-items: center; gap: 10px; user-select: none; }
+        .accordion-toggle .arrow { transition: transform 0.3s ease; display: inline-block; }
+        .accordion-toggle.open .arrow { transform: rotate(180deg); }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.35s ease-out; background-color: #fff; padding: 0 15px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .accordion-content.open { max-height: 1000px; transition: max-height 0.4s ease-in; padding: 20px 15px; }
+
+        .undo-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(150%);
+            background-color: #323232;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: transform 0.4s ease;
+        }
+        .undo-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        .undo-toast button {
+            background: none;
+            border: none;
+            color: #bb86fc;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header style="text-align: center; margin-bottom: 20px;">
+        <h1>📚 دستیار هوشمند معلم</h1>
+    </header>
+
+    <main id="class-management-page" class="page active">
+        <h2>لیست کلاس‌ها</h2>
+        <div style="display: flex; margin-bottom: 10px;">
+            <input type="text" id="new-class-name" placeholder="نام کلاس جدید..." style="flex-grow: 1; margin-left: 10px;">
+            <button id="add-class-btn">افزودن</button>
+        </div>
+        <ul id="class-list"></ul>
+    </main>
+
+    <main id="student-page" class="page">
+        <h2 id="class-name-header"></h2>
+        <button class="back-to-classes-btn">➡️ بازگشت به لیست کلاس‌ها</button>
+        <hr style="margin: 20px 0;">
+        <h3>🎲 انتخابگر هوشمند</h3>
+        <button id="select-student-btn" style="font-size: 20px; padding: 20px; width: 100%;" class="btn-success">انتخاب نفر بعدی!</button>
+        <div id="selected-student-result" style="text-align: center; font-size: 24px; margin-top: 20px; font-weight: bold; min-height: 30px; color: #28a745;"></div>
+        <h3 style="margin-top: 40px;">لیست دانش‌آموزان کلاس</h3>
+        <ul id="student-list"></ul>
+    </main>
+
+    <main id="settings-page" class="page">
+        <h2 id="settings-class-name-header"></h2>
+        <button class="back-to-classes-btn">➡️ بازگشت به لیست کلاس‌ها</button>
+        <hr style="margin: 20px 0;">
+
+        <h3 id="student-management-toggle" class="accordion-toggle open">
+            <span class="arrow">▼</span>
+            مدیریت لیست دانش‌آموزان
+        </h3>
+        <div id="student-management-content" class="accordion-content open">
+            <div style="display: flex; margin-bottom: 10px;">
+                <input type="text" id="new-student-name" placeholder="افزودن دستی دانش‌آموز..." style="flex-grow: 1; margin-left: 10px;">
+                <button id="add-student-btn">افزودن</button>
+            </div>
+            <div>
+                <textarea id="paste-area" placeholder="لیست اسامی کپی شده را اینجا Paste کنید... (هر اسم در یک خط)"></textarea>
+                <button id="process-paste-btn" class="btn-secondary" style="width: 100%;">بررسی لیست</button>
+            </div>
+            <div style="margin: 20px 0; text-align: center;">یا</div>
+            <div style="margin-bottom: 10px;">
+                 <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
+                 <button id="import-csv-btn" class="btn-secondary" style="width: 100%;">ورود لیست از فایل (CSV)</button>
+            </div>
+        </div>
+
+        <h3 style="margin-top: 40px;">لیست فعلی دانش‌آموزان</h3>
+        <ul id="settings-student-list"></ul>
+    </main>
+    
+    <main id="csv-preview-page" class="page">
+        <h2>پیش‌نمایش لیست ورودی</h2>
+        <p>لطفاً لیست زیر را بررسی کرده و موارد مورد نظر برای افزودن را تایید کنید.</p>
+        <ul id="csv-preview-list"></ul>
+        <div style="margin-top: 20px;">
+            <button id="csv-confirm-btn" class="btn-success">تایید و افزودن موارد انتخاب شده</button>
+            <button id="csv-cancel-btn">لغو عملیات</button>
+        </div>
+    </main>
+
+    <div id="undo-toast" class="undo-toast">
+        <span id="undo-message"></span>
+        <button id="undo-btn">واگرد</button>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- HTML Elements ---
+        const classManagementPage = document.getElementById('class-management-page');
+        const studentPage = document.getElementById('student-page');
+        const settingsPage = document.getElementById('settings-page');
+        const csvPreviewPage = document.getElementById('csv-preview-page');
+        const newClassNameInput = document.getElementById('new-class-name');
+        const addClassBtn = document.getElementById('add-class-btn');
+        const classListUl = document.getElementById('class-list');
+        const classNameHeader = document.getElementById('class-name-header');
+        const settingsClassNameHeader = document.getElementById('settings-class-name-header');
+        const backToClassesBtns = document.querySelectorAll('.back-to-classes-btn');
+        const newStudentNameInput = document.getElementById('new-student-name');
+        const addStudentBtn = document.getElementById('add-student-btn');
+        const studentListUl = document.getElementById('student-list');
+        const settingsStudentListUl = document.getElementById('settings-student-list');
+        const selectStudentBtn = document.getElementById('select-student-btn');
+        const selectedStudentResult = document.getElementById('selected-student-result');
+        const csvFileInput = document.getElementById('csv-file-input');
+        const importCsvBtn = document.getElementById('import-csv-btn');
+        const pasteArea = document.getElementById('paste-area');
+        const processPasteBtn = document.getElementById('process-paste-btn');
+        const csvPreviewList = document.getElementById('csv-preview-list');
+        const csvConfirmBtn = document.getElementById('csv-confirm-btn');
+        const csvCancelBtn = document.getElementById('csv-cancel-btn');
+        const studentManagementToggle = document.getElementById('student-management-toggle');
+        const studentManagementContent = document.getElementById('student-management-content');
+        const undoToast = document.getElementById('undo-toast');
+        const undoMessage = document.getElementById('undo-message');
+        const undoBtn = document.getElementById('undo-btn');
+
+        // --- State Management ---
+        let schoolData = {};
+        let currentClass = null;
+        let lastWinner = null;
+        let namesToImport = [];
+        let previousState = null;
+        let undoTimeout = null;
+
+        // --- Core Functions ---
+        function saveData() { localStorage.setItem('teacherAssistantData', JSON.stringify(schoolData)); }
+        function loadData() {
+            const savedData = localStorage.getItem('teacherAssistantData');
+            if (savedData) { schoolData = JSON.parse(savedData); } else { schoolData = {}; }
+        }
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        // --- Undo Functionality ---
+        function showUndoToast(message) {
+            clearTimeout(undoTimeout);
+            if (!previousState) {
+                previousState = JSON.stringify(schoolData);
+            }
+            undoMessage.textContent = toPersianDigits(message);
+            undoToast.classList.add('show');
+            undoTimeout = setTimeout(() => {
+                undoToast.classList.remove('show');
+                previousState = null;
+            }, 5000);
+        }
+        function handleUndo() {
+            if (previousState) {
+                schoolData = JSON.parse(previousState);
+                saveData();
+                renderClasses();
+                if (currentClass && schoolData[currentClass]) {
+                    renderStudents();
+                } else if (currentClass && !schoolData[currentClass]) {
+                    currentClass = null;
+                    showPage('class-management-page');
+                }
+                undoToast.classList.remove('show');
+                clearTimeout(undoTimeout);
+                previousState = null;
+            }
+        }
+        undoBtn.addEventListener('click', handleUndo);
+
+        // --- Helper & Utility Functions ---
+        function toPersianDigits(str) {
+            const persian = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            return str.toString().replace(/\d/g, (d) => persian[d]);
+        }
+        function calculateSimilarity(s1, s2) {
+            let longer = s1; let shorter = s2;
+            if (s1.length < s2.length) { longer = s2; shorter = s1; }
+            let longerLength = longer.length;
+            if (longerLength === 0) return 1.0;
+            const normalizedLonger = longer.replace(/[\s\u200c]/g, '');
+            const normalizedShorter = shorter.replace(/[\s\u200c]/g, '');
+            if (normalizedLonger.length === 0) return 1.0;
+            return (normalizedLonger.length - editDistance(normalizedLonger, normalizedShorter)) / parseFloat(normalizedLonger.length);
+        }
+        function editDistance(s1, s2) {
+            s1 = s1.toLowerCase(); s2 = s2.toLowerCase();
+            const costs = [];
+            for (let i = 0; i <= s1.length; i++) {
+                let lastValue = i;
+                for (let j = 0; j <= s2.length; j++) {
+                    if (i === 0) { costs[j] = j; } 
+                    else {
+                        if (j > 0) {
+                            let newValue = costs[j - 1];
+                            if (s1.charAt(i - 1) !== s2.charAt(j - 1))
+                                newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+                            costs[j - 1] = lastValue;
+                            lastValue = newValue;
+                        }
+                    }
+                }
+                if (i > 0) costs[s2.length] = lastValue;
+            }
+            return costs[s2.length];
+        }
+
+        // --- Render Functions ---
+        function renderStudents() {
+            studentListUl.innerHTML = '';
+            settingsStudentListUl.innerHTML = '';
+            if (!lastWinner) selectedStudentResult.textContent = '';
+            
+            if (currentClass && schoolData[currentClass]) {
+                const renderList = (listElement) => {
+                    listElement.innerHTML = '';
+                    schoolData[currentClass].forEach((student, index) => {
+                        const li = document.createElement('li');
+                        const nameSpan = document.createElement('span');
+                        nameSpan.textContent = toPersianDigits(`${student.name} (انتخاب: ${student.count})`);
+                        li.appendChild(nameSpan);
+
+                        if (listElement === settingsStudentListUl) {
+                            const deleteBtn = document.createElement('button');
+                            deleteBtn.textContent = 'حذف';
+                            deleteBtn.style.backgroundColor = '#dc3545';
+                            deleteBtn.addEventListener('click', () => {
+                                showUndoToast(`«${student.name}» حذف شد.`);
+                                if (lastWinner && lastWinner.name === student.name) lastWinner = null;
+                                schoolData[currentClass].splice(index, 1);
+                                saveData();
+                                renderStudents();
+                            });
+                            li.appendChild(deleteBtn);
+                        }
+                        listElement.appendChild(li);
+                    });
+                };
+                renderList(studentListUl);
+                renderList(settingsStudentListUl);
+            }
+        }
+        function renderClasses() {
+            classListUl.innerHTML = '';
+            for (const className in schoolData) {
+                const li = document.createElement('li');
+                const nameContainer = document.createElement('span');
+                nameContainer.textContent = toPersianDigits(className);
+                nameContainer.style.flexGrow = '1';
+                nameContainer.style.cursor = 'pointer';
+                nameContainer.addEventListener('click', () => {
+                    currentClass = className;
+                    lastWinner = null;
+                    classNameHeader.textContent = toPersianDigits(`کلاس: ${currentClass}`);
+                    renderStudents();
+                    showPage('student-page');
+                });
+                
+                const buttonsContainer = document.createElement('div');
+                const settingsBtn = document.createElement('button');
+                settingsBtn.className = 'btn-icon';
+                settingsBtn.innerHTML = '⚙️';
+                settingsBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    currentClass = className;
+                    settingsClassNameHeader.textContent = toPersianDigits(`تنظیمات کلاس: ${currentClass}`);
+                    renderStudents();
+                    showPage('settings-page');
+                });
+
+                const deleteClassBtn = document.createElement('button');
+                deleteClassBtn.className = 'btn-icon';
+                deleteClassBtn.innerHTML = '🗑️';
+                deleteClassBtn.style.color = '#dc3545';
+                deleteClassBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    showUndoToast(`کلاس «${className}» حذف شد.`);
+                    if(currentClass === className) currentClass = null;
+                    delete schoolData[className];
+                    saveData();
+                    renderClasses();
+                });
+                
+                buttonsContainer.appendChild(settingsBtn);
+                buttonsContainer.appendChild(deleteClassBtn);
+                li.appendChild(nameContainer);
+                li.appendChild(buttonsContainer);
+                classListUl.appendChild(li);
+            }
+        }
+        function renderImportPreview(names) {
+            csvPreviewList.innerHTML = '';
+            names.forEach(name => {
+                const li = document.createElement('li');
+                li.className = 'preview-item';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = true;
+                checkbox.dataset.name = name;
+                const label = document.createElement('label');
+                label.textContent = name;
+                li.appendChild(checkbox);
+                li.appendChild(label);
+                csvPreviewList.appendChild(li);
+            });
+        }
+        
+        // --- Event Listeners ---
+        addClassBtn.addEventListener('click', () => {
+            const className = newClassNameInput.value.trim();
+            if (className && !schoolData[className]) {
+                schoolData[className] = [];
+                saveData();
+                renderClasses();
+                newClassNameInput.value = '';
+            } else if (schoolData[className]) {
+                alert('کلاسی با این نام از قبل وجود دارد.');
+            }
+        });
+        newClassNameInput.addEventListener('keyup', e => { if (e.key === 'Enter') addClassBtn.click(); });
+        backToClassesBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                currentClass = null;
+                lastWinner = null;
+                showPage('class-management-page');
+            });
+        });
+        addStudentBtn.addEventListener('click', () => {
+            const studentName = newStudentNameInput.value.trim();
+            if (!studentName || !currentClass) return;
+            const SIMILARITY_THRESHOLD = 0.80;
+            let potentialMatch = null;
+            const normalizedNewName = studentName.replace(/[\s\u200c]/g, '');
+            for (const existingStudent of schoolData[currentClass]) {
+                const normalizedExistingName = existingStudent.name.replace(/[\s\u200c]/g, '');
+                if (normalizedNewName.toLowerCase() === normalizedExistingName.toLowerCase()) {
+                    potentialMatch = existingStudent;
+                    break;
+                }
+            }
+            if (!potentialMatch) {
+                for (const existingStudent of schoolData[currentClass]) {
+                     const similarity = calculateSimilarity(studentName, existingStudent.name);
+                     if (similarity >= SIMILARITY_THRESHOLD) {
+                        potentialMatch = existingStudent;
+                        break;
+                    }
+                }
+            }
+            const addTheStudent = () => {
+                const newStudent = { name: studentName, count: 0 };
+                schoolData[currentClass].push(newStudent);
+                saveData();
+                renderStudents();
+                newStudentNameInput.value = '';
+            };
+            if (potentialMatch) {
+                if (confirm(toPersianDigits(`نام وارد شده «${studentName}» به «${potentialMatch.name}» بسیار شبیه است. \nآیا مطمئنید که این یک دانش آموز جدید است؟`))) {
+                    addTheStudent();
+                }
+            } else {
+                addTheStudent();
+            }
+        });
+        newStudentNameInput.addEventListener('keyup', e => { if (e.key === 'Enter') addStudentBtn.click(); });
+        importCsvBtn.addEventListener('click', () => { csvFileInput.click(); });
+        csvFileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => { processImportedText(e.target.result); };
+                reader.readAsText(file, 'UTF-8');
+            }
+            event.target.value = null;
+        });
+        processPasteBtn.addEventListener('click', () => {
+            const text = pasteArea.value;
+            if (text.trim()) { processImportedText(text); } 
+            else { alert("کادر متنی خالی است. لطفاً اسامی را وارد کنید."); }
+        });
+        function processImportedText(text) {
+            let names = text.split('\n').map(name => name.trim()).filter(name => name);
+            if (names.length === 0) return;
+            const header = names[0].toLowerCase().replace(/[\s"']/g, '');
+            if (['name', 'student', 'studentname', 'names', 'nam', 'esm'].includes(header)) {
+                names.shift();
+            }
+            namesToImport = names;
+            renderImportPreview(namesToImport);
+            showPage('csv-preview-page');
+        }
+        csvConfirmBtn.addEventListener('click', () => {
+            const selectedCheckboxes = csvPreviewList.querySelectorAll('input[type="checkbox"]:checked');
+            selectedCheckboxes.forEach(checkbox => {
+                const name = checkbox.dataset.name;
+                const isDuplicate = schoolData[currentClass].some(s => s.name.toLowerCase() === name.toLowerCase());
+                if (!isDuplicate) {
+                    schoolData[currentClass].push({ name: name, count: 0 });
+                }
+            });
+            saveData();
+            renderStudents();
+            showPage('settings-page');
+            pasteArea.value = '';
+        });
+        csvCancelBtn.addEventListener('click', () => { showPage('settings-page'); });
+        
+        studentManagementToggle.addEventListener('click', () => {
+            studentManagementToggle.classList.toggle('open');
+            studentManagementContent.classList.toggle('open');
+        });
+
+        selectStudentBtn.addEventListener('click', () => {
+            const allStudents = schoolData[currentClass];
+            if (!allStudents || allStudents.length === 0) {
+                selectedStudentResult.textContent = 'لطفاً ابتدا دانش‌آموز اضافه کنید.';
+                return;
+            }
+            let absoluteMaxCount = 0;
+            allStudents.forEach(s => { if (s.count > absoluteMaxCount) absoluteMaxCount = s.count; });
+            let allowedGap;
+            if (absoluteMaxCount < 10) allowedGap = 1;
+            else if (absoluteMaxCount < 30) allowedGap = 2;
+            else allowedGap = 3;
+            let candidates = allStudents.filter(s => !lastWinner || s.name !== lastWinner.name);
+            if (candidates.length === 0) candidates = allStudents;
+            let minCountInCandidates = Infinity, maxCountInCandidates = -Infinity;
+            if (candidates.length > 0) {
+                candidates.forEach(s => {
+                    if (s.count < minCountInCandidates) minCountInCandidates = s.count;
+                    if (s.count > maxCountInCandidates) maxCountInCandidates = s.count;
+                });
+            }
+            const currentGap = maxCountInCandidates - minCountInCandidates;
+            let selectionPool = [];
+            if (currentGap >= allowedGap && candidates.length > 1) {
+                const minCountStudents = candidates.filter(s => s.count === minCountInCandidates);
+                selectionPool = minCountStudents;
+            } else {
+                candidates.forEach(s => {
+                    const weight = (maxCountInCandidates - s.count) + 1;
+                    for (let i = 0; i < weight; i++) selectionPool.push(s);
+                });
+            }
+            if (selectionPool.length === 0) selectionPool = candidates;
+            const randomIndex = Math.floor(Math.random() * selectionPool.length);
+            const winner = selectionPool[randomIndex];
+            if (winner) {
+                winner.count++;
+                lastWinner = winner;
+                saveData();
+                renderStudents();
+                selectedStudentResult.innerHTML = toPersianDigits(`✨ <strong>${winner.name} (انتخاب: ${winner.count})</strong> ✨`);
+            }
+        });
+        
+        // --- Developer Tools ---
+        function resetCurrentClassCounters() {
+            if (!currentClass) {
+                console.log("ریست ناموفق: ابتدا باید وارد یک کلاس شوید.");
+                return;
+            }
+            const students = schoolData[currentClass];
+            if (students && students.length > 0) {
+                students.forEach(s => { s.count = 0; });
+                lastWinner = null;
+                saveData();
+                renderStudents();
+                console.log(`شمارنده‌های کلاس «${currentClass}» با موفقیت ریست شدند!`);
+            } else {
+                console.log("این کلاس دانش‌آموزی برای ریست کردن ندارد.");
+            }
+        }
+        window.resetCurrentClassCounters = resetCurrentClassCounters;
+
+        // --- Initial Load ---
+        loadData();
+        renderClasses();
+        showPage('class-management-page');
+    });
+    </script>
+</body>
+</html>
