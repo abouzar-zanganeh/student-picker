@@ -105,6 +105,33 @@
             padding: 0;
             margin: 0;
         }
+		.btn-warning { 
+    background-color: #ffc107; 
+    color: #212529; 
+}
+.btn-warning:hover { 
+    background-color: #e0a800; 
+}
+.status-button-container {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.status-button {
+    background-color: #f8f9fa;
+    color: #495057;
+    border: 1px solid #ced4da;
+    box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-out;
+}
+.status-button.active {
+    background-color: #6c757d;
+    color: white;
+    border-color: #5a6268;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    transform: translateY(1px);
+}
     </style>
 </head>
 <body>
@@ -220,9 +247,32 @@
         // --- Core Functions ---
         function saveData() { localStorage.setItem('teacherAssistantData', JSON.stringify(schoolData)); }
         function loadData() {
-            const savedData = localStorage.getItem('teacherAssistantData');
-            if (savedData) { schoolData = JSON.parse(savedData); } else { schoolData = {}; }
+    const savedData = localStorage.getItem('teacherAssistantData');
+    if (savedData) {
+        schoolData = JSON.parse(savedData);
+        // --- Data Migration for backward compatibility ---
+        let needsSave = false;
+        for (const className in schoolData) {
+            if (Array.isArray(schoolData[className])) {
+                schoolData[className].forEach(student => {
+                    if (student.absenceCount === undefined) {
+                        student.absenceCount = 0;
+                        needsSave = true;
+                    }
+                    if (student.problemCount === undefined) {
+                        student.problemCount = 0;
+                        needsSave = true;
+                    }
+                });
+            }
         }
+        if (needsSave) {
+            saveData(); // Save the migrated data
+        }
+    } else {
+        schoolData = {};
+    }
+}
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
@@ -298,39 +348,47 @@
 
         // --- Render Functions ---
         function renderStudents() {
-            studentListUl.innerHTML = '';
-            settingsStudentListUl.innerHTML = '';
-            if (!lastWinner) selectedStudentResult.textContent = '';
-            
-            if (currentClass && schoolData[currentClass]) {
-                const renderList = (listElement) => {
-                    listElement.innerHTML = '';
-                    schoolData[currentClass].forEach((student, index) => {
-                        const li = document.createElement('li');
-                        const nameSpan = document.createElement('span');
-                        nameSpan.textContent = toPersianDigits(`${student.name} (انتخاب: ${student.count})`);
-                        li.appendChild(nameSpan);
+    studentListUl.innerHTML = '';
+    settingsStudentListUl.innerHTML = '';
+    
+    if (currentClass && schoolData[currentClass]) {
+        const renderList = (listElement) => {
+            listElement.innerHTML = '';
+            schoolData[currentClass].forEach((student, index) => {
+                const li = document.createElement('li');
+                const nameSpan = document.createElement('span');
+                // Updated to show all three counts
+                nameSpan.textContent = toPersianDigits(`${student.name} (انتخاب: ${student.count} | غایب: ${student.absenceCount} | مشکل: ${student.problemCount})`);
+                li.appendChild(nameSpan);
 
-                        if (listElement === settingsStudentListUl) {
-                            const deleteBtn = document.createElement('button');
-                            deleteBtn.textContent = 'حذف';
-                            deleteBtn.style.backgroundColor = '#dc3545';
-                            deleteBtn.addEventListener('click', () => {
-                                showUndoToast(`«${student.name}» حذف شد.`);
-                                if (lastWinner && lastWinner.name === student.name) lastWinner = null;
-                                schoolData[currentClass].splice(index, 1);
-                                saveData();
-                                renderStudents();
-                            });
-                            li.appendChild(deleteBtn);
+                if (listElement === settingsStudentListUl) {
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.textContent = 'حذف';
+                    deleteBtn.style.backgroundColor = '#dc3545';
+                    deleteBtn.addEventListener('click', (event) => {
+                        const deleteStudent = () => {
+                            if (lastWinner && lastWinner.name === student.name) lastWinner = null;
+                            schoolData[currentClass].splice(index, 1);
+                            saveData();
+                            renderStudents();
+                        };
+                        if (event.ctrlKey) {
+                            deleteStudent();
+                        } else {
+                            if (confirm(toPersianDigits(`آیا از حذف دانش‌آموز «${student.name}» مطمئن هستید؟`))) {
+                                deleteStudent();
+                            }
                         }
-                        listElement.appendChild(li);
                     });
-                };
-                renderList(studentListUl);
-                renderList(settingsStudentListUl);
-            }
-        }
+                    li.appendChild(deleteBtn);
+                }
+                listElement.appendChild(li);
+            });
+        };
+        renderList(studentListUl);
+        renderList(settingsStudentListUl);
+    }
+}
         function renderClasses() {
             classListUl.innerHTML = '';
             for (const className in schoolData) {
@@ -417,42 +475,43 @@
             });
         });
         addStudentBtn.addEventListener('click', () => {
-            const studentName = newStudentNameInput.value.trim();
-            if (!studentName || !currentClass) return;
-            const SIMILARITY_THRESHOLD = 0.80;
-            let potentialMatch = null;
-            const normalizedNewName = studentName.replace(/[\s\u200c]/g, '');
-            for (const existingStudent of schoolData[currentClass]) {
-                const normalizedExistingName = existingStudent.name.replace(/[\s\u200c]/g, '');
-                if (normalizedNewName.toLowerCase() === normalizedExistingName.toLowerCase()) {
-                    potentialMatch = existingStudent;
-                    break;
-                }
+    const studentName = newStudentNameInput.value.trim();
+    if (!studentName || !currentClass) return;
+    const SIMILARITY_THRESHOLD = 0.80;
+    let potentialMatch = null;
+    const normalizedNewName = studentName.replace(/[\s\u200c]/g, '');
+    for (const existingStudent of schoolData[currentClass]) {
+        const normalizedExistingName = existingStudent.name.replace(/[\s\u200c]/g, '');
+        if (normalizedNewName.toLowerCase() === normalizedExistingName.toLowerCase()) {
+            potentialMatch = existingStudent;
+            break;
+        }
+    }
+    if (!potentialMatch) {
+        for (const existingStudent of schoolData[currentClass]) {
+             const similarity = calculateSimilarity(studentName, existingStudent.name);
+             if (similarity >= SIMILARITY_THRESHOLD) {
+                potentialMatch = existingStudent;
+                break;
             }
-            if (!potentialMatch) {
-                for (const existingStudent of schoolData[currentClass]) {
-                     const similarity = calculateSimilarity(studentName, existingStudent.name);
-                     if (similarity >= SIMILARITY_THRESHOLD) {
-                        potentialMatch = existingStudent;
-                        break;
-                    }
-                }
-            }
-            const addTheStudent = () => {
-                const newStudent = { name: studentName, count: 0 };
-                schoolData[currentClass].push(newStudent);
-                saveData();
-                renderStudents();
-                newStudentNameInput.value = '';
-            };
-            if (potentialMatch) {
-                if (confirm(toPersianDigits(`نام وارد شده «${studentName}» به «${potentialMatch.name}» بسیار شبیه است. \nآیا مطمئنید که این یک دانش آموز جدید است؟`))) {
-                    addTheStudent();
-                }
-            } else {
-                addTheStudent();
-            }
-        });
+        }
+    }
+    const addTheStudent = () => {
+        // Updated to include new counters
+        const newStudent = { name: studentName, count: 0, absenceCount: 0, problemCount: 0 };
+        schoolData[currentClass].push(newStudent);
+        saveData();
+        renderStudents();
+        newStudentNameInput.value = '';
+    };
+    if (potentialMatch) {
+        if (confirm(toPersianDigits(`نام وارد شده «${studentName}» به «${potentialMatch.name}» بسیار شبیه است. \nآیا مطمئنید که این یک دانش آموز جدید است؟`))) {
+            addTheStudent();
+        }
+    } else {
+        addTheStudent();
+    }
+});
         newStudentNameInput.addEventListener('keyup', e => { if (e.key === 'Enter') addStudentBtn.click(); });
         importCsvBtn.addEventListener('click', () => { csvFileInput.click(); });
         csvFileInput.addEventListener('change', (event) => {
@@ -502,48 +561,89 @@
         });
 
         selectStudentBtn.addEventListener('click', () => {
-            const allStudents = schoolData[currentClass];
-            if (!allStudents || allStudents.length === 0) {
-                selectedStudentResult.textContent = 'لطفاً ابتدا دانش‌آموز اضافه کنید.';
-                return;
-            }
-            let absoluteMaxCount = 0;
-            allStudents.forEach(s => { if (s.count > absoluteMaxCount) absoluteMaxCount = s.count; });
-            let allowedGap;
-            if (absoluteMaxCount < 10) allowedGap = 1;
-            else if (absoluteMaxCount < 30) allowedGap = 2;
-            else allowedGap = 3;
-            let candidates = allStudents.filter(s => !lastWinner || s.name !== lastWinner.name);
-            if (candidates.length === 0) candidates = allStudents;
-            let minCountInCandidates = Infinity, maxCountInCandidates = -Infinity;
-            if (candidates.length > 0) {
-                candidates.forEach(s => {
-                    if (s.count < minCountInCandidates) minCountInCandidates = s.count;
-                    if (s.count > maxCountInCandidates) maxCountInCandidates = s.count;
-                });
-            }
-            const currentGap = maxCountInCandidates - minCountInCandidates;
-            let selectionPool = [];
-            if (currentGap >= allowedGap && candidates.length > 1) {
-                const minCountStudents = candidates.filter(s => s.count === minCountInCandidates);
-                selectionPool = minCountStudents;
-            } else {
-                candidates.forEach(s => {
-                    const weight = (maxCountInCandidates - s.count) + 1;
-                    for (let i = 0; i < weight; i++) selectionPool.push(s);
-                });
-            }
-            if (selectionPool.length === 0) selectionPool = candidates;
-            const randomIndex = Math.floor(Math.random() * selectionPool.length);
-            const winner = selectionPool[randomIndex];
-            if (winner) {
-                winner.count++;
-                lastWinner = winner;
-                saveData();
-                renderStudents();
-                selectedStudentResult.innerHTML = toPersianDigits(`✨ <strong>${winner.name} (انتخاب: ${winner.count})</strong> ✨`);
-            }
+    // Clear previous result area before selecting a new student
+    selectedStudentResult.innerHTML = '';
+
+    const allStudents = schoolData[currentClass];
+    if (!allStudents || allStudents.length === 0) {
+        selectedStudentResult.textContent = 'لطفاً ابتدا دانش‌آموز اضافه کنید.';
+        return;
+    }
+    let absoluteMaxCount = 0;
+    allStudents.forEach(s => { if (s.count > absoluteMaxCount) absoluteMaxCount = s.count; });
+    let allowedGap;
+    if (absoluteMaxCount < 10) allowedGap = 1;
+    else if (absoluteMaxCount < 30) allowedGap = 2;
+    else allowedGap = 3;
+    let candidates = allStudents.filter(s => !lastWinner || s.name !== lastWinner.name);
+    if (candidates.length === 0) candidates = allStudents;
+    let minCountInCandidates = Infinity, maxCountInCandidates = -Infinity;
+    if (candidates.length > 0) {
+        candidates.forEach(s => {
+            if (s.count < minCountInCandidates) minCountInCandidates = s.count;
+            if (s.count > maxCountInCandidates) maxCountInCandidates = s.count;
         });
+    }
+    const currentGap = maxCountInCandidates - minCountInCandidates;
+    let selectionPool = [];
+    if (currentGap >= allowedGap && candidates.length > 1) {
+        const minCountStudents = candidates.filter(s => s.count === minCountInCandidates);
+        selectionPool = minCountStudents;
+    } else {
+        candidates.forEach(s => {
+            const weight = (maxCountInCandidates - s.count) + 1;
+            for (let i = 0; i < weight; i++) selectionPool.push(s);
+        });
+    }
+    if (selectionPool.length === 0) selectionPool = candidates;
+    const randomIndex = Math.floor(Math.random() * selectionPool.length);
+    const winner = selectionPool[randomIndex];
+    
+    if (winner) {
+        // Step 1: Immediately increment the opportunity count
+        winner.count++;
+        lastWinner = winner;
+        saveData();
+        renderStudents();
+        
+        // Step 2: Display the result and status buttons
+        const resultText = document.createElement('div');
+        resultText.innerHTML = toPersianDigits(`✨ <strong>${winner.name} (انتخاب: ${winner.count})</strong> ✨`);
+        
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'status-button-container';
+
+        // Helper function to create a status button
+        const createStatusButton = (text, type) => {
+            const btn = document.createElement('button');
+            btn.textContent = text;
+            btn.className = 'status-button';
+            btn.dataset.type = type;
+
+            btn.addEventListener('click', () => {
+                const isActive = btn.classList.toggle('active');
+                if (type === 'absent') {
+                    winner.absenceCount += isActive ? 1 : -1;
+                } else if (type === 'problem') {
+                    winner.problemCount += isActive ? 1 : -1;
+                }
+                saveData();
+                renderStudents(); // Re-render to update the list counts
+            });
+
+            return btn;
+        };
+        
+        const absentBtn = createStatusButton('غایب', 'absent');
+        const problemBtn = createStatusButton('مشکل', 'problem');
+        
+        buttonContainer.appendChild(absentBtn);
+        buttonContainer.appendChild(problemBtn);
+        
+        selectedStudentResult.appendChild(resultText);
+        selectedStudentResult.appendChild(buttonContainer);
+    }
+});
         
         // --- Developer Tools ---
         function resetCurrentClassCounters() {
