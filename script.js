@@ -29,10 +29,15 @@
         const undoToast = document.getElementById('undo-toast');
         const undoMessage = document.getElementById('undo-message');
         const undoBtn = document.getElementById('undo-btn');
+		const sessionPage = document.getElementById('session-page');
+        const sessionClassNameHeader = document.getElementById('session-class-name-header');
+        const newSessionBtn = document.getElementById('new-session-btn');
+        const sessionListUl = document.getElementById('session-list');
 
         // --- State Management ---
         let schoolData = {};
         let currentClass = null;
+		let currentSession = null;
         let lastWinner = null;
         let namesToImport = [];
         let previousState = null;
@@ -44,40 +49,25 @@
     const savedData = localStorage.getItem('teacherAssistantData');
     if (savedData) {
         schoolData = JSON.parse(savedData);
-        // --- Data Migration for backward compatibility ---
-        let needsSave = false;
-        for (const className in schoolData) {
-            // Check if the old array structure exists and convert it
-            if (Array.isArray(schoolData[className])) {
-                const students = schoolData[className];
-                schoolData[className] = {
-                    students: students,
-                    lastWinner: null
-                };
-                needsSave = true;
-            }
-
-            // Ensure all students have the new counters
-            if (schoolData[className] && schoolData[className].students) {
-                schoolData[className].students.forEach(student => {
-                    if (student.absenceCount === undefined) {
-                        student.absenceCount = 0;
-                        needsSave = true;
-                    }
-                    if (student.problemCount === undefined) {
-                        student.problemCount = 0;
-                        needsSave = true;
-                    }
-                });
-            }
-        }
-        if (needsSave) {
-            saveData(); // Save the potentially migrated data
-        }
     } else {
         schoolData = {};
     }
 }
+// ...
+addClassBtn.addEventListener('click', () => {
+    const className = newClassNameInput.value.trim();
+    if (className && !schoolData[className]) {
+        schoolData[className] = {
+            students: [],
+            sessions: {} // A place to store session data
+        };
+        saveData();
+        renderClasses();
+        newClassNameInput.value = '';
+    } else if (schoolData[className]) {
+        alert('کلاسی با این نام از قبل وجود دارد.');
+    }
+});
         function showPage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
@@ -157,24 +147,29 @@
     settingsStudentListUl.innerHTML = '';
     
     if (currentClass && schoolData[currentClass]) {
-        const students = schoolData[currentClass].students; // Access students from the new structure
+        const students = schoolData[currentClass].students;
 
-        const renderList = (listElement) => {
+        const renderList = (listElement, isSettingsPage) => {
             listElement.innerHTML = '';
             students.forEach((student, index) => {
                 const li = document.createElement('li');
                 const nameSpan = document.createElement('span');
-                nameSpan.textContent = toPersianDigits(`${student.name} (انتخاب: ${student.count} | غایب: ${student.absenceCount} | مشکل: ${student.problemCount})`);
+                // Updated to show TOTAL counts from the new structure
+                nameSpan.textContent = toPersianDigits(`${student.name} (مجموع انتخاب: ${student.totalCount} | مجموع غیبت: ${student.totalAbsenceCount} | مجموع مشکل: ${student.totalProblemCount})`);
                 li.appendChild(nameSpan);
 
-                if (listElement === settingsStudentListUl) {
+                if (isSettingsPage) {
                     const deleteBtn = document.createElement('button');
                     deleteBtn.textContent = 'حذف';
                     deleteBtn.style.backgroundColor = '#dc3545';
                     deleteBtn.addEventListener('click', (event) => {
                         const deleteStudent = () => {
-                            if (lastWinner && lastWinner.name === student.name) lastWinner = null;
-                            schoolData[currentClass].students.splice(index, 1); // Delete from new structure
+                            // Clear last winner if they are deleted
+                            const classObject = schoolData[currentClass];
+                            if (classObject.sessions[currentSession] && classObject.sessions[currentSession].lastWinner && classObject.sessions[currentSession].lastWinner.name === student.name) {
+                                classObject.sessions[currentSession].lastWinner = null;
+                            }
+                            students.splice(index, 1);
                             saveData();
                             renderStudents();
                         };
@@ -191,8 +186,8 @@
                 listElement.appendChild(li);
             });
         };
-        renderList(studentListUl);
-        renderList(settingsStudentListUl);
+        renderList(studentListUl, false);
+        renderList(settingsStudentListUl, true);
     }
 }
         function renderClasses() {
@@ -203,20 +198,13 @@
         nameContainer.textContent = toPersianDigits(className);
         nameContainer.style.flexGrow = '1';
         nameContainer.style.cursor = 'pointer';
+        
+        // This is the main navigation logic now
         nameContainer.addEventListener('click', () => {
             currentClass = className;
-            classNameHeader.textContent = toPersianDigits(`کلاس: ${currentClass}`);
-            
-            // Check for a saved last winner and display it
-            const savedWinner = schoolData[currentClass].lastWinner;
-            if (savedWinner) {
-                displayWinner(savedWinner);
-            } else {
-                selectedStudentResult.innerHTML = '';
-            }
-
-            renderStudents();
-            showPage('student-page');
+            sessionClassNameHeader.textContent = toPersianDigits(`کلاس: ${className}`);
+            renderSessions(); // We will create this function next
+            showPage('session-page');
         });
         
         const buttonsContainer = document.createElement('div');
@@ -251,6 +239,75 @@
         classListUl.appendChild(li);
     }
 }
+		function renderSessions() {
+    sessionListUl.innerHTML = '';
+    const classObject = schoolData[currentClass];
+    const sessions = classObject.sessions || {};
+
+    // Get session numbers and sort them numerically in descending order
+    const sortedSessionNumbers = Object.keys(sessions).map(Number).sort((a, b) => b - a);
+
+    sortedSessionNumbers.forEach(sessionNumber => {
+        const li = document.createElement('li');
+        li.textContent = toPersianDigits(`جلسه شماره ${sessionNumber}`);
+        li.style.cursor = 'pointer';
+        li.addEventListener('click', () => {
+            currentSession = sessionNumber;
+            
+            // Update headers and navigate
+            classNameHeader.textContent = toPersianDigits(`کلاس: ${currentClass} - جلسه ${currentSession}`);
+            
+            // Display the last winner of THAT session
+            const lastSessionWinner = classObject.sessions[currentSession].lastWinner;
+            if (lastSessionWinner) {
+                // We need a way to find the full student object from just the name
+                const winnerObject = classObject.students.find(s => s.name === lastSessionWinner.name);
+                if (winnerObject) {
+                    displayWinner(winnerObject);
+                }
+            } else {
+                selectedStudentResult.innerHTML = '';
+            }
+
+            renderStudents(); // This will be updated later to show session-specific data
+            showPage('student-page');
+        });
+        sessionListUl.appendChild(li);
+    });
+}
+	newSessionBtn.addEventListener('click', () => {
+    const classObject = schoolData[currentClass];
+    const sessions = classObject.sessions || {};
+    const sessionNumbers = Object.keys(sessions).map(Number);
+    const nextSessionNumber = sessionNumbers.length > 0 ? Math.max(...sessionNumbers) + 1 : 1;
+    
+    // Create the new session object
+    classObject.sessions[nextSessionNumber] = {
+        lastWinner: null
+    };
+
+    // Initialize session data for each student for this new session
+    classObject.students.forEach(student => {
+        if (!student.sessionData) {
+            student.sessionData = {};
+        }
+        student.sessionData[nextSessionNumber] = {
+            count: 0,
+            absenceCount: 0,
+            problemCount: 0
+        };
+    });
+
+    currentSession = nextSessionNumber;
+    
+    // Update headers and navigate
+    classNameHeader.textContent = toPersianDigits(`کلاس: ${currentClass} - جلسه ${currentSession}`);
+    selectedStudentResult.innerHTML = ''; // Clear previous results
+    
+    saveData();
+    renderStudents(); // This will be updated later to show session-specific data
+    showPage('student-page');
+});
         function renderImportPreview(names) {
             csvPreviewList.innerHTML = '';
             names.forEach(name => {
@@ -319,7 +376,14 @@
     }
 
     const addTheStudent = () => {
-        const newStudent = { name: studentName, count: 0, absenceCount: 0, problemCount: 0 };
+        // Create student with the new, more complex data structure
+        const newStudent = {
+            name: studentName,
+            totalCount: 0,
+            totalAbsenceCount: 0,
+            totalProblemCount: 0,
+            sessionData: {}
+        };
         classObject.students.push(newStudent);
         saveData();
         renderStudents();
@@ -388,59 +452,41 @@
         });
 
         function displayWinner(winner) {
-    selectedStudentResult.innerHTML = '';
+    selectedStudentResult.innerHTML = ''; // Clear previous content
 
+    const sessionStats = winner.sessionData[currentSession] || { count: 0, absenceCount: 0, problemCount: 0 };
     const resultText = document.createElement('div');
-    resultText.innerHTML = toPersianDigits(`✨ <strong>${winner.name} (انتخاب: ${winner.count})</strong> ✨`);
+    resultText.innerHTML = toPersianDigits(`✨ <strong>${winner.name} (انتخاب در این جلسه: ${sessionStats.count})</strong> ✨`);
     
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'status-button-container';
 
-    const absentBtn = document.createElement('button');
-    absentBtn.textContent = 'غایب';
-    absentBtn.className = 'status-button';
-
-    const problemBtn = document.createElement('button');
-    problemBtn.textContent = 'مشکل';
-    problemBtn.className = 'status-button';
-
-    absentBtn.addEventListener('click', () => {
-        const isCurrentlyActive = absentBtn.classList.contains('active');
+    const createStatusButton = (text, type) => {
+        const btn = document.createElement('button');
+        btn.textContent = text;
+        btn.className = 'status-button';
         
-        if (problemBtn.classList.contains('active')) {
-            problemBtn.classList.remove('active');
-            winner.problemCount--;
-        }
-
-        if (isCurrentlyActive) {
-            winner.absenceCount--;
-        } else {
-            winner.absenceCount++;
-        }
-        absentBtn.classList.toggle('active');
+        const sessionProp = type === 'absent' ? 'absenceCount' : 'problemCount';
+        const totalProp = type === 'absent' ? 'totalAbsenceCount' : 'totalProblemCount';
         
-        saveData();
-        renderStudents();
-    });
+        let isToggled = false;
 
-    problemBtn.addEventListener('click', () => {
-        const isCurrentlyActive = problemBtn.classList.contains('active');
-
-        if (absentBtn.classList.contains('active')) {
-            absentBtn.classList.remove('active');
-            winner.absenceCount--;
-        }
-
-        if (isCurrentlyActive) {
-            winner.problemCount--;
-        } else {
-            winner.problemCount++;
-        }
-        problemBtn.classList.toggle('active');
-
-        saveData();
-        renderStudents();
-    });
+        btn.addEventListener('click', () => {
+            isToggled = !isToggled;
+            btn.classList.toggle('active', isToggled);
+            
+            const change = isToggled ? 1 : -1;
+            winner[totalProp] += change;
+            winner.sessionData[currentSession][sessionProp] += change;
+            
+            saveData();
+            renderStudents();
+        });
+        return btn;
+    };
+    
+    const absentBtn = createStatusButton('غایب', 'absent');
+    const problemBtn = createStatusButton('مشکل', 'problem');
     
     buttonContainer.appendChild(absentBtn);
     buttonContainer.appendChild(problemBtn);
@@ -457,34 +503,35 @@ selectStudentBtn.addEventListener('click', () => {
     }
     
     let allStudents = classObject.students;
-    let lastWinnerName = classObject.lastWinner ? classObject.lastWinner.name : null;
+    let lastSessionWinner = classObject.sessions[currentSession].lastWinner;
     
     let absoluteMaxCount = 0;
-    allStudents.forEach(s => { if (s.count > absoluteMaxCount) absoluteMaxCount = s.count; });
-    let allowedGap;
-    if (absoluteMaxCount < 10) allowedGap = 1;
-    else if (absoluteMaxCount < 30) allowedGap = 2;
-    else allowedGap = 3;
+    allStudents.forEach(s => { 
+        const sessionCount = s.sessionData[currentSession] ? s.sessionData[currentSession].count : 0;
+        if (sessionCount > absoluteMaxCount) absoluteMaxCount = sessionCount;
+    });
 
-    let candidates = allStudents.filter(s => s.name !== lastWinnerName);
+    let candidates = allStudents.filter(s => !lastSessionWinner || s.name !== lastSessionWinner.name);
     if (candidates.length === 0) candidates = allStudents;
     
     let minCountInCandidates = Infinity, maxCountInCandidates = -Infinity;
     if (candidates.length > 0) {
         candidates.forEach(s => {
-            if (s.count < minCountInCandidates) minCountInCandidates = s.count;
-            if (s.count > maxCountInCandidates) maxCountInCandidates = s.count;
+            const sessionCount = s.sessionData[currentSession] ? s.sessionData[currentSession].count : 0;
+            if (sessionCount < minCountInCandidates) minCountInCandidates = sessionCount;
+            if (sessionCount > maxCountInCandidates) maxCountInCandidates = sessionCount;
         });
     }
 
     const currentGap = maxCountInCandidates - minCountInCandidates;
     let selectionPool = [];
-    if (currentGap >= allowedGap && candidates.length > 1) {
-        const minCountStudents = candidates.filter(s => s.count === minCountInCandidates);
+    if (currentGap >= 3 && candidates.length > 1) { // Simplified gap logic
+        const minCountStudents = candidates.filter(s => (s.sessionData[currentSession] ? s.sessionData[currentSession].count : 0) === minCountInCandidates);
         selectionPool = minCountStudents;
     } else {
         candidates.forEach(s => {
-            const weight = (maxCountInCandidates - s.count) + 1;
+            const sessionCount = s.sessionData[currentSession] ? s.sessionData[currentSession].count : 0;
+            const weight = (maxCountInCandidates - sessionCount) + 1;
             for (let i = 0; i < weight; i++) selectionPool.push(s);
         });
     }
@@ -494,13 +541,18 @@ selectStudentBtn.addEventListener('click', () => {
     const winner = selectionPool[randomIndex];
     
     if (winner) {
-        winner.count++;
-        classObject.lastWinner = winner; // Save the winner to the class object
+        // Increment both total and session-specific counts
+        winner.totalCount++;
+        winner.sessionData[currentSession].count++;
+        
+        classObject.sessions[currentSession].lastWinner = winner;
         saveData();
         renderStudents();
-        displayWinner(winner); // Use the new helper function
+        displayWinner(winner);
     }
 });
+
+
         
         // --- Developer Tools ---
         function resetCurrentClassCounters() {
