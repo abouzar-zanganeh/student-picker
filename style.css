@@ -1,0 +1,127 @@
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
+
+        body { 
+            font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 20px; 
+            max-width: 600px;
+            margin: auto;
+            background-color: #f4f4f9;
+            padding-bottom: 5rem;
+        }
+        .page { display: none; }
+        .page.active { display: block; }
+        h1, h2 { color: #333; }
+        h3 { border-bottom: 2px solid #ddd; padding-bottom: 5px; margin-top: 30px;}
+        button { 
+            font-family: 'Vazirmatn', sans-serif;
+            padding: 10px 15px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        button:hover { background-color: #0056b3; }
+        .btn-secondary { background-color: #6c757d; }
+        .btn-secondary:hover { background-color: #5a6268; }
+        .btn-success { background-color: #28a745; }
+        .btn-success:hover { background-color: #218838; }
+        .btn-icon {
+            background: none;
+            border: none;
+            padding: 5px;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            color: #6c757d;
+        }
+        .btn-icon:hover { color: #333; }
+
+        input[type="text"], textarea { 
+            font-family: 'Vazirmatn', sans-serif;
+            padding: 10px; 
+            font-size: 16px; 
+            width: calc(100% - 22px);
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        textarea { min-height: 100px; resize: vertical; margin-bottom: 10px; }
+        ul { list-style-type: none; padding: 0; }
+        li { 
+            padding: 12px; 
+            background-color: white;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        li:first-child { border-top-left-radius: 5px; border-top-right-radius: 5px; }
+        li:last-child { border-bottom: none; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px; }
+        
+        .preview-item { display: flex; align-items: center; gap: 10px; }
+        
+        .accordion-toggle { cursor: pointer; display: flex; align-items: center; gap: 10px; user-select: none; }
+        .accordion-toggle .arrow { transition: transform 0.3s ease; display: inline-block; }
+        .accordion-toggle.open .arrow { transform: rotate(180deg); }
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.35s ease-out; background-color: #fff; padding: 0 15px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .accordion-content.open { max-height: 1000px; transition: max-height 0.4s ease-in; padding: 20px 15px; }
+
+        .undo-toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(150%);
+            background-color: #323232;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: transform 0.4s ease;
+        }
+        .undo-toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        .undo-toast button {
+            background: none;
+            border: none;
+            color: #bb86fc;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 0;
+            margin: 0;
+        }
+		.btn-warning { 
+    background-color: #ffc107; 
+    color: #212529; 
+}
+.btn-warning:hover { 
+    background-color: #e0a800; 
+}
+.status-button-container {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.status-button {
+    background-color: #f8f9fa;
+    color: #495057;
+    border: 1px solid #ced4da;
+    box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+    transition: all 0.2s ease-out;
+}
+.status-button.active {
+    background-color: #6c757d;
+    color: white;
+    border-color: #5a6268;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    transform: translateY(1px);
+}
