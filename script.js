@@ -388,7 +388,7 @@
         });
 
         function displayWinner(winner) {
-    selectedStudentResult.innerHTML = ''; // Clear previous content
+    selectedStudentResult.innerHTML = '';
 
     const resultText = document.createElement('div');
     resultText.innerHTML = toPersianDigits(`✨ <strong>${winner.name} (انتخاب: ${winner.count})</strong> ✨`);
@@ -396,29 +396,51 @@
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'status-button-container';
 
-    const createStatusButton = (text, type, countProp) => {
-        const btn = document.createElement('button');
-        btn.textContent = text;
-        btn.className = 'status-button';
+    const absentBtn = document.createElement('button');
+    absentBtn.textContent = 'غایب';
+    absentBtn.className = 'status-button';
+
+    const problemBtn = document.createElement('button');
+    problemBtn.textContent = 'مشکل';
+    problemBtn.className = 'status-button';
+
+    absentBtn.addEventListener('click', () => {
+        const isCurrentlyActive = absentBtn.classList.contains('active');
         
-        // Check initial state
-        let isToggled = false;
+        if (problemBtn.classList.contains('active')) {
+            problemBtn.classList.remove('active');
+            winner.problemCount--;
+        }
 
-        btn.addEventListener('click', () => {
-            isToggled = !isToggled; // Toggle state
-            btn.classList.toggle('active', isToggled);
-            
-            winner[countProp] += isToggled ? 1 : -1;
-            
-            saveData();
-            renderStudents();
-        });
+        if (isCurrentlyActive) {
+            winner.absenceCount--;
+        } else {
+            winner.absenceCount++;
+        }
+        absentBtn.classList.toggle('active');
+        
+        saveData();
+        renderStudents();
+    });
 
-        return btn;
-    };
-    
-    const absentBtn = createStatusButton('غایب', 'absent', 'absenceCount');
-    const problemBtn = createStatusButton('مشکل', 'problem', 'problemCount');
+    problemBtn.addEventListener('click', () => {
+        const isCurrentlyActive = problemBtn.classList.contains('active');
+
+        if (absentBtn.classList.contains('active')) {
+            absentBtn.classList.remove('active');
+            winner.absenceCount--;
+        }
+
+        if (isCurrentlyActive) {
+            winner.problemCount--;
+        } else {
+            winner.problemCount++;
+        }
+        problemBtn.classList.toggle('active');
+
+        saveData();
+        renderStudents();
+    });
     
     buttonContainer.appendChild(absentBtn);
     buttonContainer.appendChild(problemBtn);
