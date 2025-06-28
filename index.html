@@ -26,6 +26,9 @@
         <button class="back-to-classes-btn">➡️ بازگشت به لیست کلاس‌ها</button>
         <hr style="margin: 20px 0;">
         <h3>🎲 انتخابگر هوشمند</h3>
+		<div id="category-selection-container" style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+            <!-- دکمه‌های دسته‌بندی با جاوااسکریپت اینجا اضافه می‌شوند -->
+        </div>
         <button id="select-student-btn" style="font-size: 20px; padding: 20px; width: 100%;" class="btn-success">انتخاب نفر بعدی!</button>
         <div id="selected-student-result" style="text-align: center; font-size: 24px; margin-top: 20px; font-weight: bold; min-height: 30px; color: #28a745;"></div>
         <h3 style="margin-top: 40px;">لیست دانش‌آموزان کلاس</h3>
@@ -56,7 +59,14 @@
                  <button id="import-csv-btn" class="btn-secondary" style="width: 100%;">ورود لیست از فایل (CSV)</button>
             </div>
         </div>
-
+		<h3 style="margin-top: 40px;">مدیریت دسته‌بندی‌های پرسش</h3>
+        <div style="display: flex; margin-bottom: 10px;">
+            <input type="text" id="new-category-name" placeholder="نام دسته‌بندی جدید (مثلا: Grammar)" style="flex-grow: 1; margin-left: 10px;">
+            <button id="add-category-btn">افزودن</button>
+        </div>
+        <ul id="category-list">
+            <!-- لیست دسته‌بندی‌ها با جاوااسکریپت اینجا اضافه می‌شود -->
+        </ul>
         <h3 style="margin-top: 40px;">لیست فعلی دانش‌آموزان</h3>
         <ul id="settings-student-list"></ul>
     </main>

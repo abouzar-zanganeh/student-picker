@@ -33,11 +33,15 @@
         const sessionClassNameHeader = document.getElementById('session-class-name-header');
         const newSessionBtn = document.getElementById('new-session-btn');
         const sessionListUl = document.getElementById('session-list');
+		const newCategoryNameInput = document.getElementById('new-category-name');
+        const addCategoryBtn = document.getElementById('add-category-btn');
+        const categoryListUl = document.getElementById('category-list');
 
         // --- State Management ---
         let schoolData = {};
         let currentClass = null;
 		let currentSession = null;
+		let currentCategory = null;
         let lastWinner = null;
         let namesToImport = [];
         let previousState = null;
@@ -54,7 +58,7 @@
     }
 }
 // ...
-addClassBtn.addEventListener('click', () => {
+	addClassBtn.addEventListener('click', () => {
     const className = newClassNameInput.value.trim();
     if (className && !schoolData[className]) {
         schoolData[className] = {
@@ -142,52 +146,65 @@ addClassBtn.addEventListener('click', () => {
         }
 
         // --- Render Functions ---
-        function renderStudents() {
+        function renderStudents(categoryToDisplay = null) {
     studentListUl.innerHTML = '';
     settingsStudentListUl.innerHTML = '';
     
     if (currentClass && schoolData[currentClass]) {
         const students = schoolData[currentClass].students;
 
-        const renderList = (listElement, isSettingsPage) => {
-            listElement.innerHTML = '';
-            students.forEach((student, index) => {
-                const li = document.createElement('li');
-                const nameSpan = document.createElement('span');
-                // Updated to show TOTAL counts from the new structure
-                nameSpan.textContent = toPersianDigits(`${student.name} (مجموع انتخاب: ${student.totalCount} | مجموع غیبت: ${student.totalAbsenceCount} | مجموع مشکل: ${student.totalProblemCount})`);
-                li.appendChild(nameSpan);
+        const createStudentListItem = (student, index, isSettingsPage) => {
+            const li = document.createElement('li');
+            li.className = 'student-list-item'; // New class for flexbox styling
 
-                if (isSettingsPage) {
-                    const deleteBtn = document.createElement('button');
-                    deleteBtn.textContent = 'حذف';
-                    deleteBtn.style.backgroundColor = '#dc3545';
-                    deleteBtn.addEventListener('click', (event) => {
-                        const deleteStudent = () => {
-                            // Clear last winner if they are deleted
-                            const classObject = schoolData[currentClass];
-                            if (classObject.sessions[currentSession] && classObject.sessions[currentSession].lastWinner && classObject.sessions[currentSession].lastWinner.name === student.name) {
-                                classObject.sessions[currentSession].lastWinner = null;
-                            }
-                            students.splice(index, 1);
-                            saveData();
-                            renderStudents();
-                        };
-                        if (event.ctrlKey) {
-                            deleteStudent();
-                        } else {
-                            if (confirm(toPersianDigits(`آیا از حذف دانش‌آموز «${student.name}» مطمئن هستید؟`))) {
-                                deleteStudent();
-                            }
-                        }
-                    });
-                    li.appendChild(deleteBtn);
-                }
-                listElement.appendChild(li);
-            });
+            // --- Total Stats Div ---
+            const totalStatsDiv = document.createElement('div');
+            totalStatsDiv.className = 'total-stats';
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = toPersianDigits(`${student.name} (مجموع انتخاب: ${student.totalCount})`);
+            totalStatsDiv.appendChild(nameSpan);
+            
+            if (isSettingsPage) {
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'حذف';
+                deleteBtn.style.backgroundColor = '#dc3545';
+                deleteBtn.addEventListener('click', (event) => {
+                    if (confirm(toPersianDigits(`آیا از حذف دانش‌آموز «${student.name}» مطمئن هستید؟`))) {
+                         // Logic to delete student will be here
+                        const classObject = schoolData[currentClass];
+                        students.splice(index, 1);
+                        saveData();
+                        renderStudents();
+                    }
+                });
+                totalStatsDiv.appendChild(deleteBtn);
+            }
+            
+            // --- Category Stats Div (placeholder) ---
+            const categoryStatsDiv = document.createElement('div');
+            categoryStatsDiv.className = 'category-stats';
+            // Create a unique ID for each student's category stats div
+            const studentId = student.name.replace(/\s+/g, '-');
+            categoryStatsDiv.id = `cat-stats-${studentId}`;
+
+            if(categoryToDisplay && student.sessionData[currentSession] && student.sessionData[currentSession][categoryToDisplay]) {
+                const stats = student.sessionData[currentSession][categoryToDisplay];
+                categoryStatsDiv.textContent = toPersianDigits(`${categoryToDisplay}: (انتخاب: ${stats.count} | غیبت: ${stats.absenceCount} | مشکل: ${stats.problemCount})`);
+                categoryStatsDiv.classList.add('visible');
+            }
+
+            li.appendChild(totalStatsDiv);
+            li.appendChild(categoryStatsDiv);
+            return li;
         };
-        renderList(studentListUl, false);
-        renderList(settingsStudentListUl, true);
+
+        students.forEach((student, index) => {
+            // We need to clone the node for the second list
+            const listItemForStudentPage = createStudentListItem(student, index, false);
+            const listItemForSettingsPage = createStudentListItem(student, index, true);
+            studentListUl.appendChild(listItemForStudentPage);
+            settingsStudentListUl.appendChild(listItemForSettingsPage);
+        });
     }
 }
         function renderClasses() {
@@ -216,6 +233,7 @@ addClassBtn.addEventListener('click', () => {
             currentClass = className;
             settingsClassNameHeader.textContent = toPersianDigits(`تنظیمات کلاس: ${currentClass}`);
             renderStudents();
+            renderCategories(); // Call the new function
             showPage('settings-page');
         });
 
@@ -244,7 +262,6 @@ addClassBtn.addEventListener('click', () => {
     const classObject = schoolData[currentClass];
     const sessions = classObject.sessions || {};
 
-    // Get session numbers and sort them numerically in descending order
     const sortedSessionNumbers = Object.keys(sessions).map(Number).sort((a, b) => b - a);
 
     sortedSessionNumbers.forEach(sessionNumber => {
@@ -254,22 +271,11 @@ addClassBtn.addEventListener('click', () => {
         li.addEventListener('click', () => {
             currentSession = sessionNumber;
             
-            // Update headers and navigate
             classNameHeader.textContent = toPersianDigits(`کلاس: ${currentClass} - جلسه ${currentSession}`);
-            
-            // Display the last winner of THAT session
-            const lastSessionWinner = classObject.sessions[currentSession].lastWinner;
-            if (lastSessionWinner) {
-                // We need a way to find the full student object from just the name
-                const winnerObject = classObject.students.find(s => s.name === lastSessionWinner.name);
-                if (winnerObject) {
-                    displayWinner(winnerObject);
-                }
-            } else {
-                selectedStudentResult.innerHTML = '';
-            }
+            selectedStudentResult.innerHTML = ''; // Always clear previous results when entering a session
 
-            renderStudents(); // This will be updated later to show session-specific data
+            renderStudents();
+            renderCategorySelectionButtons(); // Call the function to show category buttons
             showPage('student-page');
         });
         sessionListUl.appendChild(li);
@@ -281,31 +287,34 @@ addClassBtn.addEventListener('click', () => {
     const sessionNumbers = Object.keys(sessions).map(Number);
     const nextSessionNumber = sessionNumbers.length > 0 ? Math.max(...sessionNumbers) + 1 : 1;
     
-    // Create the new session object
-    classObject.sessions[nextSessionNumber] = {
-        lastWinner: null
-    };
+    classObject.sessions[nextSessionNumber] = {};
 
-    // Initialize session data for each student for this new session
     classObject.students.forEach(student => {
         if (!student.sessionData) {
             student.sessionData = {};
         }
-        student.sessionData[nextSessionNumber] = {
-            count: 0,
-            absenceCount: 0,
-            problemCount: 0
-        };
+        // For each category, initialize session data for the student
+        classObject.categories.forEach(category => {
+            if (!student.sessionData[nextSessionNumber]) {
+                student.sessionData[nextSessionNumber] = {};
+            }
+            student.sessionData[nextSessionNumber][category] = {
+                count: 0,
+                absenceCount: 0,
+                problemCount: 0,
+                lastWinner: null
+            };
+        });
     });
 
     currentSession = nextSessionNumber;
     
-    // Update headers and navigate
     classNameHeader.textContent = toPersianDigits(`کلاس: ${currentClass} - جلسه ${currentSession}`);
-    selectedStudentResult.innerHTML = ''; // Clear previous results
+    selectedStudentResult.innerHTML = '';
     
     saveData();
-    renderStudents(); // This will be updated later to show session-specific data
+    renderStudents();
+    renderCategorySelectionButtons(); // Call the function to show category buttons
     showPage('student-page');
 });
         function renderImportPreview(names) {
@@ -324,15 +333,80 @@ addClassBtn.addEventListener('click', () => {
                 csvPreviewList.appendChild(li);
             });
         }
+		function renderCategories() {
+            categoryListUl.innerHTML = '';
+            if (!currentClass || !schoolData[currentClass].categories) return;
+
+            const categories = schoolData[currentClass].categories;
+            categories.forEach((category, index) => {
+                const li = document.createElement('li');
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = toPersianDigits(category);
+                li.appendChild(nameSpan);
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'حذف';
+                deleteBtn.style.backgroundColor = '#dc3545';
+                deleteBtn.addEventListener('click', () => {
+                    // We can add a confirmation here if needed in the future
+                    categories.splice(index, 1);
+                    saveData();
+                    renderCategories();
+                });
+                li.appendChild(deleteBtn);
+                categoryListUl.appendChild(li);
+            });
+        }
+
+        addCategoryBtn.addEventListener('click', () => {
+            const categoryName = newCategoryNameInput.value.trim();
+            if (categoryName && currentClass && schoolData[currentClass]) {
+                const classObject = schoolData[currentClass];
+                if (!classObject.categories) {
+                    classObject.categories = [];
+                }
+                // Check for duplicates (case-insensitive)
+                const isDuplicate = classObject.categories.some(cat => cat.toLowerCase() === categoryName.toLowerCase());
+                if (!isDuplicate) {
+                    classObject.categories.push(categoryName);
+                    saveData();
+                    renderCategories();
+                    newCategoryNameInput.value = '';
+                } else {
+                    alert('این دسته‌بندی از قبل وجود دارد.');
+                }
+            }
+        });
+
+        addCategoryBtn.addEventListener('click', () => {
+            const categoryName = newCategoryNameInput.value.trim();
+            if (categoryName && currentClass && schoolData[currentClass]) {
+                const classObject = schoolData[currentClass];
+                if (!classObject.categories) {
+                    classObject.categories = [];
+                }
+                if (!classObject.categories.includes(categoryName)) {
+                    classObject.categories.push(categoryName);
+                    saveData();
+                    renderCategories();
+                    newCategoryNameInput.value = '';
+                } else {
+                    alert('این دسته‌بندی از قبل وجود دارد.');
+                }
+            }
+        });
         
         // --- Event Listeners ---
        addClassBtn.addEventListener('click', () => {
     const className = newClassNameInput.value.trim();
     if (className && !schoolData[className]) {
-        // Create class with the new object structure
         schoolData[className] = {
             students: [],
-            lastWinner: null
+            sessions: {},
+            categories: [
+                'Vocabulary', 'Grammar', 'Reading', 'Writing', 
+                'Speaking', 'Pronunciation', 'Listening'
+            ]
         };
         saveData();
         renderClasses();
@@ -343,60 +417,49 @@ addClassBtn.addEventListener('click', () => {
 });
         newClassNameInput.addEventListener('keyup', e => { if (e.key === 'Enter') addClassBtn.click(); });
         backToClassesBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                currentClass = null;
-                lastWinner = null;
-                showPage('class-management-page');
-            });
-        });
+    btn.addEventListener('click', () => {
+        currentClass = null;
+        currentSession = null;
+        currentCategory = null;
+        showPage('class-management-page');
+    });
+});
         addStudentBtn.addEventListener('click', () => {
     const studentName = newStudentNameInput.value.trim();
     if (!studentName || !currentClass) return;
 
     const classObject = schoolData[currentClass];
-    const SIMILARITY_THRESHOLD = 0.80;
-    let potentialMatch = null;
-    const normalizedNewName = studentName.replace(/[\s\u200c]/g, '');
+    const isDuplicate = classObject.students.some(s => s.name.toLowerCase() === studentName.toLowerCase());
 
-    for (const existingStudent of classObject.students) {
-        const normalizedExistingName = existingStudent.name.replace(/[\s\u200c]/g, '');
-        if (normalizedNewName.toLowerCase() === normalizedExistingName.toLowerCase()) {
-            potentialMatch = existingStudent;
-            break;
-        }
-    }
-    if (!potentialMatch) {
-        for (const existingStudent of classObject.students) {
-             const similarity = calculateSimilarity(studentName, existingStudent.name);
-             if (similarity >= SIMILARITY_THRESHOLD) {
-                potentialMatch = existingStudent;
-                break;
-            }
-        }
+    if (isDuplicate) {
+        alert('دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.');
+        return;
     }
 
-    const addTheStudent = () => {
-        // Create student with the new, more complex data structure
-        const newStudent = {
-            name: studentName,
-            totalCount: 0,
-            totalAbsenceCount: 0,
-            totalProblemCount: 0,
-            sessionData: {}
-        };
-        classObject.students.push(newStudent);
-        saveData();
-        renderStudents();
-        newStudentNameInput.value = '';
+    const newStudent = {
+        name: studentName,
+        totalCount: 0,
+        totalAbsenceCount: 0,
+        totalProblemCount: 0,
+        sessionData: {}
     };
 
-    if (potentialMatch) {
-        if (confirm(toPersianDigits(`نام وارد شده «${studentName}» به «${potentialMatch.name}» بسیار شبیه است. \nآیا مطمئنید که این یک دانش آموز جدید است؟`))) {
-            addTheStudent();
-        }
-    } else {
-        addTheStudent();
+    // Initialize data for existing sessions for the new student
+    for (const sessionNumber in classObject.sessions) {
+        newStudent.sessionData[sessionNumber] = {};
+        classObject.categories.forEach(category => {
+            newStudent.sessionData[sessionNumber][category] = {
+                count: 0,
+                absenceCount: 0,
+                problemCount: 0
+            };
+        });
     }
+
+    classObject.students.push(newStudent);
+    saveData();
+    renderStudents(); // This will need to be updated later
+    newStudentNameInput.value = '';
 });
         newStudentNameInput.addEventListener('keyup', e => { if (e.key === 'Enter') addStudentBtn.click(); });
         importCsvBtn.addEventListener('click', () => { csvFileInput.click(); });
@@ -452,11 +515,11 @@ addClassBtn.addEventListener('click', () => {
         });
 
         function displayWinner(winner) {
-    selectedStudentResult.innerHTML = ''; // Clear previous content
-
-    const sessionStats = winner.sessionData[currentSession] || { count: 0, absenceCount: 0, problemCount: 0 };
+    selectedStudentResult.innerHTML = '';
+    
+    const sessionCategoryStats = winner.sessionData[currentSession][currentCategory];
     const resultText = document.createElement('div');
-    resultText.innerHTML = toPersianDigits(`✨ <strong>${winner.name} (انتخاب در این جلسه: ${sessionStats.count})</strong> ✨`);
+    resultText.innerHTML = toPersianDigits(`✨ <strong>${winner.name}</strong> (انتخاب در این دسته: ${sessionCategoryStats.count}) ✨`);
     
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'status-button-container';
@@ -469,15 +532,12 @@ addClassBtn.addEventListener('click', () => {
         const sessionProp = type === 'absent' ? 'absenceCount' : 'problemCount';
         const totalProp = type === 'absent' ? 'totalAbsenceCount' : 'totalProblemCount';
         
-        let isToggled = false;
-
         btn.addEventListener('click', () => {
-            isToggled = !isToggled;
-            btn.classList.toggle('active', isToggled);
-            
-            const change = isToggled ? 1 : -1;
+            const isActive = btn.classList.toggle('active');
+            const change = isActive ? 1 : -1;
+
             winner[totalProp] += change;
-            winner.sessionData[currentSession][sessionProp] += change;
+            winner.sessionData[currentSession][currentCategory][sessionProp] += change;
             
             saveData();
             renderStudents();
@@ -495,59 +555,59 @@ addClassBtn.addEventListener('click', () => {
     selectedStudentResult.appendChild(buttonContainer);
 }
 
-selectStudentBtn.addEventListener('click', () => {
-    const classObject = schoolData[currentClass];
-    if (!classObject || !classObject.students || classObject.students.length === 0) {
-        selectedStudentResult.textContent = 'لطفاً ابتدا دانش‌آموز اضافه کنید.';
+	selectStudentBtn.addEventListener('click', () => {
+    if (!currentClass || !currentSession || !currentCategory) {
+        alert("لطفاً ابتدا یک دسته‌بندی را انتخاب کنید.");
         return;
     }
+
+    const classObject = schoolData[currentClass];
+    const allStudents = classObject.students;
+    const lastWinnerName = classObject.sessions[currentSession][currentCategory]?.lastWinner?.name || null;
     
-    let allStudents = classObject.students;
-    let lastSessionWinner = classObject.sessions[currentSession].lastWinner;
-    
-    let absoluteMaxCount = 0;
-    allStudents.forEach(s => { 
-        const sessionCount = s.sessionData[currentSession] ? s.sessionData[currentSession].count : 0;
-        if (sessionCount > absoluteMaxCount) absoluteMaxCount = sessionCount;
+    let candidates = allStudents.filter(s => s.name !== lastWinnerName);
+    if (candidates.length === 0) candidates = allStudents;
+
+    let minCount = Infinity, maxCount = -Infinity;
+    candidates.forEach(s => {
+        const count = s.sessionData[currentSession][currentCategory]?.count ?? 0;
+        if (count < minCount) minCount = count;
+        if (count > maxCount) maxCount = count;
     });
 
-    let candidates = allStudents.filter(s => !lastSessionWinner || s.name !== lastSessionWinner.name);
-    if (candidates.length === 0) candidates = allStudents;
-    
-    let minCountInCandidates = Infinity, maxCountInCandidates = -Infinity;
-    if (candidates.length > 0) {
-        candidates.forEach(s => {
-            const sessionCount = s.sessionData[currentSession] ? s.sessionData[currentSession].count : 0;
-            if (sessionCount < minCountInCandidates) minCountInCandidates = sessionCount;
-            if (sessionCount > maxCountInCandidates) maxCountInCandidates = sessionCount;
-        });
-    }
-
-    const currentGap = maxCountInCandidates - minCountInCandidates;
+    const currentGap = maxCount - minCount;
     let selectionPool = [];
-    if (currentGap >= 3 && candidates.length > 1) { // Simplified gap logic
-        const minCountStudents = candidates.filter(s => (s.sessionData[currentSession] ? s.sessionData[currentSession].count : 0) === minCountInCandidates);
+
+    if (currentGap >= 3 && candidates.length > 1) {
+        const minCountStudents = candidates.filter(s => (s.sessionData[currentSession][currentCategory]?.count ?? 0) === minCount);
         selectionPool = minCountStudents;
     } else {
         candidates.forEach(s => {
-            const sessionCount = s.sessionData[currentSession] ? s.sessionData[currentSession].count : 0;
-            const weight = (maxCountInCandidates - sessionCount) + 1;
-            for (let i = 0; i < weight; i++) selectionPool.push(s);
+            const count = s.sessionData[currentSession][currentCategory]?.count ?? 0;
+            const weight = (maxCount - count) + 1;
+            for (let i = 0; i < weight; i++) {
+                selectionPool.push(s);
+            }
         });
     }
 
     if (selectionPool.length === 0) selectionPool = candidates;
     const randomIndex = Math.floor(Math.random() * selectionPool.length);
     const winner = selectionPool[randomIndex];
-    
+
     if (winner) {
-        // Increment both total and session-specific counts
+        // Increment total and specific counters
         winner.totalCount++;
-        winner.sessionData[currentSession].count++;
+        winner.sessionData[currentSession][currentCategory].count++;
         
-        classObject.sessions[currentSession].lastWinner = winner;
+        // Save winner for this specific category in this session
+        classObject.sessions[currentSession][currentCategory] = {
+            ...classObject.sessions[currentSession][currentCategory],
+            lastWinner: winner
+        };
+
         saveData();
-        renderStudents();
+        renderStudents(currentCategory); // Pass the active category to the render function
         displayWinner(winner);
     }
 });
@@ -574,6 +634,35 @@ selectStudentBtn.addEventListener('click', () => {
     } else {
         console.log("این کلاس دانش‌آموزی برای ریست کردن ندارد.");
     }
+}
+		function renderCategorySelectionButtons() {
+    const container = document.getElementById('category-selection-container');
+    container.innerHTML = '';
+    selectStudentBtn.disabled = true;
+
+    if (!currentClass || !schoolData[currentClass].categories) return;
+
+    const categories = schoolData[currentClass].categories;
+    categories.forEach(category => {
+        const btn = document.createElement('button');
+        btn.textContent = toPersianDigits(category);
+        btn.className = 'btn-secondary category-btn';
+        btn.dataset.category = category;
+        
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            currentCategory = category;
+            selectStudentBtn.disabled = false;
+            selectedStudentResult.innerHTML = '';
+
+            // Re-render the student list to show stats for the selected category
+            renderStudents(currentCategory);
+        });
+
+        container.appendChild(btn);
+    });
 }
         window.resetCurrentClassCounters = resetCurrentClassCounters;
 
