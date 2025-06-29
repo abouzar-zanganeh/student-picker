@@ -446,12 +446,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const selectedCheckboxes = csvPreviewList.querySelectorAll('input[type="checkbox"]:checked');
         const classObject = schoolData[currentClass];
         selectedCheckboxes.forEach(checkbox => {
-            const name = checkbox.dataset.name;
-            const isDuplicate = classObject.students.some(s => s.name.toLowerCase() === name.toLowerCase());
-            if (!isDuplicate) {
-                classObject.students.push({ name: name, count: 0, absenceCount: 0, problemCount: 0 });
+    const name = checkbox.dataset.name;
+    const isDuplicate = classObject.students.some(s => s.name.toLowerCase() === name.toLowerCase());
+
+    if (!isDuplicate) {
+        const newStudent = {
+            name: name,
+            totalCount: 0,
+            totalAbsenceCount: 0,
+            totalProblemCount: 0,
+            sessionData: {}
+        };
+
+        for (const sessionNumber in classObject.sessions) {
+            newStudent.sessionData[sessionNumber] = {};
+            if (classObject.categories) {
+                classObject.categories.forEach(category => {
+                    newStudent.sessionData[sessionNumber][category] = {
+                        count: 0,
+                        absenceCount: 0,
+                        problemCount: 0,
+                        lastWinner: null
+                    };
+                });
             }
-        });
+        }
+        classObject.students.push(newStudent);
+    }
+});
         saveData();
         renderStudents();
         showPage('settings-page');
