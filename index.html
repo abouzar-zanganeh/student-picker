@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl"> 
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,89 +8,87 @@
 </head>
 <body>
 
-    <header style="text-align: center; margin-bottom: 20px;">
+    <header class="app-header">
         <h1>📚 دستیار هوشمند معلم</h1>
     </header>
 
     <main id="class-management-page" class="page active">
         <h2>لیست کلاس‌ها</h2>
-        <div style="display: flex; margin-bottom: 10px;">
-            <input type="text" id="new-class-name" placeholder="نام کلاس جدید..." style="flex-grow: 1; margin-left: 10px;">
+        <div class="input-group">
+            <input type="text" id="new-class-name" placeholder="نام کلاس جدید...">
             <button id="add-class-btn">افزودن</button>
         </div>
-        <ul id="class-list"></ul>
+        <ul id="class-list" class="list-container"></ul>
     </main>
 
     <main id="student-page" class="page">
         <h2 id="class-name-header"></h2>
         <button class="back-to-classes-btn">➡️ بازگشت به لیست کلاس‌ها</button>
-        <hr style="margin: 20px 0;">
+        <hr class="separator">
         <h3>🎲 انتخابگر هوشمند</h3>
-		<div id="category-selection-container" style="margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
-            <!-- دکمه‌های دسته‌بندی با جاوااسکریپت اینجا اضافه می‌شوند -->
+        <div id="category-selection-container" class="category-container">
         </div>
-        <button id="select-student-btn" style="font-size: 20px; padding: 20px; width: 100%;" class="btn-success">انتخاب نفر بعدی!</button>
-        <div id="selected-student-result" style="text-align: center; font-size: 24px; margin-top: 20px; font-weight: bold; min-height: 30px; color: #28a745;"></div>
-        <h3 style="margin-top: 40px;">لیست دانش‌آموزان کلاس</h3>
-        <ul id="student-list"></ul>
+        <button id="select-student-btn" class="btn-success btn-large">انتخاب نفر بعدی!</button>
+        <div id="selected-student-result" class="result-display"></div>
+        <h3 class="section-title">لیست دانش‌آموزان کلاس</h3>
+        <ul id="student-list" class="list-container"></ul>
     </main>
 
     <main id="settings-page" class="page">
         <h2 id="settings-class-name-header"></h2>
         <button class="back-to-classes-btn">➡️ بازگشت به لیست کلاس‌ها</button>
-        <hr style="margin: 20px 0;">
+        <hr class="separator">
 
         <h3 id="student-management-toggle" class="accordion-toggle open">
             <span class="arrow">▼</span>
             مدیریت لیست دانش‌آموزان
         </h3>
         <div id="student-management-content" class="accordion-content open">
-            <div style="display: flex; margin-bottom: 10px;">
-                <input type="text" id="new-student-name" placeholder="افزودن دستی دانش‌آموز..." style="flex-grow: 1; margin-left: 10px;">
+            <div class="input-group">
+                <input type="text" id="new-student-name" placeholder="افزودن دستی دانش‌آموز...">
                 <button id="add-student-btn">افزودن</button>
             </div>
             <div>
                 <textarea id="paste-area" placeholder="لیست اسامی کپی شده را اینجا Paste کنید... (هر اسم در یک خط)"></textarea>
-                <button id="process-paste-btn" class="btn-secondary" style="width: 100%;">بررسی لیست</button>
+                <button id="process-paste-btn" class="btn-secondary">بررسی لیست</button>
             </div>
-            <div style="margin: 20px 0; text-align: center;">یا</div>
-            <div style="margin-bottom: 10px;">
-                 <input type="file" id="csv-file-input" accept=".csv" style="display: none;">
-                 <button id="import-csv-btn" class="btn-secondary" style="width: 100%;">ورود لیست از فایل (CSV)</button>
+            <div class="divider-text">یا</div>
+            <div>
+                <input type="file" id="csv-file-input" class="hidden-input" accept=".csv">
+                <button id="import-csv-btn" class="btn-secondary">ورود لیست از فایل (CSV)</button>
             </div>
         </div>
-		<h3 style="margin-top: 40px;">مدیریت دسته‌بندی‌های پرسش</h3>
-        <div style="display: flex; margin-bottom: 10px;">
-            <input type="text" id="new-category-name" placeholder="نام دسته‌بندی جدید (مثلا: Grammar)" style="flex-grow: 1; margin-left: 10px;">
+        
+        <h3 class="section-title">مدیریت دسته‌بندی‌های پرسش</h3>
+        <div class="input-group">
+            <input type="text" id="new-category-name" placeholder="نام دسته‌بندی جدید (مثلا: Grammar)">
             <button id="add-category-btn">افزودن</button>
         </div>
-        <ul id="category-list">
-            <!-- لیست دسته‌بندی‌ها با جاوااسکریپت اینجا اضافه می‌شود -->
-        </ul>
-        <h3 style="margin-top: 40px;">لیست فعلی دانش‌آموزان</h3>
-        <ul id="settings-student-list"></ul>
+        <ul id="category-list" class="list-container"></ul>
+
+        <h3 class="section-title">لیست فعلی دانش‌آموزان</h3>
+        <ul id="settings-student-list" class="list-container"></ul>
     </main>
-	<main id="session-page" class="page">
-        <h2 id="session-class-name-header"></h2>
-        <button class="back-to-classes-btn">➡️ بازگشت به لیست کلاس‌ها</button>
-        <hr style="margin: 20px 0;">
-        <h3>انتخاب جلسه</h3>
-        <div style="margin-bottom: 20px;">
-            <button id="new-session-btn" class="btn-success" style="width: 100%; font-size: 18px;">
-                ➕ شروع جلسه جدید
-            </button>
-        </div>
-        <h4>جلسات قبلی:</h4>
-        <ul id="session-list">
-            <!-- لیست جلسات با جاوااسکریپت اینجا اضافه می‌شود -->
-        </ul>
-    </main>
+
+    <main id="session-page" class="page">
+        <h2 id="session-class-name-header"></h2>
+        <button class="back-to-classes-btn">➡️ بازگشت به لیست کلاس‌ها</button>
+        <hr class="separator">
+        <h3>انتخاب جلسه</h3>
+        <div class="session-actions">
+            <button id="new-session-btn" class="btn-success btn-large">
+                ➕ شروع جلسه جدید
+            </button>
+        </div>
+        <h4>جلسات قبلی:</h4>
+        <ul id="session-list" class="list-container"></ul>
+    </main>
     
     <main id="csv-preview-page" class="page">
         <h2>پیش‌نمایش لیست ورودی</h2>
         <p>لطفاً لیست زیر را بررسی کرده و موارد مورد نظر برای افزودن را تایید کنید.</p>
-        <ul id="csv-preview-list"></ul>
-        <div style="margin-top: 20px;">
+        <ul id="csv-preview-list" class="list-container"></ul>
+        <div class="form-actions">
             <button id="csv-confirm-btn" class="btn-success">تایید و افزودن موارد انتخاب شده</button>
             <button id="csv-cancel-btn">لغو عملیات</button>
         </div>
