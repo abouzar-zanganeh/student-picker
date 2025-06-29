@@ -128,7 +128,7 @@
             const costs = [];
             for (let i = 0; i <= s1.length; i++) {
                 let lastValue = i;
-                for (let j = 0; j <= s2.length; j++) {
+                for (let j = 0; j <= s2.length; j++) { 
                     if (i === 0) { costs[j] = j; } 
                     else {
                         if (j > 0) {
