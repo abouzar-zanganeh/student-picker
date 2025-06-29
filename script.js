@@ -378,23 +378,7 @@
             }
         });
 
-        addCategoryBtn.addEventListener('click', () => {
-            const categoryName = newCategoryNameInput.value.trim();
-            if (categoryName && currentClass && schoolData[currentClass]) {
-                const classObject = schoolData[currentClass];
-                if (!classObject.categories) {
-                    classObject.categories = [];
-                }
-                if (!classObject.categories.includes(categoryName)) {
-                    classObject.categories.push(categoryName);
-                    saveData();
-                    renderCategories();
-                    newCategoryNameInput.value = '';
-                } else {
-                    alert('این دسته‌بندی از قبل وجود دارد.');
-                }
-            }
-        });
+        
         
         // --- Event Listeners ---
        addClassBtn.addEventListener('click', () => {
