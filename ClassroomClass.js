@@ -46,6 +46,23 @@ class Classroom {
         return newSession;
     }
 
+    endSpecificSession(sessionNumber) {
+        // ابتدا جلسه مورد نظر را با استفاده از شماره آن پیدا می‌کند
+        const sessionToEnd = this.getSession(sessionNumber);
+
+        // بررسی می‌کند که آیا جلسه‌ای با این شماره پیدا شده و آیا آن جلسه از قبل خاتمه نیافته است
+        if (sessionToEnd && !sessionToEnd.isFinished) {
+            // وظیفه خاتمه دادن را به خود آبجکت همان جلسه مشخص محول می‌کند
+            sessionToEnd.end();
+            console.log(`جلسه شماره ${sessionNumber} با موفقیت خاتمه یافت.`);
+            return true; // برای اعلام موفقیت عملیات
+        }
+        
+        // اگر جلسه‌ای پیدا نشود یا از قبل بسته شده باشد
+        console.log(`خطا: جلسه شماره ${sessionNumber} یافت نشد یا از قبل خاتمه یافته است.`);
+        return false; // برای اعلام عدم موفقیت
+    }
+
     getSession(sessionNumber) {
         // یک جلسه خاص را از لیست جلسات برمی‌گرداند.
         return this.sessions.find(s => s.sessionNumber === sessionNumber);
