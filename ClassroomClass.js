@@ -145,6 +145,7 @@ class Classroom {
         for (const skill of requiredSkills) {
             if (!scores[skill] || scores[skill].length === 0) {
                 // اگر حتی برای یک مهارت نمره‌ای ثبت نشده باشد، محاسبه را متوقف می‌کند.
+                console.log(`محاسبه نمره برای دانش‌آموز «${student.identity.name}» انجام نشد. دلیل: نمره‌ای برای مهارت «${skill}» ثبت نشده است.`);
                 return null; 
             }
         }
@@ -172,9 +173,32 @@ class Classroom {
     }
 
     assignAllFinalScores() {
-        // نمره نهایی همه دانش‌آموزان را محاسبه و در پروفایلشان ثبت می‌کند.
+        // نسخه نهایی: نتیجه null را مدیریت کرده و گزارش کاملی از عملیات ارائه می‌دهد.
+        let successCount = 0;
+        let failedStudentsNames = []; // آرایه‌ای برای نگهداری اسامی دانش‌آموزان ناموفق
+
+        console.log("شروع عملیات محاسبه نمره نهایی برای تمام دانش‌آموزان...");
+
         this.students.forEach(student => {
-            student.finalClassActivityScore = this.calculateFinalStudentScore(student);
+            const calculatedScore = this.calculateFinalStudentScore(student);
+
+            if (calculatedScore !== null) {
+                student.finalClassActivityScore = calculatedScore;
+                successCount++;
+            } else {
+                student.finalClassActivityScore = null;
+                // نام دانش‌آموز ناموفق به لیست اضافه می‌شود
+                failedStudentsNames.push(student.identity.name);
+            }
         });
+
+        const failedCount = failedStudentsNames.length;
+        console.log(`عملیات پایان یافت. تعداد نمرات موفق: ${successCount} | تعداد ناموفق (نمرات ناقص): ${failedCount}`);
+
+        // اگر دانش‌آموز ناموفقی وجود داشته باشد، اسامی آن‌ها را چاپ می‌کند
+        if (failedCount > 0) {
+            console.log("اسامی دانش‌آموزانی که نمراتشان ناقص است:");
+            failedStudentsNames.forEach(name => console.log(`- ${name}`));
+        }
     }
 }
