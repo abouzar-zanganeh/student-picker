@@ -83,16 +83,43 @@ class Classroom {
 
     // --- منطق اصلی برنامه ---
     selectNextWinner(category) {
-        // این متد، ارکستراتور اصلی است.
-        const currentSession = this.sessions[this.sessions.length - 1]; // آخرین جلسه به عنوان جلسه فعلی
-        if (currentSession) {
-            // وظیفه انتخاب را به خود جلسه محول می‌کند (Delegation)
-            return currentSession.selectNextWinner(category, this.students);
+        // (تغییر یافته) این متد حالا از Getter هوشمند liveSession استفاده می‌کند.
+        const liveSession = this.liveSession; // دریافت جلسه زنده و فعال
+        if (liveSession) {
+            // وظیفه انتخاب را به خود جلسه زنده محول می‌کند
+            return liveSession.selectNextWinner(category, this.students);
         }
-        return null; // اگر هیچ جلسه‌ای شروع نشده باشد
+        console.log("خطا: هیچ جلسه زنده‌ای برای انتخاب دانش‌آموز وجود ندارد.");
+        return null; // اگر هیچ جلسه زنده‌ای وجود نداشته باشد
     }
 
+    // --- بخش جدید: متدهای کمکی برای مدیریت وضعیت جلسه ---
+    // این متدها به منطق اصلی برنامه کمک می‌کنند تا وضعیت جلسات را بهتر درک کند.
+    get liveSession() {
+        // یک Getter هوشمند که آخرین جلسه خاتمه نیافته را به عنوان جلسه "زنده" برمی‌گرداند.
+        // این متد از آخر لیست شروع به گشتن می‌کند.
+        for (let i = this.sessions.length - 1; i >= 0; i--) {
+            if (!this.sessions[i].isFinished) {
+                return this.sessions[i];
+            }
+        }
+        return null; // اگر تمام جلسات خاتمه یافته باشند
+    }
+
+    endLiveSession() {
+        // یک متد راحت برای خاتمه دادن به جلسه زنده فعلی.
+        const sessionToEnd = this.liveSession;
+        if (sessionToEnd) {
+            sessionToEnd.end();
+            console.log(`جلسه زنده (شماره ${sessionToEnd.sessionNumber}) خاتمه یافت.`);
+            return true;
+        }
+        return false;
+    }
+
+
     // --- بخش ۴: متدهای گزارش‌گیری و تحلیل (GETTERS & REPORTS) ---
+    // این بخش بدون تغییر باقی می‌ماند چون منطق آن به وضعیت زنده/منتخب ارتباطی ندارد.
 
     getOverallClassAverage() {
         // میانگین نمرات کل دانش‌آموزان کلاس را محاسبه می‌کند.
