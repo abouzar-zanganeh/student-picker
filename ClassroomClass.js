@@ -137,17 +137,38 @@ class Classroom {
     }
     
     calculateFinalStudentScore(student) {
-        // نمره نهایی یک دانش‌آموز را طبق فرمول شما محاسبه می‌کند.
+        // نسخه نهایی: ابتدا وجود تمام نمرات را بررسی کرده و سپس با فرمول جدید محاسبه می‌کند.
         const scores = student.logs.scores;
-        const avg = (skill) => scores[skill].length ? scores[skill].reduce((a, b) => a + b, 0) / scores[skill].length : 0;
+        const requiredSkills = ['listening', 'speaking', 'reading', 'writing'];
+
+        // مرحله ۱: بررسی وجود نمرات برای تمام مهارت‌های الزامی
+        for (const skill of requiredSkills) {
+            if (!scores[skill] || scores[skill].length === 0) {
+                // اگر حتی برای یک مهارت نمره‌ای ثبت نشده باشد، محاسبه را متوقف می‌کند.
+                return null; 
+            }
+        }
+
+        // تابع کمکی برای محاسبه میانگین که حالا می‌دانیم آرایه آن خالی نیست.
+        const getSkillAverage = (skill) => {
+            return scores[skill].reduce((a, b) => a + b, 0) / scores[skill].length;
+        };
+
+        // مرحله ۲: محاسبه میانگین‌ها بر اساس منطق جدید
+        const listeningAvg = getSkillAverage('listening');
+        const speakingAvg = getSkillAverage('speaking');
+        const readingAvg = getSkillAverage('reading');
+        const writingAvg = getSkillAverage('writing');
         
-        const listeningAvg = avg('listening');
-        const speakingAvg = avg('speaking');
-        const readingAvg = avg('reading');
-        const writingAvg = avg('writing');
-        
-        const finalScore = ((listeningAvg + speakingAvg) * 3 + (readingAvg * 2) + writingAvg) / 6;
-        return finalScore;
+        // ترکیب میانگین‌های Listening و Speaking
+        const combinedListeningSpeakingAvg = (listeningAvg + speakingAvg) / 2;
+
+        // مرحله ۳: اعمال فرمول نهایی با وزن‌ها و مخرج صحیح
+        const numerator = (combinedListeningSpeakingAvg * 3) + (readingAvg * 2) + (writingAvg * 1);
+        const finalScore = numerator / 6;
+
+        // گرد کردن نتیجه و برگرداندن آن
+        return Math.round(finalScore * 100) / 100;
     }
 
     assignAllFinalScores() {
