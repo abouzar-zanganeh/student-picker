@@ -261,6 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsStudentListUl = document.getElementById('settings-student-list');
     const categoryListUl = document.getElementById('category-list');
     const backToSessionsBtn = document.getElementById('back-to-sessions-btn');
+    const newStudentNameInput = document.getElementById('new-student-name');
+    const addStudentBtn = document.getElementById('add-student-btn');
     
     // --- توابع اصلی داده‌ها (Data Functions) ---
     function saveData() {
@@ -330,10 +332,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleUndo() {
         if (previousState) {
+            // ۱. نام کلاس فعلی را قبل از هر کاری ذخیره می‌کنیم (اگر وجود داشته باشد)
+            const currentClassName = currentClassroom ? currentClassroom.info.name : null;
+
+            // ۲. داده‌ها را از حالت ذخیره شده بازسازی می‌کنیم
             const plainData = JSON.parse(previousState);
-            rehydrateData(plainData); // بازسازی آبجکت‌ها از وضعیت قبلی
-            renderClassList();
+            rehydrateData(plainData);
+
+            // ۳. مرجع currentClassroom را با استفاده از نام ذخیره شده، از آبجکت جدید پیدا و به‌روز می‌کنیم
+            if (currentClassName && classrooms[currentClassName]) {
+                currentClassroom = classrooms[currentClassName];
+            } else {
+                currentClassroom = null;
+            }
+
+            // ۴. حالا بر اساس اینکه آیا در یک کلاس هستیم یا نه، صفحه مناسب را رندر می‌کنیم
+            if (currentClassroom) {
+                // اگر داخل یک کلاس بودیم، یعنی در صفحه تنظیمات هستیم
+                renderSettingsStudentList();
+            } else {
+                // اگر نه، در صفحه اصلی لیست کلاس‌ها هستیم
+                renderClassList();
+            }
             
+            // ۵. پیام واگرد را پنهان کرده و وضعیت را ریست می‌کنیم
             undoToast.classList.remove('show');
             clearTimeout(undoTimeout);
             previousState = null;
@@ -412,8 +434,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentClassroom.students.forEach(student => {
             const li = document.createElement('li');
-            li.textContent = student.identity.name;
-            // در آینده دکمه‌های حذف و ویرایش دانش‌آموز اینجا اضافه می‌شود
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = student.identity.name;
+            nameSpan.style.flexGrow = '1';
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-icon';
+            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.style.color = 'var(--color-warning)';
+
+            deleteBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                
+                showUndoToast(`دانش‌آموز «${student.identity.name}» حذف شد.`);
+                
+                currentClassroom.removeStudent(student.identity.studentId);
+                
+                saveData();
+                renderSettingsStudentList();
+            });
+            
+            li.appendChild(nameSpan);
+            li.appendChild(deleteBtn);
             settingsStudentListUl.appendChild(li);
         });
     }
@@ -501,6 +544,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- شنودگرهای رویداد (Event Listeners) ---
+    newStudentNameInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            addStudentBtn.click();
+        }
+    });
+
+    addStudentBtn.addEventListener('click', () => {
+        if (!currentClassroom) return;
+
+        const studentName = newStudentNameInput.value.trim();
+        if (!studentName) {
+            alert("لطفاً نام دانش‌آموز را وارد کنید.");
+            return;
+        }
+
+        const isDuplicate = currentClassroom.students.some(student => student.identity.name.toLowerCase() === studentName.toLowerCase());
+        if (isDuplicate) {
+            alert("دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.");
+            return;
+        }
+
+        const newStudent = new Student({ name: studentName });
+
+        currentClassroom.addStudent(newStudent);
+        saveData();
+        renderSettingsStudentList();
+        
+        newStudentNameInput.value = '';
+        newStudentNameInput.focus();
+    });
     backToSessionsBtn.addEventListener('click', () => {
         renderSessions();
         showPage('session-page');
