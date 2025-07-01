@@ -245,12 +245,21 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentClassroom = null; // کلاسی که کاربر در حال کار با آن است
     let liveSession = null; // جلسه زنده‌ای که در حال برگزاری است
     let selectedSession = null; // جلسه‌ای که کاربر برای مشاهده انتخاب کرده
+    let previousState = null; // برای ذخیره آخرین وضعیت قبل از حذف
+    let undoTimeout = null;   // برای مدیریت زمان‌بندی پیام واگرد
 
     // --- عناصر HTML ---
     const classManagementPage = document.getElementById('class-management-page');
     const newClassNameInput = document.getElementById('new-class-name');
     const addClassBtn = document.getElementById('add-class-btn');
     const classListUl = document.getElementById('class-list');
+    const undoToast = document.getElementById('undo-toast');
+    const undoMessage = document.getElementById('undo-message');
+    const undoBtn = document.getElementById('undo-btn');
+    const settingsPage = document.getElementById('settings-page');
+    const settingsClassNameHeader = document.getElementById('settings-class-name-header');
+    const settingsStudentListUl = document.getElementById('settings-student-list');
+    const categoryListUl = document.getElementById('category-list');
     
     // --- توابع اصلی داده‌ها (Data Functions) ---
     function saveData() {
@@ -304,14 +313,45 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function showUndoToast(message) {
+        clearTimeout(undoTimeout);
+        // فقط در صورتی وضعیت را ذخیره کن که عملیات واگرد جدیدی شروع شده باشد
+        if (!previousState) {
+            previousState = JSON.stringify(classrooms);
+        }
+        undoMessage.textContent = message;
+        undoToast.classList.add('show');
+        undoTimeout = setTimeout(() => {
+            undoToast.classList.remove('show');
+            previousState = null; // پس از ۵ ثانیه، امکان واگرد از بین می‌رود
+        }, 5000);
+    }
+
+    function handleUndo() {
+        if (previousState) {
+            const plainData = JSON.parse(previousState);
+            rehydrateData(plainData); // بازسازی آبجکت‌ها از وضعیت قبلی
+            renderClassList();
+            
+            undoToast.classList.remove('show');
+            clearTimeout(undoTimeout);
+            previousState = null;
+        }
+    }
+
     // --- توابع رندر (Render Functions) ---
     function renderClassList() {
         classListUl.innerHTML = '';
         for (const name in classrooms) {
             const classroom = classrooms[name];
+            
             const li = document.createElement('li');
-            li.textContent = name;
-            li.addEventListener('click', () => {
+            
+            const nameContainer = document.createElement('span');
+            nameContainer.textContent = name;
+            nameContainer.style.flexGrow = '1';
+            
+            nameContainer.addEventListener('click', () => {
                 currentClassroom = classroom;
                 selectedSession = null; 
                 liveSession = currentClassroom.liveSession;
@@ -320,8 +360,73 @@ document.addEventListener('DOMContentLoaded', () => {
                 updateSessionPageHeader();
                 showPage('session-page');
             });
+            
+            const buttonsContainer = document.createElement('div');
+            
+            const settingsBtn = document.createElement('button');
+            settingsBtn.className = 'btn-icon';
+            settingsBtn.innerHTML = '⚙️';
+            settingsBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                currentClassroom = classroom;
+                
+                // به‌روزرسانی هدر صفحه تنظیمات
+                settingsClassNameHeader.textContent = `تنظیمات کلاس: ${currentClassroom.info.name}`;
+                
+                // رندر کردن محتوای صفحه تنظیمات
+                renderSettingsStudentList();
+                renderSettingsCategories();
+                
+                // نمایش صفحه تنظیمات
+                showPage('settings-page');
+            });
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-icon';
+            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.style.color = 'var(--color-warning)';
+            
+            deleteBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                
+                showUndoToast(`کلاس «${name}» حذف شد.`);
+                
+                delete classrooms[name];
+                
+                saveData();
+                renderClassList();
+            });
+            
+            buttonsContainer.appendChild(settingsBtn);
+            buttonsContainer.appendChild(deleteBtn);
+            li.appendChild(nameContainer);
+            li.appendChild(buttonsContainer);
             classListUl.appendChild(li);
         }
+    }
+
+    function renderSettingsStudentList() {
+        settingsStudentListUl.innerHTML = '';
+        if (!currentClassroom) return;
+
+        currentClassroom.students.forEach(student => {
+            const li = document.createElement('li');
+            li.textContent = student.identity.name;
+            // در آینده دکمه‌های حذف و ویرایش دانش‌آموز اینجا اضافه می‌شود
+            settingsStudentListUl.appendChild(li);
+        });
+    }
+
+    function renderSettingsCategories() {
+        categoryListUl.innerHTML = '';
+        if (!currentClassroom) return;
+
+        currentClassroom.categories.forEach(category => {
+            const li = document.createElement('li');
+            li.textContent = category;
+            // در آینده دکمه حذف دسته‌بندی اینجا اضافه می‌شود
+            categoryListUl.appendChild(li);
+        });
     }
 
     function showPage(pageId) {
@@ -361,6 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('کلاسی با این نام از قبل وجود دارد.');
         }
     });
+    undoBtn.addEventListener('click', handleUndo);
 
     document.querySelectorAll('.back-to-classes-btn').forEach(btn => {
         btn.addEventListener('click', () => {
