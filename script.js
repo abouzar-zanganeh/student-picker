@@ -153,7 +153,7 @@ class Classroom {
         return this.sessions.find(s => s.sessionNumber === sessionNumber);
     }
 
-    markSessionAsMakeup(sessionNumber) {
+    markAsMakeup(sessionNumber) {
         const session = this.getSession(sessionNumber);
         if (session) {
             session.markAsMakeup();
