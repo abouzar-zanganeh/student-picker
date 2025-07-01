@@ -338,7 +338,8 @@ button:hover {
 .undo-toast.show {
     transform: translateX(-50%) translateY(0);
 }
-#class-list li:hover {
+#class-list li:hover,
+#session-list li:hover {
     background-color: #e9ecef;
     cursor: pointer;
 }

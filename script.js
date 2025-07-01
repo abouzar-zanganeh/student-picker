@@ -260,6 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsClassNameHeader = document.getElementById('settings-class-name-header');
     const settingsStudentListUl = document.getElementById('settings-student-list');
     const categoryListUl = document.getElementById('category-list');
+    const backToSessionsBtn = document.getElementById('back-to-sessions-btn');
     
     // --- توابع اصلی داده‌ها (Data Functions) ---
     function saveData() {
@@ -440,9 +441,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderSessions() {
-        // This function will be filled in later
         const sessionListUl = document.getElementById('session-list');
-        sessionListUl.innerHTML = '<li>No sessions yet.</li>'; 
+        const sessionClassNameHeader = document.getElementById('session-class-name-header');
+        
+        if (!currentClassroom) return;
+
+        sessionClassNameHeader.textContent = `کلاس: ${currentClassroom.info.name}`;
+        sessionListUl.innerHTML = '';
+
+        if (currentClassroom.sessions.length === 0) {
+            sessionListUl.innerHTML = '<li>هنوز جلسه‌ای شروع نشده است.</li>';
+            return;
+        }
+
+        const reversedSessions = [...currentClassroom.sessions].reverse();
+
+        reversedSessions.forEach(session => {
+            const li = document.createElement('li');
+            
+            const sessionDate = new Date(session.startTime).toLocaleDateString('fa-IR');
+            const sessionText = document.createElement('span');
+            sessionText.textContent = `جلسه ${session.sessionNumber} - تاریخ: ${sessionDate}`;
+            li.appendChild(sessionText);
+
+            const badgesContainer = document.createElement('div');
+            
+            if (session.isFinished) {
+                const finishedBadge = document.createElement('span');
+                finishedBadge.className = 'badge badge-secondary';
+                finishedBadge.textContent = 'خاتمه یافته';
+                badgesContainer.appendChild(finishedBadge);
+            }
+            if (session.isMakeup) {
+                const makeupBadge = document.createElement('span');
+                makeupBadge.className = 'badge badge-warning';
+                makeupBadge.textContent = 'جبرانی';
+                badgesContainer.appendChild(makeupBadge);
+            }
+            li.appendChild(badgesContainer);
+
+            li.addEventListener('click', () => {
+                selectedSession = session;
+                // updateStudentPageHeader();
+                // renderCategorySelectionButtons();
+                // renderStudentListForSession();
+                showPage('student-page');
+                console.log("وارد جلسه منتخب شدید:", selectedSession);
+            });
+            sessionListUl.appendChild(li);
+        });
     }
 
     function updateSessionPageHeader() {
@@ -454,6 +501,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- شنودگرهای رویداد (Event Listeners) ---
+    backToSessionsBtn.addEventListener('click', () => {
+        renderSessions();
+        showPage('session-page');
+    });
+    document.getElementById('new-session-btn').addEventListener('click', () => {
+    if (currentClassroom) {
+        const newSession = currentClassroom.startNewSession();
+        
+        liveSession = newSession; 
+        selectedSession = newSession;
+        
+        console.log(`--- DEBUG: Session ${newSession.sessionNumber} created. Total sessions now: ${currentClassroom.sessions.length}`);
+
+
+        saveData();
+        renderSessions(); 
+        
+        showPage('student-page');
+    }
+});
+    
     addClassBtn.addEventListener('click', () => {
         const className = newClassNameInput.value.trim();
         if (className && !classrooms[className]) {
