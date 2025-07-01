@@ -466,6 +466,12 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('کلاسی با این نام از قبل وجود دارد.');
         }
     });
+
+    newClassNameInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            addClassBtn.click();
+        }
+    });
     undoBtn.addEventListener('click', handleUndo);
 
     document.querySelectorAll('.back-to-classes-btn').forEach(btn => {
