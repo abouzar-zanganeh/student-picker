@@ -247,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedSession = null; // جلسه‌ای که کاربر برای مشاهده انتخاب کرده
     let previousState = null; // برای ذخیره آخرین وضعیت قبل از حذف
     let undoTimeout = null;   // برای مدیریت زمان‌بندی پیام واگرد
+    let namesToImport = []; // آرایه‌ای برای نگهداری موقت اسامی جهت ورود
 
     // --- عناصر HTML ---
     const classManagementPage = document.getElementById('class-management-page');
@@ -263,6 +264,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const backToSessionsBtn = document.getElementById('back-to-sessions-btn');
     const newStudentNameInput = document.getElementById('new-student-name');
     const addStudentBtn = document.getElementById('add-student-btn');
+    const pasteArea = document.getElementById('paste-area');
+    const processPasteBtn = document.getElementById('process-paste-btn');
+    const csvPreviewPage = document.getElementById('csv-preview-page');
+    const csvPreviewList = document.getElementById('csv-preview-list');
+    const csvConfirmBtn = document.getElementById('csv-confirm-btn');
+    const csvCancelBtn = document.getElementById('csv-cancel-btn');
     
     // --- توابع اصلی داده‌ها (Data Functions) ---
     function saveData() {
@@ -363,6 +370,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- توابع رندر (Render Functions) ---
+    function renderImportPreview() {
+        csvPreviewList.innerHTML = '';
+        namesToImport.forEach(name => {
+            const li = document.createElement('li');
+            li.className = 'preview-item'; // برای استایل‌دهی بهتر
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = true;
+            checkbox.dataset.name = name; // ذخیره نام در دیتاست برای استفاده بعدی
+
+            const label = document.createElement('label');
+            label.textContent = name;
+
+            li.appendChild(checkbox);
+            li.appendChild(label);
+            csvPreviewList.appendChild(li);
+        });
+    }
     function renderClassList() {
         classListUl.innerHTML = '';
         for (const name in classrooms) {
@@ -544,6 +570,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- شنودگرهای رویداد (Event Listeners) ---
+    csvConfirmBtn.addEventListener('click', () => {
+        const selectedCheckboxes = csvPreviewList.querySelectorAll('input[type="checkbox"]:checked');
+        
+        selectedCheckboxes.forEach(checkbox => {
+            const name = checkbox.dataset.name;
+            
+            // بررسی اینکه آیا دانش‌آموز با این نام از قبل وجود دارد یا نه
+            const isDuplicate = currentClassroom.students.some(student => student.identity.name.toLowerCase() === name.toLowerCase());
+            
+            if (!isDuplicate) {
+                const newStudent = new Student({ name: name });
+                currentClassroom.addStudent(newStudent);
+            } else {
+                console.log(`دانش‌آموز «${name}» به دلیل تکراری بودن اضافه نشد.`);
+            }
+        });
+
+        saveData(); // ذخیره تمام تغییرات
+        renderSettingsStudentList(); // بازسازی لیست دانش‌آموزان در صفحه تنظیمات
+        showPage('settings-page'); // بازگشت به صفحه تنظیمات
+
+        // خالی کردن محتوای استفاده شده
+        pasteArea.value = '';
+        namesToImport = [];
+    });
+    csvCancelBtn.addEventListener('click', () => {
+        namesToImport = []; // خالی کردن آرایه اسامی موقت
+        showPage('settings-page');
+    });
+    processPasteBtn.addEventListener('click', () => {
+        const text = pasteArea.value.trim();
+        if (!text) {
+            alert("کادر متنی خالی است. لطفاً اسامی را وارد کنید.");
+            return;
+        }
+
+        // تبدیل متن به آرایه‌ای از اسامی، حذف خطوط خالی و فضاهای اضافی
+        const names = text.split('\n')
+                           .map(name => name.trim())
+                           .filter(name => name.length > 0);
+
+        if (names.length > 0) {
+            namesToImport = names;
+            renderImportPreview();
+            showPage('csv-preview-page');
+        } else {
+            alert("هیچ نام معتبری برای ورود پیدا نشد.");
+        }
+    });
     newStudentNameInput.addEventListener('keyup', (event) => {
         if (event.key === 'Enter') {
             addStudentBtn.click();
