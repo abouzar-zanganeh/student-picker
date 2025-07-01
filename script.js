@@ -248,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let previousState = null; // برای ذخیره آخرین وضعیت قبل از حذف
     let undoTimeout = null;   // برای مدیریت زمان‌بندی پیام واگرد
     let namesToImport = []; // آرایه‌ای برای نگهداری موقت اسامی جهت ورود
+    let importedFileContent = null; // برای نگهداری محتوای کامل فایل CSV
 
     // --- عناصر HTML ---
     const classManagementPage = document.getElementById('class-management-page');
@@ -270,6 +271,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const csvPreviewList = document.getElementById('csv-preview-list');
     const csvConfirmBtn = document.getElementById('csv-confirm-btn');
     const csvCancelBtn = document.getElementById('csv-cancel-btn');
+    const importCsvBtn = document.getElementById('import-csv-btn');
+    const csvFileInput = document.getElementById('csv-file-input');
+    const columnMappingPage = document.getElementById('column-mapping-page');
+    const columnSelectDropdown = document.getElementById('column-select-dropdown');
+    const confirmColumnBtn = document.getElementById('confirm-column-btn');
+    const cancelImportBtn = document.getElementById('cancel-import-btn');
+    const newCategoryNameInput = document.getElementById('new-category-name');
+    const addCategoryBtn = document.getElementById('add-category-btn');
     
     // --- توابع اصلی داده‌ها (Data Functions) ---
     function saveData() {
@@ -325,44 +334,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showUndoToast(message) {
         clearTimeout(undoTimeout);
-        // فقط در صورتی وضعیت را ذخیره کن که عملیات واگرد جدیدی شروع شده باشد
+        
+        // منطق کلیدی برای واگرد دسته‌ای:
+        // فقط زمانی وضعیت را ذخیره کن که هیچ عملیات واگردی در جریان نباشد.
         if (!previousState) {
             previousState = JSON.stringify(classrooms);
         }
+        
         undoMessage.textContent = message;
         undoToast.classList.add('show');
+        
+        // با هر حذف جدید، تایمر واگرد را ریست می‌کنیم تا فرصت کافی وجود داشته باشد.
         undoTimeout = setTimeout(() => {
             undoToast.classList.remove('show');
-            previousState = null; // پس از ۵ ثانیه، امکان واگرد از بین می‌رود
+            previousState = null; // پس از پایان زمان، نقطه بازگشت پاک می‌شود.
         }, 5000);
     }
 
     function handleUndo() {
         if (previousState) {
-            // ۱. نام کلاس فعلی را قبل از هر کاری ذخیره می‌کنیم (اگر وجود داشته باشد)
             const currentClassName = currentClassroom ? currentClassroom.info.name : null;
-
-            // ۲. داده‌ها را از حالت ذخیره شده بازسازی می‌کنیم
+            
             const plainData = JSON.parse(previousState);
             rehydrateData(plainData);
 
-            // ۳. مرجع currentClassroom را با استفاده از نام ذخیره شده، از آبجکت جدید پیدا و به‌روز می‌کنیم
             if (currentClassName && classrooms[currentClassName]) {
                 currentClassroom = classrooms[currentClassName];
             } else {
                 currentClassroom = null;
             }
 
-            // ۴. حالا بر اساس اینکه آیا در یک کلاس هستیم یا نه، صفحه مناسب را رندر می‌کنیم
+            // منطق جدید و کامل: رندر مجدد تمام لیست‌های مرتبط
             if (currentClassroom) {
-                // اگر داخل یک کلاس بودیم، یعنی در صفحه تنظیمات هستیم
+                // اگر داخل یک کلاس هستیم، تمام لیست‌های صفحه تنظیمات را بازسازی کن
                 renderSettingsStudentList();
+                renderSettingsCategories();
             } else {
-                // اگر نه، در صفحه اصلی لیست کلاس‌ها هستیم
                 renderClassList();
             }
             
-            // ۵. پیام واگرد را پنهان کرده و وضعیت را ریست می‌کنیم
             undoToast.classList.remove('show');
             clearTimeout(undoTimeout);
             previousState = null;
@@ -370,6 +380,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- توابع رندر (Render Functions) ---
+    function renderColumnSelector(headers) {
+        columnSelectDropdown.innerHTML = '';
+        headers.forEach((header, index) => {
+            const option = document.createElement('option');
+            option.value = index; // مقدار هر گزینه، ایندکس ستون است
+            option.textContent = header.trim();
+            columnSelectDropdown.appendChild(option);
+        });
+    }
     function renderImportPreview() {
         csvPreviewList.innerHTML = '';
         namesToImport.forEach(name => {
@@ -491,10 +510,29 @@ document.addEventListener('DOMContentLoaded', () => {
         categoryListUl.innerHTML = '';
         if (!currentClassroom) return;
 
-        currentClassroom.categories.forEach(category => {
+        currentClassroom.categories.forEach((category, index) => {
             const li = document.createElement('li');
-            li.textContent = category;
-            // در آینده دکمه حذف دسته‌بندی اینجا اضافه می‌شود
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = category;
+            nameSpan.style.flexGrow = '1';
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-icon';
+            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.style.color = 'var(--color-warning)';
+
+            deleteBtn.addEventListener('click', () => {
+                showUndoToast(`دسته‌بندی «${category}» حذف شد.`);
+
+                currentClassroom.categories.splice(index, 1);
+                
+                saveData();
+                renderSettingsCategories();
+            });
+
+            li.appendChild(nameSpan);
+            li.appendChild(deleteBtn);
             categoryListUl.appendChild(li);
         });
     }
@@ -570,6 +608,101 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- شنودگرهای رویداد (Event Listeners) ---
+
+    addCategoryBtn.addEventListener('click', () => {
+        if (!currentClassroom) return;
+
+        const categoryName = newCategoryNameInput.value.trim();
+        if (!categoryName) {
+            alert("لطفاً نام دسته‌بندی را وارد کنید.");
+            return;
+        }
+
+        const isDuplicate = currentClassroom.categories.some(cat => cat.toLowerCase() === categoryName.toLowerCase());
+        if (isDuplicate) {
+            alert("این دسته‌بندی از قبل وجود دارد.");
+            return;
+        }
+
+        currentClassroom.categories.push(categoryName);
+        saveData();
+        renderSettingsCategories(); // بازسازی لیست برای نمایش آیتم جدید
+        newCategoryNameInput.value = '';
+    });
+
+    newCategoryNameInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            addCategoryBtn.click();
+        }
+    });
+    
+    confirmColumnBtn.addEventListener('click', () => {
+        if (!importedFileContent) {
+            alert("خطایی رخ داده است. لطفاً فایل را دوباره انتخاب کنید.");
+            showPage('settings-page');
+            return;
+        }
+
+        // گرفتن ایندکس ستونی که کاربر انتخاب کرده است
+        const selectedColumnIndex = parseInt(columnSelectDropdown.value, 10);
+        
+        // پردازش محتوای فایل برای استخراج اسامی از ستون انتخاب شده
+        const lines = importedFileContent.split('\n');
+        const dataRows = lines.slice(1); // نادیده گرفتن خط اول (هدرها)
+
+        namesToImport = dataRows.map(row => {
+                const columns = row.split(',');
+                // استخراج داده از ستون مورد نظر و حذف فضاهای خالی احتمالی
+                return columns[selectedColumnIndex]?.trim();
+            })
+            .filter(name => name && name.length > 0); // حذف ردیف‌های خالی یا نامعتبر
+        
+        if (namesToImport.length > 0) {
+            renderImportPreview();
+            showPage('csv-preview-page');
+        } else {
+            alert("هیچ نامی در ستون انتخاب شده پیدا نشد. لطفاً ستون دیگری را امتحان کنید یا فایل خود را بررسی کنید.");
+        }
+
+        // ریست کردن محتوای موقت فایل
+        importedFileContent = null;
+    });
+
+    importCsvBtn.addEventListener('click', () => {
+        // با کلیک روی دکمه، فایل ورودی مخفی را فعال می‌کنیم
+        csvFileInput.click();
+    });
+
+    csvFileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            const text = e.target.result;
+            importedFileContent = text; // محتوای کامل فایل را ذخیره می‌کنیم
+
+            // خط اول فایل (هدرها) را استخراج می‌کنیم
+            const firstLine = text.split('\n')[0];
+            const headers = firstLine.split(',');
+
+            renderColumnSelector(headers); // منوی کشویی را با هدرها پر می‌کنیم
+            showPage('column-mapping-page'); // صفحه انتخاب ستون را نمایش می‌دهیم
+        };
+
+        reader.readAsText(file);
+        
+        // ورودی را ریست می‌کنیم تا در صورت انتخاب مجدد همان فایل، رویداد اجرا شود
+        event.target.value = null; 
+    });
+
+    cancelImportBtn.addEventListener('click', () => {
+        // عملیات را لغو کرده و به صفحه تنظیمات بازمی‌گردیم
+        importedFileContent = null;
+        showPage('settings-page');
+    });
+
     csvConfirmBtn.addEventListener('click', () => {
         const selectedCheckboxes = csvPreviewList.querySelectorAll('input[type="checkbox"]:checked');
         
