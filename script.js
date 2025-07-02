@@ -545,8 +545,6 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteBtn.addEventListener('click', () => {
                 showUndoToast(`دسته‌بندی «${category.name}» حذف شد.`);
                 
-                // در اینجا فعلا از متد حذف نرم استفاده نمی‌کنیم و منتظر پیاده‌سازی سطل آشغال می‌مانیم
-                // اما برای سازگاری با آینده، می‌توانستیم بنویسیم: category.isDeleted = true;
                 const categoryIndex = currentClassroom.categories.findIndex(c => c.id === category.id);
                 if (categoryIndex > -1) {
                     currentClassroom.categories.splice(categoryIndex, 1);
@@ -624,9 +622,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             li.addEventListener('click', () => {
                 selectedSession = session;
-                // updateStudentPageHeader();
-                // renderCategorySelectionButtons();
-                // renderStudentListForSession();
                 showPage('student-page');
                 console.log("وارد جلسه منتخب شدید:", selectedSession);
             });
@@ -635,7 +630,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateSessionPageHeader() {
-        // This function will also be expanded later
         const sessionClassNameHeader = document.getElementById('session-class-name-header');
         if (currentClassroom) {
             sessionClassNameHeader.textContent = `کلاس: ${currentClassroom.info.name}`;
