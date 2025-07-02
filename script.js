@@ -121,7 +121,11 @@ class Classroom {
         };
         this.students = [];
         this.sessions = [];
-        this.categories = ['Vocabulary', 'Grammar', 'Speaking'];
+        this.categories = [
+            new Category('Vocabulary'), 
+            new Category('Grammar'), 
+            new Category('Speaking')
+        ];
         this.futurePlans = {};
     }
 
@@ -235,6 +239,14 @@ class Classroom {
     }
 }
 
+class Category {
+    constructor(name) {
+        this.id = `cat_${new Date().getTime()}_${Math.random()}`;
+        this.name = name;
+        this.isDeleted = false;
+    }
+}
+
 // =================================================================
 //  بخش ۲: منطق اصلی برنامه، مدیریت وضعیت و رویدادها
 // =================================================================
@@ -325,7 +337,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return sessionInstance;
             });
             
-            classroomInstance.categories = plainClass.categories;
+            classroomInstance.categories = plainClass.categories.map(plainCategory => {
+                const categoryInstance = new Category(plainCategory.name);
+                categoryInstance.id = plainCategory.id;
+                categoryInstance.isDeleted = plainCategory.isDeleted;
+                return categoryInstance;
+            });
             classroomInstance.futurePlans = plainClass.futurePlans;
 
             classrooms[className] = classroomInstance;
@@ -510,11 +527,13 @@ document.addEventListener('DOMContentLoaded', () => {
         categoryListUl.innerHTML = '';
         if (!currentClassroom) return;
 
-        currentClassroom.categories.forEach((category, index) => {
+        const activeCategories = currentClassroom.categories.filter(cat => !cat.isDeleted);
+
+        activeCategories.forEach(category => {
             const li = document.createElement('li');
             
             const nameSpan = document.createElement('span');
-            nameSpan.textContent = category;
+            nameSpan.textContent = category.name;
             nameSpan.style.flexGrow = '1';
 
             const deleteBtn = document.createElement('button');
@@ -523,9 +542,14 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteBtn.style.color = 'var(--color-warning)';
 
             deleteBtn.addEventListener('click', () => {
-                showUndoToast(`دسته‌بندی «${category}» حذف شد.`);
-
-                currentClassroom.categories.splice(index, 1);
+                showUndoToast(`دسته‌بندی «${category.name}» حذف شد.`);
+                
+                // در اینجا فعلا از متد حذف نرم استفاده نمی‌کنیم و منتظر پیاده‌سازی سطل آشغال می‌مانیم
+                // اما برای سازگاری با آینده، می‌توانستیم بنویسیم: category.isDeleted = true;
+                const categoryIndex = currentClassroom.categories.findIndex(c => c.id === category.id);
+                if (categoryIndex > -1) {
+                    currentClassroom.categories.splice(categoryIndex, 1);
+                }
                 
                 saveData();
                 renderSettingsCategories();
@@ -618,15 +642,17 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const isDuplicate = currentClassroom.categories.some(cat => cat.toLowerCase() === categoryName.toLowerCase());
+        const isDuplicate = currentClassroom.categories.some(cat => !cat.isDeleted && cat.name.toLowerCase() === categoryName.toLowerCase());
         if (isDuplicate) {
             alert("این دسته‌بندی از قبل وجود دارد.");
             return;
         }
 
-        currentClassroom.categories.push(categoryName);
+        const newCategory = new Category(categoryName);
+        currentClassroom.categories.push(newCategory);
+        
         saveData();
-        renderSettingsCategories(); // بازسازی لیست برای نمایش آیتم جدید
+        renderSettingsCategories();
         newCategoryNameInput.value = '';
     });
 
