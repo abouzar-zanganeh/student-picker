@@ -291,6 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelImportBtn = document.getElementById('cancel-import-btn');
     const newCategoryNameInput = document.getElementById('new-category-name');
     const addCategoryBtn = document.getElementById('add-category-btn');
+    const appHeader = document.querySelector('.app-header');
     
     // --- توابع اصلی داده‌ها (Data Functions) ---
     function saveData() {
@@ -562,12 +563,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showPage(pageId) {
+        // ابتدا تمام صفحات را پنهان می‌کنیم
         document.querySelectorAll('.page').forEach(page => {
             page.style.display = 'none';
         });
+
+        // سپس صفحه مورد نظر را نمایش می‌دهیم
         const pageToShow = document.getElementById(pageId);
         if (pageToShow) {
             pageToShow.style.display = 'block';
+        }
+
+        // منطق جدید: نمایش یا پنهان کردن هدر اصلی
+        if (pageId === 'class-management-page') {
+            appHeader.style.display = 'block';
+        } else {
+            appHeader.style.display = 'none';
         }
     }
 
