@@ -299,6 +299,13 @@ button:hover {
     display: none;
 }
 
+#class-list li:hover,
+#session-list li:hover {
+    background-color: #e9ecef;
+    cursor: pointer;
+}
+
+/* ===== استایل‌های مربوط به پیام‌ها (Toast) ===== */
 .toast {
     position: fixed;
     bottom: 20px;
@@ -316,6 +323,10 @@ button:hover {
     transition: transform 0.4s ease;
 }
 
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
 .toast button {
     background: none;
     border: none;
@@ -327,12 +338,4 @@ button:hover {
     margin: 0;
 }
 
-.toast.show {
-    transform: translateX(-50%) translateY(0);
-}
-
-#class-list li:hover,
-#session-list li:hover {
-    background-color: #e9ecef;
-    cursor: pointer;
-}
+/* ============================================== */

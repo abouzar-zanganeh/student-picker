@@ -403,6 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showNotification(message, duration = 3000) {
         const notificationToast = document.getElementById('notification-toast');
+        if (!notificationToast) return;
         notificationToast.textContent = message;
         notificationToast.classList.add('show');
 
