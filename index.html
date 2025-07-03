@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>دستیار هوشمند معلم</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
     <header class="app-header">
@@ -49,7 +51,8 @@
                 <button id="add-student-btn">افزودن</button>
             </div>
             <div>
-                <textarea id="paste-area" placeholder="لیست اسامی کپی شده را اینجا Paste کنید... (هر اسم در یک خط)"></textarea>
+                <textarea id="paste-area"
+                    placeholder="لیست اسامی کپی شده را اینجا Paste کنید... (هر اسم در یک خط)"></textarea>
                 <button id="process-paste-btn" class="btn-secondary">بررسی لیست</button>
             </div>
             <div class="divider-text">یا</div>
@@ -58,7 +61,7 @@
                 <button id="import-csv-btn" class="btn-secondary">ورود لیست از فایل (CSV)</button>
             </div>
         </div>
-        
+
         <h3 class="section-title">مدیریت دسته‌بندی‌های پرسش</h3>
         <div class="input-group">
             <input type="text" id="new-category-name" placeholder="نام دسته‌بندی جدید (مثلا: Grammar)">
@@ -87,7 +90,7 @@
     <main id="column-mapping-page" class="page">
         <h2>انتخاب ستون نام دانش‌آموزان</h2>
         <p>فایل شما با موفقیت خوانده شد. لطفاً از لیست زیر، ستونی که حاوی نام کامل دانش‌آموزان است را انتخاب کنید.</p>
-        
+
         <div class="input-group">
             <select id="column-select-dropdown" style="width: 100%; padding: 10px;"></select>
         </div>
@@ -97,7 +100,7 @@
             <button id="cancel-import-btn" class="btn-secondary" style="width: auto;">لغو عملیات</button>
         </div>
     </main>
-    
+
     <main id="csv-preview-page" class="page">
         <h2>پیش‌نمایش لیست ورودی</h2>
         <p>لطفاً لیست زیر را بررسی کرده و موارد مورد نظر برای افزودن را تایید کنید.</p>
@@ -113,6 +116,9 @@
         <button id="undo-btn">واگرد</button>
     </div>
 
+    <div id="notification-toast" class="notification-toast"></div>
+
     <script src="script.js"></script>
 </body>
+
 </html>

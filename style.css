@@ -29,7 +29,8 @@ body {
     background-color: var(--color-background);
 }
 
-h1, h2 {
+h1,
+h2 {
     color: var(--color-text-dark);
 }
 
@@ -39,7 +40,7 @@ h3 {
     margin-top: 30px;
 }
 
-input[type="text"], 
+input[type="text"],
 textarea {
     font-family: var(--font-family-main);
     padding: 10px;
@@ -60,12 +61,12 @@ ul {
     padding: 0;
 }
 
-.page { 
-    display: none; 
+.page {
+    display: none;
 }
 
-.page.active { 
-    display: block; 
+.page.active {
+    display: block;
 }
 
 .app-header {
@@ -338,6 +339,32 @@ button:hover {
 .undo-toast.show {
     transform: translateX(-50%) translateY(0);
 }
+
+#class-list li:hover,
+#session-list li:hover {
+    background-color: #e9ecef;
+    cursor: pointer;
+}
+
+.notification-toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    background-color: var(--color-toast-bg);
+    color: var(--color-text-light);
+    padding: 14px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+.notification-toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
 #class-list li:hover,
 #session-list li:hover {
     background-color: #e9ecef;

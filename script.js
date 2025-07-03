@@ -261,6 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let undoTimeout = null;   // برای مدیریت زمان‌بندی پیام واگرد
     let namesToImport = []; // آرایه‌ای برای نگهداری موقت اسامی جهت ورود
     let importedFileContent = null; // برای نگهداری محتوای کامل فایل CSV
+    let notificationTimeout = null;
+
 
     // --- عناصر HTML ---
     const classManagementPage = document.getElementById('class-management-page');
@@ -395,6 +397,19 @@ document.addEventListener('DOMContentLoaded', () => {
             clearTimeout(undoTimeout);
             previousState = null;
         }
+    }
+
+    function showNotification(message, duration = 3000) {
+        const notificationToast = document.getElementById('notification-toast');
+        if (!notificationToast) return;
+
+        notificationToast.textContent = message;
+        notificationToast.classList.add('show');
+
+        clearTimeout(notificationTimeout);
+        notificationTimeout = setTimeout(() => {
+            notificationToast.classList.remove('show');
+        }, duration);
     }
 
     // --- توابع رندر (Render Functions) ---
