@@ -54,7 +54,7 @@ class Session {
     markAsMakeup() {
         this.isMakeup = true;
     }
-    
+
     initializeStudentRecord(studentId) {
         if (!this.studentRecords[studentId]) {
             this.studentRecords[studentId] = {
@@ -78,7 +78,7 @@ class Session {
     addScore(studentInstance, skill, score) {
         studentInstance.logs.scores[skill].push(score);
     }
-    
+
     selectNextWinner(category, studentList) {
         const presentStudents = studentList.filter(student => {
             this.initializeStudentRecord(student.identity.studentId);
@@ -92,7 +92,7 @@ class Session {
         }
 
         const winner = presentStudents[Math.floor(Math.random() * presentStudents.length)];
-        
+
         const studentId = winner.identity.studentId;
         this.initializeStudentRecord(studentId);
         if (!this.studentRecords[studentId].selections[category]) {
@@ -100,7 +100,7 @@ class Session {
         }
         this.studentRecords[studentId].selections[category]++;
         winner.counters.totalSelections++;
-        
+
         this.lastWinnerByCategory[category] = studentId;
 
         return winner;
@@ -122,8 +122,8 @@ class Classroom {
         this.students = [];
         this.sessions = [];
         this.categories = [
-            new Category('Vocabulary'), 
-            new Category('Grammar'), 
+            new Category('Vocabulary'),
+            new Category('Grammar'),
             new Category('Speaking')
         ];
         this.futurePlans = {};
@@ -163,7 +163,7 @@ class Classroom {
             session.markAsMakeup();
         }
     }
-    
+
     planForSession(sessionNumber, planText) {
         this.futurePlans[sessionNumber] = planText;
     }
@@ -200,7 +200,7 @@ class Classroom {
         for (const skill of requiredSkills) {
             if (!scores[skill] || scores[skill].length === 0) {
                 console.log(`محاسبه نمره برای دانش‌آموز «${student.identity.name}» انجام نشد. دلیل: نمره‌ای برای مهارت «${skill}» ثبت نشده است.`);
-                return null; 
+                return null;
             }
         }
         const getSkillAverage = (skill) => {
@@ -292,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const newCategoryNameInput = document.getElementById('new-category-name');
     const addCategoryBtn = document.getElementById('add-category-btn');
     const appHeader = document.querySelector('.app-header');
-    
+
     // --- توابع اصلی داده‌ها (Data Functions) ---
     function saveData() {
         localStorage.setItem('teacherAssistantData_v2', JSON.stringify(classrooms));
@@ -306,16 +306,16 @@ document.addEventListener('DOMContentLoaded', () => {
             renderClassList();
         }
     }
-    
+
     // تابع کلیدی برای تبدیل داده‌های ساده به نمونه‌های کلاس
     function rehydrateData(plainClassrooms) {
         classrooms = {};
         for (const className in plainClassrooms) {
             const plainClass = plainClassrooms[className];
-            
+
             // ساخت نمونه Classroom
             const classroomInstance = new Classroom(plainClass.info);
-            
+
             // بازسازی دانش‌آموزان
             classroomInstance.students = plainClass.students.map(plainStudent => {
                 const studentInstance = new Student(plainStudent.identity);
@@ -325,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 studentInstance.finalClassActivityScore = plainStudent.finalClassActivityScore;
                 return studentInstance;
             });
-            
+
             // بازسازی جلسات
             classroomInstance.sessions = plainClass.sessions.map(plainSession => {
                 const sessionInstance = new Session(plainSession.sessionNumber);
@@ -337,7 +337,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 sessionInstance.lastWinnerByCategory = plainSession.lastWinnerByCategory;
                 return sessionInstance;
             });
-            
+
             classroomInstance.categories = plainClass.categories.map(plainCategory => {
                 const categoryInstance = new Category(plainCategory.name);
                 categoryInstance.id = plainCategory.id;
@@ -352,16 +352,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function showUndoToast(message) {
         clearTimeout(undoTimeout);
-        
+
         // منطق کلیدی برای واگرد دسته‌ای:
         // فقط زمانی وضعیت را ذخیره کن که هیچ عملیات واگردی در جریان نباشد.
         if (!previousState) {
             previousState = JSON.stringify(classrooms);
         }
-        
+
         undoMessage.textContent = message;
         undoToast.classList.add('show');
-        
+
         // با هر حذف جدید، تایمر واگرد را ریست می‌کنیم تا فرصت کافی وجود داشته باشد.
         undoTimeout = setTimeout(() => {
             undoToast.classList.remove('show');
@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleUndo() {
         if (previousState) {
             const currentClassName = currentClassroom ? currentClassroom.info.name : null;
-            
+
             const plainData = JSON.parse(previousState);
             rehydrateData(plainData);
 
@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 renderClassList();
             }
-            
+
             undoToast.classList.remove('show');
             clearTimeout(undoTimeout);
             previousState = null;
@@ -398,6 +398,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- توابع رندر (Render Functions) ---
+
+    function renderStudentPage() {
+        const categorySelectionContainer = document.getElementById('category-selection-container');
+        const studentListUl = document.getElementById('student-list');
+        const classNameHeader = document.getElementById('class-name-header');
+
+        if (!currentClassroom || !selectedSession) {
+            showPage('class-management-page');
+            return;
+        }
+
+        classNameHeader.textContent = `جلسه ${selectedSession.sessionNumber} / کلاس: ${currentClassroom.info.name}`;
+        categorySelectionContainer.innerHTML = '';
+        studentListUl.innerHTML = '';
+
+        const activeCategories = currentClassroom.categories.filter(cat => !cat.isDeleted);
+        activeCategories.forEach(category => {
+            const categoryBtn = document.createElement('button');
+            categoryBtn.className = 'btn-secondary category-btn';
+            categoryBtn.textContent = category.name;
+            categoryBtn.dataset.categoryId = category.id;
+            categorySelectionContainer.appendChild(categoryBtn);
+        });
+
+        showPage('student-page');
+    }
+
     function renderColumnSelector(headers) {
         columnSelectDropdown.innerHTML = '';
         headers.forEach((header, index) => {
@@ -430,39 +457,39 @@ document.addEventListener('DOMContentLoaded', () => {
         classListUl.innerHTML = '';
         for (const name in classrooms) {
             const classroom = classrooms[name];
-            
+
             const li = document.createElement('li');
-            
+
             const nameContainer = document.createElement('span');
             nameContainer.textContent = name;
             nameContainer.style.flexGrow = '1';
-            
+
             nameContainer.addEventListener('click', () => {
                 currentClassroom = classroom;
-                selectedSession = null; 
+                selectedSession = null;
                 liveSession = currentClassroom.liveSession;
 
                 renderSessions();
                 updateSessionPageHeader();
                 showPage('session-page');
             });
-            
+
             const buttonsContainer = document.createElement('div');
-            
+
             const settingsBtn = document.createElement('button');
             settingsBtn.className = 'btn-icon';
             settingsBtn.innerHTML = '⚙️';
             settingsBtn.addEventListener('click', (event) => {
                 event.stopPropagation();
                 currentClassroom = classroom;
-                
+
                 // به‌روزرسانی هدر صفحه تنظیمات
                 settingsClassNameHeader.textContent = `تنظیمات کلاس: ${currentClassroom.info.name}`;
-                
+
                 // رندر کردن محتوای صفحه تنظیمات
                 renderSettingsStudentList();
                 renderSettingsCategories();
-                
+
                 // نمایش صفحه تنظیمات
                 showPage('settings-page');
             });
@@ -471,18 +498,18 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteBtn.className = 'btn-icon';
             deleteBtn.innerHTML = '🗑️';
             deleteBtn.style.color = 'var(--color-warning)';
-            
+
             deleteBtn.addEventListener('click', (event) => {
                 event.stopPropagation();
-                
+
                 showUndoToast(`کلاس «${name}» حذف شد.`);
-                
+
                 delete classrooms[name];
-                
+
                 saveData();
                 renderClassList();
             });
-            
+
             buttonsContainer.appendChild(settingsBtn);
             buttonsContainer.appendChild(deleteBtn);
             li.appendChild(nameContainer);
@@ -497,11 +524,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentClassroom.students.forEach(student => {
             const li = document.createElement('li');
-            
+
             const nameSpan = document.createElement('span');
             nameSpan.textContent = student.identity.name;
             nameSpan.style.flexGrow = '1';
-            
+
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'btn-icon';
             deleteBtn.innerHTML = '🗑️';
@@ -509,15 +536,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             deleteBtn.addEventListener('click', (event) => {
                 event.stopPropagation();
-                
+
                 showUndoToast(`دانش‌آموز «${student.identity.name}» حذف شد.`);
-                
+
                 currentClassroom.removeStudent(student.identity.studentId);
-                
+
                 saveData();
                 renderSettingsStudentList();
             });
-            
+
             li.appendChild(nameSpan);
             li.appendChild(deleteBtn);
             settingsStudentListUl.appendChild(li);
@@ -532,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         activeCategories.forEach(category => {
             const li = document.createElement('li');
-            
+
             const nameSpan = document.createElement('span');
             nameSpan.textContent = category.name;
             nameSpan.style.flexGrow = '1';
@@ -544,12 +571,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             deleteBtn.addEventListener('click', () => {
                 showUndoToast(`دسته‌بندی «${category.name}» حذف شد.`);
-                
+
                 const categoryIndex = currentClassroom.categories.findIndex(c => c.id === category.id);
                 if (categoryIndex > -1) {
                     currentClassroom.categories.splice(categoryIndex, 1);
                 }
-                
+
                 saveData();
                 renderSettingsCategories();
             });
@@ -583,7 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderSessions() {
         const sessionListUl = document.getElementById('session-list');
         const sessionClassNameHeader = document.getElementById('session-class-name-header');
-        
+
         if (!currentClassroom) return;
 
         sessionClassNameHeader.textContent = `کلاس: ${currentClassroom.info.name}`;
@@ -598,14 +625,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         reversedSessions.forEach(session => {
             const li = document.createElement('li');
-            
+
             const sessionDate = new Date(session.startTime).toLocaleDateString('fa-IR');
             const sessionText = document.createElement('span');
             sessionText.textContent = `جلسه ${session.sessionNumber} - تاریخ: ${sessionDate}`;
             li.appendChild(sessionText);
 
             const badgesContainer = document.createElement('div');
-            
+
             if (session.isFinished) {
                 const finishedBadge = document.createElement('span');
                 finishedBadge.className = 'badge badge-secondary';
@@ -622,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             li.addEventListener('click', () => {
                 selectedSession = session;
-                showPage('student-page');
+                renderStudentPage();
             });
             sessionListUl.appendChild(li);
         });
@@ -654,7 +681,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const newCategory = new Category(categoryName);
         currentClassroom.categories.push(newCategory);
-        
+
         saveData();
         renderSettingsCategories();
         newCategoryNameInput.value = '';
@@ -665,7 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
             addCategoryBtn.click();
         }
     });
-    
+
     confirmColumnBtn.addEventListener('click', () => {
         if (!importedFileContent) {
             alert("خطایی رخ داده است. لطفاً فایل را دوباره انتخاب کنید.");
@@ -675,18 +702,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // گرفتن ایندکس ستونی که کاربر انتخاب کرده است
         const selectedColumnIndex = parseInt(columnSelectDropdown.value, 10);
-        
+
         // پردازش محتوای فایل برای استخراج اسامی از ستون انتخاب شده
         const lines = importedFileContent.split('\n');
         const dataRows = lines.slice(1); // نادیده گرفتن خط اول (هدرها)
 
         namesToImport = dataRows.map(row => {
-                const columns = row.split(',');
-                // استخراج داده از ستون مورد نظر و حذف فضاهای خالی احتمالی
-                return columns[selectedColumnIndex]?.trim();
-            })
+            const columns = row.split(',');
+            // استخراج داده از ستون مورد نظر و حذف فضاهای خالی احتمالی
+            return columns[selectedColumnIndex]?.trim();
+        })
             .filter(name => name && name.length > 0); // حذف ردیف‌های خالی یا نامعتبر
-        
+
         if (namesToImport.length > 0) {
             renderImportPreview();
             showPage('csv-preview-page');
@@ -722,9 +749,9 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         reader.readAsText(file);
-        
+
         // ورودی را ریست می‌کنیم تا در صورت انتخاب مجدد همان فایل، رویداد اجرا شود
-        event.target.value = null; 
+        event.target.value = null;
     });
 
     cancelImportBtn.addEventListener('click', () => {
@@ -735,13 +762,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     csvConfirmBtn.addEventListener('click', () => {
         const selectedCheckboxes = csvPreviewList.querySelectorAll('input[type="checkbox"]:checked');
-        
+
         selectedCheckboxes.forEach(checkbox => {
             const name = checkbox.dataset.name;
-            
+
             // بررسی اینکه آیا دانش‌آموز با این نام از قبل وجود دارد یا نه
             const isDuplicate = currentClassroom.students.some(student => student.identity.name.toLowerCase() === name.toLowerCase());
-            
+
             if (!isDuplicate) {
                 const newStudent = new Student({ name: name });
                 currentClassroom.addStudent(newStudent);
@@ -771,8 +798,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // تبدیل متن به آرایه‌ای از اسامی، حذف خطوط خالی و فضاهای اضافی
         const names = text.split('\n')
-                           .map(name => name.trim())
-                           .filter(name => name.length > 0);
+            .map(name => name.trim())
+            .filter(name => name.length > 0);
 
         if (names.length > 0) {
             namesToImport = names;
@@ -808,7 +835,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentClassroom.addStudent(newStudent);
         saveData();
         renderSettingsStudentList();
-        
+
         newStudentNameInput.value = '';
         newStudentNameInput.focus();
     });
@@ -817,19 +844,15 @@ document.addEventListener('DOMContentLoaded', () => {
         showPage('session-page');
     });
     document.getElementById('new-session-btn').addEventListener('click', () => {
-    if (currentClassroom) {
-        const newSession = currentClassroom.startNewSession();
-        
-        liveSession = newSession; 
-        selectedSession = newSession;
-
-        saveData();
-        renderSessions(); 
-        
-        showPage('student-page');
-    }
-});
-    
+        if (currentClassroom) {
+            const newSession = currentClassroom.startNewSession();
+            liveSession = newSession;
+            selectedSession = newSession;
+            saveData();
+            renderSessions();
+            renderStudentPage();
+        }
+    });
     addClassBtn.addEventListener('click', () => {
         const className = newClassNameInput.value.trim();
         if (className && !classrooms[className]) {
