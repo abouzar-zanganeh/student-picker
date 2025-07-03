@@ -623,7 +623,6 @@ document.addEventListener('DOMContentLoaded', () => {
             li.addEventListener('click', () => {
                 selectedSession = session;
                 showPage('student-page');
-                console.log("وارد جلسه منتخب شدید:", selectedSession);
             });
             sessionListUl.appendChild(li);
         });
@@ -823,9 +822,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         liveSession = newSession; 
         selectedSession = newSession;
-        
-        console.log(`--- DEBUG: Session ${newSession.sessionNumber} created. Total sessions now: ${currentClassroom.sessions.length}`);
-
 
         saveData();
         renderSessions(); 
