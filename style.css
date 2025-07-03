@@ -303,6 +303,7 @@ button:hover {
     position: fixed;
     bottom: 20px;
     left: 50%;
+    transform: translateX(-50%) translateY(150%);
     background-color: var(--color-toast-bg);
     color: var(--color-text-light);
     padding: 14px 20px;
@@ -312,6 +313,7 @@ button:hover {
     gap: 20px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     z-index: 1000;
+    transition: transform 0.4s ease;
 }
 
 .toast button {
@@ -323,17 +325,6 @@ button:hover {
     cursor: pointer;
     padding: 0;
     margin: 0;
-}
-
-.accordion-toggle .arrow,
-.accordion-content,
-.toast,
-.status-button {
-    transition: all 0.3s ease;
-}
-
-.toast {
-    transform: translateX(-50%) translateY(150%);
 }
 
 .toast.show {
