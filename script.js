@@ -82,7 +82,7 @@ class Session {
         studentInstance.logs.scores[skill].push(score);
     }
 
-    selectNextWinner(category, studentList) {
+    selectNextWinner(categoryName, studentList) {
         const presentStudents = studentList.filter(student => {
             this.initializeStudentRecord(student.identity.studentId);
             const record = this.studentRecords[student.identity.studentId];
@@ -94,17 +94,60 @@ class Session {
             return null;
         }
 
-        const winner = presentStudents[Math.floor(Math.random() * presentStudents.length)];
-
-        const studentId = winner.identity.studentId;
-        this.initializeStudentRecord(studentId);
-        if (!this.studentRecords[studentId].selections[category]) {
-            this.studentRecords[studentId].selections[category] = 0;
+        const lastWinnerId = this.lastWinnerByCategory[categoryName];
+        let candidates = presentStudents.filter(s => s.identity.studentId !== lastWinnerId);
+        if (candidates.length === 0) {
+            candidates = presentStudents;
         }
-        this.studentRecords[studentId].selections[category]++;
-        winner.counters.totalSelections++;
 
-        this.lastWinnerByCategory[category] = studentId;
+        const getSelectionCount = (student) => {
+            const record = this.studentRecords[student.identity.studentId];
+            return (record && record.selections && record.selections[categoryName]) || 0;
+        };
+
+        let minCount = Infinity;
+        let maxCount = 0;
+        candidates.forEach(s => {
+            const count = getSelectionCount(s);
+            if (count < minCount) minCount = count;
+            if (count > maxCount) maxCount = count;
+        });
+
+        let absoluteMaxCount = 0;
+        presentStudents.forEach(s => {
+            const count = getSelectionCount(s);
+            if (count > absoluteMaxCount) absoluteMaxCount = count;
+        });
+
+        let allowedGap = 1;
+        if (absoluteMaxCount >= 10) allowedGap = 2;
+        if (absoluteMaxCount >= 30) allowedGap = 3;
+
+        let selectionPool = [];
+        if (maxCount - minCount >= allowedGap && candidates.length > 1) {
+            selectionPool = candidates.filter(s => getSelectionCount(s) === minCount);
+        } else {
+            candidates.forEach(s => {
+                const count = getSelectionCount(s);
+                const weight = (maxCount - count) + 1;
+                for (let i = 0; i < weight; i++) {
+                    selectionPool.push(s);
+                }
+            });
+        }
+
+        if (selectionPool.length === 0) selectionPool = candidates;
+
+        const winner = selectionPool[Math.floor(Math.random() * selectionPool.length)];
+        const winnerId = winner.identity.studentId;
+
+        this.initializeStudentRecord(winnerId);
+        this.studentRecords[winnerId].selections[categoryName] = getSelectionCount(winner) + 1;
+
+        winner.counters.totalSelections++;
+        winner.categoryCounts[categoryName] = (winner.categoryCounts[categoryName] || 0) + 1;
+
+        this.lastWinnerByCategory[categoryName] = winnerId;
 
         return winner;
     }
@@ -422,6 +465,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- توابع رندر (Render Functions) ---
 
+    function renderStudentStatsList() {
+        const studentListUl = document.getElementById('student-list');
+        studentListUl.innerHTML = '';
+
+        if (!currentClassroom) return;
+
+        currentClassroom.students.forEach(student => {
+            const li = document.createElement('li');
+            li.textContent = `${student.identity.name} | انتخاب کل: ${student.counters.totalSelections} | غیبت: ${student.counters.outOfClass} | مشکل: ${student.counters.micIssues}`;
+            studentListUl.appendChild(li);
+        });
+    }
+
+    function displayWinner(winner, categoryName) {
+        const resultDiv = document.getElementById('selected-student-result');
+        resultDiv.innerHTML = '';
+
+        const getSelectionCount = (student) => {
+            const record = selectedSession.studentRecords[student.identity.studentId];
+            return (record && record.selections && record.selections[categoryName]) || 0;
+        };
+
+        const winnerNameEl = document.createElement('div');
+        winnerNameEl.innerHTML = `✨ <strong>${winner.identity.name}</strong> (انتخاب در این دسته: ${getSelectionCount(winner)}) ✨`;
+        resultDiv.appendChild(winnerNameEl);
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'status-button-container';
+
+        const createStatusButton = (text, counterKey) => {
+            const btn = document.createElement('button');
+            btn.textContent = text;
+            btn.className = 'status-button';
+            let isToggled = false;
+
+            btn.addEventListener('click', () => {
+                isToggled = !isToggled;
+                winner.counters[counterKey] += isToggled ? 1 : -1;
+                btn.classList.toggle('active', isToggled);
+                saveData();
+                renderStudentStatsList();
+            });
+            buttonContainer.appendChild(btn);
+        };
+
+        createStatusButton('غایب', 'outOfClass');
+        createStatusButton('مشکل فنی', 'micIssues');
+
+        resultDiv.appendChild(buttonContainer);
+    }
+
     function renderStudentPage() {
         const categorySelectionContainer = document.getElementById('category-selection-container');
         const studentListUl = document.getElementById('student-list');
@@ -456,6 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         showPage('student-page');
+        renderStudentStatsList();
     }
 
     function renderColumnSelector(headers) {
@@ -696,8 +791,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- شنودگرهای رویداد (Event Listeners) ---
 
     selectStudentBtn.addEventListener('click', () => {
-        console.log(`آماده برای انتخاب دانش‌آموز در دسته‌بندی: ${selectedCategory.name}`);
+        if (!currentClassroom || !selectedSession || !selectedCategory) return;
 
+        const winner = selectedSession.selectNextWinner(selectedCategory.name, currentClassroom.students);
+
+        if (winner) {
+            saveData();
+            displayWinner(winner, selectedCategory.name);
+            renderStudentStatsList();
+        } else {
+            showNotification("دانش‌آموز واجد شرایطی برای انتخاب یافت نشد.");
+        }
     });
 
     addCategoryBtn.addEventListener('click', () => {
