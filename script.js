@@ -892,15 +892,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     addClassBtn.addEventListener('click', () => {
         const className = newClassNameInput.value.trim();
-        if (className && !classrooms[className]) {
-            const newClassroom = new Classroom({ name: className });
-            classrooms[className] = newClassroom;
-            saveData();
-            renderClassList();
-            newClassNameInput.value = '';
-        } else if (classrooms[className]) {
-            alert('کلاسی با این نام از قبل وجود دارد.');
+        const selectedTypeRadio = document.querySelector('input[name="class-type"]:checked');
+
+        if (!className && !selectedTypeRadio) {
+            showNotification("لطفاً نام و نوع کلاس را مشخص کنید.");
+            return;
         }
+        if (!className) {
+            showNotification("لطفاً نام کلاس را وارد کنید.");
+            return;
+        }
+        if (!selectedTypeRadio) {
+            showNotification("لطفاً نوع کلاس را انتخاب کنید.");
+            return;
+        }
+
+        if (classrooms[className]) {
+            showNotification("کلاسی با این نام از قبل وجود دارد.");
+            return;
+        }
+
+        const classType = selectedTypeRadio.value;
+        const newClassroom = new Classroom({ name: className, type: classType });
+
+        classrooms[className] = newClassroom;
+        saveData();
+        renderClassList();
+
+        newClassNameInput.value = '';
+        selectedTypeRadio.checked = false;
     });
 
     newClassNameInput.addEventListener('keyup', (event) => {
