@@ -899,4 +899,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- بارگذاری اولیه ---
     loadData();
+    showNotification("این یک toast برای تست است.");
 });
