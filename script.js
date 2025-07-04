@@ -297,6 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const addCategoryBtn = document.getElementById('add-category-btn');
     const appHeader = document.querySelector('.app-header');
     const selectStudentBtn = document.getElementById('select-student-btn');
+    const selectStudentBtnWrapper = document.getElementById('select-student-btn-wrapper');
 
     // --- توابع اصلی داده‌ها (Data Functions) ---
     function saveData() {
@@ -431,7 +432,7 @@ document.addEventListener('DOMContentLoaded', () => {
         categorySelectionContainer.innerHTML = '';
         studentListUl.innerHTML = '';
         selectedCategory = null;
-        selectStudentBtn.disabled = true;
+        selectStudentBtnWrapper.classList.add('disabled-wrapper');
 
         const activeCategories = currentClassroom.categories.filter(cat => !cat.isDeleted);
         activeCategories.forEach(category => {
@@ -444,7 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
                 categoryBtn.classList.add('active');
                 selectedCategory = category;
-                selectStudentBtn.disabled = false;
+                selectStudentBtnWrapper.classList.remove('disabled-wrapper');
             });
 
             categorySelectionContainer.appendChild(categoryBtn);
@@ -693,11 +694,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- شنودگرهای رویداد (Event Listeners) ---
 
     selectStudentBtn.addEventListener('click', () => {
-        if (!selectedCategory) {
-            alert("لطفاً ابتدا یک دسته‌بندی را برای پرسش انتخاب کنید.");
-            return;
-        }
-
         console.log(`آماده برای انتخاب دانش‌آموز در دسته‌بندی: ${selectedCategory.name}`);
 
     });
