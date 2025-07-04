@@ -17,7 +17,19 @@
     <main id="class-management-page" class="page active">
         <h2>لیست کلاس‌ها</h2>
         <div class="input-group">
-            <input type="text" id="new-class-name" placeholder="نام کلاس جدید...">
+            <div class="composite-input">
+                <div class="class-type-selection">
+                    <label>
+                        <input type="radio" name="class-type" value="in-person">
+                        <span>حضوری</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="class-type" value="online">
+                        <span>آنلاین</span>
+                    </label>
+                </div>
+                <input type="text" id="new-class-name" placeholder="نام کلاس جدید...">
+            </div>
             <button id="add-class-btn">افزودن</button>
         </div>
         <ul id="class-list" class="list-container"></ul>

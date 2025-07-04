@@ -406,3 +406,57 @@ button:disabled:hover {
     margin-bottom: 5px;
     z-index: 10;
 }
+
+/* اصلاح چیدمان گروه ورودی برای ساخت کلاس جدید */
+.input-group {
+    display: flex;
+    align-items: center;
+}
+
+.composite-input {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-main);
+    background-color: #fff;
+    overflow: hidden;
+    flex-direction: row-reverse;
+}
+
+.composite-input:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.class-type-selection {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 0 15px;
+    border-right: 1px solid var(--color-border);
+}
+
+.class-type-selection label {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--color-text-muted);
+}
+
+#new-class-name {
+    padding: 10px;
+    border: none;
+    outline: none;
+    flex-grow: 1;
+    background: none;
+    width: 100%;
+}
+
+#add-class-btn {
+    margin-right: 10px;
+    flex-shrink: 0;
+}
