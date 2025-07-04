@@ -693,7 +693,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- شنودگرهای رویداد (Event Listeners) ---
 
     selectStudentBtn.addEventListener('click', () => {
-        console.log(selectedCategory);
         if (!selectedCategory) {
             alert("لطفاً ابتدا یک دسته‌بندی را برای پرسش انتخاب کنید.");
             return;
