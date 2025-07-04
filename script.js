@@ -243,9 +243,10 @@ class Classroom {
 }
 
 class Category {
-    constructor(name) {
+    constructor(name, description = '') {
         this.id = `cat_${new Date().getTime()}_${Math.random()}`;
         this.name = name;
+        this.description = description;
         this.isDeleted = false;
     }
 }
@@ -506,7 +507,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 showPage('session-page');
             });
 
+            const typeBadge = document.createElement('span');
+            typeBadge.className = `type-badge ${classroom.info.type}`;
+            typeBadge.textContent = classroom.info.type === 'online' ? 'آنلاین' : 'حضوری';
+
             const buttonsContainer = document.createElement('div');
+            buttonsContainer.className = 'list-item-buttons';
 
             const settingsBtn = document.createElement('button');
             settingsBtn.className = 'btn-icon';
@@ -514,15 +520,9 @@ document.addEventListener('DOMContentLoaded', () => {
             settingsBtn.addEventListener('click', (event) => {
                 event.stopPropagation();
                 currentClassroom = classroom;
-
-                // به‌روزرسانی هدر صفحه تنظیمات
                 settingsClassNameHeader.textContent = `تنظیمات کلاس: ${currentClassroom.info.name}`;
-
-                // رندر کردن محتوای صفحه تنظیمات
                 renderSettingsStudentList();
                 renderSettingsCategories();
-
-                // نمایش صفحه تنظیمات
                 showPage('settings-page');
             });
 
@@ -533,18 +533,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             deleteBtn.addEventListener('click', (event) => {
                 event.stopPropagation();
-
                 showUndoToast(`کلاس «${name}» حذف شد.`);
-
                 delete classrooms[name];
-
                 saveData();
                 renderClassList();
             });
 
             buttonsContainer.appendChild(settingsBtn);
             buttonsContainer.appendChild(deleteBtn);
+
             li.appendChild(nameContainer);
+            li.appendChild(typeBadge);
             li.appendChild(buttonsContainer);
             classListUl.appendChild(li);
         }

@@ -460,3 +460,26 @@ button:disabled:hover {
     margin-right: 10px;
     flex-shrink: 0;
 }
+
+/* استایل‌های مربوط به برچسب نوع کلاس */
+.type-badge {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-main);
+    color: var(--color-text-light);
+    margin: 0 10px;
+}
+
+.type-badge.online {
+    background-color: var(--color-primary);
+}
+
+.type-badge.in-person {
+    background-color: var(--color-warning);
+    color: var(--color-text-dark);
+}
+
+.list-item-buttons {
+    display: flex;
+}
