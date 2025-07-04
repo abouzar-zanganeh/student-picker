@@ -376,6 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 studentInstance.logs = plainStudent.logs;
                 studentInstance.profile = plainStudent.profile;
                 studentInstance.finalClassActivityScore = plainStudent.finalClassActivityScore;
+                studentInstance.categoryCounts = plainStudent.categoryCounts || {};
                 return studentInstance;
             });
 
