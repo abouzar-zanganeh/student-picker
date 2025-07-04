@@ -356,11 +356,13 @@ button:hover {
     padding: 14px 20px;
     border-radius: 8px;
     z-index: 1000;
-    transition: transform 0.4s ease;
+    transition: transform 0.4s ease, visibility 0.4s ease;
+    visibility: hidden;
 }
 
 .notification-toast.show {
     transform: translateX(-50%) translateY(0);
+    visibility: visible;
 }
 
 #class-list li:hover,

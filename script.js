@@ -262,6 +262,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let namesToImport = []; // آرایه‌ای برای نگهداری موقت اسامی جهت ورود
     let importedFileContent = null; // برای نگهداری محتوای کامل فایل CSV
     let notificationTimeout = null;
+    let selectedCategory = null;
+
 
 
     // --- عناصر HTML ---
@@ -294,6 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const newCategoryNameInput = document.getElementById('new-category-name');
     const addCategoryBtn = document.getElementById('add-category-btn');
     const appHeader = document.querySelector('.app-header');
+    const selectStudentBtn = document.getElementById('select-student-btn');
 
     // --- توابع اصلی داده‌ها (Data Functions) ---
     function saveData() {
@@ -427,6 +430,8 @@ document.addEventListener('DOMContentLoaded', () => {
         classNameHeader.textContent = `جلسه ${selectedSession.sessionNumber} / کلاس: ${currentClassroom.info.name}`;
         categorySelectionContainer.innerHTML = '';
         studentListUl.innerHTML = '';
+        selectedCategory = null;
+        selectStudentBtn.disabled = true;
 
         const activeCategories = currentClassroom.categories.filter(cat => !cat.isDeleted);
         activeCategories.forEach(category => {
@@ -434,6 +439,14 @@ document.addEventListener('DOMContentLoaded', () => {
             categoryBtn.className = 'btn-secondary category-btn';
             categoryBtn.textContent = category.name;
             categoryBtn.dataset.categoryId = category.id;
+
+            categoryBtn.addEventListener('click', () => {
+                document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+                categoryBtn.classList.add('active');
+                selectedCategory = category;
+                selectStudentBtn.disabled = false;
+            });
+
             categorySelectionContainer.appendChild(categoryBtn);
         });
 
@@ -679,6 +692,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- شنودگرهای رویداد (Event Listeners) ---
 
+    selectStudentBtn.addEventListener('click', () => {
+        console.log(selectedCategory);
+        if (!selectedCategory) {
+            alert("لطفاً ابتدا یک دسته‌بندی را برای پرسش انتخاب کنید.");
+            return;
+        }
+
+        console.log(`آماده برای انتخاب دانش‌آموز در دسته‌بندی: ${selectedCategory.name}`);
+
+    });
+
     addCategoryBtn.addEventListener('click', () => {
         if (!currentClassroom) return;
 
@@ -899,5 +923,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- بارگذاری اولیه ---
     loadData();
-    showNotification("این یک toast برای تست است.");
+
 });
