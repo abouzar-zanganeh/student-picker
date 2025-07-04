@@ -21,6 +21,9 @@ class Student {
             micIssues: 0,
             earlyLeaves: 0,
         };
+
+        this.categoryCounts = {}; // آبجکت جدید برای شمارش انتخاب‌ها بر اساس دسته‌بندی
+
         this.logs = {
             parentContacts: [],
             scores: { listening: [], speaking: [], reading: [], writing: [] },
