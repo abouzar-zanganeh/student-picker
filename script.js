@@ -15,10 +15,10 @@ class Student {
                 parent: identityInfo.parentContact || null,
             }
         };
-        this.counters = {
+        this.statusCounters = {
             totalSelections: 0,
-            outOfClass: 0,
-            micIssues: 0,
+            absences: 0,
+            otherIssues: 0,
             earlyLeaves: 0,
         };
 
@@ -144,7 +144,7 @@ class Session {
         this.initializeStudentRecord(winnerId);
         this.studentRecords[winnerId].selections[categoryName] = getSelectionCount(winner) + 1;
 
-        winner.counters.totalSelections++;
+        winner.statusCounters.totalSelections++;
         winner.categoryCounts[categoryName] = (winner.categoryCounts[categoryName] || 0) + 1;
 
         this.lastWinnerByCategory[categoryName] = winnerId;
@@ -372,7 +372,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // بازسازی دانش‌آموزان
             classroomInstance.students = plainClass.students.map(plainStudent => {
                 const studentInstance = new Student(plainStudent.identity);
-                studentInstance.counters = plainStudent.counters;
+                studentInstance.statusCounters = plainStudent.statusCounters;
                 studentInstance.logs = plainStudent.logs;
                 studentInstance.profile = plainStudent.profile;
                 studentInstance.finalClassActivityScore = plainStudent.finalClassActivityScore;
@@ -474,7 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentClassroom.students.forEach(student => {
             const li = document.createElement('li');
-            li.textContent = `${student.identity.name} | انتخاب کل: ${student.counters.totalSelections} | غیبت: ${student.counters.outOfClass} | مشکل: ${student.counters.micIssues}`;
+            li.textContent = `${student.identity.name} | انتخاب کل: ${student.statusCounters.totalSelections} | غیبت: ${student.statusCounters.absences} | مشکل: ${student.statusCounters.otherIssues}`;
             studentListUl.appendChild(li);
         });
     }
@@ -503,7 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             btn.addEventListener('click', () => {
                 isToggled = !isToggled;
-                winner.counters[counterKey] += isToggled ? 1 : -1;
+                winner.statusCounters[counterKey] += isToggled ? 1 : -1;
                 btn.classList.toggle('active', isToggled);
                 saveData();
                 renderStudentStatsList();
@@ -511,8 +511,8 @@ document.addEventListener('DOMContentLoaded', () => {
             buttonContainer.appendChild(btn);
         };
 
-        createStatusButton('غایب', 'outOfClass');
-        createStatusButton('مشکل فنی', 'micIssues');
+        createStatusButton('غایب', 'absences');
+        createStatusButton('مشکل فنی', 'otherIssues');
 
         resultDiv.appendChild(buttonContainer);
     }
