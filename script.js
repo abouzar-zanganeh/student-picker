@@ -83,21 +83,15 @@ class Session {
     }
 
     selectNextWinner(categoryName, studentList) {
-        const presentStudents = studentList.filter(student => {
-            this.initializeStudentRecord(student.identity.studentId);
-            const record = this.studentRecords[student.identity.studentId];
-            return record.attendance === 'present';
-        });
-
-        if (presentStudents.length === 0) {
-            console.log("هیچ دانش‌آموز حاضری برای انتخاب وجود ندارد.");
+        if (!studentList || studentList.length === 0) {
+            console.log("هیچ دانش‌آموزی در کلاس برای انتخاب وجود ندارد.");
             return null;
         }
 
         const lastWinnerId = this.lastWinnerByCategory[categoryName];
-        let candidates = presentStudents.filter(s => s.identity.studentId !== lastWinnerId);
+        let candidates = studentList.filter(s => s.identity.studentId !== lastWinnerId);
         if (candidates.length === 0) {
-            candidates = presentStudents;
+            candidates = studentList;
         }
 
         const getSelectionCount = (student) => {
@@ -114,7 +108,7 @@ class Session {
         });
 
         let absoluteMaxCount = 0;
-        presentStudents.forEach(s => {
+        studentList.forEach(s => {
             const count = getSelectionCount(s);
             if (count > absoluteMaxCount) absoluteMaxCount = count;
         });
@@ -479,9 +473,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function displayWinner(winner, categoryName) {
+    function displayWinner(winner, categoryName, isPresent) {
         const resultDiv = document.getElementById('selected-student-result');
         resultDiv.innerHTML = '';
+        resultDiv.classList.remove('absent');
 
         const getSelectionCount = (student) => {
             const record = selectedSession.studentRecords[student.identity.studentId];
@@ -490,31 +485,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const winnerNameEl = document.createElement('div');
         winnerNameEl.innerHTML = `✨ <strong>${winner.identity.name}</strong> (انتخاب در این دسته: ${getSelectionCount(winner)}) ✨`;
+
+        if (!isPresent) {
+            resultDiv.classList.add('absent');
+            winnerNameEl.classList.add('absent-student-name');
+        }
+
         resultDiv.appendChild(winnerNameEl);
 
-        const buttonContainer = document.createElement('div');
-        buttonContainer.className = 'status-button-container';
+        if (isPresent) {
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'status-button-container';
 
-        const createStatusButton = (text, counterKey) => {
-            const btn = document.createElement('button');
-            btn.textContent = text;
-            btn.className = 'status-button';
-            let isToggled = false;
+            const createStatusButton = (text, counterKey) => {
+                const btn = document.createElement('button');
+                btn.textContent = text;
+                btn.className = 'status-button';
+                let isToggled = false;
 
-            btn.addEventListener('click', () => {
-                isToggled = !isToggled;
-                winner.statusCounters[counterKey] += isToggled ? 1 : -1;
-                btn.classList.toggle('active', isToggled);
-                saveData();
-                renderStudentStatsList();
-            });
-            buttonContainer.appendChild(btn);
-        };
+                btn.addEventListener('click', () => {
+                    isToggled = !isToggled;
+                    winner.statusCounters[counterKey] += isToggled ? 1 : -1;
+                    btn.classList.toggle('active', isToggled);
+                    saveData();
+                    renderStudentStatsList();
+                });
+                buttonContainer.appendChild(btn);
+            };
 
-        createStatusButton('غایب', 'absences');
-        createStatusButton('مشکل فنی', 'otherIssues');
+            createStatusButton('غایب', 'absences');
+            createStatusButton('مشکل فنی', 'otherIssues');
 
-        resultDiv.appendChild(buttonContainer);
+            resultDiv.appendChild(buttonContainer);
+        }
     }
 
     function renderStudentPage() {
@@ -797,8 +800,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const winner = selectedSession.selectNextWinner(selectedCategory.name, currentClassroom.students);
 
         if (winner) {
+            const studentRecord = selectedSession.studentRecords[winner.identity.studentId];
+            const isPresent = studentRecord && studentRecord.attendance === 'present';
+
+            if (isPresent) {
+                // رفتار عادی برای دانش‌آموز حاضر
+                displayWinner(winner, selectedCategory.name, true);
+            } else {
+                // رفتار جدید برای دانش‌آموز غایب
+                winner.statusCounters.absences++;
+                displayWinner(winner, selectedCategory.name, false);
+            }
+
             saveData();
-            displayWinner(winner, selectedCategory.name);
             renderStudentStatsList();
         } else {
             showNotification("دانش‌آموز واجد شرایطی برای انتخاب یافت نشد.");
@@ -1045,5 +1059,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- بارگذاری اولیه ---
     loadData();
+
+    // --- تابع کمکی برای دیباگ از طریق کنسول ---
+    window.setStudentAbsent = function (className, studentId, sessionIndex = 0) {
+        if (!classrooms[className]) {
+            console.error(`❌ کلاس با نام "${className}" پیدا نشد.`);
+            return;
+        }
+        const sessionToUpdate = classrooms[className].sessions[sessionIndex];
+        if (!sessionToUpdate) {
+            console.error(`❌ جلسه با ایندکس ${sessionIndex} در کلاس "${className}" پیدا نشد.`);
+            return;
+        }
+
+        sessionToUpdate.setAttendance(studentId, 'absent');
+        saveData();
+        console.log(`✅ وضعیت حضور دانش‌آموز با آیدی ${studentId} در جلسه ${sessionIndex} از کلاس ${className} به 'absent' تغییر کرد.`);
+    };
 
 });
