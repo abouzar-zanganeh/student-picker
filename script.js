@@ -1060,21 +1060,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- بارگذاری اولیه ---
     loadData();
 
-    // --- تابع کمکی برای دیباگ از طریق کنسول ---
-    window.setStudentAbsent = function (className, studentId, sessionIndex = 0) {
-        if (!classrooms[className]) {
-            console.error(`❌ کلاس با نام "${className}" پیدا نشد.`);
-            return;
-        }
-        const sessionToUpdate = classrooms[className].sessions[sessionIndex];
-        if (!sessionToUpdate) {
-            console.error(`❌ جلسه با ایندکس ${sessionIndex} در کلاس "${className}" پیدا نشد.`);
-            return;
-        }
-
-        sessionToUpdate.setAttendance(studentId, 'absent');
-        saveData();
-        console.log(`✅ وضعیت حضور دانش‌آموز با آیدی ${studentId} در جلسه ${sessionIndex} از کلاس ${className} به 'absent' تغییر کرد.`);
-    };
 
 });
