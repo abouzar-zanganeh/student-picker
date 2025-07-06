@@ -468,7 +468,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         currentClassroom.students.forEach(student => {
             const li = document.createElement('li');
-            li.textContent = `${student.identity.name} | انتخاب کل: ${student.statusCounters.totalSelections} | غیبت: ${student.statusCounters.absences} | مشکل: ${student.statusCounters.otherIssues}`;
+            li.className = 'student-list-item';
+
+            // بخش اصلی آمار که همیشه دیده می‌شود
+            const totalStatsDiv = document.createElement('div');
+            totalStatsDiv.className = 'total-stats';
+            totalStatsDiv.innerHTML = `
+            <span>${student.identity.name}</span>
+            <span>کل: ${student.statusCounters.totalSelections} | غیبت: ${student.statusCounters.absences}</span>
+        `;
+
+            // بخش جزئیات دسته‌بندی‌ها که در ابتدا پنهان است
+            const categoryStatsDiv = document.createElement('div');
+            categoryStatsDiv.className = 'category-stats';
+
+            if (Object.keys(student.categoryCounts).length > 0) {
+                for (const categoryName in student.categoryCounts) {
+                    const count = student.categoryCounts[categoryName];
+                    const statP = document.createElement('p');
+                    statP.textContent = `${categoryName}: ${count}`;
+                    categoryStatsDiv.appendChild(statP);
+                }
+            } else {
+                categoryStatsDiv.textContent = 'هنوز در هیچ دسته‌بندی انتخاب نشده است.';
+            }
+
+            li.appendChild(totalStatsDiv);
+            li.appendChild(categoryStatsDiv);
+
+            // افزودن رویداد کلیک برای باز و بسته کردن جزئیات
+            totalStatsDiv.addEventListener('click', () => {
+                categoryStatsDiv.classList.toggle('visible');
+            });
+
             studentListUl.appendChild(li);
         });
     }
@@ -478,22 +510,20 @@ document.addEventListener('DOMContentLoaded', () => {
         resultDiv.innerHTML = '';
         resultDiv.classList.remove('absent');
 
-        const getSelectionCount = (student) => {
-            const record = selectedSession.studentRecords[student.identity.studentId];
-            return (record && record.selections && record.selections[categoryName]) || 0;
-        };
-
         const winnerNameEl = document.createElement('div');
-        winnerNameEl.innerHTML = `✨ <strong>${winner.identity.name}</strong> (انتخاب در این دسته: ${getSelectionCount(winner)}) ✨`;
+        winnerNameEl.innerHTML = `✨ <strong>${winner.identity.name}</strong> ✨`;
 
         if (!isPresent) {
             resultDiv.classList.add('absent');
             winnerNameEl.classList.add('absent-student-name');
-        }
-
-        resultDiv.appendChild(winnerNameEl);
-
-        if (isPresent) {
+            const absentMessage = document.createElement('div');
+            absentMessage.style.fontSize = '14px';
+            absentMessage.style.marginTop = '10px';
+            absentMessage.textContent = 'غیبت برای این فرصت ثبت شد.';
+            resultDiv.appendChild(winnerNameEl);
+            resultDiv.appendChild(absentMessage);
+        } else {
+            resultDiv.appendChild(winnerNameEl);
             const buttonContainer = document.createElement('div');
             buttonContainer.className = 'status-button-container';
 

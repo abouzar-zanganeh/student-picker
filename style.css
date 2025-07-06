@@ -595,3 +595,40 @@ button:disabled:hover {
 .info-column>h3:first-child {
     margin-top: 0;
 }
+
+/* استایل‌های مربوط به لیست آمار تعاملی دانش‌آموزان */
+.student-list-item {
+    flex-direction: column;
+    align-items: stretch;
+    cursor: pointer;
+}
+
+.total-stats {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.category-stats {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+    padding: 0 15px;
+    margin-top: 0;
+    border-top: 1px solid transparent;
+    text-align: left;
+}
+
+.category-stats.visible {
+    max-height: 200px;
+    /* یک ارتفاع حداکثری برای نمایش محتوا */
+    margin-top: 10px;
+    padding: 10px 15px;
+    border-top-color: var(--color-border);
+}
+
+.category-stats p {
+    margin: 0.5em 0;
+    font-size: 0.9em;
+    color: var(--color-text-muted);
+}
