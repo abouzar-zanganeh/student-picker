@@ -39,15 +39,28 @@
         <h2 id="class-name-header"></h2>
         <button id="back-to-sessions-btn">➡️ بازگشت به لیست جلسات</button>
         <hr class="separator">
-        <h3>🎲 انتخابگر هوشمند</h3>
-        <div id="category-selection-container" class="category-container">
+
+        <div class="dashboard-container">
+            <div class="action-column">
+                <h3>🎲 انتخابگر هوشمند</h3>
+
+                <div id="category-selection-container" class="category-pills">
+                </div>
+
+                <div id="select-student-btn-wrapper">
+                    <button id="select-student-btn" class="btn-success btn-large">انتخاب نفر بعدی!</button>
+                </div>
+
+                <div id="selected-student-result" class="result-display">
+                </div>
+            </div>
+
+            <div class="info-column">
+                <h3 class="section-title">آمار عملکرد دانش‌آموزان</h3>
+                <ul id="student-list" class="list-container">
+                </ul>
+            </div>
         </div>
-        <div id="select-student-btn-wrapper">
-            <button id="select-student-btn" class="btn-success btn-large">انتخاب نفر بعدی!</button>
-        </div>
-        <div id="selected-student-result" class="result-display"></div>
-        <h3 class="section-title">آمار عملکرد دانش‌آموزان</h3>
-        <ul id="student-list" class="list-container"></ul>
     </main>
 
     <main id="settings-page" class="page">

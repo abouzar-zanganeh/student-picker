@@ -521,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderStudentPage() {
-        const categorySelectionContainer = document.getElementById('category-selection-container');
+        const categoryPillsContainer = document.getElementById('category-selection-container');
         const studentListUl = document.getElementById('student-list');
         const classNameHeader = document.getElementById('class-name-header');
 
@@ -531,26 +531,30 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         classNameHeader.textContent = `جلسه ${selectedSession.sessionNumber} / کلاس: ${currentClassroom.info.name}`;
-        categorySelectionContainer.innerHTML = '';
+        categoryPillsContainer.innerHTML = '';
         studentListUl.innerHTML = '';
         selectedCategory = null;
         selectStudentBtnWrapper.classList.add('disabled-wrapper');
 
         const activeCategories = currentClassroom.categories.filter(cat => !cat.isDeleted);
         activeCategories.forEach(category => {
-            const categoryBtn = document.createElement('button');
-            categoryBtn.className = 'btn-secondary category-btn';
-            categoryBtn.textContent = category.name;
-            categoryBtn.dataset.categoryId = category.id;
+            const pill = document.createElement('span');
+            pill.className = 'pill';
+            pill.textContent = category.name;
+            pill.dataset.categoryId = category.id;
 
-            categoryBtn.addEventListener('click', () => {
-                document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
-                categoryBtn.classList.add('active');
+            if (category.description) {
+                pill.dataset.tooltip = category.description;
+            }
+
+            pill.addEventListener('click', () => {
+                document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
                 selectedCategory = category;
                 selectStudentBtnWrapper.classList.remove('disabled-wrapper');
             });
 
-            categorySelectionContainer.appendChild(categoryBtn);
+            categoryPillsContainer.appendChild(pill);
         });
 
         showPage('student-page');
