@@ -268,15 +268,6 @@ button:disabled:hover {
     display: block;
 }
 
-.result-display {
-    text-align: center;
-    font-size: 24px;
-    margin-top: 20px;
-    font-weight: bold;
-    min-height: 30px;
-    color: var(--color-success);
-}
-
 .session-actions {
     margin-bottom: 20px;
 }
@@ -485,16 +476,29 @@ button:disabled:hover {
 }
 
 /* استایل‌های مربوط به نمایش فرد غایب */
-.result-display.absent {
-    background-color: var(--color-warning);
-    color: var(--color-text-dark);
+
+.result-display {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 120px;
+    text-align: center;
+    font-size: 22px;
+    margin-top: 20px;
+    font-weight: bold;
+    color: var(--color-success);
     padding: 10px;
+    /* این پدینگ همیشه اعمال می‌شود */
+    border: 1px solid transparent;
+    /* یک حاشیه نامرئی برای حفظ فضا */
     border-radius: var(--border-radius-main);
+    transition: all 0.3s ease;
 }
 
-.result-display.absent .status-button.active {
-    background-color: var(--color-secondary-hover);
-    color: var(--color-text-light);
+.result-display.absent {
+    background-color: var(--color-warning-bg);
+    color: var(--color-warning-text);
 }
 
 .absent-student-name {
@@ -576,14 +580,7 @@ button:disabled:hover {
     visibility: visible;
 }
 
-/* استایل‌های مربوط به نمایش فرد غایب */
-.result-display.absent {
-    background-color: var(--color-warning-bg);
-    color: var(--color-warning-text);
-    padding: 10px;
-    border-radius: var(--border-radius-main);
-    border: 1px solid var(--color-warning-border);
-}
+
 
 .absent-student-name {
     text-decoration: line-through;
