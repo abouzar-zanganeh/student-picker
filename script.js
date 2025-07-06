@@ -505,49 +505,63 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function displayWinner(winner, categoryName, isPresent) {
+    function displayWinner(winner, categoryName) {
         const resultDiv = document.getElementById('selected-student-result');
         resultDiv.innerHTML = '';
         resultDiv.classList.remove('absent');
 
+        const studentRecord = selectedSession.studentRecords[winner.identity.studentId];
+        const isPresent = studentRecord && studentRecord.attendance === 'present';
+
+        const getSelectionCount = (student) => {
+            return (studentRecord.selections && studentRecord.selections[categoryName]) || 0;
+        };
+
         const winnerNameEl = document.createElement('div');
-        winnerNameEl.innerHTML = `✨ <strong>${winner.identity.name}</strong> ✨`;
+        winnerNameEl.innerHTML = `✨ <strong>${winner.identity.name}</strong>✨`;
 
         if (!isPresent) {
             resultDiv.classList.add('absent');
             winnerNameEl.classList.add('absent-student-name');
-            const absentMessage = document.createElement('div');
-            absentMessage.style.fontSize = '14px';
-            absentMessage.style.marginTop = '10px';
-            absentMessage.textContent = 'غیبت برای این فرصت ثبت شد.';
-            resultDiv.appendChild(winnerNameEl);
-            resultDiv.appendChild(absentMessage);
-        } else {
-            resultDiv.appendChild(winnerNameEl);
-            const buttonContainer = document.createElement('div');
-            buttonContainer.className = 'status-button-container';
-
-            const createStatusButton = (text, counterKey) => {
-                const btn = document.createElement('button');
-                btn.textContent = text;
-                btn.className = 'status-button';
-                let isToggled = false;
-
-                btn.addEventListener('click', () => {
-                    isToggled = !isToggled;
-                    winner.statusCounters[counterKey] += isToggled ? 1 : -1;
-                    btn.classList.toggle('active', isToggled);
-                    saveData();
-                    renderStudentStatsList();
-                });
-                buttonContainer.appendChild(btn);
-            };
-
-            createStatusButton('غایب', 'absences');
-            createStatusButton('مشکل فنی', 'otherIssues');
-
-            resultDiv.appendChild(buttonContainer);
         }
+
+        resultDiv.appendChild(winnerNameEl);
+
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'status-button-container';
+
+        const createStatusButton = (text, counterKey, isInitiallyToggled = false) => {
+            const btn = document.createElement('button');
+            btn.textContent = text;
+            btn.className = 'status-button';
+            let isToggled = isInitiallyToggled;
+
+            if (isToggled) {
+                btn.classList.add('active');
+            }
+
+            btn.addEventListener('click', () => {
+                isToggled = !isToggled;
+                winner.statusCounters[counterKey] += isToggled ? 1 : -1;
+                btn.classList.toggle('active', isToggled);
+
+                if (counterKey === 'absences') {
+                    const studentId = winner.identity.studentId;
+                    const newStatus = isToggled ? 'absent' : 'present';
+                    selectedSession.setAttendance(studentId, newStatus);
+                }
+
+                saveData();
+                renderStudentStatsList();
+            });
+            buttonContainer.appendChild(btn);
+        };
+
+        // اگر دانش‌آموز غایب باشد، دکمه «غایب» را به صورت فعال نشان بده
+        createStatusButton('غایب', 'absences', !isPresent);
+        createStatusButton('مشکل فنی', 'otherIssues');
+
+        resultDiv.appendChild(buttonContainer);
     }
 
     function renderStudentPage() {
@@ -834,20 +848,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const winner = selectedSession.selectNextWinner(selectedCategory.name, currentClassroom.students);
 
         if (winner) {
-            const studentRecord = selectedSession.studentRecords[winner.identity.studentId];
-            const isPresent = studentRecord && studentRecord.attendance === 'present';
-
-            if (isPresent) {
-                // رفتار عادی برای دانش‌آموز حاضر
-                displayWinner(winner, selectedCategory.name, true);
-            } else {
-                // رفتار جدید برای دانش‌آموز غایب
-                winner.statusCounters.absences++;
-                displayWinner(winner, selectedCategory.name, false);
-            }
-
-            saveData();
+            displayWinner(winner, selectedCategory.name);
             renderStudentStatsList();
+            saveData();
         } else {
             showNotification("دانش‌آموز واجد شرایطی برای انتخاب یافت نشد.");
         }
