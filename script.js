@@ -310,6 +310,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedCategory = null;
     let easterEggClickCount = 0;
     let easterEggLastClickTime = 0;
+    let resetEasterEggClickCount = 0;
+    let resetEasterEggLastClickTime = 0;
 
 
 
@@ -352,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const backToSessionsFromAttendanceBtn = document.getElementById('back-to-sessions-from-attendance-btn');
     const backToAttendanceBtn = document.getElementById('back-to-attendance-btn');
     const classListHeader = document.querySelector('#class-management-page h2');
-
+    const studentStatsHeader = document.getElementById('student-stats-header');
     // --- توابع اصلی داده‌ها (Data Functions) ---
     function saveData() {
         localStorage.setItem('teacherAssistantData_v2', JSON.stringify(classrooms));
@@ -930,6 +932,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- شنودگرهای رویداد (Event Listeners) ---
+    studentStatsHeader.addEventListener('click', () => {
+        const now = new Date().getTime();
+
+        if (now - resetEasterEggLastClickTime > 500) {
+            resetEasterEggClickCount = 1;
+        } else {
+            resetEasterEggClickCount++;
+        }
+
+        resetEasterEggLastClickTime = now;
+
+        if (resetEasterEggClickCount === 5) {
+            resetEasterEggClickCount = 0;
+
+            const isConfirmed = confirm("آیا از صفر کردن تمام شمارنده‌های دانش‌آموزان مطمئن هستید؟ این عمل غیرقابل بازگشت است.");
+            if (isConfirmed) {
+                resetAllStudentCounters();
+            }
+        }
+    });
 
     classListHeader.addEventListener('click', () => {
         const now = new Date().getTime();
