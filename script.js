@@ -1301,12 +1301,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const categories = newClass.categories.map(c => c.name);
         const numberOfSessions = Math.floor(Math.random() * 5) + 5;
 
+        // یک تاریخ شروع در گذشته برای اولین جلسه تعیین می‌کنیم
+        let sessionDate = new Date();
+        sessionDate.setDate(sessionDate.getDate() - (numberOfSessions * 3));
+
         for (let i = 0; i < numberOfSessions; i++) {
             const session = newClass.startNewSession();
-            newClass.students.forEach(student => {
-                // این خط جدید، مشکل را حل می‌کند
-                session.initializeStudentRecord(student.identity.studentId);
 
+            // تاریخ شروع جلسه را به صورت دستی تنظیم می‌کنیم
+            session.startTime = new Date(sessionDate);
+
+            newClass.students.forEach(student => {
+                session.initializeStudentRecord(student.identity.studentId);
                 const isAbsent = Math.random() < 0.1;
                 if (isAbsent) {
                     session.setAttendance(student.identity.studentId, 'absent');
@@ -1321,7 +1327,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
             });
+
             session.end();
+            // زمان جلسه بعدی را ۲ تا ۴ روز به جلو می‌بریم
+            const daysToAdd = Math.floor(Math.random() * 3) + 2;
+            sessionDate.setDate(sessionDate.getDate() + daysToAdd);
         }
 
         classrooms[className] = newClass;
