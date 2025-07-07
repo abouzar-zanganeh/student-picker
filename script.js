@@ -1209,6 +1209,48 @@ document.addEventListener('DOMContentLoaded', () => {
         showPage('session-page');
     });
 
+    // --- توابع مربوط به باگ یابی debugging ---
+
+    window.resetAllStudentCounters = function () {
+        if (!classrooms || Object.keys(classrooms).length === 0) {
+            console.log("هیچ کلاسی برای ریست کردن وجود ندارد.");
+            return;
+        }
+
+        let studentCount = 0;
+        for (const className in classrooms) {
+            const classroom = classrooms[className];
+            if (classroom.students && classroom.students.length > 0) {
+                classroom.students.forEach(student => {
+                    student.statusCounters = {
+                        totalSelections: 0,
+                        absences: 0,
+                        otherIssues: 0,
+                        earlyLeaves: 0,
+                    };
+                    student.categoryCounts = {};
+                    student.finalClassActivityScore = null;
+
+                    if (student.logs) {
+                        student.logs.sessionHistory = {};
+                    }
+
+                    studentCount++;
+                });
+            }
+        }
+
+        saveData();
+
+        if (document.getElementById('student-page').style.display === 'block') {
+            renderStudentStatsList();
+            const resultDiv = document.getElementById('selected-student-result');
+            if (resultDiv) resultDiv.innerHTML = '';
+        }
+
+        console.log(`✅ شمارنده‌های ${studentCount} دانش‌آموز با موفقیت صفر شد. داده‌ها ذخیره شدند.`);
+    }
+
     // --- بارگذاری اولیه ---
     loadData();
 
