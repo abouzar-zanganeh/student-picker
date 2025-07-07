@@ -308,6 +308,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let importedFileContent = null; // برای نگهداری محتوای کامل فایل CSV
     let notificationTimeout = null;
     let selectedCategory = null;
+    let easterEggClickCount = 0;
+    let easterEggLastClickTime = 0;
 
 
 
@@ -349,6 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const finishAttendanceBtn = document.getElementById('finish-attendance-btn');
     const backToSessionsFromAttendanceBtn = document.getElementById('back-to-sessions-from-attendance-btn');
     const backToAttendanceBtn = document.getElementById('back-to-attendance-btn');
+    const classListHeader = document.querySelector('#class-management-page h2');
 
     // --- توابع اصلی داده‌ها (Data Functions) ---
     function saveData() {
@@ -928,6 +931,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- شنودگرهای رویداد (Event Listeners) ---
 
+    classListHeader.addEventListener('click', () => {
+        const now = new Date().getTime();
+
+        if (now - easterEggLastClickTime > 500) {
+            easterEggClickCount = 1;
+        } else {
+            easterEggClickCount++;
+        }
+
+        easterEggLastClickTime = now;
+
+        if (easterEggClickCount === 5) {
+            easterEggClickCount = 0;
+
+            const isConfirmed = confirm("آیا از ساخت یک کلاس تستی تصادفی مطمئن هستید؟");
+            if (isConfirmed) {
+                createRandomClass();
+                showNotification("کلاس تستی با موفقیت ساخته شد!");
+            }
+        }
+    });
+
     backToAttendanceBtn.addEventListener('click', () => {
         if (currentClassroom && selectedSession) {
             renderAttendancePage();
@@ -1249,6 +1274,61 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         console.log(`✅ شمارنده‌های ${studentCount} دانش‌آموز با موفقیت صفر شد. داده‌ها ذخیره شدند.`);
+    }
+
+    window.createRandomClass = function () {
+        const randomId = Math.floor(Math.random() * 1000);
+        const className = `کلاس تستی ${randomId}`;
+
+        if (classrooms[className]) {
+            console.log("کلاس تستی با نام مشابه از قبل وجود دارد، لطفاً دوباره امتحان کنید.");
+            return;
+        }
+
+        const classInfo = {
+            name: className,
+            type: Math.random() < 0.5 ? 'online' : 'in-person',
+            level: `Level ${Math.floor(Math.random() * 10) + 1}`
+        };
+        const newClass = new Classroom(classInfo);
+
+        const studentNames = ["سارا رضایی", "علی اکبری", "مریم حسینی", "رضا محمدی", "فاطمه احمدی", "حسین کریمی", "زهرا قاسمی", "مهدی جعفری", "نیلوفر محمودی", "امیر مرادی", "هستی صالحی", "پرهام اسدی"];
+        studentNames.forEach(name => {
+            const student = new Student({ name: name });
+            newClass.addStudent(student);
+        });
+
+        const categories = newClass.categories.map(c => c.name);
+        const numberOfSessions = Math.floor(Math.random() * 5) + 5;
+
+        for (let i = 0; i < numberOfSessions; i++) {
+            const session = newClass.startNewSession();
+            newClass.students.forEach(student => {
+                // این خط جدید، مشکل را حل می‌کند
+                session.initializeStudentRecord(student.identity.studentId);
+
+                const isAbsent = Math.random() < 0.1;
+                if (isAbsent) {
+                    session.setAttendance(student.identity.studentId, 'absent');
+                }
+
+                categories.forEach(catName => {
+                    const selectionCount = Math.floor(Math.random() * 4);
+                    if (selectionCount > 0) {
+                        session.studentRecords[student.identity.studentId].selections[catName] = selectionCount;
+                        student.categoryCounts[catName] = (student.categoryCounts[catName] || 0) + selectionCount;
+                        student.statusCounters.totalSelections += selectionCount;
+                    }
+                });
+            });
+            session.end();
+        }
+
+        classrooms[className] = newClass;
+        saveData();
+        renderClassList();
+
+        console.log(`✅ کلاس تستی جدید با نام "${className}" و ${newClass.students.length} دانش‌آموز و ${newClass.sessions.length} جلسه با موفقیت ساخته شد.`);
     }
 
     // --- بارگذاری اولیه ---
