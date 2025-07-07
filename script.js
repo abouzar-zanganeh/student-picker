@@ -1315,7 +1315,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const newClass = new Classroom(classInfo);
 
         const studentNames = ["سارا رضایی", "علی اکبری", "مریم حسینی", "رضا محمدی", "فاطمه احمدی", "حسین کریمی", "زهرا قاسمی", "مهدی جعفری", "نیلوفر محمودی", "امیر مرادی", "هستی صالحی", "پرهام اسدی"];
-        studentNames.forEach(name => {
+        const selectedStudents = studentNames.sort(() => 0.5 - Math.random()).slice(0, 5);
+
+        selectedStudents.forEach(name => {
             const student = new Student({ name: name });
             newClass.addStudent(student);
         });
@@ -1323,14 +1325,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const categories = newClass.categories.map(c => c.name);
         const numberOfSessions = Math.floor(Math.random() * 5) + 5;
 
-        // یک تاریخ شروع در گذشته برای اولین جلسه تعیین می‌کنیم
         let sessionDate = new Date();
         sessionDate.setDate(sessionDate.getDate() - (numberOfSessions * 3));
 
         for (let i = 0; i < numberOfSessions; i++) {
             const session = newClass.startNewSession();
 
-            // تاریخ شروع جلسه را به صورت دستی تنظیم می‌کنیم
             session.startTime = new Date(sessionDate);
 
             newClass.students.forEach(student => {
@@ -1351,7 +1351,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             session.end();
-            // زمان جلسه بعدی را ۲ تا ۴ روز به جلو می‌بریم
             const daysToAdd = Math.floor(Math.random() * 3) + 2;
             sessionDate.setDate(sessionDate.getDate() + daysToAdd);
         }
