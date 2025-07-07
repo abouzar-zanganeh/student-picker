@@ -631,6 +631,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const categoryPillsContainer = document.getElementById('category-selection-container');
         const studentListUl = document.getElementById('student-list');
         const classNameHeader = document.getElementById('class-name-header');
+        const resultDiv = document.getElementById('selected-student-result');
 
         if (!currentClassroom || !selectedSession) {
             showPage('class-management-page');
@@ -640,6 +641,7 @@ document.addEventListener('DOMContentLoaded', () => {
         classNameHeader.textContent = `جلسه ${selectedSession.sessionNumber} / کلاس: ${currentClassroom.info.name}`;
         categoryPillsContainer.innerHTML = '';
         studentListUl.innerHTML = '';
+        resultDiv.innerHTML = ''; // این خط جدید و کلیدی است
         selectStudentBtnWrapper.classList.add('disabled-wrapper');
 
         const activeCategories = currentClassroom.categories.filter(cat => !cat.isDeleted);
