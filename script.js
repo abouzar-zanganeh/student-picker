@@ -47,6 +47,8 @@ class Session {
         this.isMakeup = false;
         this.studentRecords = {};
         this.lastWinnerByCategory = {};
+        this.lastUsedCategoryId = null;
+        this.lastSelectedWinnerId = null;
     }
 
     end() {
