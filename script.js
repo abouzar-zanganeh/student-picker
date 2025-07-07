@@ -756,9 +756,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
             deleteBtn.addEventListener('click', (event) => {
                 event.stopPropagation();
+
+                // قبل از هر تغییری، وضعیت فعلی را برای قابلیت واگرد ذخیره می‌کنیم
                 showUndoToast(`کلاس «${name}» حذف شد.`);
+
+                // کلاس را از آبجکت اصلی در حافظه حذف می‌کنیم
                 delete classrooms[name];
+
+                // مهم‌ترین بخش: آبجکت به‌روز شده را فوراً در حافظه مرورگر ذخیره می‌کنیم
                 saveData();
+
+                // در نهایت، لیست کلاس‌ها را دوباره رندر می‌کنیم تا تغییر در صفحه دیده شود
                 renderClassList();
             });
 
