@@ -902,7 +902,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- شنودگرهای رویداد (Event Listeners) ---
 
     backToAttendanceBtn.addEventListener('click', () => {
-        if (currentClassroom && liveSession) {
+        if (currentClassroom && selectedSession) {
             renderAttendancePage();
             showPage('attendance-page');
         }
