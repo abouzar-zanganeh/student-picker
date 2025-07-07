@@ -467,7 +467,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- توابع رندر (Render Functions) ---
 
     function renderAttendancePage() {
-        if (!currentClassroom || !liveSession) return;
+        if (!currentClassroom || !selectedSession) return;
 
         attendanceClassNameHeader.textContent = `حضور و غیاب کلاس: ${currentClassroom.info.name}`;
         attendanceListUl.innerHTML = '';
@@ -490,7 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
             absentBtn.textContent = 'غایب';
             absentBtn.className = 'attendance-status-btn absent';
 
-            const currentStatus = liveSession.studentRecords[student.identity.studentId]?.attendance || 'present';
+            const currentStatus = selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
             if (currentStatus === 'present') {
                 presentBtn.classList.add('active');
             } else if (currentStatus === 'absent') {
@@ -498,14 +498,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             presentBtn.addEventListener('click', () => {
-                liveSession.setAttendance(student.identity.studentId, 'present');
+                selectedSession.setAttendance(student.identity.studentId, 'present');
                 presentBtn.classList.add('active');
                 absentBtn.classList.remove('active');
                 saveData();
             });
 
             absentBtn.addEventListener('click', () => {
-                liveSession.setAttendance(student.identity.studentId, 'absent');
+                selectedSession.setAttendance(student.identity.studentId, 'absent');
                 absentBtn.classList.add('active');
                 presentBtn.classList.remove('active');
                 saveData();
