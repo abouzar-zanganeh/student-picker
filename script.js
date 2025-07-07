@@ -637,7 +637,6 @@ document.addEventListener('DOMContentLoaded', () => {
         classNameHeader.textContent = `جلسه ${selectedSession.sessionNumber} / کلاس: ${currentClassroom.info.name}`;
         categoryPillsContainer.innerHTML = '';
         studentListUl.innerHTML = '';
-        selectedCategory = null;
         selectStudentBtnWrapper.classList.add('disabled-wrapper');
 
         const activeCategories = currentClassroom.categories.filter(cat => !cat.isDeleted);
@@ -660,6 +659,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             categoryPillsContainer.appendChild(pill);
         });
+
+        if (selectedSession.lastUsedCategoryId) {
+            const lastCategoryPill = categoryPillsContainer.querySelector(`.pill[data-category-id="${selectedSession.lastUsedCategoryId}"]`);
+            if (lastCategoryPill) {
+                lastCategoryPill.click();
+            }
+        }
+
+        if (selectedSession.lastSelectedWinnerId) {
+            const lastWinner = currentClassroom.students.find(s => s.identity.studentId === selectedSession.lastSelectedWinnerId);
+            if (lastWinner && selectedCategory) {
+                displayWinner(lastWinner, selectedCategory.name);
+            }
+        }
 
         showPage('student-page');
         renderStudentStatsList();
