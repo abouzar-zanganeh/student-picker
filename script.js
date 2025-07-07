@@ -368,10 +368,8 @@ document.addEventListener('DOMContentLoaded', () => {
         for (const className in plainClassrooms) {
             const plainClass = plainClassrooms[className];
 
-            // ساخت نمونه Classroom
             const classroomInstance = new Classroom(plainClass.info);
 
-            // بازسازی دانش‌آموزان
             classroomInstance.students = plainClass.students.map(plainStudent => {
                 const studentInstance = new Student(plainStudent.identity);
                 studentInstance.statusCounters = plainStudent.statusCounters;
@@ -382,7 +380,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return studentInstance;
             });
 
-            // بازسازی جلسات
             classroomInstance.sessions = plainClass.sessions.map(plainSession => {
                 const sessionInstance = new Session(plainSession.sessionNumber);
                 sessionInstance.startTime = new Date(plainSession.startTime);
@@ -391,6 +388,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 sessionInstance.isMakeup = plainSession.isMakeup;
                 sessionInstance.studentRecords = plainSession.studentRecords;
                 sessionInstance.lastWinnerByCategory = plainSession.lastWinnerByCategory;
+                sessionInstance.lastUsedCategoryId = plainSession.lastUsedCategoryId;
+                sessionInstance.lastSelectedWinnerId = plainSession.lastSelectedWinnerId;
                 return sessionInstance;
             });
 
