@@ -65,7 +65,9 @@ class Session {
             this.studentRecords[studentId] = {
                 attendance: 'present',
                 homework: 'complete',
-                selections: {}
+                selections: {},
+                hadIssue: false,
+
             };
         }
     }
@@ -619,7 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // اگر دانش‌آموز غایب باشد، دکمه «غایب» را به صورت فعال نشان بده
         createStatusButton('غایب', 'absences', !isPresent);
-        createStatusButton('مشکل فنی', 'otherIssues');
+        createStatusButton('مشکل', 'otherIssues');
 
         resultDiv.appendChild(buttonContainer);
     }
