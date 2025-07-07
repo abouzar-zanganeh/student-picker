@@ -629,3 +629,38 @@ button:disabled:hover {
     font-size: 0.9em;
     color: var(--color-text-muted);
 }
+
+.attendance-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.attendance-button-group {
+    display: flex;
+    gap: 8px;
+}
+
+.attendance-status-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--color-border);
+    background-color: #f0f0f0;
+    color: var(--color-text-muted);
+    border-radius: var(--border-radius-main);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+}
+
+.attendance-status-btn.present.active {
+    background-color: var(--color-success);
+    border-color: var(--color-success-hover);
+    color: var(--color-text-light);
+}
+
+.attendance-status-btn.absent.active {
+    background-color: var(--color-warning);
+    border-color: var(--color-warning-hover);
+    color: var(--color-text-dark);
+}

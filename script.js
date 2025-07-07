@@ -339,6 +339,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const appHeader = document.querySelector('.app-header');
     const selectStudentBtn = document.getElementById('select-student-btn');
     const selectStudentBtnWrapper = document.getElementById('select-student-btn-wrapper');
+    const attendancePage = document.getElementById('attendance-page');
+    const attendanceClassNameHeader = document.getElementById('attendance-class-name-header');
+    const attendanceListUl = document.getElementById('attendance-list');
+    const finishAttendanceBtn = document.getElementById('finish-attendance-btn');
+    const backToSessionsFromAttendanceBtn = document.getElementById('back-to-sessions-from-attendance-btn');
+    const backToAttendanceBtn = document.getElementById('back-to-attendance-btn');
 
     // --- توابع اصلی داده‌ها (Data Functions) ---
     function saveData() {
@@ -459,6 +465,59 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- توابع رندر (Render Functions) ---
+
+    function renderAttendancePage() {
+        if (!currentClassroom || !liveSession) return;
+
+        attendanceClassNameHeader.textContent = `حضور و غیاب کلاس: ${currentClassroom.info.name}`;
+        attendanceListUl.innerHTML = '';
+
+        currentClassroom.students.forEach(student => {
+            const li = document.createElement('li');
+            li.className = 'attendance-list-item';
+
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = student.identity.name;
+
+            const buttonGroup = document.createElement('div');
+            buttonGroup.className = 'attendance-button-group';
+
+            const presentBtn = document.createElement('button');
+            presentBtn.textContent = 'حاضر';
+            presentBtn.className = 'attendance-status-btn present';
+
+            const absentBtn = document.createElement('button');
+            absentBtn.textContent = 'غایب';
+            absentBtn.className = 'attendance-status-btn absent';
+
+            const currentStatus = liveSession.studentRecords[student.identity.studentId]?.attendance || 'present';
+            if (currentStatus === 'present') {
+                presentBtn.classList.add('active');
+            } else if (currentStatus === 'absent') {
+                absentBtn.classList.add('active');
+            }
+
+            presentBtn.addEventListener('click', () => {
+                liveSession.setAttendance(student.identity.studentId, 'present');
+                presentBtn.classList.add('active');
+                absentBtn.classList.remove('active');
+                saveData();
+            });
+
+            absentBtn.addEventListener('click', () => {
+                liveSession.setAttendance(student.identity.studentId, 'absent');
+                absentBtn.classList.add('active');
+                presentBtn.classList.remove('active');
+                saveData();
+            });
+
+            buttonGroup.appendChild(presentBtn);
+            buttonGroup.appendChild(absentBtn);
+            li.appendChild(nameSpan);
+            li.appendChild(buttonGroup);
+            attendanceListUl.appendChild(li);
+        });
+    }
 
     function renderStudentStatsList() {
         const studentListUl = document.getElementById('student-list');
@@ -842,6 +901,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- شنودگرهای رویداد (Event Listeners) ---
 
+    backToAttendanceBtn.addEventListener('click', () => {
+        if (currentClassroom && liveSession) {
+            renderAttendancePage();
+            showPage('attendance-page');
+        }
+    });
+
     selectStudentBtn.addEventListener('click', () => {
         if (!currentClassroom || !selectedSession || !selectedCategory) return;
 
@@ -1037,12 +1103,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('new-session-btn').addEventListener('click', () => {
         if (currentClassroom) {
+            const wantsToTakeAttendance = confirm("آیا تمایل به انجام فرآیند حضور و غیاب دارید؟");
+
             const newSession = currentClassroom.startNewSession();
             liveSession = newSession;
             selectedSession = newSession;
+
+            currentClassroom.students.forEach(student => {
+                liveSession.setAttendance(student.identity.studentId, 'present');
+            });
+
+            if (wantsToTakeAttendance) {
+                renderAttendancePage();
+                showPage('attendance-page');
+            } else {
+                renderStudentPage();
+            }
             saveData();
-            renderSessions();
-            renderStudentPage();
         }
     });
     addClassBtn.addEventListener('click', () => {
@@ -1092,6 +1169,15 @@ document.addEventListener('DOMContentLoaded', () => {
             liveSession = null;
             showPage('class-management-page');
         });
+    });
+
+    finishAttendanceBtn.addEventListener('click', () => {
+        renderStudentPage();
+    });
+
+    backToSessionsFromAttendanceBtn.addEventListener('click', () => {
+        renderSessions();
+        showPage('session-page');
     });
 
     // --- بارگذاری اولیه ---
