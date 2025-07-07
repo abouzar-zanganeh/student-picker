@@ -537,8 +537,8 @@ document.addEventListener('DOMContentLoaded', () => {
             totalStatsDiv.className = 'total-stats';
             totalStatsDiv.innerHTML = `
             <span>${student.identity.name}</span>
-            <span>کل: ${student.statusCounters.totalSelections} | غیبت: ${student.statusCounters.absences}</span>
-        `;
+            <span>کل: ${student.statusCounters.totalSelections} | غیبت: ${student.statusCounters.absences} | مشکل: ${student.statusCounters.otherIssues}</span>
+`;
 
             // بخش جزئیات دسته‌بندی‌ها که در ابتدا پنهان است
             const categoryStatsDiv = document.createElement('div');
