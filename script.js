@@ -916,6 +916,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (winner) {
             displayWinner(winner, selectedCategory.name);
+            selectedSession.lastUsedCategoryId = selectedCategory.id;
+            selectedSession.lastSelectedWinnerId = winner.identity.studentId;
             renderStudentStatsList();
             saveData();
         } else {
