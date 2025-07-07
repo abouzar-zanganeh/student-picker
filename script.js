@@ -17,7 +17,7 @@ class Student {
         };
         this.statusCounters = {
             totalSelections: 0,
-            absences: 0,
+            missedChances: 0,
             otherIssues: 0,
             earlyLeaves: 0,
         };
@@ -533,29 +533,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!currentClassroom) return;
 
+        const calculateAbsences = (student) => {
+            let absenceCount = 0;
+            if (currentClassroom && currentClassroom.sessions) {
+                currentClassroom.sessions.forEach(session => {
+                    const record = session.studentRecords[student.identity.studentId];
+                    if (record && record.attendance === 'absent') {
+                        absenceCount++;
+                    }
+                });
+            }
+            return absenceCount;
+        };
+
         currentClassroom.students.forEach(student => {
             const li = document.createElement('li');
             li.className = 'student-list-item';
 
-            // بخش اصلی آمار که همیشه دیده می‌شود
+            const absenceCount = calculateAbsences(student);
+
             const totalStatsDiv = document.createElement('div');
             totalStatsDiv.className = 'total-stats';
             totalStatsDiv.innerHTML = `
             <span>${student.identity.name}</span>
-            <span>کل: ${student.statusCounters.totalSelections} | غیبت: ${student.statusCounters.absences} | مشکل: ${student.statusCounters.otherIssues}</span>
-`;
+            <span>کل انتخاب: ${student.statusCounters.totalSelections} | غیبت: ${absenceCount} | فرصت از دست رفته: ${student.statusCounters.missedChances || 0} | مشکل: ${student.statusCounters.otherIssues}</span>
+        `;
 
-            // بخش جزئیات دسته‌بندی‌ها که در ابتدا پنهان است
             const categoryStatsDiv = document.createElement('div');
             categoryStatsDiv.className = 'category-stats';
 
             if (Object.keys(student.categoryCounts).length > 0) {
+                let statsText = '';
                 for (const categoryName in student.categoryCounts) {
                     const count = student.categoryCounts[categoryName];
-                    const statP = document.createElement('p');
-                    statP.textContent = `${categoryName}: ${count}`;
-                    categoryStatsDiv.appendChild(statP);
+                    statsText += `${categoryName}: ${count} | `;
                 }
+                categoryStatsDiv.textContent = statsText.slice(0, -3);
             } else {
                 categoryStatsDiv.textContent = 'هنوز در هیچ دسته‌بندی انتخاب نشده است.';
             }
@@ -563,7 +576,6 @@ document.addEventListener('DOMContentLoaded', () => {
             li.appendChild(totalStatsDiv);
             li.appendChild(categoryStatsDiv);
 
-            // افزودن رویداد کلیک برای باز و بسته کردن جزئیات
             totalStatsDiv.addEventListener('click', () => {
                 categoryStatsDiv.classList.toggle('visible');
             });
@@ -578,7 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resultDiv.classList.remove('absent');
 
         const studentRecord = selectedSession.studentRecords[winner.identity.studentId];
-        const isPresent = studentRecord && studentRecord.attendance === 'present';
+        const isPresent = studentRecord?.attendance === 'present';
 
         const winnerNameEl = document.createElement('div');
         winnerNameEl.innerHTML = `✨ <strong>${winner.identity.name}</strong>✨`;
@@ -593,36 +605,51 @@ document.addEventListener('DOMContentLoaded', () => {
         const buttonContainer = document.createElement('div');
         buttonContainer.className = 'status-button-container';
 
-        // --- دکمه غایب ---
         const absentBtn = document.createElement('button');
         absentBtn.textContent = 'غایب';
         absentBtn.className = 'status-button';
-        if (!isPresent) {
-            absentBtn.classList.add('active');
-        }
-        absentBtn.addEventListener('click', () => {
-            const currentStatus = selectedSession.studentRecords[winner.identity.studentId].attendance;
-            const newStatus = currentStatus === 'absent' ? 'present' : 'absent';
-            selectedSession.setAttendance(winner.identity.studentId, newStatus);
-            absentBtn.classList.toggle('active');
-            winnerNameEl.classList.toggle('absent-student-name');
-            resultDiv.classList.toggle('absent');
-            saveData();
-        });
+        if (!isPresent) absentBtn.classList.add('active');
 
-        // --- دکمه مشکل ---
         const issueBtn = document.createElement('button');
         issueBtn.textContent = 'مشکل';
         issueBtn.className = 'status-button';
-        let hadIssue = studentRecord?.hadIssue || false;
-        if (hadIssue) {
-            issueBtn.classList.add('active');
-        }
+        if (studentRecord?.hadIssue) issueBtn.classList.add('active');
+
+        absentBtn.addEventListener('click', () => {
+            const wasPresent = selectedSession.studentRecords[winner.identity.studentId].attendance === 'present';
+            const newStatus = wasPresent ? 'absent' : 'present';
+
+            // Toggle Missed Chances Counter
+            winner.statusCounters.missedChances += wasPresent ? 1 : -1;
+            selectedSession.setAttendance(winner.identity.studentId, newStatus);
+
+            // Mutual Exclusion Logic
+            if (wasPresent && studentRecord.hadIssue) {
+                studentRecord.hadIssue = false;
+                winner.statusCounters.otherIssues--;
+                issueBtn.classList.remove('active');
+            }
+
+            absentBtn.classList.toggle('active');
+            renderStudentStatsList();
+            saveData();
+        });
+
         issueBtn.addEventListener('click', () => {
-            hadIssue = !hadIssue;
-            studentRecord.hadIssue = hadIssue;
-            winner.statusCounters.otherIssues += hadIssue ? 1 : -1;
-            issueBtn.classList.toggle('active', hadIssue);
+            const hadIssuePreviously = studentRecord.hadIssue;
+            studentRecord.hadIssue = !hadIssuePreviously;
+
+            // Toggle Other Issues Counter
+            winner.statusCounters.otherIssues += !hadIssuePreviously ? 1 : -1;
+
+            // Mutual Exclusion Logic
+            if (!hadIssuePreviously && studentRecord.attendance === 'absent') {
+                selectedSession.setAttendance(winner.identity.studentId, 'present');
+                winner.statusCounters.missedChances--;
+                absentBtn.classList.remove('active');
+            }
+
+            issueBtn.classList.toggle('active');
             renderStudentStatsList();
             saveData();
         });
@@ -989,6 +1016,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (winner) {
             displayWinner(winner, selectedCategory.name);
+            const studentRecord = selectedSession.studentRecords[winner.identity.studentId];
+            if (studentRecord && studentRecord.attendance === 'absent') {
+                winner.statusCounters.missedChances++;
+            }
+            if (studentRecord && studentRecord.hadIssue) {
+                winner.statusCounters.otherIssues++;
+            }
             selectedSession.lastUsedCategoryId = selectedCategory.id;
             selectedSession.lastSelectedWinnerId = winner.identity.studentId;
             renderStudentStatsList();
@@ -1271,7 +1305,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 classroom.students.forEach(student => {
                     student.statusCounters = {
                         totalSelections: 0,
-                        absences: 0,
+                        missedChances: 0,
                         otherIssues: 0,
                         earlyLeaves: 0,
                     };
