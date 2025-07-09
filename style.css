@@ -105,6 +105,10 @@ ul {
     margin-left: 10px;
 }
 
+.centered-input-group {
+    justify-content: center;
+}
+
 .separator {
     margin: 20px 0;
 }
@@ -777,8 +781,9 @@ button:disabled:hover {
 
 .score-info {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start; /* Align to the start (right in RTL) */
     align-items: center;
+    gap: 20px; /* Add space between items */
     margin-bottom: 10px;
 }
 

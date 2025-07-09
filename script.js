@@ -804,6 +804,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pill.addEventListener('click', () => {
                 scoreSkillSelectionContainer.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
+                newScoreValueInput.focus();
             });
         });
 
@@ -826,9 +827,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 li.className = 'score-history-item';
                 li.innerHTML = `
                     <div class="score-info">
-                        <span class="score-skill-badge">${score.skill}</span>
-                        <span class="score-value">نمره: <strong>${score.value}</strong></span>
                         <span class="score-date">${new Date(score.timestamp).toLocaleDateString('fa-IR')}</span>
+                        <span class="score-value">نمره: <strong>${score.value}</strong></span>
+                        <span class="score-skill-badge">${score.skill}</span>
                     </div>
                     ${score.comment ? `<p class="score-comment"><strong>توضیحات:</strong> ${score.comment}</p>` : ''}
                 `;
@@ -1471,6 +1472,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    newScoreValueInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+            addScoreBtn.click();
+        }
+    });
+
+    newScoreCommentTextarea.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault(); // Prevent adding a new line
+            addScoreBtn.click();
+        }
+    });
 
     addScoreBtn.addEventListener('click', () => {
         const selectedSkillPill = scoreSkillSelectionContainer.querySelector('.pill.active');
