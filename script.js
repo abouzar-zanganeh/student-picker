@@ -26,7 +26,7 @@ class Student {
 
         this.logs = {
             parentContacts: [],
-            scores: [],
+            scores: {},
             discipline: [],
             sessionHistory: {},
         };
@@ -35,6 +35,14 @@ class Student {
             tags: [],
         };
         this.finalClassActivityScore = null;
+    }
+
+    addScore(skill, value, comment) {
+        if (!this.logs.scores[skill]) {
+            this.logs.scores[skill] = [];
+        }
+        const newScore = new Score(skill, value, comment);
+        this.logs.scores[skill].push(newScore);
     }
 }
 
@@ -90,10 +98,6 @@ class Session {
     setHomeworkStatus(studentId, status) {
         this.initializeStudentRecord(studentId);
         this.studentRecords[studentId].homework = status;
-    }
-
-    addScore(studentInstance, skill, score) {
-        studentInstance.logs.scores[skill].push(score);
     }
 
     selectNextWinner(categoryName, studentList) {
@@ -312,6 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentClassroom = null; // کلاسی که کاربر در حال کار با آن است
     let liveSession = null; // جلسه زنده‌ای که در حال برگزاری است
     let selectedSession = null; // جلسه‌ای که کاربر برای مشاهده انتخاب کرده
+    let selectedStudentForProfile = null; // دانش‌آموزی که پروفایل او در حال مشاهده است
     let previousState = null; // برای ذخیره آخرین وضعیت قبل از حذف
     let undoTimeout = null;   // برای مدیریت زمان‌بندی پیام واگرد
     let namesToImport = []; // آرایه‌ای برای نگهداری موقت اسامی جهت ورود
@@ -365,6 +370,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const backToAttendanceBtn = document.getElementById('back-to-attendance-btn');
     const classListHeader = document.querySelector('#class-management-page h2');
     const studentStatsHeader = document.getElementById('student-stats-header');
+
+    // --- عناصر صفحه پروفایل دانش‌آموز ---
+    const studentProfilePage = document.getElementById('student-profile-page');
+    const profileStudentNameHeader = document.getElementById('profile-student-name-header');
+    const backToStudentPageBtn = document.getElementById('back-to-student-page-btn');
+    const scoreSkillSelectionContainer = document.getElementById('score-skill-selection');
+    const newScoreValueInput = document.getElementById('new-score-value');
+    const newScoreCommentTextarea = document.getElementById('new-score-comment');
+    const addScoreBtn = document.getElementById('add-score-btn');
+    const profileStatsSummaryDiv = document.getElementById('profile-stats-summary');
+    const profileScoresListUl = document.getElementById('profile-scores-list');
+
+
     // --- توابع اصلی داده‌ها (Data Functions) ---
     function saveData() {
         localStorage.setItem('teacherAssistantData_v2', JSON.stringify(classrooms));
@@ -391,6 +409,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const studentInstance = new Student(plainStudent.identity);
                 studentInstance.statusCounters = plainStudent.statusCounters;
                 studentInstance.logs = plainStudent.logs;
+                // اطمینان از اینکه ساختار scores درست است
+                if (!studentInstance.logs.scores) {
+                    studentInstance.logs.scores = {};
+                }
                 studentInstance.profile = plainStudent.profile;
                 studentInstance.finalClassActivityScore = plainStudent.finalClassActivityScore;
                 studentInstance.categoryCounts = plainStudent.categoryCounts || {};
@@ -625,6 +647,11 @@ document.addEventListener('DOMContentLoaded', () => {
         issueBtn.className = 'status-button';
         if (studentRecord?.hadIssue) issueBtn.classList.add('active');
 
+        const profileBtn = document.createElement('button');
+        profileBtn.textContent = 'پروفایل / نمره‌دهی';
+        profileBtn.className = 'status-button profile-btn';
+
+
         absentBtn.addEventListener('click', () => {
             const wasPresent = selectedSession.studentRecords[winner.identity.studentId].attendance === 'present';
             const newStatus = wasPresent ? 'absent' : 'present';
@@ -664,13 +691,20 @@ document.addEventListener('DOMContentLoaded', () => {
             saveData();
         });
 
+        profileBtn.addEventListener('click', () => {
+            selectedStudentForProfile = winner;
+            renderStudentProfilePage();
+            showPage('student-profile-page');
+        });
+
         buttonContainer.appendChild(absentBtn);
         buttonContainer.appendChild(issueBtn);
+        buttonContainer.appendChild(profileBtn);
         resultDiv.appendChild(buttonContainer);
     }
 
     function renderStudentPage() {
-        const categoryPillsContainer = document.getElementById('category-selection-container');
+        const categoryPillsContainer = document.getElementById('category-selection-container'); ""
         const studentListUl = document.getElementById('student-list');
         const classNameHeader = document.getElementById('class-name-header');
         const resultDiv = document.getElementById('selected-student-result');
@@ -723,6 +757,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
         showPage('student-page');
         renderStudentStatsList();
+    }
+
+    function renderStudentProfilePage() {
+        if (!selectedStudentForProfile) return;
+
+        const student = selectedStudentForProfile;
+        profileStudentNameHeader.textContent = `پروفایل: ${student.identity.name}`;
+
+        // --- Render Stats Summary ---
+        const absenceCount = currentClassroom.sessions.reduce((count, session) => {
+            const record = session.studentRecords[student.identity.studentId];
+            return count + (record && record.attendance === 'absent' ? 1 : 0);
+        }, 0);
+
+        profileStatsSummaryDiv.innerHTML = `
+            <p><strong>کل انتخاب:</strong> ${student.statusCounters.totalSelections}</p>
+            <p><strong>غیبت:</strong> ${absenceCount}</p>
+            <p><strong>فرصت از دست رفته:</strong> ${student.statusCounters.missedChances || 0}</p>
+            <p><strong>مشکل فنی:</strong> ${student.statusCounters.otherIssues || 0}</p>
+        `;
+
+        // --- Render Scoring Form ---
+        const skills = ['Listening', 'Speaking', 'Reading', 'Writing'];
+        scoreSkillSelectionContainer.innerHTML = '';
+        skills.forEach(skill => {
+            const pill = document.createElement('span');
+            pill.className = 'pill';
+            pill.textContent = skill;
+            pill.dataset.skillName = skill.toLowerCase();
+            scoreSkillSelectionContainer.appendChild(pill);
+
+            pill.addEventListener('click', () => {
+                scoreSkillSelectionContainer.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+            });
+        });
+
+        // --- Render Scores History ---
+        profileScoresListUl.innerHTML = '';
+        const allScores = [];
+        for (const skill in student.logs.scores) {
+            student.logs.scores[skill].forEach(score => {
+                allScores.push(score);
+            });
+        }
+
+        allScores.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        if (allScores.length === 0) {
+            profileScoresListUl.innerHTML = '<li>هنوز نمره‌ای ثبت نشده است.</li>';
+        } else {
+            allScores.forEach(score => {
+                const li = document.createElement('li');
+                li.className = 'score-history-item';
+                li.innerHTML = `
+                    <div class="score-info">
+                        <span class="score-skill-badge">${score.skill}</span>
+                        <span class="score-value">نمره: <strong>${score.value}</strong></span>
+                        <span class="score-date">${new Date(score.timestamp).toLocaleDateString('fa-IR')}</span>
+                    </div>
+                    ${score.comment ? `<p class="score-comment"><strong>توضیحات:</strong> ${score.comment}</p>` : ''}
+                `;
+                profileScoresListUl.appendChild(li);
+            });
+        }
+
+        // Clear input fields
+        newScoreValueInput.value = '';
+        newScoreCommentTextarea.value = '';
+        if (scoreSkillSelectionContainer.querySelector('.pill.active')) {
+            scoreSkillSelectionContainer.querySelector('.pill.active').classList.remove('active');
+        }
     }
 
     function renderColumnSelector(headers) {
@@ -1298,6 +1404,36 @@ document.addEventListener('DOMContentLoaded', () => {
     backToSessionsFromAttendanceBtn.addEventListener('click', () => {
         renderSessions();
         showPage('session-page');
+    });
+
+    backToStudentPageBtn.addEventListener('click', () => {
+        selectedStudentForProfile = null;
+        showPage('student-page');
+    });
+
+    addScoreBtn.addEventListener('click', () => {
+        const selectedSkillPill = scoreSkillSelectionContainer.querySelector('.pill.active');
+        if (!selectedSkillPill) {
+            showNotification('لطفاً یک مهارت را برای نمره‌دهی انتخاب کنید.');
+            return;
+        }
+
+        const skill = selectedSkillPill.dataset.skillName;
+        const value = parseInt(newScoreValueInput.value, 10);
+        const comment = newScoreCommentTextarea.value.trim();
+
+        if (isNaN(value) || value < 0 || value > 100) {
+            showNotification('لطفاً یک نمره معتبر بین ۰ تا ۱۰۰ وارد کنید.');
+            return;
+        }
+
+        if (selectedStudentForProfile) {
+            selectedStudentForProfile.addScore(skill, value, comment);
+            saveData();
+            showNotification(`نمره برای مهارت ${skill} با موفقیت ثبت شد.`);
+            // Re-render the page to show the new score
+            renderStudentProfilePage();
+        }
     });
 
     // --- توابع مربوط به باگ یابی debugging ---

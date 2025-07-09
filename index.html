@@ -154,6 +154,37 @@
         </div>
     </main>
 
+    <main id="student-profile-page" class="page">
+        <h2 id="profile-student-name-header"></h2>
+        <button id="back-to-student-page-btn" class="btn-secondary" style="width: auto;">➡️ بازگشت به صفحه جلسه</button>
+        <hr class="separator">
+
+        <div class="profile-content-container">
+            <div class="scoring-section">
+                <h3>ثبت نمره جدید</h3>
+                <div id="score-skill-selection" class="category-pills">
+                    <!-- Pills for skills will be generated here -->
+                </div>
+                <div class="input-group" style="margin-top: 15px;">
+                    <input type="number" id="new-score-value" placeholder="نمره (مثلا: 85)" style="width: 100%;">
+                </div>
+                <textarea id="new-score-comment" placeholder="توضیحات (اختیاری)..." style="margin-top: 10px;"></textarea>
+                <button id="add-score-btn" class="btn-success" style="width: 100%; margin-top: 10px;">ثبت نمره</button>
+            </div>
+
+            <div class="history-section">
+                <h3>سوابق دانش‌آموز</h3>
+                <div id="profile-stats-summary" class="stats-summary-box">
+                    <!-- Student's general stats will be displayed here -->
+                </div>
+                <h4 style="margin-top: 20px;">تاریخچه نمرات:</h4>
+                <ul id="profile-scores-list" class="list-container">
+                    <!-- Scores history will be listed here -->
+                </ul>
+            </div>
+        </div>
+    </main>
+
     <div id="undo-toast" class="undo-toast">
         <span id="undo-message"></span>
         <button id="undo-btn">واگرد</button>
