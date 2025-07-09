@@ -1147,11 +1147,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (winner) {
             displayWinner(winner, selectedCategory.name);
             const studentRecord = selectedSession.studentRecords[winner.identity.studentId];
-            if (studentRecord && studentRecord.attendance === 'absent') {
-                winner.statusCounters.missedChances++;
-            }
-            if (studentRecord && studentRecord.hadIssue) {
-                winner.statusCounters.otherIssues++;
+            if (studentRecord) {
+                if (studentRecord.attendance === 'absent') {
+                    winner.statusCounters.missedChances++;
+                } else if (studentRecord.hadIssue) {
+                    winner.statusCounters.missedChances++;
+                    winner.statusCounters.otherIssues++;
+                }
             }
             selectedSession.lastUsedCategoryId = selectedCategory.id;
             selectedSession.lastSelectedWinnerId = winner.identity.studentId;
