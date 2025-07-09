@@ -38,6 +38,16 @@ class Student {
     }
 }
 
+class Score {
+    constructor(skill, value, comment = '') {
+        this.id = `score_${new Date().getTime()}`;
+        this.skill = skill;
+        this.value = value;
+        this.timestamp = new Date();
+        this.comment = comment;
+    }
+}
+
 class Session {
     constructor(sessionNumber) {
         this.sessionNumber = sessionNumber;
