@@ -542,6 +542,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             presentBtn.addEventListener('click', () => {
+                const studentRecord = selectedSession.studentRecords[student.identity.studentId];
+                if (!studentRecord) return;
+
+                const wasAbsent = studentRecord.attendance === 'absent';
+                const hadIssue = studentRecord.hadIssue;
+
+                if (wasAbsent) {
+                    student.statusCounters.missedChances--;
+                }
+                if (hadIssue) {
+                    // This was a separate missed chance, so decrement both.
+                    student.statusCounters.missedChances--;
+                    student.statusCounters.otherIssues--;
+                    studentRecord.hadIssue = false;
+                }
+
                 selectedSession.setAttendance(student.identity.studentId, 'present');
                 presentBtn.classList.add('active');
                 absentBtn.classList.remove('active');
@@ -549,15 +565,25 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             absentBtn.addEventListener('click', () => {
-                selectedSession.setAttendance(student.identity.studentId, 'absent');
-
-                // Mutual Exclusion: If a student is marked as absent, they cannot have an issue.
                 const studentRecord = selectedSession.studentRecords[student.identity.studentId];
-                if (studentRecord && studentRecord.hadIssue) {
-                    student.statusCounters.otherIssues--;
-                    studentRecord.hadIssue = false;
-                }
+                if (!studentRecord) return;
 
+                const wasPresent = studentRecord.attendance === 'present';
+
+                if (wasPresent) {
+                    if (studentRecord.hadIssue) {
+                        // The reason for the missed chance is changing from issue to absent.
+                        // The count of missedChances remains the same, but otherIssues is decremented.
+                        student.statusCounters.otherIssues--;
+                        studentRecord.hadIssue = false;
+                    } else {
+                        // This is a new missed chance.
+                        student.statusCounters.missedChances++;
+                    }
+                }
+                // If already absent, no counters change.
+
+                selectedSession.setAttendance(student.identity.studentId, 'absent');
                 absentBtn.classList.add('active');
                 presentBtn.classList.remove('active');
                 saveData();
