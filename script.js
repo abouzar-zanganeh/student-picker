@@ -550,6 +550,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             absentBtn.addEventListener('click', () => {
                 selectedSession.setAttendance(student.identity.studentId, 'absent');
+
+                // Mutual Exclusion: If a student is marked as absent, they cannot have an issue.
+                const studentRecord = selectedSession.studentRecords[student.identity.studentId];
+                if (studentRecord && studentRecord.hadIssue) {
+                    student.statusCounters.otherIssues--;
+                    studentRecord.hadIssue = false;
+                }
+
                 absentBtn.classList.add('active');
                 presentBtn.classList.remove('active');
                 saveData();
