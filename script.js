@@ -26,7 +26,7 @@ class Student {
 
         this.logs = {
             parentContacts: [],
-            scores: { listening: [], speaking: [], reading: [], writing: [] },
+            scores: [],
             discipline: [],
             sessionHistory: {},
         };
