@@ -44,7 +44,14 @@
 
         <div class="dashboard-container">
             <div class="action-column">
-                <h3>🎲 انتخابگر هوشمند</h3>
+                <div class="action-column-header">
+                    <h3>🎲 انتخابگر هوشمند</h3>
+                    <div class="student-search-container">
+                        <input type="text" id="student-search-input" placeholder="جستجوی دانش‌آموز...">
+                        <span class="search-icon">🔍</span>
+                        <div id="student-search-results" class="search-results-dropdown"></div>
+                    </div>
+                </div>
 
                 <div id="category-selection-container" class="category-pills">
                 </div>
@@ -166,7 +173,7 @@
                     <!-- Pills for skills will be generated here -->
                 </div>
                 <div class="input-group" style="margin-top: 15px;">
-                    <input type="number" id="new-score-value" placeholder="نمره (مثلا: 85)" style="width: 100%;">
+                    <input type="number" id="new-score-value" placeholder="نمره (مثلا: 85)">
                 </div>
                 <textarea id="new-score-comment" placeholder="توضیحات (اختیاری)..."
                     style="margin-top: 10px;"></textarea>

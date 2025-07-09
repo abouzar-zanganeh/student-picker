@@ -371,6 +371,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const classListHeader = document.querySelector('#class-management-page h2');
     const studentStatsHeader = document.getElementById('student-stats-header');
 
+    // --- عناصر جستجوی دانش‌آموز ---
+    const studentSearchInput = document.getElementById('student-search-input');
+    const studentSearchResultsDiv = document.getElementById('student-search-results');
+
     // --- عناصر صفحه پروفایل دانش‌آموز ---
     const studentProfilePage = document.getElementById('student-profile-page');
     const profileStudentNameHeader = document.getElementById('profile-student-name-header');
@@ -654,14 +658,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         absentBtn.addEventListener('click', () => {
             const wasPresent = selectedSession.studentRecords[winner.identity.studentId].attendance === 'present';
-            const newStatus = wasPresent ? 'absent' : 'present';
+            const hadIssue = studentRecord.hadIssue;
 
-            // Toggle Missed Chances Counter
-            winner.statusCounters.missedChances += wasPresent ? 1 : -1;
-            selectedSession.setAttendance(winner.identity.studentId, newStatus);
+            selectedSession.setAttendance(winner.identity.studentId, wasPresent ? 'absent' : 'present');
 
-            // Mutual Exclusion Logic
-            if (wasPresent && studentRecord.hadIssue) {
+            // Toggle Missed Chances, but only if it's not a transfer from an existing "missed" state
+            if (!hadIssue) {
+                winner.statusCounters.missedChances += wasPresent ? 1 : -1;
+            }
+
+            // Mutual Exclusion: If marking a student with an issue as absent, resolve the issue.
+            if (wasPresent && hadIssue) {
                 studentRecord.hadIssue = false;
                 winner.statusCounters.otherIssues--;
                 issueBtn.classList.remove('active');
@@ -674,15 +681,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         issueBtn.addEventListener('click', () => {
             const hadIssuePreviously = studentRecord.hadIssue;
+            const wasAbsent = studentRecord.attendance === 'absent';
+
             studentRecord.hadIssue = !hadIssuePreviously;
 
             // Toggle Other Issues Counter
             winner.statusCounters.otherIssues += !hadIssuePreviously ? 1 : -1;
 
-            // Mutual Exclusion Logic
-            if (!hadIssuePreviously && studentRecord.attendance === 'absent') {
+            // Toggle Missed Chances, but only if it's not a transfer from an existing "missed" state (absent)
+            if (!wasAbsent) {
+                winner.statusCounters.missedChances += !hadIssuePreviously ? 1 : -1;
+            }
+
+            // Mutual Exclusion: If marking an absent student as having an issue, make them present.
+            if (!hadIssuePreviously && wasAbsent) {
                 selectedSession.setAttendance(winner.identity.studentId, 'present');
-                winner.statusCounters.missedChances--;
                 absentBtn.classList.remove('active');
             }
 
@@ -1410,6 +1423,54 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedStudentForProfile = null;
         showPage('student-page');
     });
+
+    // --- Event Listeners for Student Search ---
+    function renderSearchResults(searchTerm = '') {
+        if (!currentClassroom) return;
+
+        const filteredStudents = currentClassroom.students.filter(student =>
+            student.identity.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        studentSearchResultsDiv.innerHTML = '';
+
+        if (filteredStudents.length > 0) {
+            filteredStudents.forEach(student => {
+                const studentDiv = document.createElement('div');
+                studentDiv.textContent = student.identity.name;
+                studentDiv.addEventListener('click', () => {
+                    selectedStudentForProfile = student;
+                    renderStudentProfilePage();
+                    showPage('student-profile-page');
+                    studentSearchResultsDiv.style.display = 'none';
+                    studentSearchInput.value = '';
+                });
+                studentSearchResultsDiv.appendChild(studentDiv);
+            });
+        } else {
+            const noResultsDiv = document.createElement('div');
+            noResultsDiv.className = 'no-results';
+            noResultsDiv.textContent = 'پیدا نشد';
+            studentSearchResultsDiv.appendChild(noResultsDiv);
+        }
+
+        studentSearchResultsDiv.style.display = 'block';
+    }
+
+    studentSearchInput.addEventListener('focus', () => {
+        renderSearchResults();
+    });
+
+    studentSearchInput.addEventListener('input', () => {
+        renderSearchResults(studentSearchInput.value);
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!studentSearchInput.contains(event.target) && !studentSearchResultsDiv.contains(event.target)) {
+            studentSearchResultsDiv.style.display = 'none';
+        }
+    });
+
 
     addScoreBtn.addEventListener('click', () => {
         const selectedSkillPill = scoreSkillSelectionContainer.querySelector('.pill.active');

@@ -35,12 +35,33 @@ h2 {
 }
 
 h3 {
-    border-bottom: 2px solid var(--color-border);
     padding-bottom: 5px;
     margin-top: 30px;
 }
 
+.action-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.action-column-header h3 {
+    margin: 0;
+    border: none;
+    flex-grow: 1;
+}
+
+.student-search-container {
+    width: 40%;
+    /* Adjust width as needed */
+    position: relative;
+}
+
 input[type="text"],
+input[type="number"],
 textarea {
     font-family: var(--font-family-main);
     padding: 10px;
@@ -665,6 +686,61 @@ button:disabled:hover {
     color: var(--color-text-dark);
 }
 
+/* --- استایل‌های جستجوی دانش‌آموز --- */
+.student-search-container {
+    position: relative;
+}
+
+#student-search-input {
+    width: 100%;
+    padding-left: 40px;
+    /* Make space for the icon */
+    box-sizing: border-box;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-muted);
+    cursor: pointer;
+}
+
+.search-results-dropdown {
+    display: none;
+    position: absolute;
+    width: 100%;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-top: none;
+    border-radius: 0 0 var(--border-radius-main) var(--border-radius-main);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.search-results-dropdown div {
+    padding: 12px 15px;
+    cursor: pointer;
+}
+
+.search-results-dropdown div:hover {
+    background-color: #e9ecef;
+}
+
+.search-results-dropdown .no-results {
+    padding: 12px 15px;
+    color: var(--color-text-muted);
+    cursor: default;
+}
+
+#new-score-value {
+    width: 150px;
+    /* Or any other suitable width */
+}
+
 /* --- استایل‌های صفحه پروفایل دانش‌آموز --- */
 .profile-content-container {
     display: flex;
@@ -729,7 +805,8 @@ button:disabled:hover {
     border-top: 1px solid var(--color-border);
     font-size: 14px;
     color: #333;
-    white-space: pre-wrap; /* To respect newlines in comment */
+    white-space: pre-wrap;
+    /* To respect newlines in comment */
 }
 
 .status-button.profile-btn {
