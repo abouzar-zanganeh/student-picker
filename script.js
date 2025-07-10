@@ -75,7 +75,7 @@ class Session {
     }
 
     markAsMakeup() {
-        this.isMakeup = true;
+        this.isMakeup = !this.isMakeup;
     }
 
     initializeStudentRecord(studentId) {
@@ -1106,31 +1106,90 @@ document.addEventListener('DOMContentLoaded', () => {
         reversedSessions.forEach(session => {
             const li = document.createElement('li');
 
+            // --- Container for text and badges ---
+            const infoContainer = document.createElement('div');
+            infoContainer.style.display = 'flex';
+            infoContainer.style.flexDirection = 'column';
+            infoContainer.style.alignItems = 'flex-start';
+            infoContainer.style.flexGrow = '1';
+            infoContainer.style.cursor = 'pointer';
+
+
             const sessionDate = new Date(session.startTime).toLocaleDateString('fa-IR');
             const sessionText = document.createElement('span');
             sessionText.textContent = `جلسه ${session.sessionNumber} - تاریخ: ${sessionDate}`;
-            li.appendChild(sessionText);
+            infoContainer.appendChild(sessionText);
 
             const badgesContainer = document.createElement('div');
+            badgesContainer.style.display = 'flex';
+            badgesContainer.style.gap = '5px';
+            badgesContainer.style.marginTop = '5px';
+
 
             if (session.isFinished) {
                 const finishedBadge = document.createElement('span');
-                finishedBadge.className = 'badge badge-secondary';
+                finishedBadge.className = 'type-badge'; // Using existing class for style
                 finishedBadge.textContent = 'خاتمه یافته';
+                finishedBadge.style.backgroundColor = 'var(--color-secondary)';
                 badgesContainer.appendChild(finishedBadge);
             }
             if (session.isMakeup) {
                 const makeupBadge = document.createElement('span');
-                makeupBadge.className = 'badge badge-warning';
+                makeupBadge.className = 'type-badge'; // Using existing class for style
                 makeupBadge.textContent = 'جبرانی';
+                makeupBadge.style.backgroundColor = 'var(--color-warning)';
+                makeupBadge.style.color = 'var(--color-text-dark)';
                 badgesContainer.appendChild(makeupBadge);
             }
-            li.appendChild(badgesContainer);
+            infoContainer.appendChild(badgesContainer);
 
-            li.addEventListener('click', () => {
+            li.appendChild(infoContainer);
+
+
+            // --- Main click event to enter the session ---
+            infoContainer.addEventListener('click', () => {
                 selectedSession = session;
                 renderStudentPage();
             });
+
+
+            // --- Container for action buttons ---
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.className = 'list-item-buttons';
+
+            // Button to toggle makeup status
+            const makeupBtn = document.createElement('button');
+            makeupBtn.className = 'btn-icon';
+            makeupBtn.innerHTML = '🔄';
+            makeupBtn.title = 'تغییر وضعیت جبرانی';
+            makeupBtn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                currentClassroom.markAsMakeup(session.sessionNumber);
+                saveData();
+                renderSessions(); // Re-render to show updated status
+            });
+            buttonsContainer.appendChild(makeupBtn);
+
+
+            // Button to end the session (only if not already finished)
+            if (!session.isFinished) {
+                const endSessionBtn = document.createElement('button');
+                endSessionBtn.className = 'btn-icon';
+                endSessionBtn.innerHTML = '✅';
+                endSessionBtn.title = 'خاتمه جلسه';
+                endSessionBtn.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    if (confirm(`آیا از خاتمه دادن جلسه ${session.sessionNumber} مطمئن هستید؟`)) {
+                        currentClassroom.endSpecificSession(session.sessionNumber);
+                        saveData();
+                        renderSessions(); // Re-render to show updated status
+                    }
+                });
+                buttonsContainer.appendChild(endSessionBtn);
+            }
+
+
+            li.appendChild(buttonsContainer);
             sessionListUl.appendChild(li);
         });
     }
