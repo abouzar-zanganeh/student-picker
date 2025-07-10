@@ -1458,6 +1458,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('new-session-btn').addEventListener('click', () => {
         if (currentClassroom) {
+            const unfinishedSession = currentClassroom.sessions.find(session => !session.isFinished);
+
+            if (unfinishedSession) {
+                showNotification(`جلسه ${unfinishedSession.sessionNumber} هنوز تمام نشده است. لطفاً ابتدا با دکمه ✅ آن را خاتمه دهید.`);
+                return;
+            }
+
             const wantsToTakeAttendance = confirm("آیا تمایل به انجام فرآیند حضور و غیاب دارید؟");
 
             const newSession = currentClassroom.startNewSession();
