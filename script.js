@@ -1047,7 +1047,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function showPage(pageId) {
+    function _internalShowPage(pageId) {
         // ابتدا تمام صفحات را پنهان می‌کنیم
         document.querySelectorAll('.page').forEach(page => {
             page.style.display = 'none';
@@ -1065,6 +1065,26 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             appHeader.style.display = 'none';
         }
+    }
+
+    function showPage(pageId) {
+        const state = {
+            pageId,
+            currentClassName: currentClassroom ? currentClassroom.info.name : null,
+            selectedSessionNumber: selectedSession ? selectedSession.sessionNumber : null,
+            selectedStudentId: selectedStudentForProfile ? selectedStudentForProfile.identity.studentId : null,
+        };
+
+        const currentState = history.state;
+        if (!currentState ||
+            currentState.pageId !== state.pageId ||
+            currentState.currentClassName !== state.currentClassName ||
+            currentState.selectedSessionNumber !== state.selectedSessionNumber ||
+            currentState.selectedStudentId !== state.selectedStudentId) {
+            history.pushState(state, '', `#${pageId}`);
+        }
+
+        _internalShowPage(pageId);
     }
 
     function renderSessions() {
@@ -1652,7 +1672,56 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log(`✅ کلاس تستی جدید با نام "${className}" و ${newClass.students.length} دانش‌آموز و ${newClass.sessions.length} جلسه با موفقیت ساخته شد.`);
     }
 
+    // --- شنودگر رویداد برای back/forward ---
+    window.addEventListener('popstate', (event) => {
+        if (!event.state) {
+            _internalShowPage('class-management-page');
+            return;
+        }
+
+        const { pageId, currentClassName, selectedSessionNumber, selectedStudentId } = event.state;
+
+        currentClassroom = currentClassName ? classrooms[currentClassName] : null;
+        selectedSession = (currentClassroom && selectedSessionNumber)
+            ? currentClassroom.getSession(selectedSessionNumber)
+            : null;
+        selectedStudentForProfile = (currentClassroom && selectedStudentId)
+            ? currentClassroom.students.find(s => s.identity.studentId === selectedStudentId)
+            : null;
+        liveSession = currentClassroom ? currentClassroom.liveSession : null;
+
+        // Re-render the view based on the restored state
+        switch (pageId) {
+            case 'class-management-page':
+                renderClassList();
+                break;
+            case 'session-page':
+                renderSessions();
+                updateSessionPageHeader();
+                break;
+            case 'student-page':
+                renderStudentPage();
+                break;
+            case 'attendance-page':
+                renderAttendancePage();
+                break;
+            case 'settings-page':
+                if (currentClassroom) {
+                    settingsClassNameHeader.textContent = `تنظیمات کلاس: ${currentClassroom.info.name}`;
+                    renderSettingsStudentList();
+                    renderSettingsCategories();
+                }
+                break;
+            case 'student-profile-page':
+                renderStudentProfilePage();
+                break;
+        }
+
+        _internalShowPage(pageId);
+    });
+
     // --- بارگذاری اولیه ---
+    history.replaceState({ pageId: 'class-management-page' }, '', '#class-management-page');
     loadData();
 
 
