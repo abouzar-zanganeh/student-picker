@@ -328,6 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let resetEasterEggClickCount = 0;
     let resetEasterEggLastClickTime = 0;
     let confirmCallback = null;
+    let cancelCallback = null;
 
 
 
@@ -516,9 +517,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }, duration);
     }
 
-    function showCustomConfirm(message, callback) {
+    function showCustomConfirm(message, onConfirm, options = {}) {
+        const {
+            confirmText = 'تایید',
+            cancelText = 'لغو',
+            confirmClass = 'btn-success',
+            onCancel = null
+        } = options;
+
         confirmModalMessage.textContent = message;
-        confirmCallback = callback;
+        confirmModalConfirmBtn.textContent = confirmText;
+        confirmModalCancelBtn.textContent = cancelText;
+
+        // Reset classes and apply the new one
+        confirmModalConfirmBtn.className = 'modal-action-btn'; // Base class
+        confirmModalConfirmBtn.classList.add(confirmClass);
+
+        confirmCallback = onConfirm;
+        cancelCallback = onCancel;
+
         customConfirmModal.style.display = 'flex';
     }
 
@@ -969,19 +986,23 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteBtn.addEventListener('click', (event) => {
                 event.stopPropagation();
 
-                showCustomConfirm(`آیا از حذف کلاس «${name}» مطمئن هستید؟ این عمل تمام جلسات و آمار مربوط به آن را نیز حذف می‌کند.`, () => {
-                    // قبل از هر تغییری، وضعیت فعلی را برای قابلیت واگرد ذخیره می‌کنیم
-                    showUndoToast(`کلاس «${name}» حذف شد.`);
+                showCustomConfirm(
+                    `آیا از حذف کلاس «${name}» مطمئن هستید؟ این عمل تمام جلسات و آمار مربوط به آن را نیز حذف می‌کند.`,
+                    () => {
+                        // قبل از هر تغییری، وضعیت فعلی را برای قابلیت واگرد ذخیره می‌کنیم
+                        showUndoToast(`کلاس «${name}» حذف شد.`);
 
-                    // کلاس را از آبجکت اصلی در حافظه حذف می‌کنیم
-                    delete classrooms[name];
+                        // کلاس را از آبجکت اصلی در حافظه حذف می‌کنیم
+                        delete classrooms[name];
 
-                    // مهم‌ترین بخش: آبجکت به‌روز شده را فوراً در حافظه مرورگر ذخیره می‌کنیم
-                    saveData();
+                        // مهم‌ترین بخش: آبجکت به‌روز شده را فوراً در حافظه مرورگر ذخیره می‌کنیم
+                        saveData();
 
-                    // در نهایت، لیست کلاس‌ها را دوباره رندر می‌کنیم تا تغییر در صفحه دیده شود
-                    renderClassList();
-                });
+                        // در نهایت، لیست کلاس‌ها را دوباره رندر می‌کنیم تا تغییر در صفحه دیده شود
+                        renderClassList();
+                    },
+                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
+                );
             });
 
             buttonsContainer.appendChild(settingsBtn);
@@ -1195,11 +1216,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 endSessionBtn.title = 'خاتمه جلسه';
                 endSessionBtn.addEventListener('click', (event) => {
                     event.stopPropagation();
-                    showCustomConfirm(`آیا از خاتمه دادن جلسه ${session.sessionNumber} مطمئن هستید؟`, () => {
-                        currentClassroom.endSpecificSession(session.sessionNumber);
-                        saveData();
-                        renderSessions(); // Re-render to show updated status
-                    });
+                    showCustomConfirm(
+                        `آیا از خاتمه دادن جلسه ${session.sessionNumber} مطمئن هستید؟`,
+                        () => {
+                            currentClassroom.endSpecificSession(session.sessionNumber);
+                            saveData();
+                            renderSessions(); // Re-render to show updated status
+                        },
+                        { confirmText: 'بله', confirmClass: 'btn-success' }
+                    );
                 });
                 buttonsContainer.appendChild(endSessionBtn);
             }
@@ -1212,15 +1237,19 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteSessionBtn.style.color = 'var(--color-warning)';
             deleteSessionBtn.addEventListener('click', (event) => {
                 event.stopPropagation();
-                showCustomConfirm(`آیا از حذف جلسه ${session.sessionNumber} مطمئن هستید؟ این عمل آمار ثبت شده در این جلسه را نیز حذف می‌کند.`, () => {
-                    showUndoToast(`جلسه ${session.sessionNumber} حذف شد.`);
-                    const sessionIndex = currentClassroom.sessions.findIndex(s => s.sessionNumber === session.sessionNumber);
-                    if (sessionIndex > -1) {
-                        currentClassroom.sessions.splice(sessionIndex, 1);
-                        saveData();
-                        renderSessions();
-                    }
-                });
+                showCustomConfirm(
+                    `آیا از حذف جلسه ${session.sessionNumber} مطمئن هستید؟ این عمل آمار ثبت شده در این جلسه را نیز حذف می‌کند.`,
+                    () => {
+                        showUndoToast(`جلسه ${session.sessionNumber} حذف شد.`);
+                        const sessionIndex = currentClassroom.sessions.findIndex(s => s.sessionNumber === session.sessionNumber);
+                        if (sessionIndex > -1) {
+                            currentClassroom.sessions.splice(sessionIndex, 1);
+                            saveData();
+                            renderSessions();
+                        }
+                    },
+                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
+                );
             });
             buttonsContainer.appendChild(deleteSessionBtn);
 
@@ -1252,9 +1281,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (resetEasterEggClickCount === 5) {
             resetEasterEggClickCount = 0;
 
-            showCustomConfirm("آیا از صفر کردن تمام شمارنده‌های دانش‌آموزان مطمئن هستید؟ این عمل غیرقابل بازگشت است.", () => {
-                resetAllStudentCounters();
-            });
+            showCustomConfirm(
+                "آیا از صفر کردن تمام شمارنده‌های دانش‌آموزان مطمئن هستید؟ این عمل غیرقابل بازگشت است.",
+                () => {
+                    resetAllStudentCounters();
+                },
+                { confirmText: 'بله', confirmClass: 'btn-warning' }
+            );
         }
     });
 
@@ -1272,16 +1305,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (easterEggClickCount === 5) {
             easterEggClickCount = 0;
 
-            showCustomConfirm("آیا از ساخت یک کلاس تستی تصادفی مطمئن هستید؟", () => {
-                createRandomClass();
-                showNotification("کلاس تستی با موفقیت ساخته شد!");
-            });
+            showCustomConfirm(
+                "آیا از ساخت یک کلاس تستی تصادفی مطمئن هستید؟",
+                () => {
+                    createRandomClass();
+                    showNotification("کلاس تستی با موفقیت ساخته شد!");
+                },
+                { confirmText: 'بساز', confirmClass: 'btn-success' }
+            );
         }
     });
 
     confirmModalCancelBtn.addEventListener('click', () => {
         customConfirmModal.style.display = 'none';
+        if (typeof cancelCallback === 'function') {
+            cancelCallback();
+        }
         confirmCallback = null;
+        cancelCallback = null;
     });
 
     confirmModalConfirmBtn.addEventListener('click', () => {
@@ -1290,6 +1331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         customConfirmModal.style.display = 'none';
         confirmCallback = null;
+        cancelCallback = null;
     });
 
     backToAttendanceBtn.addEventListener('click', () => {
@@ -1512,23 +1554,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const wantsToTakeAttendance = confirm("آیا تمایل به انجام فرآیند حضور و غیاب دارید؟");
+            const startSession = (takeAttendance) => {
+                const newSession = currentClassroom.startNewSession();
+                liveSession = newSession;
+                selectedSession = newSession;
 
-            const newSession = currentClassroom.startNewSession();
-            liveSession = newSession;
-            selectedSession = newSession;
+                currentClassroom.students.forEach(student => {
+                    liveSession.setAttendance(student.identity.studentId, 'present');
+                });
 
-            currentClassroom.students.forEach(student => {
-                liveSession.setAttendance(student.identity.studentId, 'present');
-            });
+                if (takeAttendance) {
+                    renderAttendancePage();
+                    showPage('attendance-page');
+                } else {
+                    renderStudentPage();
+                }
+                saveData();
+            };
 
-            if (wantsToTakeAttendance) {
-                renderAttendancePage();
-                showPage('attendance-page');
-            } else {
-                renderStudentPage();
-            }
-            saveData();
+            showCustomConfirm(
+                "آیا تمایل به انجام فرآیند حضور و غیاب دارید؟",
+                () => startSession(true), // onConfirm
+                {
+                    confirmText: 'بله',
+                    cancelText: 'خیر',
+                    confirmClass: 'btn-success',
+                    onCancel: () => startSession(false) // onCancel
+                }
+            );
         }
     });
     addClassBtn.addEventListener('click', () => {

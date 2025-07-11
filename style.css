@@ -781,9 +781,11 @@ button:disabled:hover {
 
 .score-info {
     display: flex;
-    justify-content: flex-start; /* Align to the start (right in RTL) */
+    justify-content: flex-start;
+    /* Align to the start (right in RTL) */
     align-items: center;
-    gap: 20px; /* Add space between items */
+    gap: 20px;
+    /* Add space between items */
     margin-bottom: 10px;
 }
 
@@ -832,6 +834,7 @@ button:disabled:hover {
     align-items: center;
     z-index: 2000;
     padding: 20px;
+    box-sizing: border-box;
 }
 
 .modal-content {
@@ -842,6 +845,7 @@ button:disabled:hover {
     text-align: center;
     max-width: 400px;
     width: 100%;
+    box-sizing: border-box;
 }
 
 .modal-content p {
