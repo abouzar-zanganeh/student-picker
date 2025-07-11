@@ -742,6 +742,7 @@ button:disabled:hover {
 
 #new-score-value {
     width: 150px;
+    text-align: center;
     /* Or any other suitable width */
 }
 
