@@ -44,6 +44,11 @@ class Student {
         const newScore = new Score(skill, value, comment);
         this.logs.scores[skill].push(newScore);
     }
+
+    addNote(content) {
+        const newNote = new Note(content);
+        this.profile.notes.push(newNote);
+    }
 }
 
 class Score {
@@ -53,6 +58,14 @@ class Score {
         this.value = value;
         this.timestamp = new Date();
         this.comment = comment;
+    }
+}
+
+class Note {
+    constructor(content) {
+        this.id = `note_${new Date().getTime()}`;
+        this.timestamp = new Date();
+        this.content = content;
     }
 }
 
@@ -378,6 +391,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmModalMessage = document.getElementById('confirm-modal-message');
     const confirmModalCancelBtn = document.getElementById('confirm-modal-cancel-btn');
     const confirmModalConfirmBtn = document.getElementById('confirm-modal-confirm-btn');
+
+    // --- عناصر مودال یادداشت ---
+    const addNoteModal = document.getElementById('add-note-modal');
+    const newNoteContent = document.getElementById('new-note-content');
+    const saveNoteBtn = document.getElementById('save-note-btn');
+    const cancelNoteBtn = document.getElementById('cancel-note-btn');
 
     // --- عناصر جستجوی دانش‌آموز ---
     const studentSearchInput = document.getElementById('student-search-input');
@@ -908,6 +927,32 @@ document.addEventListener('DOMContentLoaded', () => {
         if (scoreSkillSelectionContainer.querySelector('.pill.active')) {
             scoreSkillSelectionContainer.querySelector('.pill.active').classList.remove('active');
         }
+
+        renderStudentNotes();
+    }
+
+    function renderStudentNotes() {
+        const profileNotesListUl = document.getElementById('profile-notes-list');
+        profileNotesListUl.innerHTML = '';
+
+        if (!selectedStudentForProfile || !selectedStudentForProfile.profile.notes || selectedStudentForProfile.profile.notes.length === 0) {
+            profileNotesListUl.innerHTML = '<li>هنوز یادداشتی ثبت نشده است.</li>';
+            return;
+        }
+
+        const sortedNotes = [...selectedStudentForProfile.profile.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        sortedNotes.forEach(note => {
+            const li = document.createElement('li');
+            li.className = 'note-history-item'; // A new class for styling
+            li.innerHTML = `
+                <div class="note-info">
+                    <span class="note-date">${new Date(note.timestamp).toLocaleDateString('fa-IR')}</span>
+                </div>
+                <p class="note-content">${note.content}</p>
+            `;
+            profileNotesListUl.appendChild(li);
+        });
     }
 
     function renderColumnSelector(headers) {
@@ -1729,6 +1774,33 @@ document.addEventListener('DOMContentLoaded', () => {
             showNotification(`نمره برای مهارت ${skill} با موفقیت ثبت شد.`);
             // Re-render the page to show the new score
             renderStudentProfilePage();
+        }
+    });
+
+    // --- Event Listeners for Add Note Modal ---
+    document.body.addEventListener('click', (event) => {
+        if (event.target.id === 'add-note-btn') {
+            addNoteModal.style.display = 'flex';
+            newNoteContent.focus();
+        }
+    });
+
+    cancelNoteBtn.addEventListener('click', () => {
+        addNoteModal.style.display = 'none';
+        newNoteContent.value = '';
+    });
+
+    saveNoteBtn.addEventListener('click', () => {
+        const content = newNoteContent.value.trim();
+        if (content && selectedStudentForProfile) {
+            selectedStudentForProfile.addNote(content);
+            saveData();
+            showNotification('یادداشت با موفقیت ثبت شد.');
+            renderStudentNotes();
+            addNoteModal.style.display = 'none';
+            newNoteContent.value = '';
+        } else {
+            showNotification('لطفاً متن یادداشت را وارد کنید.', 3000);
         }
     });
 
