@@ -505,20 +505,114 @@ button:disabled:hover {
 .result-display {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start; /* محتوا از بالا شروع شود */
     align-items: center;
-    height: 120px;
+    min-height: 250px; /* حداقل ارتفاع برای جای دادن محتوای جدید */
+    height: auto; /* ارتفاع خودکار برای تطبیق با محتوا */
     text-align: center;
     font-size: 22px;
     margin-top: 20px;
     font-weight: bold;
     color: var(--color-success);
-    padding: 10px;
-    /* این پدینگ همیشه اعمال می‌شود */
+    padding: 20px; /* افزایش پدینگ برای فضای بیشتر */
     border: 1px solid transparent;
-    /* یک حاشیه نامرئی برای حفظ فضا */
     border-radius: var(--border-radius-main);
     transition: all 0.3s ease;
+}
+
+/* استایل‌های کانتینر اصلی جزئیات دانش‌آموز */
+.student-details-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 20px;
+    width: 100%;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--color-border);
+    text-align: right; /* راست‌چین کردن متن‌ها */
+}
+
+/* استایل‌های ستون‌های نمرات و یادداشت‌ها */
+.student-details-scores,
+.student-details-notes {
+    flex: 1; /* هر ستون نصف فضا را بگیرد */
+    font-size: 14px; /* فونت کوچکتر برای حالت فشرده */
+    font-weight: normal;
+    color: var(--color-text-dark);
+}
+
+.student-details-container h4 {
+    font-size: 15px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+/* لیست نمرات */
+.scores-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.scores-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0; /* پدینگ کمتر برای فشردگی */
+    border: none; /* حذف حاشیه پیش‌فرض آیتم لیست */
+    background: none; /* حذف پس‌زمینه پیش‌فرض */
+    direction: ltr; /* نمایش محتوا از چپ به راست */
+}
+
+.skill-name {
+    font-weight: bold;
+}
+
+.skill-scores {
+    font-family: monospace; /* فونت مناسب برای اعداد */
+    direction: ltr; /* اعداد از چپ به راست نمایش داده شوند */
+    text-align: left;
+}
+
+/* لیست یادداشت‌ها */
+.notes-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 120px; /* محدودیت ارتفاع برای کل لیست */
+    overflow-y: auto; /* اسکرول در صورت بلند بودن لیست */
+    background-color: #fdfde9; /* پس‌زمینه زرد کم‌رنگ */
+    padding: 10px;
+    border-radius: var(--border-radius-main);
+}
+
+.notes-list li {
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    padding: 5px 0; /* کمی فاصله بین یادداشت‌ها */
+    border-bottom: 1px solid #f0f0c9; /* جداکننده ظریف */
+    background: none;
+    border: none;
+    display: block;
+    text-align: left;
+    direction: ltr;
+}
+
+.notes-list li:last-child {
+    border-bottom: none; /* حذف جداکننده برای آخرین آیتم */
+}
+
+/* پیام برای محتوای خالی */
+.no-content-message {
+    color: var(--color-text-muted);
+    font-style: italic;
+    font-size: 13px;
+    text-align: center;
+    padding: 10px;
 }
 
 .result-display.absent {

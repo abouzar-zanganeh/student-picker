@@ -798,6 +798,85 @@ document.addEventListener('DOMContentLoaded', () => {
         buttonContainer.appendChild(issueBtn);
         buttonContainer.appendChild(profileBtn);
         resultDiv.appendChild(buttonContainer);
+
+        // --- نمایش اطلاعات سریع دانش‌آموز (نمرات و یادداشت‌ها) ---
+        const detailsContainer = document.createElement('div');
+        detailsContainer.className = 'student-details-container';
+
+        // --- بخش نمرات ---
+        const scoresDiv = document.createElement('div');
+        scoresDiv.className = 'student-details-scores';
+        scoresDiv.innerHTML = '<h4>آخرین نمرات</h4>';
+
+        const scoresList = document.createElement('ul');
+        scoresList.className = 'scores-list';
+
+        const skills = ['Reading', 'Writing', 'Speaking', 'Listening'];
+        let hasAnyScore = false;
+
+        const studentScores = winner.logs.scores || {};
+
+        skills.forEach(skill => {
+            const li = document.createElement('li');
+            const skillNameSpan = document.createElement('span');
+            skillNameSpan.className = 'skill-name';
+            skillNameSpan.textContent = `${skill}:`;
+
+            const skillScoresSpan = document.createElement('span');
+            skillScoresSpan.className = 'skill-scores';
+
+            const skillKey = skill.toLowerCase();
+            const scoresForSkill = studentScores[skillKey];
+
+            if (scoresForSkill && scoresForSkill.length > 0) {
+                hasAnyScore = true;
+                // نمایش حداکثر ۳ نمره آخر
+                skillScoresSpan.textContent = scoresForSkill.slice(-3).map(s => s.value).join(', ');
+            } else {
+                skillScoresSpan.textContent = 'none';
+            }
+
+            li.appendChild(skillNameSpan);
+            li.appendChild(skillScoresSpan);
+            scoresList.appendChild(li);
+        });
+
+        if (!hasAnyScore && Object.keys(studentScores).length === 0) {
+            scoresList.innerHTML = `<li class="no-content-message">هنوز نمره‌ای ثبت نشده.</li>`;
+        }
+
+        scoresDiv.appendChild(scoresList);
+        detailsContainer.appendChild(scoresDiv);
+
+
+        // --- بخش یادداشت‌ها ---
+        const notesDiv = document.createElement('div');
+        notesDiv.className = 'student-details-notes';
+        notesDiv.innerHTML = '<h4>یادداشت‌ها</h4>';
+
+        const notesList = document.createElement('ul');
+        notesList.className = 'notes-list';
+
+        if (winner.profile.notes && winner.profile.notes.length > 0) {
+            const sortedNotes = [...winner.profile.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            sortedNotes.forEach(note => {
+                const noteItem = document.createElement('li');
+                noteItem.textContent = note.content;
+                notesList.appendChild(noteItem);
+            });
+
+        } else {
+            const noNotesItem = document.createElement('li');
+            noNotesItem.className = 'no-content-message';
+            noNotesItem.textContent = 'یادداشتی وجود ندارد.';
+            notesList.appendChild(noNotesItem);
+        }
+
+        notesDiv.appendChild(notesList);
+        detailsContainer.appendChild(notesDiv);
+
+        resultDiv.appendChild(detailsContainer);
     }
 
     function renderStudentPage() {
