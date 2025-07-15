@@ -11,8 +11,18 @@
 <body>
 
     <header class="app-header">
+        <button id="hamburger-menu-btn" class="btn-icon">☰</button>
         <h1>📚 دستیار هوشمند معلم</h1>
+        <div class="header-placeholder"></div> <!-- To balance the flexbox -->
     </header>
+
+    <div id="side-nav-menu" class="side-nav">
+        <a href="javascript:void(0)" id="close-nav-btn" class="close-btn">&times;</a>
+        <button id="backup-data-btn" class="nav-btn">📤 پشتیبان‌گیری</button>
+        <button id="restore-data-btn" class="nav-btn">📥 بازیابی</button>
+        <input type="file" id="restore-file-input" class="hidden-input" accept=".json">
+    </div>
+    <div id="overlay" class="overlay"></div>
 
     <main id="class-management-page" class="page active">
         <h2>لیست کلاس‌ها</h2>

@@ -386,6 +386,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const classListHeader = document.querySelector('#class-management-page h2');
     const studentStatsHeader = document.getElementById('student-stats-header');
 
+    // --- عناصر منوی همبرگری و پشتیبان‌گیری/بازیابی ---
+    const hamburgerMenuBtn = document.getElementById('hamburger-menu-btn');
+    const sideNavMenu = document.getElementById('side-nav-menu');
+    const closeNavBtn = document.getElementById('close-nav-btn');
+    const overlay = document.getElementById('overlay');
+    const backupDataBtn = document.getElementById('backup-data-btn');
+    const restoreDataBtn = document.getElementById('restore-data-btn');
+    const restoreFileInput = document.getElementById('restore-file-input');
+
     // --- عناصر مودال تایید ---
     const customConfirmModal = document.getElementById('custom-confirm-modal');
     const confirmModalMessage = document.getElementById('confirm-modal-message');
@@ -2015,6 +2024,87 @@ document.addEventListener('DOMContentLoaded', () => {
 
         console.log(`✅ شمارنده‌های ${studentCount} دانش‌آموز با موفقیت صفر شد. داده‌ها ذخیره شدند.`);
     }
+
+    // --- توابع مربوط به منو و پشتیبان‌گیری ---
+    function openNav() {
+        sideNavMenu.style.width = "250px";
+        overlay.style.display = "block";
+    }
+
+    function closeNav() {
+        sideNavMenu.style.width = "0";
+        overlay.style.display = "none";
+    }
+
+    function getPersianDate() {
+        const date = new Date();
+        const year = new Intl.DateTimeFormat('fa-IR-u-nu-latn', { year: 'numeric' }).format(date).replace(/‎/g, '');
+        const month = new Intl.DateTimeFormat('fa-IR-u-nu-latn', { month: '2-digit' }).format(date).replace(/‎/g, '');
+        const day = new Intl.DateTimeFormat('fa-IR-u-nu-latn', { day: '2-digit' }).format(date).replace(/‎/g, '');
+        return `${year}-${month}-${day}`;
+    }
+
+    hamburgerMenuBtn.addEventListener('click', openNav);
+    closeNavBtn.addEventListener('click', closeNav);
+    overlay.addEventListener('click', closeNav);
+
+    backupDataBtn.addEventListener('click', () => {
+        try {
+            const dataStr = JSON.stringify(classrooms, null, 2); // Pretty print JSON
+            const dataBlob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `teacher-assistant-backup-${getPersianDate()}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showNotification('فایل پشتیبان با موفقیت ایجاد شد.');
+            closeNav();
+        } catch (error) {
+            console.error("خطا در ایجاد فایل پشتیبان:", error);
+            showNotification('خطا در ایجاد فایل پشتیبان.', 5000);
+        }
+    });
+
+    restoreDataBtn.addEventListener('click', () => {
+        restoreFileInput.click();
+    });
+
+    restoreFileInput.addEventListener('change', (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const restoredData = JSON.parse(e.target.result);
+                showCustomConfirm(
+                    "آیا مطمئن هستید؟ تمام داده‌های فعلی شما با اطلاعات فایل پشتیبان جایگزین خواهد شد. این عمل غیرقابل بازگشت است.",
+                    () => {
+                        rehydrateData(restoredData);
+                        saveData();
+                        currentClassroom = null;
+                        selectedSession = null;
+                        renderClassList();
+                        showPage('class-management-page');
+                        showNotification('اطلاعات با موفقیت بازیابی شد.');
+                        closeNav();
+                    },
+                    {
+                        confirmText: 'تایید و بازیابی',
+                        confirmClass: 'btn-warning'
+                    }
+                );
+            } catch (error) {
+                console.error("خطا در خواندن یا تجزیه فایل بازیابی:", error);
+                showNotification('فایل پشتیبان معتبر نیست.', 5000);
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = null; // Reset input
+    });
 
     window.createRandomClass = function () {
         const randomId = Math.floor(Math.random() * 1000);
