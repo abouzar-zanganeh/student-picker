@@ -868,19 +868,36 @@ button:disabled:hover {
     justify-content: space-between;
 }
 
-.score-history-item {
-    flex-direction: column;
-    align-items: stretch;
+.score-history-item,
+.note-history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
     padding: 15px;
+}
+
+.item-content {
+    flex-grow: 1;
+}
+
+.delete-item-btn {
+    flex-shrink: 0;
+    margin-right: 15px; /* فاصله دکمه از محتوا */
+    opacity: 0.3;
+    transition: opacity 0.2s ease;
+}
+
+.score-history-item:hover .delete-item-btn,
+.note-history-item:hover .delete-item-btn {
+    opacity: 1;
 }
 
 .score-info {
     display: flex;
-    justify-content: flex-start;
-    /* Align to the start (right in RTL) */
+    justify-content: flex-start; /* Align to the start (right in RTL) */
     align-items: center;
-    gap: 20px;
-    /* Add space between items */
+    gap: 20px; /* Add space between items */
     margin-bottom: 10px;
 }
 

@@ -988,7 +988,10 @@ document.addEventListener('DOMContentLoaded', () => {
             allScores.forEach(score => {
                 const li = document.createElement('li');
                 li.className = 'score-history-item';
-                li.innerHTML = `
+
+                const scoreContent = document.createElement('div');
+                scoreContent.className = 'item-content';
+                scoreContent.innerHTML = `
                     <div class="score-info">
                         <span class="score-date">${new Date(score.timestamp).toLocaleDateString('fa-IR')}</span>
                         <span class="score-value">نمره: <strong>${score.value}</strong></span>
@@ -996,6 +999,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     ${score.comment ? `<p class="score-comment"><strong>توضیحات:</strong> ${score.comment}</p>` : ''}
                 `;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn-icon delete-item-btn';
+                deleteBtn.innerHTML = '🗑️';
+                deleteBtn.title = 'حذف این نمره';
+
+                deleteBtn.addEventListener('click', () => {
+                    showCustomConfirm(
+                        `آیا از حذف نمره ${score.value} برای مهارت ${score.skill} مطمئن هستید؟`,
+                        () => {
+                            const skillScores = student.logs.scores[score.skill];
+                            const scoreIndex = skillScores.findIndex(s => s.id === score.id);
+                            if (scoreIndex > -1) {
+                                skillScores.splice(scoreIndex, 1);
+                                saveData();
+                                renderStudentProfilePage(); // Re-render the entire profile page
+                                showNotification('نمره با موفقیت حذف شد.');
+                            }
+                        },
+                        { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
+                    );
+                });
+
+                li.appendChild(scoreContent);
+                li.appendChild(deleteBtn);
                 profileScoresListUl.appendChild(li);
             });
         }
@@ -1023,13 +1051,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
         sortedNotes.forEach(note => {
             const li = document.createElement('li');
-            li.className = 'note-history-item'; // A new class for styling
-            li.innerHTML = `
+            li.className = 'note-history-item';
+
+            const noteContent = document.createElement('div');
+            noteContent.className = 'item-content';
+            noteContent.innerHTML = `
                 <div class="note-info">
                     <span class="note-date">${new Date(note.timestamp).toLocaleDateString('fa-IR')}</span>
                 </div>
                 <p class="note-content">${note.content}</p>
             `;
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-icon delete-item-btn';
+            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.title = 'حذف این یادداشت';
+
+            deleteBtn.addEventListener('click', () => {
+                showCustomConfirm(
+                    `آیا از حذف این یادداشت مطمئن هستید؟`,
+                    () => {
+                        const noteIndex = selectedStudentForProfile.profile.notes.findIndex(n => n.id === note.id);
+                        if (noteIndex > -1) {
+                            selectedStudentForProfile.profile.notes.splice(noteIndex, 1);
+                            saveData();
+                            renderStudentNotes(); // Only re-render the notes list
+                            showNotification('یادداشت با موفقیت حذف شد.');
+                        }
+                    },
+                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
+                );
+            });
+
+            li.appendChild(noteContent);
+            li.appendChild(deleteBtn);
             profileNotesListUl.appendChild(li);
         });
     }
