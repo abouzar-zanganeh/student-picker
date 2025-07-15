@@ -1058,6 +1058,13 @@ button:disabled:hover {
 
 .attendance-list-item .student-name {
     font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.attendance-list-item .student-name:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
 }
 
 .attendance-list-item .absence-info {

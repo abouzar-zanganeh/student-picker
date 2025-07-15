@@ -577,6 +577,12 @@ document.addEventListener('DOMContentLoaded', () => {
             nameSpan.className = 'student-name';
             nameSpan.textContent = student.identity.name;
 
+            nameSpan.addEventListener('click', () => {
+                selectedStudentForProfile = student;
+                renderStudentProfilePage();
+                showPage('student-profile-page');
+            });
+
             const absenceSpan = document.createElement('span');
             absenceSpan.className = 'absence-info';
 
