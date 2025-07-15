@@ -570,8 +570,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = document.createElement('li');
             li.className = 'attendance-list-item';
 
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'student-info';
+
             const nameSpan = document.createElement('span');
+            nameSpan.className = 'student-name';
             nameSpan.textContent = student.identity.name;
+
+            const absenceSpan = document.createElement('span');
+            absenceSpan.className = 'absence-info';
+
+            const absentSessions = currentClassroom.sessions
+                .filter(session => session.studentRecords[student.identity.studentId]?.attendance === 'absent')
+                .map(session => `جلسه ${session.sessionNumber}`);
+
+            if (absentSessions.length > 0) {
+                absenceSpan.textContent = `غیبت ها: ${absentSessions.join('، ')}`;
+            } else {
+                absenceSpan.textContent = 'غیبت ها: بدون غیبت';
+            }
+
+            infoDiv.appendChild(nameSpan);
+            infoDiv.appendChild(absenceSpan);
+
 
             const buttonGroup = document.createElement('div');
             buttonGroup.className = 'attendance-button-group';
@@ -591,6 +612,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 absentBtn.classList.add('active');
             }
 
+            const updateAbsenceInfo = () => {
+                const updatedAbsentSessions = currentClassroom.sessions
+                    .filter(session => session.studentRecords[student.identity.studentId]?.attendance === 'absent')
+                    .map(session => `جلسه ${session.sessionNumber}`);
+
+                if (updatedAbsentSessions.length > 0) {
+                    absenceSpan.textContent = `غیبت ها: ${updatedAbsentSessions.join('، ')}`;
+                } else {
+                    absenceSpan.textContent = 'غیبت ها: بدون غیبت';
+                }
+            };
+
             presentBtn.addEventListener('click', () => {
                 const studentRecord = selectedSession.studentRecords[student.identity.studentId];
                 if (!studentRecord) return;
@@ -602,7 +635,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     student.statusCounters.missedChances--;
                 }
                 if (hadIssue) {
-                    // This was a separate missed chance, so decrement both.
                     student.statusCounters.missedChances--;
                     student.statusCounters.otherIssues--;
                     studentRecord.hadIssue = false;
@@ -611,6 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 selectedSession.setAttendance(student.identity.studentId, 'present');
                 presentBtn.classList.add('active');
                 absentBtn.classList.remove('active');
+                updateAbsenceInfo();
                 saveData();
             });
 
@@ -622,26 +655,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (wasPresent) {
                     if (studentRecord.hadIssue) {
-                        // The reason for the missed chance is changing from issue to absent.
-                        // The count of missedChances remains the same, but otherIssues is decremented.
                         student.statusCounters.otherIssues--;
                         studentRecord.hadIssue = false;
                     } else {
-                        // This is a new missed chance.
                         student.statusCounters.missedChances++;
                     }
                 }
-                // If already absent, no counters change.
 
                 selectedSession.setAttendance(student.identity.studentId, 'absent');
                 absentBtn.classList.add('active');
                 presentBtn.classList.remove('active');
+                updateAbsenceInfo();
                 saveData();
             });
 
             buttonGroup.appendChild(presentBtn);
             buttonGroup.appendChild(absentBtn);
-            li.appendChild(nameSpan);
+            li.appendChild(infoDiv);
             li.appendChild(buttonGroup);
             attendanceListUl.appendChild(li);
         });

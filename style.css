@@ -505,16 +505,20 @@ button:disabled:hover {
 .result-display {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* محتوا از بالا شروع شود */
+    justify-content: flex-start;
+    /* محتوا از بالا شروع شود */
     align-items: center;
-    min-height: 250px; /* حداقل ارتفاع برای جای دادن محتوای جدید */
-    height: auto; /* ارتفاع خودکار برای تطبیق با محتوا */
+    min-height: 250px;
+    /* حداقل ارتفاع برای جای دادن محتوای جدید */
+    height: auto;
+    /* ارتفاع خودکار برای تطبیق با محتوا */
     text-align: center;
     font-size: 22px;
     margin-top: 20px;
     font-weight: bold;
     color: var(--color-success);
-    padding: 20px; /* افزایش پدینگ برای فضای بیشتر */
+    padding: 20px;
+    /* افزایش پدینگ برای فضای بیشتر */
     border: 1px solid transparent;
     border-radius: var(--border-radius-main);
     transition: all 0.3s ease;
@@ -530,14 +534,17 @@ button:disabled:hover {
     margin-top: 20px;
     padding-top: 15px;
     border-top: 1px solid var(--color-border);
-    text-align: right; /* راست‌چین کردن متن‌ها */
+    text-align: right;
+    /* راست‌چین کردن متن‌ها */
 }
 
 /* استایل‌های ستون‌های نمرات و یادداشت‌ها */
 .student-details-scores,
 .student-details-notes {
-    flex: 1; /* هر ستون نصف فضا را بگیرد */
-    font-size: 14px; /* فونت کوچکتر برای حالت فشرده */
+    flex: 1;
+    /* هر ستون نصف فضا را بگیرد */
+    font-size: 14px;
+    /* فونت کوچکتر برای حالت فشرده */
     font-weight: normal;
     color: var(--color-text-dark);
 }
@@ -561,10 +568,14 @@ button:disabled:hover {
 .scores-list li {
     display: flex;
     justify-content: space-between;
-    padding: 4px 0; /* پدینگ کمتر برای فشردگی */
-    border: none; /* حذف حاشیه پیش‌فرض آیتم لیست */
-    background: none; /* حذف پس‌زمینه پیش‌فرض */
-    direction: ltr; /* نمایش محتوا از چپ به راست */
+    padding: 4px 0;
+    /* پدینگ کمتر برای فشردگی */
+    border: none;
+    /* حذف حاشیه پیش‌فرض آیتم لیست */
+    background: none;
+    /* حذف پس‌زمینه پیش‌فرض */
+    direction: ltr;
+    /* نمایش محتوا از چپ به راست */
 }
 
 .skill-name {
@@ -572,8 +583,10 @@ button:disabled:hover {
 }
 
 .skill-scores {
-    font-family: monospace; /* فونت مناسب برای اعداد */
-    direction: ltr; /* اعداد از چپ به راست نمایش داده شوند */
+    font-family: monospace;
+    /* فونت مناسب برای اعداد */
+    direction: ltr;
+    /* اعداد از چپ به راست نمایش داده شوند */
     text-align: left;
 }
 
@@ -582,9 +595,12 @@ button:disabled:hover {
     list-style: none;
     padding: 0;
     margin: 0;
-    max-height: 120px; /* محدودیت ارتفاع برای کل لیست */
-    overflow-y: auto; /* اسکرول در صورت بلند بودن لیست */
-    background-color: #fdfde9; /* پس‌زمینه زرد کم‌رنگ */
+    max-height: 120px;
+    /* محدودیت ارتفاع برای کل لیست */
+    overflow-y: auto;
+    /* اسکرول در صورت بلند بودن لیست */
+    background-color: #fdfde9;
+    /* پس‌زمینه زرد کم‌رنگ */
     padding: 10px;
     border-radius: var(--border-radius-main);
 }
@@ -593,8 +609,10 @@ button:disabled:hover {
     font-size: 14px;
     line-height: 1.5;
     white-space: pre-wrap;
-    padding: 5px 0; /* کمی فاصله بین یادداشت‌ها */
-    border-bottom: 1px solid #f0f0c9; /* جداکننده ظریف */
+    padding: 5px 0;
+    /* کمی فاصله بین یادداشت‌ها */
+    border-bottom: 1px solid #f0f0c9;
+    /* جداکننده ظریف */
     background: none;
     border: none;
     display: block;
@@ -603,7 +621,8 @@ button:disabled:hover {
 }
 
 .notes-list li:last-child {
-    border-bottom: none; /* حذف جداکننده برای آخرین آیتم */
+    border-bottom: none;
+    /* حذف جداکننده برای آخرین آیتم */
 }
 
 /* پیام برای محتوای خالی */
@@ -883,7 +902,8 @@ button:disabled:hover {
 
 .delete-item-btn {
     flex-shrink: 0;
-    margin-right: 15px; /* فاصله دکمه از محتوا */
+    margin-right: 15px;
+    /* فاصله دکمه از محتوا */
     opacity: 0.3;
     transition: opacity 0.2s ease;
 }
@@ -895,9 +915,11 @@ button:disabled:hover {
 
 .score-info {
     display: flex;
-    justify-content: flex-start; /* Align to the start (right in RTL) */
+    justify-content: flex-start;
+    /* Align to the start (right in RTL) */
     align-items: center;
-    gap: 20px; /* Add space between items */
+    gap: 20px;
+    /* Add space between items */
     margin-bottom: 10px;
 }
 
@@ -932,7 +954,8 @@ button:disabled:hover {
     flex-direction: column;
     align-items: stretch;
     padding: 15px;
-    background-color: #fdfde9; /* A light yellow for distinction */
+    background-color: #fdfde9;
+    /* A light yellow for distinction */
 }
 
 .note-info {
@@ -1022,4 +1045,22 @@ button:disabled:hover {
     width: 100%;
     min-height: 150px;
     margin-bottom: 20px;
+}
+
+/* --- استایل‌های جدید برای لیست حضور و غیاب --- */
+.attendance-list-item .student-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1;
+    gap: 4px;
+}
+
+.attendance-list-item .student-name {
+    font-weight: bold;
+}
+
+.attendance-list-item .absence-info {
+    font-size: 0.85em;
+    color: var(--color-text-muted);
 }
