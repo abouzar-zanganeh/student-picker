@@ -1146,3 +1146,10 @@ button:disabled:hover {
     display: none;
     transition: opacity 0.4s;
 }
+
+/* Fix for side nav menu position on wider screens. */
+@media screen and (min-width: 640px) {
+    .side-nav {
+        right: calc((100vw - 640px) / 2);
+    }
+}
