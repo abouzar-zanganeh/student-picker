@@ -1322,7 +1322,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // منطق جدید: نمایش یا پنهان کردن هدر اصلی
         if (pageId === 'class-management-page') {
-            appHeader.style.display = 'block';
+            appHeader.style.display = 'flex';
         } else {
             appHeader.style.display = 'none';
         }
@@ -2027,6 +2027,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- توابع مربوط به منو و پشتیبان‌گیری ---
     function openNav() {
+        const mainContentWidth = document.body.clientWidth;
+        const windowWidth = window.innerWidth;
+        const rightOffset = Math.max(0, (windowWidth - mainContentWidth) / 2);
+
+        sideNavMenu.style.right = `${rightOffset}px`;
         sideNavMenu.style.width = "250px";
         overlay.style.display = "block";
     }
@@ -2035,6 +2040,12 @@ document.addEventListener('DOMContentLoaded', () => {
         sideNavMenu.style.width = "0";
         overlay.style.display = "none";
     }
+
+    window.addEventListener('resize', () => {
+        if (sideNavMenu.style.width === "250px") {
+            openNav();
+        }
+    });
 
     function getPersianDate() {
         const date = new Date();
@@ -2078,6 +2089,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const reader = new FileReader();
         reader.onload = (e) => {
+            closeNav(); // Close menu immediately after file is read
             try {
                 const restoredData = JSON.parse(e.target.result);
                 showCustomConfirm(
@@ -2090,7 +2102,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         renderClassList();
                         showPage('class-management-page');
                         showNotification('اطلاعات با موفقیت بازیابی شد.');
-                        closeNav();
                     },
                     {
                         confirmText: 'تایید و بازیابی',
