@@ -1047,6 +1047,28 @@ button:disabled:hover {
     margin-bottom: 20px;
 }
 
+/* --- استایل‌های مودال تایید امن --- */
+.secure-code-display {
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--color-primary);
+    letter-spacing: 8px;
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: var(--border-radius-main);
+    user-select: none; /* جلوگیری از انتخاب متن کد */
+}
+
+#secure-confirm-input {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 4px;
+    margin-bottom: 20px;
+}
+
 /* --- استایل‌های جدید برای لیست حضور و غیاب --- */
 .attendance-list-item .student-info {
     display: flex;

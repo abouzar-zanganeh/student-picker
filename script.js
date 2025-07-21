@@ -342,6 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let resetEasterEggLastClickTime = 0;
     let confirmCallback = null;
     let cancelCallback = null;
+    let secureConfirmCallback = null;
 
 
 
@@ -400,6 +401,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const confirmModalMessage = document.getElementById('confirm-modal-message');
     const confirmModalCancelBtn = document.getElementById('confirm-modal-cancel-btn');
     const confirmModalConfirmBtn = document.getElementById('confirm-modal-confirm-btn');
+
+    // --- عناصر مودال تایید امن ---
+    const secureConfirmModal = document.getElementById('secure-confirm-modal');
+    const secureConfirmMessage = document.getElementById('secure-confirm-message');
+    const secureConfirmCode = document.getElementById('secure-confirm-code');
+    const secureConfirmInput = document.getElementById('secure-confirm-input');
+    const secureConfirmCancelBtn = document.getElementById('secure-confirm-cancel-btn');
+    const secureConfirmConfirmBtn = document.getElementById('secure-confirm-confirm-btn');
 
     // --- عناصر مودال یادداشت ---
     const addNoteModal = document.getElementById('add-note-modal');
@@ -550,21 +559,64 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmText = 'تایید',
             cancelText = 'لغو',
             confirmClass = 'btn-success',
-            onCancel = null
+            onCancel = null,
+            isDelete = false
         } = options;
 
-        confirmModalMessage.textContent = message;
-        confirmModalConfirmBtn.textContent = confirmText;
-        confirmModalCancelBtn.textContent = cancelText;
+        if (isDelete) {
+            const firstConfirm = () => {
+                showSecureConfirm(message, onConfirm);
+            };
+            confirmModalMessage.textContent = message;
+            confirmModalConfirmBtn.textContent = confirmText;
+            confirmModalCancelBtn.textContent = cancelText;
+            confirmModalConfirmBtn.className = 'modal-action-btn'; // Base class
+            confirmModalConfirmBtn.classList.add(confirmClass);
+            confirmCallback = firstConfirm;
+            cancelCallback = onCancel;
+            customConfirmModal.style.display = 'flex';
+        } else {
+            confirmModalMessage.textContent = message;
+            confirmModalConfirmBtn.textContent = confirmText;
+            confirmModalCancelBtn.textContent = cancelText;
 
-        // Reset classes and apply the new one
-        confirmModalConfirmBtn.className = 'modal-action-btn'; // Base class
-        confirmModalConfirmBtn.classList.add(confirmClass);
+            // Reset classes and apply the new one
+            confirmModalConfirmBtn.className = 'modal-action-btn'; // Base class
+            confirmModalConfirmBtn.classList.add(confirmClass);
 
-        confirmCallback = onConfirm;
-        cancelCallback = onCancel;
+            confirmCallback = onConfirm;
+            cancelCallback = onCancel;
 
-        customConfirmModal.style.display = 'flex';
+            customConfirmModal.style.display = 'flex';
+        }
+    }
+
+    function showSecureConfirm(message, onConfirm) {
+        const randomCode = Math.floor(10000 + Math.random() * 90000).toString();
+        secureConfirmMessage.textContent = message;
+        secureConfirmCode.textContent = randomCode;
+        secureConfirmInput.value = '';
+        secureConfirmConfirmBtn.disabled = true;
+
+        secureConfirmCallback = onConfirm;
+
+        secureConfirmModal.style.display = 'flex';
+        secureConfirmInput.focus();
+
+        const validationHandler = () => {
+            if (secureConfirmInput.value === randomCode) {
+                secureConfirmConfirmBtn.disabled = false;
+            } else {
+                secureConfirmConfirmBtn.disabled = true;
+            }
+        };
+
+        secureConfirmInput.addEventListener('input', validationHandler);
+
+        // Return a function to remove the event listener to prevent memory leaks
+        return () => {
+            secureConfirmInput.removeEventListener('input', validationHandler);
+        };
     }
 
     // --- توابع رندر (Render Functions) ---
@@ -1063,7 +1115,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 showNotification('نمره با موفقیت حذف شد.');
                             }
                         },
-                        { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
+                        { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
                     );
                 });
 
@@ -1124,7 +1176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             showNotification('یادداشت با موفقیت حذف شد.');
                         }
                     },
-                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
+                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
                 );
             });
 
@@ -1225,7 +1277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         // در نهایت، لیست کلاس‌ها را دوباره رندر می‌کنیم تا تغییر در صفحه دیده شود
                         renderClassList();
                     },
-                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
+                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
                 );
             });
 
@@ -1472,7 +1524,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             renderSessions();
                         }
                     },
-                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
+                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
                 );
             });
             buttonsContainer.appendChild(deleteSessionBtn);
@@ -1538,6 +1590,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 { confirmText: 'بساز', confirmClass: 'btn-success' }
             );
         }
+    });
+
+    secureConfirmCancelBtn.addEventListener('click', () => {
+        secureConfirmModal.style.display = 'none';
+        secureConfirmCallback = null;
+    });
+
+    secureConfirmConfirmBtn.addEventListener('click', () => {
+        if (typeof secureConfirmCallback === 'function') {
+            secureConfirmCallback();
+        }
+        secureConfirmModal.style.display = 'none';
+        secureConfirmCallback = null;
     });
 
     confirmModalCancelBtn.addEventListener('click', () => {
