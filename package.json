@@ -1,0 +1,25 @@
+{
+  "name": "student-picker",
+  "version": "1.0.0",
+  "description": "یک ابزار تحت وب، مدرن و هوشمند برای کمک به معلمان در مدیریت کلاس، ثبت دقیق فعالیت‌ها و انتخاب عادلانه دانش‌آموزان برای مشارکت در کلاس. این برنامه به صورت کاملاً سمت کاربر (Client-Side) و با جاوااسکریپت خالص (Vanilla JS) نوشته شده و تمام داده‌ها را به صورت امن در حافظه مرورگر شما (`localStorage`) ذخیره می‌کند.",
+  "main": "script.js",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint script.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abouzar-zanganeh/student-picker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abouzar-zanganeh/student-picker/issues"
+  },
+  "homepage": "https://github.com/abouzar-zanganeh/student-picker#readme",
+  "devDependencies": {
+    "eslint": "^9.31.0"
+  }
+}
