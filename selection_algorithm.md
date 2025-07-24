@@ -28,6 +28,8 @@ If the primary filter results in a tie (i.e., multiple students have the same lo
 
 The algorithm calculates the **sum of selection counts for each tied student across all *other* categories**. The student with the lowest total in these other categories is selected.
 
+**Crucial Detail:** This calculation is based on the student's **entire history** in the class (across all sessions), not just the counts from the active session. This provides a long-term memory for fairness.
+
 *   **Example:** Students A and B are tied for "Grammar" selections.
     *   Student A's counts in other categories: Vocabulary (5) + Speaking (4) = 9
     *   Student B's counts in other categories: Vocabulary (2) + Speaking (3) = 5
