@@ -556,6 +556,7 @@ button:disabled:hover {
     color: var(--color-text-muted);
     border-bottom: 1px solid #eee;
     padding-bottom: 5px;
+    text-align: center;
 }
 
 /* لیست نمرات */
