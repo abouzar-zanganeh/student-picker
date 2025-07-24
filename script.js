@@ -114,26 +114,20 @@ class Session {
     }
 
     selectNextWinner(categoryName, studentList, allCategories) {
-        // Step 0: Filter for students who are present and available for selection.
-        const presentStudents = studentList.filter(s => {
-            const record = this.studentRecords[s.identity.studentId];
-            // A student must be initialized and marked as 'present' to be a candidate.
-            return record && record.attendance === 'present';
-        });
-
-        if (presentStudents.length === 0) {
-            console.log("هیچ دانش‌آموز حاضری برای انتخاب وجود ندارد.");
+        // Step 0: Check if there are any students to select from.
+        if (!studentList || studentList.length === 0) {
+            console.log("هیچ دانش‌آموزی در کلاس برای انتخاب وجود ندارد.");
             return null;
         }
 
         // Avoid selecting the same student twice in a row for the same category.
         const lastWinnerId = this.lastWinnerByCategory[categoryName];
-        let candidates = presentStudents.filter(s => s.identity.studentId !== lastWinnerId);
+        let candidates = studentList.filter(s => s.identity.studentId !== lastWinnerId);
 
-        // If filtering leaves no one, it means all present students were the last winner.
-        // In this case, all present students become candidates again.
+        // If filtering leaves no one, it means all students were the last winner.
+        // In this case, all students become candidates again.
         if (candidates.length === 0) {
-            candidates = presentStudents;
+            candidates = studentList;
         }
 
         // This should ideally not happen if presentStudents has members, but as a safeguard:
@@ -729,11 +723,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const hadIssue = studentRecord.hadIssue;
 
                 if (wasAbsent) {
-                    student.statusCounters.missedChances--;
+                    student.statusCounters.missedChances = Math.max(0, student.statusCounters.missedChances - 1);
                 }
                 if (hadIssue) {
-                    student.statusCounters.missedChances--;
-                    student.statusCounters.otherIssues--;
+                    student.statusCounters.missedChances = Math.max(0, student.statusCounters.missedChances - 1);
+                    student.statusCounters.otherIssues = Math.max(0, student.statusCounters.otherIssues - 1);
                     studentRecord.hadIssue = false;
                 }
 
@@ -837,14 +831,17 @@ document.addEventListener('DOMContentLoaded', () => {
         resultDiv.classList.remove('absent');
 
         const studentRecord = selectedSession.studentRecords[winner.identity.studentId];
-        const isPresent = studentRecord?.attendance === 'present';
+        const isAbsent = studentRecord?.attendance === 'absent';
 
         const winnerNameEl = document.createElement('div');
         winnerNameEl.innerHTML = `✨ <strong>${winner.identity.name}</strong>✨`;
 
-        if (!isPresent) {
-            resultDiv.classList.add('absent');
-            winnerNameEl.classList.add('absent-student-name');
+        // Add the heartbeat animation class
+        winnerNameEl.classList.add('heartbeat-animation');
+
+        if (isAbsent) {
+            winnerNameEl.style.textDecoration = 'line-through';
+            winnerNameEl.style.opacity = '0.6';
         }
 
         resultDiv.appendChild(winnerNameEl);
@@ -855,7 +852,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const absentBtn = document.createElement('button');
         absentBtn.textContent = 'غایب';
         absentBtn.className = 'status-button';
-        if (!isPresent) absentBtn.classList.add('active');
+        if (isAbsent) absentBtn.classList.add('active');
 
         const issueBtn = document.createElement('button');
         issueBtn.textContent = 'مشکل';
@@ -868,49 +865,60 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         absentBtn.addEventListener('click', () => {
-            const wasPresent = selectedSession.studentRecords[winner.identity.studentId].attendance === 'present';
-            const hadIssue = studentRecord.hadIssue;
+            const isCurrentlyActive = absentBtn.classList.contains('active');
 
-            selectedSession.setAttendance(winner.identity.studentId, wasPresent ? 'absent' : 'present');
+            // If activating the "absent" button
+            if (!isCurrentlyActive) {
+                // Deactivate the "issue" button if it's active to maintain mutual exclusivity
+                if (issueBtn.classList.contains('active')) {
+                    issueBtn.classList.remove('active');
+                    studentRecord.hadIssue = false;
+                    // Reverse the counter changes from the "issue" button
+                    winner.statusCounters.otherIssues = Math.max(0, winner.statusCounters.otherIssues - 1);
+                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+                }
 
-            // Toggle Missed Chances, but only if it's not a transfer from an existing "missed" state
-            if (!hadIssue) {
-                winner.statusCounters.missedChances += wasPresent ? 1 : -1;
+                // Apply the "absent" state
+                absentBtn.classList.add('active');
+                selectedSession.setAttendance(winner.identity.studentId, 'absent');
+                winner.statusCounters.missedChances++;
+            } else {
+                // If deactivating the "absent" button (making student present)
+                absentBtn.classList.remove('active');
+                selectedSession.setAttendance(winner.identity.studentId, 'present');
+                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
             }
 
-            // Mutual Exclusion: If marking a student with an issue as absent, resolve the issue.
-            if (wasPresent && hadIssue) {
-                studentRecord.hadIssue = false;
-                winner.statusCounters.otherIssues--;
-                issueBtn.classList.remove('active');
-            }
-
-            absentBtn.classList.toggle('active');
             renderStudentStatsList();
             saveData();
         });
 
         issueBtn.addEventListener('click', () => {
-            const hadIssuePreviously = studentRecord.hadIssue;
-            const wasAbsent = studentRecord.attendance === 'absent';
+            const isCurrentlyActive = issueBtn.classList.contains('active');
 
-            studentRecord.hadIssue = !hadIssuePreviously;
+            // If activating the "issue" button
+            if (!isCurrentlyActive) {
+                // Deactivate the "absent" button if it's active
+                if (absentBtn.classList.contains('active')) {
+                    absentBtn.classList.remove('active');
+                    selectedSession.setAttendance(winner.identity.studentId, 'present');
+                    // Reverse the counter changes from the "absent" button
+                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+                }
 
-            // Toggle Other Issues Counter
-            winner.statusCounters.otherIssues += !hadIssuePreviously ? 1 : -1;
-
-            // Toggle Missed Chances, but only if it's not a transfer from an existing "missed" state (absent)
-            if (!wasAbsent) {
-                winner.statusCounters.missedChances += !hadIssuePreviously ? 1 : -1;
+                // Apply the "issue" state
+                issueBtn.classList.add('active');
+                studentRecord.hadIssue = true;
+                winner.statusCounters.otherIssues++;
+                winner.statusCounters.missedChances++;
+            } else {
+                // If deactivating the "issue" button
+                issueBtn.classList.remove('active');
+                studentRecord.hadIssue = false;
+                winner.statusCounters.otherIssues = Math.max(0, winner.statusCounters.otherIssues - 1);
+                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
             }
 
-            // Mutual Exclusion: If marking an absent student as having an issue, make them present.
-            if (!hadIssuePreviously && wasAbsent) {
-                selectedSession.setAttendance(winner.identity.studentId, 'present');
-                absentBtn.classList.remove('active');
-            }
-
-            issueBtn.classList.toggle('active');
             renderStudentStatsList();
             saveData();
         });
@@ -1667,11 +1675,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const winner = currentClassroom.selectNextWinner(selectedCategory.name);
 
         if (winner) {
-            displayWinner(winner, selectedCategory.name);
+            const studentRecord = selectedSession.studentRecords[winner.identity.studentId];
 
-            // The logic for handling absent/issue students is now self-contained
-            // within the displayWinner function and the new selection algorithm.
-            // We just need to update the UI and save the state.
+            // --- NEW LOGIC: Handle absent student selection ---
+            if (studentRecord && studentRecord.attendance === 'absent') {
+                winner.statusCounters.missedChances++;
+            }
+
+            displayWinner(winner, selectedCategory.name);
 
             selectedSession.lastUsedCategoryId = selectedCategory.id;
             selectedSession.lastSelectedWinnerId = winner.identity.studentId;

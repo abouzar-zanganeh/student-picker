@@ -1057,7 +1057,8 @@ button:disabled:hover {
     padding: 10px;
     background-color: #e9ecef;
     border-radius: var(--border-radius-main);
-    user-select: none; /* جلوگیری از انتخاب متن کد */
+    user-select: none;
+    /* جلوگیری از انتخاب متن کد */
 }
 
 #secure-confirm-input {
@@ -1104,7 +1105,8 @@ button:disabled:hover {
 
 .app-header h1 {
     margin: 0;
-    font-size: 24px; /* Adjust as needed */
+    font-size: 24px;
+    /* Adjust as needed */
 }
 
 #hamburger-menu-btn {
@@ -1113,7 +1115,8 @@ button:disabled:hover {
 }
 
 .header-placeholder {
-    width: 40px; /* Same width as hamburger button to keep title centered */
+    width: 40px;
+    /* Same width as hamburger button to keep title centered */
 }
 
 .side-nav {
@@ -1127,7 +1130,7 @@ button:disabled:hover {
     overflow-x: hidden;
     transition: 0.4s;
     padding-top: 60px;
-    box-shadow: -2px 0 8px rgba(0,0,0,0.15);
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
 }
 
 .side-nav .nav-btn {
@@ -1163,7 +1166,7 @@ button:disabled:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.4);
+    background-color: rgba(0, 0, 0, 0.4);
     z-index: 2500;
     display: none;
     transition: opacity 0.4s;
@@ -1174,4 +1177,23 @@ button:disabled:hover {
     .side-nav {
         right: calc((100vw - 640px) / 2);
     }
+}
+
+/* --- انیمیشن ضربان قلب --- */
+@keyframes heartbeat {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.heartbeat-animation {
+    animation: heartbeat 0.2s ease-in-out;
 }
