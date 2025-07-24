@@ -113,65 +113,94 @@ class Session {
         this.studentRecords[studentId].homework = status;
     }
 
-    selectNextWinner(categoryName, studentList) {
-        if (!studentList || studentList.length === 0) {
-            console.log("هیچ دانش‌آموزی در کلاس برای انتخاب وجود ندارد.");
+    selectNextWinner(categoryName, studentList, allCategories) {
+        // Step 0: Filter for students who are present and available for selection.
+        const presentStudents = studentList.filter(s => {
+            const record = this.studentRecords[s.identity.studentId];
+            // A student must be initialized and marked as 'present' to be a candidate.
+            return record && record.attendance === 'present';
+        });
+
+        if (presentStudents.length === 0) {
+            console.log("هیچ دانش‌آموز حاضری برای انتخاب وجود ندارد.");
             return null;
         }
 
+        // Avoid selecting the same student twice in a row for the same category.
         const lastWinnerId = this.lastWinnerByCategory[categoryName];
-        let candidates = studentList.filter(s => s.identity.studentId !== lastWinnerId);
+        let candidates = presentStudents.filter(s => s.identity.studentId !== lastWinnerId);
+
+        // If filtering leaves no one, it means all present students were the last winner.
+        // In this case, all present students become candidates again.
         if (candidates.length === 0) {
-            candidates = studentList;
+            candidates = presentStudents;
         }
 
-        const getSelectionCount = (student) => {
-            const record = this.studentRecords[student.identity.studentId];
-            return (record && record.selections && record.selections[categoryName]) || 0;
+        // This should ideally not happen if presentStudents has members, but as a safeguard:
+        if (candidates.length === 0) {
+            return null;
+        }
+
+        // Helper to get the total selection count for a student in a given category.
+        const getGlobalSelectionCount = (student, catName) => {
+            return student.categoryCounts[catName] || 0;
         };
 
-        let minCount = Infinity;
-        let maxCount = 0;
-        candidates.forEach(s => {
-            const count = getSelectionCount(s);
-            if (count < minCount) minCount = count;
-            if (count > maxCount) maxCount = count;
-        });
+        // Step 1: Primary Filter - Find students with the minimum selections in the CURRENT category.
+        const minSelectionCount = Math.min(...candidates.map(s => getGlobalSelectionCount(s, categoryName)));
+        const primaryCandidates = candidates.filter(s => getGlobalSelectionCount(s, categoryName) === minSelectionCount);
 
-        let absoluteMaxCount = 0;
-        studentList.forEach(s => {
-            const count = getSelectionCount(s);
-            if (count > absoluteMaxCount) absoluteMaxCount = count;
-        });
+        let winner;
 
-        let allowedGap = 1;
-        if (absoluteMaxCount >= 10) allowedGap = 2;
-        if (absoluteMaxCount >= 30) allowedGap = 3;
+        // If the primary filter gives a single, clear winner, select them.
+        if (primaryCandidates.length === 1) {
+            winner = primaryCandidates[0];
+        } else if (primaryCandidates.length > 1) {
+            // Step 2: First Tie-Breaker - Use the sum of selections in OTHER categories.
+            const otherCategoryNames = allCategories
+                .filter(c => !c.isDeleted && c.name !== categoryName)
+                .map(c => c.name);
 
-        let selectionPool = [];
-        if (maxCount - minCount >= allowedGap && candidates.length > 1) {
-            selectionPool = candidates.filter(s => getSelectionCount(s) === minCount);
-        } else {
-            candidates.forEach(s => {
-                const count = getSelectionCount(s);
-                const weight = (maxCount - count) + 1;
-                for (let i = 0; i < weight; i++) {
-                    selectionPool.push(s);
-                }
+            const candidatesWithOtherCounts = primaryCandidates.map(student => {
+                const otherCategoriesTotal = otherCategoryNames.reduce((total, catName) => {
+                    return total + getGlobalSelectionCount(student, catName);
+                }, 0);
+                return { student, otherCategoriesTotal };
             });
+
+            const minOtherCount = Math.min(...candidatesWithOtherCounts.map(c => c.otherCategoriesTotal));
+            const secondaryCandidates = candidatesWithOtherCounts
+                .filter(c => c.otherCategoriesTotal === minOtherCount)
+                .map(c => c.student);
+
+            // If the tie-breaker gives a single winner, select them.
+            if (secondaryCandidates.length === 1) {
+                winner = secondaryCandidates[0];
+            } else {
+                // Step 3: Final Tie-Breaker - Randomly select from the final tied group.
+                winner = secondaryCandidates[Math.floor(Math.random() * secondaryCandidates.length)];
+            }
+        } else {
+            // This is a fallback. If `primaryCandidates` is empty while `candidates` is not,
+            // it indicates a logic issue. As a safeguard, we select randomly from the available candidates.
+            winner = candidates[Math.floor(Math.random() * candidates.length)];
         }
 
-        if (selectionPool.length === 0) selectionPool = candidates;
-
-        const winner = selectionPool[Math.floor(Math.random() * selectionPool.length)];
+        // --- Update Winner's Stats ---
         const winnerId = winner.identity.studentId;
 
+        // Ensure a record for the session exists.
         this.initializeStudentRecord(winnerId);
-        this.studentRecords[winnerId].selections[categoryName] = getSelectionCount(winner) + 1;
 
+        // Increment the session-specific selection count.
+        const sessionSelectionCount = (this.studentRecords[winnerId].selections[categoryName] || 0) + 1;
+        this.studentRecords[winnerId].selections[categoryName] = sessionSelectionCount;
+
+        // Increment the student's global counters.
         winner.statusCounters.totalSelections++;
         winner.categoryCounts[categoryName] = (winner.categoryCounts[categoryName] || 0) + 1;
 
+        // Record this winner to avoid immediate re-selection.
         this.lastWinnerByCategory[categoryName] = winnerId;
 
         return winner;
@@ -242,7 +271,8 @@ class Classroom {
     selectNextWinner(category) {
         const liveSession = this.liveSession;
         if (liveSession) {
-            return liveSession.selectNextWinner(category, this.students);
+            // Pass the full list of categories to the new selection algorithm.
+            return liveSession.selectNextWinner(category, this.students, this.categories);
         }
         return null;
     }
@@ -1633,19 +1663,16 @@ document.addEventListener('DOMContentLoaded', () => {
     selectStudentBtn.addEventListener('click', () => {
         if (!currentClassroom || !selectedSession || !selectedCategory) return;
 
-        const winner = selectedSession.selectNextWinner(selectedCategory.name, currentClassroom.students);
+        // The new algorithm is now called from the Classroom instance.
+        const winner = currentClassroom.selectNextWinner(selectedCategory.name);
 
         if (winner) {
             displayWinner(winner, selectedCategory.name);
-            const studentRecord = selectedSession.studentRecords[winner.identity.studentId];
-            if (studentRecord) {
-                if (studentRecord.attendance === 'absent') {
-                    winner.statusCounters.missedChances++;
-                } else if (studentRecord.hadIssue) {
-                    winner.statusCounters.missedChances++;
-                    winner.statusCounters.otherIssues++;
-                }
-            }
+
+            // The logic for handling absent/issue students is now self-contained
+            // within the displayWinner function and the new selection algorithm.
+            // We just need to update the UI and save the state.
+
             selectedSession.lastUsedCategoryId = selectedCategory.id;
             selectedSession.lastSelectedWinnerId = winner.identity.studentId;
             renderStudentStatsList();
