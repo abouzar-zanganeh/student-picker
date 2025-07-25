@@ -532,7 +532,7 @@ button:disabled:hover {
     gap: 20px;
     width: 100%;
     margin-top: 20px;
-    padding-top: 15px;
+    padding-top: 7px;
     border-top: 1px solid var(--color-border);
     text-align: right;
     /* راست‌چین کردن متن‌ها */
@@ -562,8 +562,14 @@ button:disabled:hover {
 /* لیست نمرات */
 .scores-list {
     list-style: none;
-    padding: 0;
+    padding: 10px;
     margin: 0;
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius-main);
+    min-height: 30px;
+    /* Added for alignment */
+    display: flex;
+    flex-direction: column;
 }
 
 .scores-list li {
@@ -594,16 +600,17 @@ button:disabled:hover {
 /* لیست یادداشت‌ها */
 .notes-list {
     list-style: none;
-    padding: 0;
+    padding: 10px;
     margin: 0;
-    max-height: 120px;
-    /* محدودیت ارتفاع برای کل لیست */
+    min-height: 30px;
+    /* Matched height */
     overflow-y: auto;
     /* اسکرول در صورت بلند بودن لیست */
-    background-color: #fdfde9;
-    /* پس‌زمینه زرد کم‌رنگ */
-    padding: 10px;
+    background-color: #f8f9fa;
+    /* Matched background */
     border-radius: var(--border-radius-main);
+    display: flex;
+    flex-direction: column;
 }
 
 .notes-list li {
@@ -631,8 +638,11 @@ button:disabled:hover {
     color: var(--color-text-muted);
     font-style: italic;
     font-size: 13px;
-    text-align: center;
-    padding: 10px;
+    direction: rtl;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .result-display.absent {

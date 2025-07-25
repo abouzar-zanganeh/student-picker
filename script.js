@@ -977,7 +977,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (!hasAnyScore && Object.keys(studentScores).length === 0) {
-            scoresList.innerHTML = `<li class="no-content-message">هنوز نمره‌ای ثبت نشده.</li>`;
+            scoresList.innerHTML = `<div class="no-content-message">هنوز نمره‌ای ثبت نشده است.</div>`;
         }
 
         scoresDiv.appendChild(scoresList);
@@ -1002,10 +1002,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
         } else {
-            const noNotesItem = document.createElement('li');
-            noNotesItem.className = 'no-content-message';
-            noNotesItem.textContent = 'یادداشتی وجود ندارد.';
-            notesList.appendChild(noNotesItem);
+            notesList.innerHTML = '<div class="no-content-message">یادداشتی وجود ندارد.</div>';
         }
 
         notesDiv.appendChild(notesList);
@@ -1118,7 +1115,7 @@ document.addEventListener('DOMContentLoaded', () => {
         allScores.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
         if (allScores.length === 0) {
-            profileScoresListUl.innerHTML = '<li>هنوز نمره‌ای ثبت نشده است.</li>';
+            profileScoresListUl.innerHTML = '<div class="no-content-message">هنوز نمره‌ای ثبت نشده است.</div>';
         } else {
             allScores.forEach(score => {
                 const li = document.createElement('li');
@@ -1178,7 +1175,7 @@ document.addEventListener('DOMContentLoaded', () => {
         profileNotesListUl.innerHTML = '';
 
         if (!selectedStudentForProfile || !selectedStudentForProfile.profile.notes || selectedStudentForProfile.profile.notes.length === 0) {
-            profileNotesListUl.innerHTML = '<li>هنوز یادداشتی ثبت نشده است.</li>';
+            profileNotesListUl.innerHTML = '<div class="no-content-message">هنوز یادداشتی ثبت نشده است.</div>';
             return;
         }
 
