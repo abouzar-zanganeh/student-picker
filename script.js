@@ -2333,5 +2333,10 @@ document.addEventListener('DOMContentLoaded', () => {
     history.replaceState({ pageId: 'class-management-page' }, '', '#class-management-page');
     loadData();
 
-
+    // --- Global Keyboard Shortcuts ---
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            history.back();
+        }
+    });
 });
