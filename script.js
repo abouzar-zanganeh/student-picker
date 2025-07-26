@@ -262,11 +262,10 @@ class Classroom {
         this.futurePlans[sessionNumber] = planText;
     }
 
-    selectNextWinner(category) {
-        const liveSession = this.liveSession;
-        if (liveSession) {
-            // Pass the full list of categories to the new selection algorithm.
-            return liveSession.selectNextWinner(category, this.students, this.categories);
+    selectNextWinner(category, session) {
+        if (session) {
+            // Pass the full list of categories and all students to the selection algorithm.
+            return session.selectNextWinner(category, this.students, this.categories);
         }
         return null;
     }
@@ -1668,8 +1667,7 @@ document.addEventListener('DOMContentLoaded', () => {
     selectStudentBtn.addEventListener('click', () => {
         if (!currentClassroom || !selectedSession || !selectedCategory) return;
 
-        // The new algorithm is now called from the Classroom instance.
-        const winner = currentClassroom.selectNextWinner(selectedCategory.name);
+        const winner = currentClassroom.selectNextWinner(selectedCategory.name, selectedSession);
 
         if (winner) {
             const studentRecord = selectedSession.studentRecords[winner.identity.studentId];
