@@ -1677,6 +1677,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 winner.statusCounters.missedChances++;
             }
 
+            if (studentRecord && studentRecord.hadIssue) {
+                winner.statusCounters.missedChances++;
+                winner.statusCounters.otherIssues++;
+            }
+
             displayWinner(winner, selectedCategory.name);
 
             selectedSession.lastUsedCategoryId = selectedCategory.id;
@@ -2103,6 +2108,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     student.categoryCounts = {};
                     student.finalClassActivityScore = null;
 
+                    classroom.sessions.forEach(session => {
+                        const studentId = student.identity.studentId;
+                        if (session.studentRecords[studentId]) {
+                            session.studentRecords[studentId].attendance = 'present';
+                        }
+                    });
                     if (student.logs) {
                         student.logs.sessionHistory = {};
                     }
