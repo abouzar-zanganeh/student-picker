@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.showCustomConfirm(
                 "آیا از صفر کردن تمام شمارنده‌های دانش‌آموزان مطمئن هستید؟ این عمل غیرقابل بازگشت است.",
                 () => {
-                    
+
                     resetAllStudentCounters();
                     ui.renderStudentStatsList();
                     ui.showNotification("تمام آمارها صفر شدند.");
@@ -430,12 +430,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('add-note-btn').addEventListener('click', () => {
         newNoteContent.value = '';
-        addNoteModal.style.display = 'flex';
+        ui.openModal('add-note-modal');
         newNoteContent.focus();
     });
 
     cancelNoteBtn.addEventListener('click', () => {
-        addNoteModal.style.display = 'none';
+        ui.closeActiveModal();
     });
 
     saveNoteBtn.addEventListener('click', () => {
@@ -444,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.selectedStudentForProfile.addNote(content);
             state.saveData();
             ui.renderStudentNotes();
-            addNoteModal.style.display = 'none';
+            ui.closeActiveModal();
             ui.showNotification("یادداشت با موفقیت ذخیره شد.");
         }
     });
@@ -530,8 +530,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
+    if (event.key === 'Escape') {
+        // If a modal is active, close it.
+        if (state.activeModal) {
+            ui.closeActiveModal();
+        }
+        // Otherwise, perform the default back action.
+        else {
             history.back();
         }
-    });
+    }
+});
 });

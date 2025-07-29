@@ -19,6 +19,7 @@ import { Classroom, Student, Session, Category } from './models.js';
    export let confirmCallback = null;
    export let cancelCallback = null;
    export let secureConfirmCallback = null;
+   export let activeModal = null; // Will hold the ID of the currently open modal
 	
 	
 	
@@ -100,6 +101,7 @@ export function setResetEasterEggLastClickTime(time) { resetEasterEggLastClickTi
 export function setConfirmCallback(callback) { confirmCallback = callback; }
 export function setCancelCallback(callback) { cancelCallback = callback; }
 export function setSecureConfirmCallback(callback) { secureConfirmCallback = callback; }
+export function setActiveModal(modalId) { activeModal = modalId; }
 
 
 export function resetAllStudentCounters() {

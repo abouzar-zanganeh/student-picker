@@ -150,7 +150,7 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
         confirmModalConfirmBtn.classList.add(confirmClass);
         state.setConfirmCallback(firstConfirm);
         state.setCancelCallback(onCancel);
-        customConfirmModal.style.display = 'flex';
+        openModal('custom-confirm-modal');
     } else {
         confirmModalMessage.textContent = message;
         confirmModalConfirmBtn.textContent = confirmText;
@@ -159,7 +159,7 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
         confirmModalConfirmBtn.classList.add(confirmClass);
         state.setConfirmCallback(onConfirm);
         state.setCancelCallback(onCancel);
-        customConfirmModal.style.display = 'flex';
+        openModal('custom-confirm-modal');
     }
 }
 
@@ -172,7 +172,7 @@ export function showSecureConfirm(message, onConfirm) {
 
     state.setSecureConfirmCallback(onConfirm);
 
-    secureConfirmModal.style.display = 'flex';
+    openModal('secure-confirm-modal');
     secureConfirmInput.focus();
 
     const validationHandler = () => {
@@ -188,6 +188,36 @@ export function showSecureConfirm(message, onConfirm) {
     return () => {
         secureConfirmInput.removeEventListener('input', validationHandler);
     };
+}
+
+export function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'flex';
+        state.setActiveModal(modalId);
+    }
+}
+
+export function closeActiveModal() {
+    if (!state.activeModal) return; // Do nothing if no modal is active
+
+    const modal = document.getElementById(state.activeModal);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+
+    // --- Cleanup Logic ---
+    // Clear any pending confirmation actions to prevent accidental triggers
+    if (state.activeModal === 'custom-confirm-modal') {
+        state.setConfirmCallback(null);
+        state.setCancelCallback(null);
+    }
+    if (state.activeModal === 'secure-confirm-modal') {
+        state.setSecureConfirmCallback(null);
+    }
+
+    // Finally, reset the state
+    state.setActiveModal(null);
 }
 
 export function renderAttendancePage() {
