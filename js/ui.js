@@ -860,7 +860,7 @@ export function renderSettingsCategories() {
     });
 }
 
-function _internalShowPage(pageId) {
+export function _internalShowPage(pageId) {
     document.querySelectorAll('.page').forEach(page => {
         page.style.display = 'none';
     });
