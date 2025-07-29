@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
         profileScoresListUl
     } = ui; // This is a bit of a trick to avoid rewriting all the getElementById calls
 
+    const globalSearchIcon = document.querySelector('.global-search-container .search-icon');
+
     // --- Initial Load ---
     state.loadData();
     ui.renderClassList();
@@ -381,6 +383,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         ui.renderGlobalSearchResults(allResults);
+    });
+
+    globalSearchIcon.addEventListener('click', () => {
+        const container = document.querySelector('.global-search-container');
+        container.classList.add('search-active');
+        globalStudentSearchInput.focus();
+    });
+
+    globalStudentSearchInput.addEventListener('blur', () => {
+        // We use a small timeout to allow clicks on search results to register
+        // before the dropdown disappears. This is a classic UI programming trick.
+        setTimeout(() => {
+            const container = document.querySelector('.global-search-container');
+            container.classList.remove('search-active');
+            // Also, clear the results when hiding
+            ui.renderGlobalSearchResults([]);
+        }, 150); // A 150ms delay is imperceptible but robust
     });
 
     newClassNameInput.addEventListener('keyup', (event) => {

@@ -55,9 +55,9 @@ h3 {
 }
 
 .student-search-container {
+    position: relative;
     width: 40%;
     /* Adjust width as needed */
-    position: relative;
 }
 
 input[type="text"],
@@ -69,6 +69,28 @@ textarea {
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-main);
     box-sizing: border-box;
+}
+
+/* --- Style for Placeholder Text --- */
+input::placeholder,
+textarea::placeholder {
+    font-size: 0.9em;
+    /* 90% of the input's normal font size */
+    color: #aaa;
+    /* A slightly lighter gray for better contrast */
+}
+
+/* For older browser compatibility */
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+    font-size: 0.9em;
+    color: #aaa;
+}
+
+input::-moz-placeholder,
+textarea::-moz-placeholder {
+    font-size: 0.9em;
+    color: #aaa;
 }
 
 textarea {
@@ -838,6 +860,8 @@ button:disabled:hover {
 .search-results-dropdown {
     display: none;
     position: absolute;
+    top: 100%;
+    left: 0;
     width: 100%;
     background-color: var(--color-surface);
     border: 1px solid var(--color-border);
@@ -1210,13 +1234,64 @@ button:disabled:hover {
 }
 
 /* --- Styles for Global Search on Main Page --- */
+
 .global-search-container {
     margin: 20px 0;
-    /* Adds space above and below the search bar */
-    padding: 15px;
-    background-color: var(--color-surface);
-    border-radius: var(--border-radius-main);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    /* Keep the margin for spacing */
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.global-search-container .student-search-container {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    /* Keep icon to the right */
+}
+
+/* Style the icon to look more like a button */
+.global-search-container .search-icon {
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.global-search-container .search-icon:hover {
+    background-color: #f0f0f0;
+}
+
+/* The input field's default (hidden) state */
+#global-student-search-input {
+    width: 0;
+    opacity: 0;
+    padding: 5px 0;
+    /* Remove horizontal padding when hidden */
+    border-bottom: 1px solid transparent;
+    /* Reserve space with a transparent border */
+    transition: width 0.2s ease-in-out, opacity 0.2s ease-in-out, padding 0.2s ease;
+}
+
+/* The input field's visible state when the container is active */
+.global-search-container.search-active #global-student-search-input {
+    width: 35%;
+    opacity: 1;
+    padding: 5px 10px;
+    /* Restore padding */
+    border-bottom: 1px solid var(--color-primary);
+    /* A subtle border */
+}
+
+/* Override the icon's position only for the global search */
+.global-search-container .search-icon {
+    position: static;
+    /* Return the icon to the normal document flow */
+    transform: none;
+    /* Remove the vertical centering */
+    margin-right: 8px;
+    /* Add a little space between the icon and the input */
 }
 
 .search-results-dropdown .global-search-result {
