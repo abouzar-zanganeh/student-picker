@@ -1208,3 +1208,25 @@ button:disabled:hover {
 .heartbeat-animation {
     animation: heartbeat 0.2s ease-in-out;
 }
+
+/* --- Styles for Global Search on Main Page --- */
+.global-search-container {
+    margin: 20px 0;
+    /* Adds space above and below the search bar */
+    padding: 15px;
+    background-color: var(--color-surface);
+    border-radius: var(--border-radius-main);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.search-results-dropdown .global-search-result {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.4;
+    padding: 10px 15px;
+}
+
+.search-results-dropdown .global-search-result .student-name {
+    font-weight: bold;
+}

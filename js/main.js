@@ -6,6 +6,7 @@ import { Classroom, Student, Category } from './models.js';
 document.addEventListener('DOMContentLoaded', () => {
     // --- HTML Elements (from ui.js, but needed for event listeners) ---
     const {
+        globalStudentSearchInput, globalStudentSearchResultsDiv,
         newClassNameInput, addClassBtn, classListUl, undoBtn,
         settingsPage, settingsClassNameHeader, settingsStudentListUl, categoryListUl,
         backToSessionsBtn, newStudentNameInput, addStudentBtn, pasteArea,
@@ -360,6 +361,28 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedTypeRadio.checked = false;
     });
 
+    globalStudentSearchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        if (searchTerm.length < 2) {
+            ui.renderGlobalSearchResults([]); // Clear results if search is too short
+            return;
+        }
+
+        const allResults = [];
+        for (const className in state.classrooms) {
+            const classroom = state.classrooms[className];
+            const foundStudents = classroom.students.filter(student =>
+                student.identity.name.toLowerCase().includes(searchTerm)
+            );
+
+            foundStudents.forEach(student => {
+                allResults.push({ student, classroom });
+            });
+        }
+
+        ui.renderGlobalSearchResults(allResults);
+    });
+
     newClassNameInput.addEventListener('keyup', (event) => {
         if (event.key === 'Enter') {
             addClassBtn.click();
@@ -530,15 +553,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') {
-        // If a modal is active, close it.
-        if (state.activeModal) {
-            ui.closeActiveModal();
+        if (event.key === 'Escape') {
+            // If a modal is active, close it.
+            if (state.activeModal) {
+                ui.closeActiveModal();
+            }
+            // Otherwise, perform the default back action.
+            else {
+                history.back();
+            }
         }
-        // Otherwise, perform the default back action.
-        else {
-            history.back();
-        }
-    }
-});
+    });
 });

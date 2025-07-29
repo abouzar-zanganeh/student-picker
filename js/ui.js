@@ -72,6 +72,8 @@ export const newScoreCommentTextarea = document.getElementById('new-score-commen
 export const addScoreBtn = document.getElementById('add-score-btn');
 export const profileStatsSummaryDiv = document.getElementById('profile-stats-summary');
 export const profileScoresListUl = document.getElementById('profile-scores-list');
+export const globalStudentSearchInput = document.getElementById('global-student-search-input');
+export const globalStudentSearchResultsDiv = document.getElementById('global-student-search-results');
 
 
 export function showUndoToast(message) {
@@ -1074,4 +1076,41 @@ export function renderSearchResults(searchTerm = '') {
     }
 
     studentSearchResultsDiv.style.display = 'block';
+}
+export function renderGlobalSearchResults(results) {
+    globalStudentSearchResultsDiv.innerHTML = '';
+
+    if (results.length === 0) {
+        globalStudentSearchResultsDiv.style.display = 'none';
+        return;
+    }
+
+    results.forEach(result => {
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'global-search-result';
+
+        const studentNameSpan = document.createElement('span');
+        studentNameSpan.className = 'student-name';
+        studentNameSpan.textContent = result.student.identity.name;
+
+        const classNameSpan = document.createElement('span');
+        classNameSpan.className = 'class-name';
+        classNameSpan.textContent = `کلاس: ${result.classroom.info.name}`;
+
+        resultDiv.appendChild(studentNameSpan);
+        resultDiv.appendChild(classNameSpan);
+
+        resultDiv.addEventListener('click', () => {
+            state.setCurrentClassroom(result.classroom);
+            state.setSelectedStudentForProfile(result.student);
+            renderStudentProfilePage();
+            showPage('student-profile-page');
+            globalStudentSearchResultsDiv.style.display = 'none';
+            globalStudentSearchInput.value = '';
+        });
+
+        globalStudentSearchResultsDiv.appendChild(resultDiv);
+    });
+
+    globalStudentSearchResultsDiv.style.display = 'block';
 }
