@@ -60,7 +60,7 @@ h3 {
     /* Adjust width as needed */
 }
 
-input[type="text"],
+input[type="text"]:not(.animated-search-input),
 input[type="number"],
 textarea {
     font-family: var(--font-family-main);
@@ -841,14 +841,8 @@ button:disabled:hover {
     position: relative;
 }
 
-#student-search-input {
-    width: 100%;
-    padding-left: 40px;
-    /* Make space for the icon */
-    box-sizing: border-box;
-}
-
 .search-icon {
+    font-size: x-large;
     position: absolute;
     left: 10px;
     top: 50%;
@@ -1233,66 +1227,73 @@ button:disabled:hover {
     animation: heartbeat 0.2s ease-in-out;
 }
 
-/* --- Styles for Global Search on Main Page --- */
+/* --- Styles for Reusable Animated Search Component --- */
 
 .global-search-container {
-    margin: 20px 0;
-    /* Keep the margin for spacing */
+    margin: 5px 0;
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    min-height: 40px;
+    /* This creates a stable height to prevent the jump */
 }
 
-.global-search-container .student-search-container {
+.animated-search-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+    /* Set positioning context for the dropdown */
+}
+
+/* The student-page search bar needs to take up its original 40% width */
+.action-column-header .animated-search-container {
+    width: 40%;
+}
+
+/* The global search bar should be full width inside its container */
+.global-search-container .animated-search-container {
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    /* Keep icon to the right */
 }
 
-/* Style the icon to look more like a button */
-.global-search-container .search-icon {
+.animated-search-container .search-icon {
+    position: static;
+    transform: none;
+    margin-right: 8px;
     cursor: pointer;
     padding: 5px;
     border-radius: 50%;
     transition: background-color 0.2s ease;
 }
 
-.global-search-container .search-icon:hover {
+.animated-search-container .search-icon:hover {
     background-color: #f0f0f0;
 }
 
-/* The input field's default (hidden) state */
-#global-student-search-input {
+.animated-search-input {
+    font-family: var(--font-family-main);
+    font-size: 16px;
     width: 0;
     opacity: 0;
     padding: 5px 0;
-    /* Remove horizontal padding when hidden */
     border-bottom: 1px solid transparent;
-    /* Reserve space with a transparent border */
     transition: width 0.2s ease-in-out, opacity 0.2s ease-in-out, padding 0.2s ease;
 }
 
-/* The input field's visible state when the container is active */
-.global-search-container.search-active #global-student-search-input {
-    width: 35%;
+/* The input's visible state when the container is active */
+.animated-search-container.search-active .animated-search-input {
+    width: 100%;
+    /* Input will now fill its container */
     opacity: 1;
     padding: 5px 10px;
-    /* Restore padding */
     border-bottom: 1px solid var(--color-primary);
-    /* A subtle border */
 }
 
-/* Override the icon's position only for the global search */
-.global-search-container .search-icon {
-    position: static;
-    /* Return the icon to the normal document flow */
-    transform: none;
-    /* Remove the vertical centering */
-    margin-right: 8px;
-    /* Add a little space between the icon and the input */
+.global-search-container .animated-search-container.search-active .animated-search-input {
+    width: 25%;
 }
+
+/* --- Styles for dropdowns in search fields --- */
 
 .search-results-dropdown .global-search-result {
     display: flex;

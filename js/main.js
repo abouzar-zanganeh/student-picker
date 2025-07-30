@@ -34,6 +34,41 @@ document.addEventListener('DOMContentLoaded', () => {
     state.loadData();
     ui.renderClassList();
 
+    function initializeAnimatedSearch(containerSelector, clearResultsCallback) {
+        const container = document.querySelector(containerSelector);
+        if (!container) return; // Exit if the container doesn't exist on the current page
+
+        const icon = container.querySelector('.search-icon');
+        const input = container.querySelector('.animated-search-input');
+
+        if (!icon || !input) return;
+
+        icon.addEventListener('mousedown', (e) => {
+            // If the input is already visible, prevent the mousedown from
+            // causing the input to lose focus (which would trigger the blur event).
+            if (container.classList.contains('search-active')) {
+                e.preventDefault();
+            }
+        });
+
+        icon.addEventListener('click', () => {
+            // This logic now only needs to handle showing the input
+            if (!container.classList.contains('search-active')) {
+                container.classList.add('search-active');
+                input.focus();
+            }
+        });
+
+        input.addEventListener('blur', () => {
+            setTimeout(() => {
+                container.classList.remove('search-active');
+                if (clearResultsCallback) {
+                    clearResultsCallback([]);
+                }
+            }, 150);
+        });
+    }
+
 
     // --- Event Listeners ---
     studentStatsHeader.addEventListener('click', () => {
@@ -385,22 +420,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.renderGlobalSearchResults(allResults);
     });
 
-    globalSearchIcon.addEventListener('click', () => {
-        const container = document.querySelector('.global-search-container');
-        container.classList.add('search-active');
-        globalStudentSearchInput.focus();
-    });
 
-    globalStudentSearchInput.addEventListener('blur', () => {
-        // We use a small timeout to allow clicks on search results to register
-        // before the dropdown disappears. This is a classic UI programming trick.
-        setTimeout(() => {
-            const container = document.querySelector('.global-search-container');
-            container.classList.remove('search-active');
-            // Also, clear the results when hiding
-            ui.renderGlobalSearchResults([]);
-        }, 150); // A 150ms delay is imperceptible but robust
-    });
+
+
 
     newClassNameInput.addEventListener('keyup', (event) => {
         if (event.key === 'Enter') {
@@ -583,4 +605,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    // --- Initialize UI Components ---
+    initializeAnimatedSearch('.global-search-container .animated-search-container', ui.renderGlobalSearchResults);
+    initializeAnimatedSearch('.action-column-header .animated-search-container', ui.renderSearchResults);
+
+
 });
