@@ -232,6 +232,7 @@ button:disabled:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    direction: rtl;
 }
 
 .list-container li:first-child {
@@ -1124,24 +1125,51 @@ button:disabled:hover {
     color: var(--color-text-muted);
 }
 
-/* --- Style for the student count display in class list --- */
-.student-count-badge {
-    font-size: 13px;
-    color: var(--color-text-muted);
+/* Container for student and session counts */
+.class-stats-row {
+    display: flex;
+    /* Make it a flex container */
+    align-items: center;
+    /* Vertically align items */
+    gap: 8px;
+    /* Space between the badges and separator */
     margin-top: 5px;
-    display: block;
-    text-align: right;
-}
-
-/* Style for the session count display in class list */
-.session-count-badge {
+    /* Space below the class name */
     font-size: 13px;
+    /* Apply base font size to the row */
     color: var(--color-text-muted);
-    margin-top: 3px;
-    display: block;
-    text-align: right;
+    /* Apply base color to the row */
 }
 
+/* Style for the student count badge */
+.student-count-badge {
+    /* No display: block needed here, as parent is flex row */
+    /* No margin-top needed here, as gap handles spacing */
+    white-space: nowrap;
+    color: var(--color-secondary);
+    /* Prevent text from wrapping */
+}
+
+/* Style for the separator */
+.student-count-badge::after {
+    content: '|';
+    /* The separator character */
+    margin-left: 1px;
+    margin-right: 8px;
+    /* Space after the separator */
+    color: var(--color-secondary);
+    /* Muted color for the separator */
+}
+
+/* Style for the session count badge */
+.session-count-badge {
+    color: var(--color-secondary);
+
+    /* No display: block needed here */
+    /* No margin-top needed here */
+    white-space: nowrap;
+    /* Prevent text from wrapping */
+}
 
 /* --- Hamburger Menu & Side Nav --- */
 .app-header {

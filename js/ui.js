@@ -783,43 +783,47 @@ export function renderClassList() {
     for (const name in state.classrooms) {
         const classroom = state.classrooms[name];
         const li = document.createElement('li');
-        const nameContainer = document.createElement('span');
+        const nameContainer = document.createElement('div');
 
-        nameContainer.textContent = name;
-        nameContainer.style.flexGrow = '1';
-        // Get the number of students in the current classroom
+        nameContainer.style.flexGrow = '1'; // Keep flexGrow on the container
+
+        // Create a span for the class name itself
+        const classNameSpan = document.createElement('span');
+        classNameSpan.textContent = name;
+        classNameSpan.classList.add('class-name-display'); // Add a class for potential future styling
+
+        // Append the class name span to the nameContainer
+        nameContainer.appendChild(classNameSpan);
+
+        // Get the number of students and sessions
         const studentCount = classroom.students.length;
-
-        // Create a new <span> element to hold the student count
-        const studentCountSpan = document.createElement('span');
-
-        // Set its text content. We use a template literal (backticks ``)
-        // to easily combine text and our JavaScript variable.
-        studentCountSpan.textContent = `تعداد: ${studentCount} نفر`;
-
-        // Add a CSS class for styling. We'll define this class in style.css next.
-        studentCountSpan.classList.add('student-count-badge');
-
-        // Append this new span to the list item.
-        // We'll append it to the nameContainer so it appears right below the class name.
-        nameContainer.appendChild(studentCountSpan);
-        // --- End of new code ---
-
-        // --- Start of new code for session count ---
-        // Get the number of sessions in the current classroom
         const sessionCount = classroom.sessions.length;
 
-        // Create a new <span> element for the session count
+        // Create a new DIV to hold both badges (this will be our inner flex container)
+        const statsRowDiv = document.createElement('div');
+        statsRowDiv.classList.add('class-stats-row'); // Add a class for styling
+
+        // Create student count span
+        const studentCountSpan = document.createElement('span');
+        studentCountSpan.textContent = `${studentCount} نفر`;
+        studentCountSpan.classList.add('student-count-badge');
+
+        // Create session count span
         const sessionCountSpan = document.createElement('span');
-
-        // Set its text content
-        sessionCountSpan.textContent = `جلسه: ${sessionCount} عدد`;
-
-        // Add a CSS class for styling
+        sessionCountSpan.textContent = `جلسه ${sessionCount}`;
         sessionCountSpan.classList.add('session-count-badge');
 
-        // Append this new span to the nameContainer, so it appears below the student count
-        nameContainer.appendChild(sessionCountSpan);
+        // Append badges to their new container
+        statsRowDiv.appendChild(studentCountSpan);
+        statsRowDiv.appendChild(sessionCountSpan);
+
+        // Append the stats row container to the nameContainer
+        nameContainer.appendChild(statsRowDiv);
+
+        // Make the nameContainer a flex column to stack the name and the stats row
+        nameContainer.style.display = 'flex';
+        nameContainer.style.flexDirection = 'column';
+        nameContainer.style.alignItems = 'flex-start'; // Align content to the right (RTL)
         // --- End of new code ---
 
 
