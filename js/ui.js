@@ -784,8 +784,45 @@ export function renderClassList() {
         const classroom = state.classrooms[name];
         const li = document.createElement('li');
         const nameContainer = document.createElement('span');
+
         nameContainer.textContent = name;
         nameContainer.style.flexGrow = '1';
+        // Get the number of students in the current classroom
+        const studentCount = classroom.students.length;
+
+        // Create a new <span> element to hold the student count
+        const studentCountSpan = document.createElement('span');
+
+        // Set its text content. We use a template literal (backticks ``)
+        // to easily combine text and our JavaScript variable.
+        studentCountSpan.textContent = `تعداد: ${studentCount} نفر`;
+
+        // Add a CSS class for styling. We'll define this class in style.css next.
+        studentCountSpan.classList.add('student-count-badge');
+
+        // Append this new span to the list item.
+        // We'll append it to the nameContainer so it appears right below the class name.
+        nameContainer.appendChild(studentCountSpan);
+        // --- End of new code ---
+
+        // --- Start of new code for session count ---
+        // Get the number of sessions in the current classroom
+        const sessionCount = classroom.sessions.length;
+
+        // Create a new <span> element for the session count
+        const sessionCountSpan = document.createElement('span');
+
+        // Set its text content
+        sessionCountSpan.textContent = `جلسه: ${sessionCount} عدد`;
+
+        // Add a CSS class for styling
+        sessionCountSpan.classList.add('session-count-badge');
+
+        // Append this new span to the nameContainer, so it appears below the student count
+        nameContainer.appendChild(sessionCountSpan);
+        // --- End of new code ---
+
+
         nameContainer.addEventListener('click', () => {
             state.setCurrentClassroom(classroom);
             state.setSelectedSession(null);
@@ -793,6 +830,8 @@ export function renderClassList() {
             renderSessions();
             updateSessionPageHeader();
             showPage('session-page');
+
+
         });
         const typeBadge = document.createElement('span');
         typeBadge.className = `type-badge ${classroom.info.type}`;

@@ -1124,6 +1124,24 @@ button:disabled:hover {
     color: var(--color-text-muted);
 }
 
+/* --- Style for the student count display in class list --- */
+.student-count-badge {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-top: 5px;
+    display: block;
+    text-align: right;
+}
+
+/* Style for the session count display in class list */
+.session-count-badge {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-top: 3px;
+    display: block;
+    text-align: right;
+}
+
 
 /* --- Hamburger Menu & Side Nav --- */
 .app-header {
