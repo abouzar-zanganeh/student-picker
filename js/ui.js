@@ -350,6 +350,13 @@ export function renderStudentStatsList() {
 
     if (!state.currentClassroom) return;
 
+    // Get the total number of students in the current class
+    const totalStudents = state.currentClassroom.students.length;
+
+    // Update the header's text to include the student count
+    studentStatsHeader.textContent = `آمار عملکرد دانش‌آموزان -- ${totalStudents} نفر`;
+    // --- End of new code ---
+
     const calculateAbsences = (student) => {
         let absenceCount = 0;
         if (state.currentClassroom && state.currentClassroom.sessions) {
