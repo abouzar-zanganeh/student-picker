@@ -216,9 +216,16 @@ export class Classroom {
         this.students = [];
         this.sessions = [];
         this.categories = [
-            new Category('Vocabulary'),
-            new Category('Grammar'),
-            new Category('Speaking')
+            // Default participation categories
+            new Category('Vocabulary', 'Questions about words and meanings.'),
+            new Category('Grammar', 'Questions about sentence structure and rules.'),
+            new Category('Speaking', 'General participation and speaking activities.'),
+
+            // Default graded categories
+            new Category('Listening', 'Scores related to listening skills.', true),
+            new Category('Speaking', 'Scores related to speaking skills.', true),
+            new Category('Reading', 'Scores related to reading skills.', true),
+            new Category('Writing', 'Scores related to writing skills.', true)
         ];
         this.futurePlans = {};
     }
@@ -339,5 +346,6 @@ export class Category {
         this.name = name;
         this.description = description;
         this.isDeleted = false;
+        this.isGradedCategory = isGradedCategory;
     }
 }
