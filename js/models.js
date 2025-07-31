@@ -219,7 +219,6 @@ export class Classroom {
             // Default participation categories
             new Category('Vocabulary', 'Questions about words and meanings.'),
             new Category('Grammar', 'Questions about sentence structure and rules.'),
-            new Category('Speaking', 'General participation and speaking activities.'),
 
             // Default graded categories
             new Category('Listening', 'Scores related to listening skills.', true),
