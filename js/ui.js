@@ -636,13 +636,19 @@ export function renderStudentProfilePage() {
         <p><strong>مشکل فنی:</strong> ${student.statusCounters.otherIssues || 0}</p>
     `;
 
-    const skills = ['Listening', 'Speaking', 'Reading', 'Writing'];
+    // Get only the categories marked as "gradable" and not deleted
+    const gradedCategories = state.currentClassroom.categories.filter(cat => cat.isGradedCategory && !cat.isDeleted);
+
     scoreSkillSelectionContainer.innerHTML = '';
-    skills.forEach(skill => {
+    gradedCategories.forEach(category => {
         const pill = document.createElement('span');
         pill.className = 'pill';
-        pill.textContent = skill;
-        pill.dataset.skillName = skill.toLowerCase();
+        pill.textContent = category.name; // e.g., "Writing"
+        // Use the category name for the data key. The logic for adding scores will use this value.
+        pill.dataset.skillName = category.name;
+        if (category.description) {
+            pill.dataset.tooltip = category.description;
+        }
         scoreSkillSelectionContainer.appendChild(pill);
         pill.addEventListener('click', () => {
             scoreSkillSelectionContainer.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
