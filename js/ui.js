@@ -66,7 +66,7 @@ export const studentSearchResultsDiv = document.getElementById('student-search-r
 export const studentProfilePage = document.getElementById('student-profile-page');
 export const profileStudentNameHeader = document.getElementById('profile-student-name-header');
 export const backToStudentPageBtn = document.getElementById('back-to-student-page-btn');
-export const gradedCategoryPillsContainer = document.getElementById('score-skill-selection');
+export const gradedCategoryPillsContainer = document.getElementById('graded-category-pills-container');
 export const newScoreValueInput = document.getElementById('new-score-value');
 export const newScoreCommentTextarea = document.getElementById('new-score-comment');
 export const addScoreBtn = document.getElementById('add-score-btn');
@@ -74,6 +74,8 @@ export const profileStatsSummaryDiv = document.getElementById('profile-stats-sum
 export const profileScoresListUl = document.getElementById('profile-scores-list');
 export const globalStudentSearchInput = document.getElementById('global-student-search-input');
 export const globalStudentSearchResultsDiv = document.getElementById('global-student-search-results');
+export const isGradedCheckbox = document.getElementById('is-graded-checkbox');
+
 
 
 export function showUndoToast(message) {

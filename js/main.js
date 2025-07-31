@@ -23,9 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
         secureConfirmCancelBtn, secureConfirmConfirmBtn, addNoteModal,
         newNoteContent, saveNoteBtn, cancelNoteBtn, studentSearchInput,
         studentSearchResultsDiv, studentProfilePage, profileStudentNameHeader,
-        backToStudentPageBtn, scoreSkillSelectionContainer, newScoreValueInput,
+        backToStudentPageBtn, gradedCategoryPillsContainer, newScoreValueInput,
         newScoreCommentTextarea, addScoreBtn, profileStatsSummaryDiv,
-        profileScoresListUl
+        profileScoresListUl, isGradedCheckbox
     } = ui; // This is a bit of a trick to avoid rewriting all the getElementById calls
 
     const globalSearchIcon = document.querySelector('.global-search-container .search-icon');
@@ -192,6 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
     addCategoryBtn.addEventListener('click', () => {
         if (!state.currentClassroom) return;
         const categoryName = newCategoryNameInput.value.trim();
+        const isGraded = isGradedCheckbox.checked; // Get the checkbox status
+
         if (!categoryName) {
             alert("لطفاً نام دسته‌بندی را وارد کنید.");
             return;
@@ -201,11 +203,15 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("این دسته‌بندی از قبل وجود دارد.");
             return;
         }
-        const newCategory = new Category(categoryName);
+        // Pass the 'isGraded' status to the constructor
+        const newCategory = new Category(categoryName, '', isGraded);
         state.currentClassroom.categories.push(newCategory);
         state.saveData();
         ui.renderSettingsCategories();
+
+        // Reset the form fields for the next entry
         newCategoryNameInput.value = '';
+        isGradedCheckbox.checked = false;
     });
 
     newCategoryNameInput.addEventListener('keyup', (event) => {
@@ -472,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     addScoreBtn.addEventListener('click', () => {
-        const activeSkillPill = scoreSkillSelectionContainer.querySelector('.pill.active');
+        const activeSkillPill = gradedCategoryPillsContainer.querySelector('.pill.active');
         if (!activeSkillPill) {
             ui.showNotification("لطفاً یک مهارت را برای نمره‌دهی انتخاب کنید.");
             return;
