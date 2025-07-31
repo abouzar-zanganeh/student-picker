@@ -66,7 +66,7 @@ export const studentSearchResultsDiv = document.getElementById('student-search-r
 export const studentProfilePage = document.getElementById('student-profile-page');
 export const profileStudentNameHeader = document.getElementById('profile-student-name-header');
 export const backToStudentPageBtn = document.getElementById('back-to-student-page-btn');
-export const scoreSkillSelectionContainer = document.getElementById('score-skill-selection');
+export const gradedCategoryPillsContainer = document.getElementById('score-skill-selection');
 export const newScoreValueInput = document.getElementById('new-score-value');
 export const newScoreCommentTextarea = document.getElementById('new-score-comment');
 export const addScoreBtn = document.getElementById('add-score-btn');
@@ -639,7 +639,7 @@ export function renderStudentProfilePage() {
     // Get only the categories marked as "gradable" and not deleted
     const gradedCategories = state.currentClassroom.categories.filter(cat => cat.isGradedCategory && !cat.isDeleted);
 
-    scoreSkillSelectionContainer.innerHTML = '';
+    gradedCategoryPillsContainer.innerHTML = '';
     gradedCategories.forEach(category => {
         const pill = document.createElement('span');
         pill.className = 'pill';
@@ -649,9 +649,9 @@ export function renderStudentProfilePage() {
         if (category.description) {
             pill.dataset.tooltip = category.description;
         }
-        scoreSkillSelectionContainer.appendChild(pill);
+        gradedCategoryPillsContainer.appendChild(pill);
         pill.addEventListener('click', () => {
-            scoreSkillSelectionContainer.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            gradedCategoryPillsContainer.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
             newScoreValueInput.focus();
         });
@@ -711,8 +711,8 @@ export function renderStudentProfilePage() {
 
     newScoreValueInput.value = '';
     newScoreCommentTextarea.value = '';
-    if (scoreSkillSelectionContainer.querySelector('.pill.active')) {
-        scoreSkillSelectionContainer.querySelector('.pill.active').classList.remove('active');
+    if (gradedCategoryPillsContainer.querySelector('.pill.active')) {
+        gradedCategoryPillsContainer.querySelector('.pill.active').classList.remove('active');
     }
     renderStudentNotes();
 }
@@ -926,9 +926,20 @@ export function renderSettingsCategories() {
 
     activeCategories.forEach(category => {
         const li = document.createElement('li');
+        const nameAndBadgeContainer = document.createElement('div');
+        nameAndBadgeContainer.className = 'name-and-badge-container';
+
         const nameSpan = document.createElement('span');
         nameSpan.textContent = category.name;
-        nameSpan.style.flexGrow = '1';
+        nameAndBadgeContainer.appendChild(nameSpan);
+
+        // If the category is graded, add the badge
+        if (category.isGradedCategory) {
+            const gradedBadge = document.createElement('span');
+            gradedBadge.className = 'category-badge';
+            gradedBadge.textContent = 'قابل نمره‌دهی';
+            nameAndBadgeContainer.appendChild(gradedBadge);
+        }
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn-icon';
         deleteBtn.innerHTML = '🗑️';
@@ -942,7 +953,7 @@ export function renderSettingsCategories() {
             state.saveData();
             renderSettingsCategories();
         });
-        li.appendChild(nameSpan);
+        li.appendChild(nameAndBadgeContainer);
         li.appendChild(deleteBtn);
         categoryListUl.appendChild(li);
     });
