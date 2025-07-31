@@ -1352,3 +1352,26 @@ button:disabled:hover {
 .search-results-dropdown .global-search-result .student-name {
     font-weight: bold;
 }
+
+/* --- Styles for Category Creation Options --- */
+.category-options {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0 15px;
+    /* Adds space around the checkbox */
+    white-space: nowrap;
+    /* Prevents the label from wrapping */
+}
+
+.category-options label {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    user-select: none;
+    /* Prevents text selection on click */
+}
+
+#is-graded-checkbox {
+    cursor: pointer;
+}

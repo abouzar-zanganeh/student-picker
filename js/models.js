@@ -341,7 +341,7 @@ export class Classroom {
 }
 
 export class Category {
-    constructor(name, description = '') {
+    constructor(name, description = '', isGradedCategory = false) {
         this.id = `cat_${new Date().getTime()}_${Math.random()}`;
         this.name = name;
         this.description = description;
