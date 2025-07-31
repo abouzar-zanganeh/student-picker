@@ -1,5 +1,4 @@
 import * as state from './state.js';
-import { resetAllStudentCounters } from './state.js';
 import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 
@@ -86,7 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 "آیا از صفر کردن تمام شمارنده‌های دانش‌آموزان مطمئن هستید؟ این عمل غیرقابل بازگشت است.",
                 () => {
 
-                    resetAllStudentCounters();
+                    state.resetAllStudentCounters();
                     ui.renderStudentStatsList();
                     ui.showNotification("تمام آمارها صفر شدند.");
                 },
@@ -109,17 +108,8 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.showCustomConfirm(
                 "آیا از ساخت یک کلاس تستی تصادفی مطمئن هستید؟",
                 () => {
-                    // This function needs to be defined or moved.
-                    function createRandomClass() {
-                        const testClassName = `کلاس تستی ${Object.keys(state.classrooms).length + 1}`;
-                        const newClass = new Classroom({ name: testClassName, type: 'online' });
-                        const students = ['علی رضایی', 'مریم حسینی', 'زهرا احمدی', 'رضا محمدی', 'فاطمه کریمی'];
-                        students.forEach(name => newClass.addStudent(new Student({ name })));
-                        state.classrooms[testClassName] = newClass;
-                        state.saveData();
-                        ui.renderClassList();
-                    }
-                    createRandomClass();
+                    state.createTestClass();
+                    ui.renderClassList();
                     ui.showNotification("کلاس تستی با موفقیت ساخته شد!");
                 },
                 { confirmText: 'بساز', confirmClass: 'btn-success' }

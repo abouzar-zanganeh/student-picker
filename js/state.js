@@ -82,6 +82,16 @@ import { Classroom, Student, Session, Category } from './models.js';
             classrooms[className] = classroomInstance;
         }
     }
+
+   export function createTestClass() {
+        const testClassName = `کلاس تستی ${Object.keys(classrooms).length + 1}`;
+        const newClass = new Classroom({ name: testClassName, type: 'online' });
+        const students = ['علی رضایی', 'مریم حسینی', 'زهرا احمدی', 'رضا محمدی', 'فاطمه کریمی'];
+        students.forEach(name => newClass.addStudent(new Student({ name })));
+        classrooms[testClassName] = newClass;
+        saveData();
+        return testClassName;
+    }
 	
 	
 	export function setCurrentClassroom(classroom) { currentClassroom = classroom; }
