@@ -120,11 +120,11 @@ ul {
 .input-group {
     display: flex;
     margin-bottom: 10px;
+    gap: 10px;
 }
 
 .input-group input[type="text"] {
-    flex-grow: 1;
-    margin-left: 10px;
+    width: 100%;
 }
 
 .centered-input-group {
@@ -447,11 +447,6 @@ button:disabled:hover {
 }
 
 /* اصلاح چیدمان گروه ورودی برای ساخت کلاس جدید */
-.input-group {
-    display: flex;
-    align-items: center;
-}
-
 .composite-input {
     display: flex;
     align-items: center;
@@ -1402,4 +1397,8 @@ button:disabled:hover {
     padding: 20px 15px;
     margin-top: 0;
     border-bottom: 1px solid var(--color-border);
+}
+
+.input-wrapper {
+    flex-grow: 1;
 }
