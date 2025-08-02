@@ -524,15 +524,8 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.display = 'block';
     });
 
-    closeNavBtn.addEventListener('click', () => {
-        sideNavMenu.style.width = '0';
-        overlay.style.display = 'none';
-    });
-
-    overlay.addEventListener('click', () => {
-        sideNavMenu.style.width = '0';
-        overlay.style.display = 'none';
-    });
+    closeNavBtn.addEventListener('click', closeSideNav);
+    overlay.addEventListener('click', closeSideNav);
 
     backupDataBtn.addEventListener('click', () => {
         const dataStr = JSON.stringify(state.classrooms, null, 2);
@@ -545,10 +538,12 @@ document.addEventListener('DOMContentLoaded', () => {
         link.click();
         URL.revokeObjectURL(url);
         ui.showNotification("پشتیبان‌گیری با موفقیت انجام شد.");
+        closeSideNav();
     });
 
     restoreDataBtn.addEventListener('click', () => {
         restoreFileInput.click();
+        closeSideNav();
     });
 
     restoreFileInput.addEventListener('change', (event) => {
@@ -611,6 +606,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    function closeSideNav() {
+        sideNavMenu.style.width = '0';
+        overlay.style.display = 'none';
+    }
 
     // --- Initialize UI Components ---
     initializeAnimatedSearch('.global-search-container .animated-search-container', ui.renderGlobalSearchResults);
