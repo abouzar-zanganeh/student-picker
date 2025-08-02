@@ -1353,7 +1353,7 @@ button:disabled:hover {
     display: flex;
     align-items: center;
     gap: 5px;
-    margin: 0 15px;
+    margin: 0 4px;
     /* Adds space around the checkbox */
     white-space: nowrap;
     /* Prevents the label from wrapping */
