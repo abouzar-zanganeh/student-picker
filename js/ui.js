@@ -197,7 +197,7 @@ export function showSecureConfirm(message, onConfirm) {
 export function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
-        modal.style.display = 'flex';
+        modal.classList.add('modal-visible');
         state.setActiveModal(modalId);
     }
 }
@@ -207,7 +207,7 @@ export function closeActiveModal() {
 
     const modal = document.getElementById(state.activeModal);
     if (modal) {
-        modal.style.display = 'none';
+        modal.classList.remove('modal-visible');
     }
 
     // --- Cleanup Logic ---

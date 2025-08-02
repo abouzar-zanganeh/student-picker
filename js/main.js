@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     secureConfirmCancelBtn.addEventListener('click', () => {
-        secureConfirmModal.style.display = 'none';
+        ui.closeActiveModal();
         state.setSecureConfirmCallback(null);
     });
 
@@ -136,12 +136,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof state.secureConfirmCallback === 'function') {
             state.secureConfirmCallback();
         }
-        secureConfirmModal.style.display = 'none';
+        ui.closeActiveModal();
         state.setSecureConfirmCallback(null);
     });
 
     confirmModalCancelBtn.addEventListener('click', () => {
-        customConfirmModal.style.display = 'none';
+        ui.closeActiveModal();
         if (typeof state.cancelCallback === 'function') {
             state.cancelCallback();
         }
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof state.confirmCallback === 'function') {
             state.confirmCallback();
         }
-        customConfirmModal.style.display = 'none';
+        ui.closeActiveModal();
         state.setConfirmCallback(null);
         state.setCancelCallback(null);
     });

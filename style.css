@@ -1018,13 +1018,13 @@ button:disabled:hover {
 
 /* --- استایل‌های مودال تایید --- */
 .modal-overlay {
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
     justify-content: center;
     align-items: center;
     z-index: 2000;
@@ -1412,4 +1412,26 @@ button:disabled:hover {
     to {
         opacity: 1;
     }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* This class will be toggled by JavaScript to show the modal */
+.modal-overlay.modal-visible {
+    display: flex;
+}
+
+/* This applies the animation to the content box inside the visible modal */
+.modal-overlay.modal-visible .modal-content {
+    animation: slideUp 0.3s ease-out;
 }
