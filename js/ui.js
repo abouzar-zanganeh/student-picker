@@ -963,12 +963,14 @@ export function renderSettingsCategories() {
 
 export function _internalShowPage(pageId) {
     document.querySelectorAll('.page').forEach(page => {
-        page.style.display = 'none';
+        page.classList.remove('active');
     });
     const pageToShow = document.getElementById(pageId);
     if (pageToShow) {
-        pageToShow.style.display = 'block';
+        pageToShow.classList.add('active');
     }
+
+    // This part for the header can remain separate as it's a unique case
     if (pageId === 'class-management-page') {
         appHeader.style.display = 'flex';
     } else {

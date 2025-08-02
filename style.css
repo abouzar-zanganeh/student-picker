@@ -110,6 +110,7 @@ ul {
 
 .page.active {
     display: block;
+    animation: fadeIn 0.3s ease-in-out;
 }
 
 .app-header {
@@ -1401,4 +1402,14 @@ button:disabled:hover {
 
 .input-wrapper {
     flex-grow: 1;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
