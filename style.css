@@ -1429,9 +1429,54 @@ button:disabled:hover {
 /* This class will be toggled by JavaScript to show the modal */
 .modal-overlay.modal-visible {
     display: flex;
+    animation: fadeInBackground 0.3s ease-out;
+}
+
+.modal-overlay.modal-closing {
+    /* This applies the fade-out and holds the final transparent state */
+    animation: fadeOutBackground 0.3s ease-in forwards;
 }
 
 /* This applies the animation to the content box inside the visible modal */
 .modal-overlay.modal-visible .modal-content {
     animation: slideUp 0.3s ease-out;
+}
+
+/* Animation for the modal sliding down and fading out */
+@keyframes slideDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+}
+
+/* This class applies the closing animation */
+.modal-overlay.modal-closing .modal-content {
+    animation: slideDown 0.3s ease-in;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fadeInBackground {
+    from {
+        background-color: rgba(0, 0, 0, 0);
+    }
+
+    to {
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+}
+
+@keyframes fadeOutBackground {
+    from {
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+
+    to {
+        background-color: rgba(0, 0, 0, 0);
+    }
 }

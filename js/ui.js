@@ -203,24 +203,33 @@ export function openModal(modalId) {
 }
 
 export function closeActiveModal() {
-    if (!state.activeModal) return; // Do nothing if no modal is active
+    if (!state.activeModal) return;
 
     const modal = document.getElementById(state.activeModal);
+    const activeModalId = state.activeModal; // Store the ID before we reset the state
+
     if (modal) {
-        modal.classList.remove('modal-visible');
+        // 1. Add the class to trigger the closing animation
+        modal.classList.add('modal-closing');
+
+        // 2. Wait for the animation to finish before hiding the modal
+        setTimeout(() => {
+            modal.classList.remove('modal-visible');
+            modal.classList.remove('modal-closing'); // Clean up the animation class
+
+            // 4. Perform original cleanup logic for callbacks
+            if (activeModalId === 'custom-confirm-modal') {
+                state.setConfirmCallback(null);
+                state.setCancelCallback(null);
+            }
+            if (activeModalId === 'secure-confirm-modal') {
+                state.setSecureConfirmCallback(null);
+            }
+
+        }, 300); // IMPORTANT: This must match the animation duration (0.3s)
     }
 
-    // --- Cleanup Logic ---
-    // Clear any pending confirmation actions to prevent accidental triggers
-    if (state.activeModal === 'custom-confirm-modal') {
-        state.setConfirmCallback(null);
-        state.setCancelCallback(null);
-    }
-    if (state.activeModal === 'secure-confirm-modal') {
-        state.setSecureConfirmCallback(null);
-    }
-
-    // Finally, reset the state
+    // 3. Reset the state immediately so another modal can't be opened mid-animation
     state.setActiveModal(null);
 }
 
