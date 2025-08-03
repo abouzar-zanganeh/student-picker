@@ -1090,6 +1090,7 @@ export function renderSessions() {
                         state.currentClassroom.endSpecificSession(session.sessionNumber);
                         state.saveData();
                         renderSessions();
+                        closeActiveModal();
                     },
                     { confirmText: 'بله', confirmClass: 'btn-success' }
                 );

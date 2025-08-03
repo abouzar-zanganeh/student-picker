@@ -362,12 +362,18 @@ document.addEventListener('DOMContentLoaded', () => {
             };
             ui.showCustomConfirm(
                 "آیا تمایل به انجام فرآیند حضور و غیاب دارید?",
-                () => startSession(true),
-                {
+                () => { // This is the onConfirm callback for "Yes"
+                    startSession(true);
+                    ui.closeActiveModal();
+                },
+                {   // This is the options object
                     confirmText: 'بله',
                     cancelText: 'خیر',
                     confirmClass: 'btn-success',
-                    onCancel: () => startSession(false)
+                    onCancel: () => { // This is the onCancel callback for "No"
+                        startSession(false);
+                        ui.closeActiveModal();
+                    }
                 }
             );
         }
