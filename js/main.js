@@ -153,9 +153,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof state.confirmCallback === 'function') {
             state.confirmCallback();
         }
-        ui.closeActiveModal();
-        state.setConfirmCallback(null);
-        state.setCancelCallback(null);
     });
 
     backToAttendanceBtn.addEventListener('click', () => {

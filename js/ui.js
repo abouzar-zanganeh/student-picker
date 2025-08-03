@@ -145,7 +145,11 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
 
     if (isDelete) {
         const firstConfirm = () => {
-            showSecureConfirm(message, onConfirm);
+            // Close the current modal, and when the animation is finished,
+            // execute the function to open the next one.
+            closeActiveModal(() => {
+                showSecureConfirm(message, onConfirm);
+            });
         };
         confirmModalMessage.textContent = message;
         confirmModalConfirmBtn.textContent = confirmText;
@@ -202,22 +206,19 @@ export function openModal(modalId) {
     }
 }
 
-export function closeActiveModal() {
+export function closeActiveModal(onClosed) { // The new parameter
     if (!state.activeModal) return;
 
     const modal = document.getElementById(state.activeModal);
     const activeModalId = state.activeModal; // Store the ID before we reset the state
 
     if (modal) {
-        // 1. Add the class to trigger the closing animation
         modal.classList.add('modal-closing');
 
-        // 2. Wait for the animation to finish before hiding the modal
         setTimeout(() => {
             modal.classList.remove('modal-visible');
-            modal.classList.remove('modal-closing'); // Clean up the animation class
+            modal.classList.remove('modal-closing');
 
-            // 4. Perform original cleanup logic for callbacks
             if (activeModalId === 'custom-confirm-modal') {
                 state.setConfirmCallback(null);
                 state.setCancelCallback(null);
@@ -226,10 +227,13 @@ export function closeActiveModal() {
                 state.setSecureConfirmCallback(null);
             }
 
-        }, 300); // IMPORTANT: This must match the animation duration (0.3s)
-    }
+            // Run the callback function after everything is done
+            if (typeof onClosed === 'function') {
+                onClosed();
+            }
 
-    // 3. Reset the state immediately so another modal can't be opened mid-animation
+        }, 300); // This must match the animation duration
+    }
     state.setActiveModal(null);
 }
 
