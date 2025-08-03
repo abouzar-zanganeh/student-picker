@@ -1037,10 +1037,14 @@ button:disabled:hover {
     padding: 30px;
     border-radius: var(--border-radius-main);
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    text-align: center;
+    text-align: justify;
     max-width: 400px;
     width: 100%;
     box-sizing: border-box;
+}
+
+#secure-confirm-code {
+    text-align: center;
 }
 
 .modal-content p {

@@ -109,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.showCustomConfirm(
                 "آیا از ساخت یک کلاس تستی تصادفی مطمئن هستید؟",
                 () => {
-                    // This function needs to be defined or moved.
                     function createRandomClass() {
                         const testClassName = `کلاس تستی ${Object.keys(state.classrooms).length + 1}`;
                         const newClass = new Classroom({ name: testClassName, type: 'online' });
@@ -121,6 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     createRandomClass();
                     ui.showNotification("کلاس تستی با موفقیت ساخته شد!");
+                    ui.closeActiveModal();
                 },
                 { confirmText: 'بساز', confirmClass: 'btn-success' }
             );
@@ -559,6 +559,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         ui.renderClassList();
                         ui.showPage('class-management-page');
                         ui.showNotification("اطلاعات با موفقیت بازیابی شد.");
+                        ui.closeActiveModal();
+
                     },
                     { confirmText: 'بازیابی کن', confirmClass: 'btn-warning' }
                 );
