@@ -170,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const winner = state.currentClassroom.selectNextWinner(state.selectedCategory.name, state.selectedSession);
 
         if (winner) {
+            ui.hideQuickGradeForm();
             const studentRecord = state.selectedSession.studentRecords[winner.identity.studentId];
             if (studentRecord && studentRecord.attendance === 'absent') {
                 winner.statusCounters.missedChances++;
@@ -482,6 +483,44 @@ document.addEventListener('DOMContentLoaded', () => {
             studentSearchResultsDiv.style.display = 'none';
         }
     });
+
+    ui.quickGradeSubmitBtn.addEventListener('click', () => {
+        const scoreValue = ui.quickScoreInput.value;
+        const noteText = ui.quickNoteTextarea.value.trim();
+        const studentId = state.selectedSession?.lastSelectedWinnerId;
+        const category = state.selectedCategory;
+
+        if (!studentId || !category) {
+            ui.showNotification("لطفاً ابتدا یک دانش‌آموز و یک دسته‌بندی را انتخاب کنید.");
+            return;
+        }
+
+        if (!scoreValue) {
+            ui.showNotification("لطفاً مقدار نمره را وارد کنید.");
+            return;
+        }
+
+        const student = state.currentClassroom.students.find(s => s.identity.studentId === studentId);
+
+        if (student) {
+            student.addScore(category.name, parseFloat(scoreValue), noteText);
+            state.saveData();
+            ui.showNotification(`نمره برای ${student.identity.name} در مهارت ${category.name} ثبت شد.`);
+            ui.hideQuickGradeForm();
+            // Refresh the winner display to show the new score/note instantly
+            ui.displayWinner(student, category.name);
+        }
+    });
+
+    const quickGradeSubmitHandler = (event) => {
+        if (event.key === 'Enter' && event.ctrlKey) {
+            event.preventDefault(); // Prevents adding a new line in the textarea
+            ui.quickGradeSubmitBtn.click();
+        }
+    };
+
+    ui.quickScoreInput.addEventListener('keydown', quickGradeSubmitHandler);
+    ui.quickNoteTextarea.addEventListener('keydown', quickGradeSubmitHandler);
 
     addScoreBtn.addEventListener('click', () => {
         const activeSkillPill = gradedCategoryPillsContainer.querySelector('.pill.active');

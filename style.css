@@ -71,6 +71,11 @@ textarea {
     box-sizing: border-box;
 }
 
+input[type="text"]:not(.animated-search-input),
+input[type="number"] {
+    text-align: center;
+}
+
 /* --- Style for Placeholder Text --- */
 input::placeholder,
 textarea::placeholder {
@@ -78,6 +83,10 @@ textarea::placeholder {
     /* 90% of the input's normal font size */
     color: #aaa;
     /* A slightly lighter gray for better contrast */
+}
+
+input::placeholder {
+    text-align: center;
 }
 
 /* For older browser compatibility */
@@ -1485,4 +1494,47 @@ button:disabled:hover {
     to {
         background-color: rgba(0, 0, 0, 0);
     }
+}
+
+#quick-grade-form-wrapper {
+    display: none;
+    /* Hidden by default */
+    gap: 10px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#quick-grade-form-wrapper.visible {
+    display: flex;
+    /* Becomes a flex container when visible */
+}
+
+#quick-score-input {
+    width: 80px;
+    flex-shrink: 0;
+}
+
+#quick-note-textarea {
+    flex-grow: 1;
+    /* Takes up the remaining available space */
+    resize: vertical;
+    min-height: 0px;
+}
+
+#quick-grade-submit-btn {
+    flex-shrink: 0;
+}
+
+/* Hide spinners from number inputs */
+
+/* For WebKit browsers like Chrome, Safari, and Edge */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* For Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
 }

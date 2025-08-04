@@ -80,7 +80,10 @@ export const trashedClassesList = document.getElementById('trashed-classes-list'
 export const trashedStudentsList = document.getElementById('trashed-students-list');
 export const trashedSessionsList = document.getElementById('trashed-sessions-list');
 export const trashedCategoriesList = document.getElementById('trashed-categories-list');
-
+export const quickGradeFormWrapper = document.getElementById('quick-grade-form-wrapper');
+export const quickScoreInput = document.getElementById('quick-score-input');
+export const quickNoteTextarea = document.getElementById('quick-note-textarea');
+export const quickGradeSubmitBtn = document.getElementById('quick-grade-submit-btn');
 
 
 export function showUndoToast(message) {
@@ -98,6 +101,19 @@ export function showUndoToast(message) {
         undoToast.classList.remove('show');
         state.setPreviousState(null);
     }, 5000));
+}
+
+export function showQuickGradeForm() {
+    if (!quickGradeFormWrapper.classList.contains('visible')) {
+        quickScoreInput.value = '';
+        quickNoteTextarea.value = '';
+        quickGradeFormWrapper.classList.add('visible');
+    }
+    quickScoreInput.focus();
+}
+
+export function hideQuickGradeForm() {
+    quickGradeFormWrapper.classList.remove('visible');
 }
 
 export function handleUndo() {
@@ -612,12 +628,19 @@ export function renderStudentPage() {
         if (category.description) {
             pill.dataset.tooltip = category.description;
         }
+
         pill.addEventListener('click', () => {
             document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
             state.setSelectedCategory(category);
+            if (category.isGradedCategory) {
+                showQuickGradeForm();
+            } else {
+                hideQuickGradeForm();
+            }
             selectStudentBtnWrapper.classList.remove('disabled-wrapper');
         });
+
         categoryPillsContainer.appendChild(pill);
     });
 
