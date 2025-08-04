@@ -417,7 +417,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const allResults = [];
         for (const className in state.classrooms) {
             const classroom = state.classrooms[className];
-            const foundStudents = classroom.students.filter(student =>
+            if (classroom.isDeleted) continue;
+            const foundStudents = getActiveItems(classroom.students).filter(student =>
                 student.identity.name.toLowerCase().includes(searchTerm)
             );
 

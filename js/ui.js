@@ -1,4 +1,5 @@
 import * as state from './state.js';
+import { getActiveItems } from './state.js';
 
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');
@@ -243,7 +244,7 @@ export function renderAttendancePage() {
     attendanceClassNameHeader.textContent = `حضور و غیاب کلاس: ${state.currentClassroom.info.name}`;
     attendanceListUl.innerHTML = '';
 
-    state.currentClassroom.students.forEach(student => {
+    getActiveItems(state.currentClassroom.students).forEach(student => {
         const li = document.createElement('li');
         li.className = 'attendance-list-item';
 
@@ -385,7 +386,7 @@ export function renderStudentStatsList() {
         return absenceCount;
     };
 
-    state.currentClassroom.students.forEach(student => {
+    getActiveItems(state.currentClassroom.students).forEach(student => {
         const li = document.createElement('li');
         li.className = 'student-list-item';
 
@@ -810,6 +811,7 @@ export function renderClassList() {
     classListUl.innerHTML = '';
     for (const name in state.classrooms) {
         const classroom = state.classrooms[name];
+        if (classroom.isDeleted) continue;
         const li = document.createElement('li');
         const nameContainer = document.createElement('div');
 
@@ -824,8 +826,8 @@ export function renderClassList() {
         nameContainer.appendChild(classNameSpan);
 
         // Get the number of students and sessions
-        const studentCount = classroom.students.length;
-        const sessionCount = classroom.sessions.length;
+        const studentCount = getActiveItems(classroom.students).length;
+        const sessionCount = getActiveItems(classroom.sessions).length;
 
         // Create a new DIV to hold both badges (this will be our inner flex container)
         const statsRowDiv = document.createElement('div');
@@ -911,7 +913,7 @@ export function renderSettingsStudentList() {
     settingsStudentListUl.innerHTML = '';
     if (!state.currentClassroom) return;
 
-    state.currentClassroom.students.forEach(student => {
+    getActiveItems(state.currentClassroom.students).forEach(student => {
         const li = document.createElement('li');
         const nameSpan = document.createElement('span');
         nameSpan.textContent = student.identity.name;
@@ -1023,7 +1025,7 @@ export function renderSessions() {
         return;
     }
 
-    const reversedSessions = [...state.currentClassroom.sessions].reverse();
+    const reversedSessions = [...getActiveItems(state.currentClassroom.sessions)].reverse();
 
     reversedSessions.forEach(session => {
         const li = document.createElement('li');
