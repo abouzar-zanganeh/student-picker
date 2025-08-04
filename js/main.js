@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
     confirmModalConfirmBtn.addEventListener('click', () => {
         if (typeof state.confirmCallback === 'function') {
             state.confirmCallback();
+            ui.closeActiveModal();
         }
     });
 
