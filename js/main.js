@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         newScoreCommentTextarea, addScoreBtn, profileStatsSummaryDiv,
         profileScoresListUl, isGradedCheckbox
     } = ui; // This is a bit of a trick to avoid rewriting all the getElementById calls
+    const trashNavBtn = document.getElementById('trash-nav-btn');
 
     const globalSearchIcon = document.querySelector('.global-search-container .search-icon');
 
@@ -530,6 +531,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeNavBtn.addEventListener('click', closeSideNav);
     overlay.addEventListener('click', closeSideNav);
+
+    trashNavBtn.addEventListener('click', () => {
+        ui.renderTrashPage();
+        ui.showPage('trash-page');
+        closeSideNav(); // Close the nav menu after clicking
+    });
 
     backupDataBtn.addEventListener('click', () => {
         const dataStr = JSON.stringify(state.classrooms, null, 2);

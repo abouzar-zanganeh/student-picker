@@ -18,6 +18,7 @@
 
     <div id="side-nav-menu" class="side-nav">
         <a href="javascript:void(0)" id="close-nav-btn" class="close-btn">&times;</a>
+        <button id="trash-nav-btn" class="nav-btn">🗑️ سطل زباله</button>
         <button id="backup-data-btn" class="nav-btn">📤 پشتیبان‌گیری</button>
         <button id="restore-data-btn" class="nav-btn">📥 بازیابی</button>
         <input type="file" id="restore-file-input" class="hidden-input" accept=".json">
@@ -224,6 +225,24 @@
             </div>
         </div>
     </main>
+
+    <main id="trash-page" class="page">
+        <h2>🗑️ سطل زباله</h2>
+        <button class="back-to-classes-btn">➡️ بازگشت به لیست کلاس‌ها</button>
+        <hr class="separator">
+
+        <h3>کلاس‌های حذف شده</h3>
+        <ul id="trashed-classes-list" class="list-container">
+        </ul>
+
+        <h3>دانش‌آموزان حذف شده</h3>
+        <ul id="trashed-students-list" class="list-container">
+        </ul>
+    </main>
+
+    <div id="undo-toast" class="undo-toast">
+        ...
+    </div>
 
     <div id="undo-toast" class="undo-toast">
         <span id="undo-message"></span>
