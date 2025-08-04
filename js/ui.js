@@ -78,6 +78,8 @@ export const globalStudentSearchResultsDiv = document.getElementById('global-stu
 export const isGradedCheckbox = document.getElementById('is-graded-checkbox');
 export const trashedClassesList = document.getElementById('trashed-classes-list');
 export const trashedStudentsList = document.getElementById('trashed-students-list');
+export const trashedSessionsList = document.getElementById('trashed-sessions-list');
+export const trashedCategoriesList = document.getElementById('trashed-categories-list');
 
 
 
@@ -1204,20 +1206,20 @@ export function renderTrashPage() {
     // Clear previous lists
     trashedClassesList.innerHTML = '';
     trashedStudentsList.innerHTML = '';
+    trashedSessionsList.innerHTML = '';
+    trashedCategoriesList.innerHTML = '';
 
-    // Find and render trashed classes
+    // --- Render Trashed Classes ---
     const trashedClasses = Object.values(state.classrooms).filter(c => c.isDeleted);
     if (trashedClasses.length === 0) {
         trashedClassesList.innerHTML = '<li>هیچ کلاسی در سطل زباله نیست.</li>';
     } else {
         trashedClasses.forEach(classroom => {
+            //rendering logic for classes
             const li = document.createElement('li');
             li.innerHTML = `<span>${classroom.info.name}</span>`;
-
             const buttonsContainer = document.createElement('div');
             buttonsContainer.className = 'list-item-buttons';
-
-            // Restore Button
             const restoreBtn = document.createElement('button');
             restoreBtn.className = 'btn-icon';
             restoreBtn.innerHTML = '🔄';
@@ -1225,12 +1227,10 @@ export function renderTrashPage() {
             restoreBtn.addEventListener('click', () => {
                 classroom.isDeleted = false;
                 state.saveData();
-                renderTrashPage(); // Re-render the trash page
-                renderClassList(); // Re-render the main class list
+                renderTrashPage();
+                renderClassList();
                 showNotification(`کلاس «${classroom.info.name}» بازیابی شد.`);
             });
-
-            // Permanent Delete Button
             const permanentDeleteBtn = document.createElement('button');
             permanentDeleteBtn.className = 'btn-icon';
             permanentDeleteBtn.innerHTML = '🔥';
@@ -1247,7 +1247,6 @@ export function renderTrashPage() {
                     { confirmText: 'حذف دائمی', confirmClass: 'btn-warning', isDelete: true }
                 );
             });
-
             buttonsContainer.appendChild(restoreBtn);
             buttonsContainer.appendChild(permanentDeleteBtn);
             li.appendChild(buttonsContainer);
@@ -1255,10 +1254,10 @@ export function renderTrashPage() {
         });
     }
 
-    // Find and render trashed students
+    // --- Render Trashed Students ---
     const trashedStudents = [];
     Object.values(state.classrooms).forEach(classroom => {
-        if (!classroom.isDeleted) { // Only show students from active classes
+        if (!classroom.isDeleted) {
             classroom.students.forEach(student => {
                 if (student.isDeleted) {
                     trashedStudents.push({ student, classroom });
@@ -1271,13 +1270,11 @@ export function renderTrashPage() {
         trashedStudentsList.innerHTML = '<li>هیچ دانش‌آموزی در سطل زباله نیست.</li>';
     } else {
         trashedStudents.forEach(({ student, classroom }) => {
+            // rendering logic for students ...
             const li = document.createElement('li');
             li.innerHTML = `<span>${student.identity.name} <small>(از کلاس: ${classroom.info.name})</small></span>`;
-
             const buttonsContainer = document.createElement('div');
             buttonsContainer.className = 'list-item-buttons';
-
-            // Restore Button
             const restoreBtn = document.createElement('button');
             restoreBtn.className = 'btn-icon';
             restoreBtn.innerHTML = '🔄';
@@ -1288,8 +1285,6 @@ export function renderTrashPage() {
                 renderTrashPage();
                 showNotification(`دانش‌آموز «${student.identity.name}» بازیابی شد.`);
             });
-
-            // Permanent Delete Button
             const permanentDeleteBtn = document.createElement('button');
             permanentDeleteBtn.className = 'btn-icon';
             permanentDeleteBtn.innerHTML = '🔥';
@@ -1309,11 +1304,122 @@ export function renderTrashPage() {
                     { confirmText: 'حذف دائمی', confirmClass: 'btn-warning', isDelete: true }
                 );
             });
-
             buttonsContainer.appendChild(restoreBtn);
             buttonsContainer.appendChild(permanentDeleteBtn);
             li.appendChild(buttonsContainer);
             trashedStudentsList.appendChild(li);
+        });
+    }
+
+    // --- Render Trashed Sessions ---
+    const trashedSessions = [];
+    Object.values(state.classrooms).forEach(classroom => {
+        if (!classroom.isDeleted) {
+            classroom.sessions.forEach(session => {
+                if (session.isDeleted) {
+                    trashedSessions.push({ session, classroom });
+                }
+            });
+        }
+    });
+
+    if (trashedSessions.length === 0) {
+        trashedSessionsList.innerHTML = '<li>هیچ جلسه‌ای در سطل زباله نیست.</li>';
+    } else {
+        trashedSessions.forEach(({ session, classroom }) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>جلسه ${session.sessionNumber} <small>(از کلاس: ${classroom.info.name})</small></span>`;
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.className = 'list-item-buttons';
+            const restoreBtn = document.createElement('button');
+            restoreBtn.className = 'btn-icon';
+            restoreBtn.innerHTML = '🔄';
+            restoreBtn.title = 'بازیابی';
+            restoreBtn.addEventListener('click', () => {
+                session.isDeleted = false;
+                state.saveData();
+                renderTrashPage();
+                showNotification(`جلسه ${session.sessionNumber} بازیابی شد.`);
+            });
+            const permanentDeleteBtn = document.createElement('button');
+            permanentDeleteBtn.className = 'btn-icon';
+            permanentDeleteBtn.innerHTML = '🔥';
+            permanentDeleteBtn.title = 'حذف دائمی';
+            permanentDeleteBtn.addEventListener('click', () => {
+                showCustomConfirm(
+                    `آیا از حذف دائمی جلسه ${session.sessionNumber} مطمئن هستید؟`,
+                    () => {
+                        const sessionIndex = classroom.sessions.findIndex(s => s.sessionNumber === session.sessionNumber);
+                        if (sessionIndex > -1) {
+                            classroom.sessions.splice(sessionIndex, 1);
+                        }
+                        state.saveData();
+                        renderTrashPage();
+                        showNotification(`جلسه ${session.sessionNumber} برای همیشه حذف شد.`);
+                    },
+                    { confirmText: 'حذف دائمی', confirmClass: 'btn-warning', isDelete: true }
+                );
+            });
+            buttonsContainer.appendChild(restoreBtn);
+            buttonsContainer.appendChild(permanentDeleteBtn);
+            li.appendChild(buttonsContainer);
+            trashedSessionsList.appendChild(li);
+        });
+    }
+
+    // --- Render Trashed Categories ---
+    const trashedCategories = [];
+    Object.values(state.classrooms).forEach(classroom => {
+        if (!classroom.isDeleted) {
+            classroom.categories.forEach(category => {
+                if (category.isDeleted) {
+                    trashedCategories.push({ category, classroom });
+                }
+            });
+        }
+    });
+
+    if (trashedCategories.length === 0) {
+        trashedCategoriesList.innerHTML = '<li>هیچ دسته‌بندی در سطل زباله نیست.</li>';
+    } else {
+        trashedCategories.forEach(({ category, classroom }) => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${category.name} <small>(از کلاس: ${classroom.info.name})</small></span>`;
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.className = 'list-item-buttons';
+            const restoreBtn = document.createElement('button');
+            restoreBtn.className = 'btn-icon';
+            restoreBtn.innerHTML = '🔄';
+            restoreBtn.title = 'بازیابی';
+            restoreBtn.addEventListener('click', () => {
+                category.isDeleted = false;
+                state.saveData();
+                renderTrashPage();
+                showNotification(`دسته‌بندی «${category.name}» بازیابی شد.`);
+            });
+            const permanentDeleteBtn = document.createElement('button');
+            permanentDeleteBtn.className = 'btn-icon';
+            permanentDeleteBtn.innerHTML = '🔥';
+            permanentDeleteBtn.title = 'حذف دائمی';
+            permanentDeleteBtn.addEventListener('click', () => {
+                showCustomConfirm(
+                    `آیا از حذف دائمی دسته‌بندی «${category.name}» مطمئن هستید؟`,
+                    () => {
+                        const categoryIndex = classroom.categories.findIndex(c => c.id === category.id);
+                        if (categoryIndex > -1) {
+                            classroom.categories.splice(categoryIndex, 1);
+                        }
+                        state.saveData();
+                        renderTrashPage();
+                        showNotification(`دسته‌بندی «${category.name}» برای همیشه حذف شد.`);
+                    },
+                    { confirmText: 'حذف دائمی', confirmClass: 'btn-warning', isDelete: true }
+                );
+            });
+            buttonsContainer.appendChild(restoreBtn);
+            buttonsContainer.appendChild(permanentDeleteBtn);
+            li.appendChild(buttonsContainer);
+            trashedCategoriesList.appendChild(li);
         });
     }
 }
