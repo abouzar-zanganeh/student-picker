@@ -1,5 +1,5 @@
 import * as state from './state.js';
-import { resetAllStudentCounters } from './state.js';
+import { resetAllStudentCounters, getActiveItems } from './state.js';
 import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 

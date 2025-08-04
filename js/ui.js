@@ -1159,7 +1159,7 @@ export function updateSessionPageHeader() {
 export function renderSearchResults(searchTerm = '') {
     if (!state.currentClassroom) return;
 
-    const filteredStudents = state.currentClassroom.students.filter(student =>
+    const filteredStudents = getActiveItems(state.currentClassroom.students).filter(student =>
         student.identity.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
