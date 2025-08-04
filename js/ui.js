@@ -1244,7 +1244,7 @@ export function renderTrashPage() {
                         renderTrashPage();
                         showNotification(`کلاس «${classroom.info.name}» برای همیشه حذف شد.`);
                     },
-                    { confirmText: 'حذف دائمی', confirmClass: 'btn-warning', isDelete: true }
+                    { confirmText: 'حذف دائمی', confirmClass: 'btn-warning' }
                 );
             });
             buttonsContainer.appendChild(restoreBtn);
@@ -1301,7 +1301,7 @@ export function renderTrashPage() {
                         renderTrashPage();
                         showNotification(`دانش‌آموز «${student.identity.name}» برای همیشه حذف شد.`);
                     },
-                    { confirmText: 'حذف دائمی', confirmClass: 'btn-warning', isDelete: true }
+                    { confirmText: 'حذف دائمی', confirmClass: 'btn-warning' }
                 );
             });
             buttonsContainer.appendChild(restoreBtn);
@@ -1357,7 +1357,7 @@ export function renderTrashPage() {
                         renderTrashPage();
                         showNotification(`جلسه ${session.sessionNumber} برای همیشه حذف شد.`);
                     },
-                    { confirmText: 'حذف دائمی', confirmClass: 'btn-warning', isDelete: true }
+                    { confirmText: 'حذف دائمی', confirmClass: 'btn-warning' }
                 );
             });
             buttonsContainer.appendChild(restoreBtn);
@@ -1413,7 +1413,7 @@ export function renderTrashPage() {
                         renderTrashPage();
                         showNotification(`دسته‌بندی «${category.name}» برای همیشه حذف شد.`);
                     },
-                    { confirmText: 'حذف دائمی', confirmClass: 'btn-warning', isDelete: true }
+                    { confirmText: 'حذف دائمی', confirmClass: 'btn-warning' }
                 );
             });
             buttonsContainer.appendChild(restoreBtn);

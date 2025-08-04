@@ -347,19 +347,28 @@ button:disabled:hover {
     display: none;
 }
 
-.undo-toast {
+.toast-base {
     position: fixed;
     bottom: 20px;
     left: 50%;
+    transform: translateX(-50%) translateY(150%);
     background-color: var(--color-toast-bg);
     color: var(--color-text-light);
     padding: 14px 20px;
     border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    width: fit-content;
+    max-width: 90%;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.undo-toast {
     display: flex;
     align-items: center;
     gap: 20px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    z-index: 1000;
+    transition: all 0.3s ease;
 }
 
 .undo-toast button {
@@ -395,15 +404,6 @@ button:disabled:hover {
 }
 
 .notification-toast {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(150%);
-    background-color: var(--color-toast-bg);
-    color: var(--color-text-light);
-    padding: 14px 20px;
-    border-radius: 8px;
-    z-index: 1000;
     transition: transform 0.4s ease, visibility 0.4s ease;
     visibility: hidden;
 }
