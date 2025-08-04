@@ -43,9 +43,11 @@ export function rehydrateData(plainClassrooms) {
         const plainClass = plainClassrooms[className];
 
         const classroomInstance = new Classroom(plainClass.info);
+        classroomInstance.isDeleted = plainClass.isDeleted;
 
         classroomInstance.students = plainClass.students.map(plainStudent => {
             const studentInstance = new Student(plainStudent.identity);
+            studentInstance.isDeleted = plainStudent.isDeleted;
             studentInstance.statusCounters = plainStudent.statusCounters;
             studentInstance.logs = plainStudent.logs;
             // اطمینان از اینکه ساختار scores درست است
@@ -60,6 +62,7 @@ export function rehydrateData(plainClassrooms) {
 
         classroomInstance.sessions = plainClass.sessions.map(plainSession => {
             const sessionInstance = new Session(plainSession.sessionNumber);
+            sessionInstance.isDeleted = plainSession.isDeleted;
             sessionInstance.startTime = new Date(plainSession.startTime);
             sessionInstance.endTime = plainSession.endTime ? new Date(plainSession.endTime) : null;
             sessionInstance.isFinished = plainSession.isFinished;
