@@ -363,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.saveData();
             };
             ui.showCustomConfirm(
-                "آیا تمایل به انجام فرآیند حضور و غیاب دارید?",
+                "آیا تمایل به انجام فرآیند حضور و غیاب دارید؟",
                 () => { // This is the onConfirm callback for "Yes"
                     startSession(true);
                     ui.closeActiveModal();
