@@ -15,6 +15,7 @@ export class Student {
                 parent: identityInfo.parentContact || null,
             }
         };
+        this.isDeleted = false;
         this.statusCounters = {
             totalSelections: 0,
             missedChances: 0,
@@ -58,6 +59,7 @@ export class Score {
         this.value = value;
         this.timestamp = new Date();
         this.comment = comment;
+        this.isDeleted = false;
     }
 }
 
@@ -66,6 +68,7 @@ export class Note {
         this.id = `note_${new Date().getTime()}`;
         this.timestamp = new Date();
         this.content = content;
+        this.isDeleted = false;
     }
 }
 
@@ -73,6 +76,7 @@ export class Session {
     constructor(sessionNumber) {
         this.sessionNumber = sessionNumber;
         this.startTime = new Date();
+        this.isDeleted = false;
         this.endTime = null;
         this.isFinished = false;
         this.isMakeup = false;
@@ -215,6 +219,7 @@ export class Classroom {
         };
         this.students = [];
         this.sessions = [];
+        this.isDeleted = false;
         this.categories = [
             // Default participation categories
             new Category('Vocabulary', 'Questions about words and meanings.'),
@@ -346,5 +351,6 @@ export class Category {
         this.description = description;
         this.isDeleted = false;
         this.isGradedCategory = isGradedCategory;
+        this.isDeleted = false;
     }
 }

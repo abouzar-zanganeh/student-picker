@@ -125,3 +125,12 @@ export function resetAllStudentCounters() {
     }
     saveData();
 }
+
+// This function filters those students who are not deleted and return an array of them.
+export function getActiveItems(items) {
+    // A safeguard to ensure we're always working with an array.
+    if (!Array.isArray(items)) {
+        return [];
+    }
+    return items.filter(item => !item.isDeleted);
+}

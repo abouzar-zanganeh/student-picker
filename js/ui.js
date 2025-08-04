@@ -891,7 +891,7 @@ export function renderClassList() {
                 `آیا از حذف کلاس «${name}» مطمئن هستید؟ این عمل تمام جلسات و آمار مربوط به آن را نیز حذف می‌کند.`,
                 () => {
                     showUndoToast(`کلاس «${name}» حذف شد.`);
-                    delete state.classrooms[name];
+                    classroom.isDeleted = true;
                     state.saveData();
                     renderClassList();
                 },
@@ -923,7 +923,7 @@ export function renderSettingsStudentList() {
         deleteBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             showUndoToast(`دانش‌آموز «${student.identity.name}» حذف شد.`);
-            state.currentClassroom.removeStudent(student.identity.studentId);
+            student.isDeleted = true;
             state.saveData();
             renderSettingsStudentList();
         });
@@ -961,10 +961,8 @@ export function renderSettingsCategories() {
         deleteBtn.style.color = 'var(--color-warning)';
         deleteBtn.addEventListener('click', () => {
             showUndoToast(`دسته‌بندی «${category.name}» حذف شد.`);
-            const categoryIndex = state.currentClassroom.categories.findIndex(c => c.id === category.id);
-            if (categoryIndex > -1) {
-                state.currentClassroom.categories.splice(categoryIndex, 1);
-            }
+            //marking the category for trash can
+            category.isDeleted = true;
             state.saveData();
             renderSettingsCategories();
         });
@@ -1108,12 +1106,9 @@ export function renderSessions() {
                 `آیا از حذف جلسه ${session.sessionNumber} مطمئن هستید؟ این عمل آمار ثبت شده در این جلسه را نیز حذف می‌کند.`,
                 () => {
                     showUndoToast(`جلسه ${session.sessionNumber} حذف شد.`);
-                    const sessionIndex = state.currentClassroom.sessions.findIndex(s => s.sessionNumber === session.sessionNumber);
-                    if (sessionIndex > -1) {
-                        state.currentClassroom.sessions.splice(sessionIndex, 1);
-                        state.saveData();
-                        renderSessions();
-                    }
+                    session.isDeleted = true;
+                    state.saveData();
+                    renderSessions();
                 },
                 { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
             );
