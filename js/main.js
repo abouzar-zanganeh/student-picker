@@ -526,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     hamburgerMenuBtn.addEventListener('click', () => {
         sideNavMenu.style.width = '250px';
-        overlay.style.display = 'block';
+        overlay.classList.add('modal-visible');
     });
 
     closeNavBtn.addEventListener('click', closeSideNav);
@@ -622,7 +622,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeSideNav() {
         sideNavMenu.style.width = '0';
-        overlay.style.display = 'none';
+        overlay.classList.add('modal-closing'); // Use the modal's closing class
+
+        setTimeout(() => {
+            // This removes all classes after the animation finishes
+            overlay.classList.remove('modal-visible', 'modal-closing');
+        }, 300); // This duration must match your CSS animation time
     }
 
     // --- Initialize UI Components ---

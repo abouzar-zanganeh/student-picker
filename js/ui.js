@@ -82,6 +82,7 @@ export const trashedStudentsList = document.getElementById('trashed-students-lis
 
 
 export function showUndoToast(message) {
+
     clearTimeout(state.undoTimeout);
 
     if (!state.previousState) {

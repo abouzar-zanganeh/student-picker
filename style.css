@@ -1433,7 +1433,7 @@ button:disabled:hover {
 /* This class will be toggled by JavaScript to show the modal */
 .modal-overlay.modal-visible {
     display: flex;
-    animation: fadeInBackground 0.3s ease-out;
+    animation: fadeInBackground 0.3s ease-out forwards;
 }
 
 .modal-overlay.modal-closing {
