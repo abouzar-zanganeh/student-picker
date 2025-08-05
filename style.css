@@ -1556,3 +1556,8 @@ input[type=number] {
     font-weight: bold;
     white-space: nowrap;
 }
+
+.list-item-badges {
+    display: flex;
+    align-items: center;
+}

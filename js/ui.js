@@ -930,18 +930,34 @@ export function renderClassList() {
         });
         buttonsContainer.appendChild(settingsBtn);
         buttonsContainer.appendChild(deleteBtn);
+
+
+
+        // --- Append child elements in a structured way ---
         li.appendChild(nameContainer);
-        li.appendChild(typeBadge);
-        li.appendChild(buttonsContainer);
-        // Check for an unfinished session and add the warning indicator
+
+        // Create a dedicated container for all status badges
+        const badgesContainer = document.createElement('div');
+        badgesContainer.className = 'list-item-badges';
+
+        // Badge 1: Unfinished Session (will always be the first from the right)
         if (classroom.liveSession) {
             li.classList.add('has-unfinished-session');
             const warningBadge = document.createElement('span');
             warningBadge.className = 'warning-badge';
             warningBadge.textContent = 'جلسه باز';
-            // Insert the warning badge before the settings/delete buttons
-            li.insertBefore(warningBadge, buttonsContainer);
+            badgesContainer.appendChild(warningBadge);
         }
+
+        // Badge 2: Class Type (this element is created earlier in the function)
+        badgesContainer.appendChild(typeBadge);
+
+        // --- (Future badges can be added to the badgesContainer here) ---
+
+        // Append the main containers to the list item
+        li.appendChild(badgesContainer);
+        li.appendChild(buttonsContainer);
+
         classListUl.appendChild(li);
     }
 }
