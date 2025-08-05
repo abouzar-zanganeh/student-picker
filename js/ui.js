@@ -933,6 +933,15 @@ export function renderClassList() {
         li.appendChild(nameContainer);
         li.appendChild(typeBadge);
         li.appendChild(buttonsContainer);
+        // Check for an unfinished session and add the warning indicator
+        if (classroom.liveSession) {
+            li.classList.add('has-unfinished-session');
+            const warningBadge = document.createElement('span');
+            warningBadge.className = 'warning-badge';
+            warningBadge.textContent = 'جلسه باز';
+            // Insert the warning badge before the settings/delete buttons
+            li.insertBefore(warningBadge, buttonsContainer);
+        }
         classListUl.appendChild(li);
     }
 }
@@ -1013,6 +1022,7 @@ export function _internalShowPage(pageId) {
 
     // This part for the header can remain separate as it's a unique case
     if (pageId === 'class-management-page') {
+        renderClassList();
         appHeader.style.display = 'flex';
     } else {
         appHeader.style.display = 'none';
