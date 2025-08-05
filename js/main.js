@@ -64,6 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('blur', () => {
             setTimeout(() => {
                 container.classList.remove('search-active');
+                input.value = '';
                 if (clearResultsCallback) {
                     clearResultsCallback([]);
                 }
