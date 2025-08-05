@@ -694,3 +694,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 });
+// --- One-Time Data Migration Function ---
+function migrateScores() {
+    let studentsFixed = 0;
+    let scoresMigrated = 0;
+
+    for (const className in state.classrooms) {
+        const classroom = state.classrooms[className];
+        classroom.students.forEach(student => {
+            const oldScores = student.logs.scores;
+            const newScores = {};
+            let needsFixing = false;
+
+            for (const skill in oldScores) {
+                const normalizedKey = skill.toLowerCase();
+                if (skill !== normalizedKey) {
+                    needsFixing = true;
+                }
+
+                if (!newScores[normalizedKey]) {
+                    newScores[normalizedKey] = [];
+                }
+
+                // Merge scores from old key into the new normalized key
+                newScores[normalizedKey] = newScores[normalizedKey].concat(oldScores[skill]);
+                if (skill !== normalizedKey) {
+                    scoresMigrated += oldScores[skill].length;
+                }
+            }
+
+            if (needsFixing) {
+                student.logs.scores = newScores;
+                studentsFixed++;
+            }
+        });
+    }
+
+    if (studentsFixed > 0) {
+        state.saveData();
+        const message = `Migration complete! Merged ${scoresMigrated} scores for ${studentsFixed} students. Your data is now consistent.`;
+        console.log(message);
+        alert(message);
+    } else {
+        const message = "No scores needed fixing. Your data is already consistent.";
+        console.log(message);
+        alert(message);
+    }
+}
+// Make the function accessible from the browser's console
+window.migrateScores = migrateScores;

@@ -287,12 +287,12 @@ export function renderAttendancePage() {
 
         const absentSessions = state.currentClassroom.sessions
             .filter(session => session.studentRecords[student.identity.studentId]?.attendance === 'absent')
-            .map(session => `جلسه ${session.sessionNumber}`);
+            .map(session => ` ${session.sessionNumber}`);
 
         if (absentSessions.length > 0) {
-            absenceSpan.textContent = `غیبت ها: ${absentSessions.join('، ')}`;
+            absenceSpan.textContent = `جلسات غایب: ${absentSessions.join('، ')}`;
         } else {
-            absenceSpan.textContent = 'غیبت ها: بدون غیبت';
+            absenceSpan.textContent = 'جلسات غایب: بدون غیبت';
         }
 
         infoDiv.appendChild(nameSpan);
@@ -319,12 +319,12 @@ export function renderAttendancePage() {
         const updateAbsenceInfo = () => {
             const updatedAbsentSessions = state.currentClassroom.sessions
                 .filter(session => session.studentRecords[student.identity.studentId]?.attendance === 'absent')
-                .map(session => `جلسه ${session.sessionNumber}`);
+                .map(session => ` ${session.sessionNumber}`);
 
             if (updatedAbsentSessions.length > 0) {
-                absenceSpan.textContent = `غیبت ها: ${updatedAbsentSessions.join('، ')}`;
+                absenceSpan.textContent = `جلسات غایب: ${updatedAbsentSessions.join('، ')}`;
             } else {
-                absenceSpan.textContent = 'غیبت ها: بدون غیبت';
+                absenceSpan.textContent = 'جلسات غایب: بدون غیبت';
             }
         };
 

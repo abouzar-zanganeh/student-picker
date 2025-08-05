@@ -39,11 +39,13 @@ export class Student {
     }
 
     addScore(skill, value, comment) {
-        if (!this.logs.scores[skill]) {
-            this.logs.scores[skill] = [];
+        const skillKey = skill.toLowerCase(); // Normalize the key to lowercase
+        if (!this.logs.scores[skillKey]) {
+            this.logs.scores[skillKey] = [];
         }
+        // Still pass the original skill name to the Score object for display purposes
         const newScore = new Score(skill, value, comment);
-        this.logs.scores[skill].push(newScore);
+        this.logs.scores[skillKey].push(newScore);
     }
 
     addNote(content) {
