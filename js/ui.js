@@ -109,7 +109,6 @@ export function showQuickGradeForm() {
         quickNoteTextarea.value = '';
         quickGradeFormWrapper.classList.add('visible');
     }
-    quickScoreInput.focus();
 }
 
 export function hideQuickGradeForm() {
