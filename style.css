@@ -1497,16 +1497,11 @@ button:disabled:hover {
 }
 
 #quick-grade-form-wrapper {
-    display: none;
+    display: flex;
     /* Hidden by default */
     gap: 10px;
     align-items: center;
     margin-top: 20px;
-}
-
-#quick-grade-form-wrapper.visible {
-    display: flex;
-    /* Becomes a flex container when visible */
 }
 
 #quick-score-input {
@@ -1560,4 +1555,31 @@ input[type=number] {
 .list-item-badges {
     display: flex;
     align-items: center;
+}
+
+/* 1. Disable text selection globally for a cleaner app-like feel */
+body {
+    -webkit-user-select: none;
+    /* Safari */
+    -ms-user-select: none;
+    /* IE 10 and IE 11 */
+    user-select: none;
+    /* Standard syntax */
+}
+
+/* 2. Re-enable text selection on specific, useful elements */
+input,
+textarea,
+.student-name,
+.note-content,
+.score-comment,
+.class-name-display,
+#selected-student-result strong {
+    /* The selected winner's name */
+    -webkit-user-select: text;
+    /* Safari */
+    -ms-user-select: text;
+    /* IE 10 and IE 11 */
+    user-select: text;
+    /* Standard syntax */
 }

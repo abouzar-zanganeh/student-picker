@@ -103,18 +103,6 @@ export function showUndoToast(message) {
     }, 5000));
 }
 
-export function showQuickGradeForm() {
-    if (!quickGradeFormWrapper.classList.contains('visible')) {
-        quickScoreInput.value = '';
-        quickNoteTextarea.value = '';
-        quickGradeFormWrapper.classList.add('visible');
-    }
-}
-
-export function hideQuickGradeForm() {
-    quickGradeFormWrapper.classList.remove('visible');
-}
-
 export function handleUndo() {
     if (state.previousState) {
         const currentClassName = state.currentClassroom ? state.currentClassroom.info.name : null;
@@ -632,11 +620,6 @@ export function renderStudentPage() {
             document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
             state.setSelectedCategory(category);
-            if (category.isGradedCategory) {
-                showQuickGradeForm();
-            } else {
-                hideQuickGradeForm();
-            }
             selectStudentBtnWrapper.classList.remove('disabled-wrapper');
         });
 

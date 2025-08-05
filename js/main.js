@@ -171,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const winner = state.currentClassroom.selectNextWinner(state.selectedCategory.name, state.selectedSession);
 
         if (winner) {
-            ui.hideQuickGradeForm();
             const studentRecord = state.selectedSession.studentRecords[winner.identity.studentId];
             if (studentRecord && studentRecord.attendance === 'absent') {
                 winner.statusCounters.missedChances++;
@@ -524,7 +523,9 @@ document.addEventListener('DOMContentLoaded', () => {
             student.addScore(category.name, parseFloat(scoreValue), noteText);
             state.saveData();
             ui.showNotification(`نمره برای ${student.identity.name} در مهارت ${category.name} ثبت شد.`);
-            ui.hideQuickGradeForm();
+            // Clear inputs for the next entry
+            ui.quickScoreInput.value = '';
+            ui.quickNoteTextarea.value = '';
             // Refresh the winner display to show the new score/note instantly
             ui.displayWinner(student, category.name);
         }
@@ -694,52 +695,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 });
-// --- One-Time Data Migration Function ---
-function migrateScores() {
-    let studentsFixed = 0;
-    let scoresMigrated = 0;
-
-    for (const className in state.classrooms) {
-        const classroom = state.classrooms[className];
-        classroom.students.forEach(student => {
-            const oldScores = student.logs.scores;
-            const newScores = {};
-            let needsFixing = false;
-
-            for (const skill in oldScores) {
-                const normalizedKey = skill.toLowerCase();
-                if (skill !== normalizedKey) {
-                    needsFixing = true;
-                }
-
-                if (!newScores[normalizedKey]) {
-                    newScores[normalizedKey] = [];
-                }
-
-                // Merge scores from old key into the new normalized key
-                newScores[normalizedKey] = newScores[normalizedKey].concat(oldScores[skill]);
-                if (skill !== normalizedKey) {
-                    scoresMigrated += oldScores[skill].length;
-                }
-            }
-
-            if (needsFixing) {
-                student.logs.scores = newScores;
-                studentsFixed++;
-            }
-        });
-    }
-
-    if (studentsFixed > 0) {
-        state.saveData();
-        const message = `Migration complete! Merged ${scoresMigrated} scores for ${studentsFixed} students. Your data is now consistent.`;
-        console.log(message);
-        alert(message);
-    } else {
-        const message = "No scores needed fixing. Your data is already consistent.";
-        console.log(message);
-        alert(message);
-    }
-}
-// Make the function accessible from the browser's console
-window.migrateScores = migrateScores;
