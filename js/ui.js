@@ -1182,13 +1182,8 @@ export function updateSessionPageHeader() {
     }
 }
 
-export function renderSearchResults(searchTerm = '') {
-    if (!state.currentClassroom) return;
 
-    const filteredStudents = getActiveItems(state.currentClassroom.students).filter(student =>
-        student.identity.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
+export function renderSearchResults(filteredStudents) {
     studentSearchResultsDiv.innerHTML = '';
 
     if (filteredStudents.length > 0) {
@@ -1213,6 +1208,8 @@ export function renderSearchResults(searchTerm = '') {
 
     studentSearchResultsDiv.style.display = 'block';
 }
+
+
 export function renderGlobalSearchResults(results) {
     globalStudentSearchResultsDiv.innerHTML = '';
 

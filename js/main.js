@@ -2,6 +2,7 @@ import * as state from './state.js';
 import { resetAllStudentCounters, getActiveItems } from './state.js';
 import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
+import { normalizeText } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- HTML Elements (from ui.js, but needed for event listeners) ---
@@ -410,19 +411,23 @@ document.addEventListener('DOMContentLoaded', () => {
         selectedTypeRadio.checked = false;
     });
 
+
+
     globalStudentSearchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
+        const searchTerm = e.target.value;
         if (searchTerm.length < 2) {
-            ui.renderGlobalSearchResults([]); // Clear results if search is too short
+            ui.renderGlobalSearchResults([]);
             return;
         }
 
+        const normalizedSearchTerm = normalizeText(searchTerm.toLowerCase());
         const allResults = [];
         for (const className in state.classrooms) {
             const classroom = state.classrooms[className];
             if (classroom.isDeleted) continue;
+
             const foundStudents = getActiveItems(classroom.students).filter(student =>
-                student.identity.name.toLowerCase().includes(searchTerm)
+                normalizeText(student.identity.name.toLowerCase()).includes(normalizedSearchTerm)
             );
 
             foundStudents.forEach(student => {
@@ -432,7 +437,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ui.renderGlobalSearchResults(allResults);
     });
-
 
 
 
@@ -469,7 +473,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     studentSearchInput.addEventListener('input', (e) => {
-        ui.renderSearchResults(e.target.value);
+        const searchTerm = e.target.value;
+
+        if (!searchTerm) {
+            ui.renderSearchResults([]); // Pass an empty array to clear results
+            return;
+        }
+
+        const normalizedSearchTerm = normalizeText(searchTerm.toLowerCase());
+        const allStudents = getActiveItems(state.currentClassroom.students);
+
+        const foundStudents = allStudents.filter(student =>
+            normalizeText(student.identity.name.toLowerCase()).includes(normalizedSearchTerm)
+        );
+
+        ui.renderSearchResults(foundStudents);
     });
 
     studentSearchInput.addEventListener('focus', () => {
