@@ -167,6 +167,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     selectStudentBtn.addEventListener('click', () => {
+        if (ui.quickScoreInput.value.trim() !== '' || ui.quickNoteTextarea.value.trim() !== '') {
+            ui.showNotification("لطفاً ابتدا با دکمه «ثبت»، تغییرات را ذخیره کنید.");
+            return;
+        }
         if (!state.currentClassroom || !state.selectedSession || !state.selectedCategory) return;
 
         const winner = state.currentClassroom.selectNextWinner(state.selectedCategory.name, state.selectedSession);
