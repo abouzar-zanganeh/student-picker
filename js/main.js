@@ -46,11 +46,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!icon || !input) return;
 
         icon.addEventListener('mousedown', (e) => {
-            // If the input is already visible, prevent the mousedown from
-            // causing the input to lose focus (which would trigger the blur event).
-            if (container.classList.contains('search-active')) {
-                e.preventDefault();
-            }
+            // By always preventing the default mousedown action, we stop the browser
+            // from creating an unstable focus state when the window regains focus.
+            e.preventDefault();
         });
 
         icon.addEventListener('click', () => {
@@ -671,15 +669,89 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+
+    // All keyboard shortcust will be defined here
     document.addEventListener('keydown', (event) => {
+        // First, determine if the user is typing in any input field.
+        const focusedElement = document.activeElement;
+        const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(focusedElement.tagName);
+
+        // If the user is typing, we disable ALL keyboard shortcuts.
+        if (isTyping) {
+            return;
+        }
+
+        // --- Global 'Escape' key handler ---
+        // This code now only runs if the user is NOT typing.
         if (event.key === 'Escape') {
-            // If a modal is active, close it.
             if (state.activeModal) {
                 ui.closeActiveModal();
-            }
-            // Otherwise, perform the default back action.
-            else {
+            } else {
                 history.back();
+            }
+            return; // Stop processing other shortcuts
+        }
+
+        // --- Page-Specific Shortcuts ---
+        // The '!isTyping' check is no longer needed here because of the guard clause above.
+        if (state.selectedSession) {
+            const key = event.key.toLowerCase();
+
+            // Prevent default browser actions for our shortcut keys
+            if (' ascfg'.includes(key)) {
+                event.preventDefault();
+            }
+
+            switch (key) {
+                case ' ':
+                    selectStudentBtn.click();
+                    break;
+
+                case 'a':
+                    if (attendancePage.classList.contains('active')) {
+                        history.back();
+                    } else {
+                        ui.renderAttendancePage();
+                        ui.showPage('attendance-page');
+                    }
+                    break;
+
+                case 's':
+                    if (document.getElementById('session-page').classList.contains('active')) {
+                        history.back();
+                    } else {
+                        backToSessionsBtn.click();
+                    }
+                    break;
+
+                case 'c':
+                    document.querySelector('.back-to-classes-btn').click();
+                    break;
+
+                case 'f':
+                    const searchIcon = document.querySelector('.action-column .search-icon');
+                    if (searchIcon) {
+                        searchIcon.click();
+                    }
+                    break;
+
+                case 'g':
+                    if (studentProfilePage.classList.contains('active')) {
+                        history.back();
+                    } else {
+                        const lastWinnerId = state.selectedSession.lastSelectedWinnerId;
+                        if (lastWinnerId) {
+                            const student = state.currentClassroom.students.find(s => s.identity.studentId === lastWinnerId);
+                            if (student) {
+                                state.setSelectedStudentForProfile(student);
+                                ui.renderStudentProfilePage();
+                                ui.showPage('student-profile-page');
+                            }
+                        } else {
+                            ui.showNotification("ابتدا یک نفر را انتخاب کنید تا پروفایل او نمایش داده شود.");
+                        }
+                    }
+                    break;
             }
         }
     });
@@ -700,3 +772,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 });
+

@@ -1181,54 +1181,67 @@ export function renderSearchResults(filteredStudents) {
             });
             studentSearchResultsDiv.appendChild(studentDiv);
         });
+        studentSearchResultsDiv.style.display = 'block';
     } else {
-        const noResultsDiv = document.createElement('div');
-        noResultsDiv.className = 'no-results';
-        noResultsDiv.textContent = 'پیدا نشد';
-        studentSearchResultsDiv.appendChild(noResultsDiv);
+        // This new logic checks if the search was intentional before showing "Not found"
+        if (studentSearchInput.value.trim() !== '') {
+            const noResultsDiv = document.createElement('div');
+            noResultsDiv.className = 'no-results';
+            noResultsDiv.textContent = 'پیدا نشد';
+            studentSearchResultsDiv.appendChild(noResultsDiv);
+            studentSearchResultsDiv.style.display = 'block';
+        } else {
+            // If the input that led to empty results was also empty, just hide the dropdown.
+            studentSearchResultsDiv.style.display = 'none';
+        }
     }
-
-    studentSearchResultsDiv.style.display = 'block';
 }
-
 
 export function renderGlobalSearchResults(results) {
     globalStudentSearchResultsDiv.innerHTML = '';
 
-    if (results.length === 0) {
-        globalStudentSearchResultsDiv.style.display = 'none';
-        return;
-    }
+    if (results.length > 0) {
+        results.forEach(result => {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'global-search-result';
 
-    results.forEach(result => {
-        const resultDiv = document.createElement('div');
-        resultDiv.className = 'global-search-result';
+            const studentNameSpan = document.createElement('span');
+            studentNameSpan.className = 'student-name';
+            studentNameSpan.textContent = result.student.identity.name;
 
-        const studentNameSpan = document.createElement('span');
-        studentNameSpan.className = 'student-name';
-        studentNameSpan.textContent = result.student.identity.name;
+            const classNameSpan = document.createElement('span');
+            classNameSpan.className = 'class-name';
+            classNameSpan.textContent = `کلاس: ${result.classroom.info.name}`;
 
-        const classNameSpan = document.createElement('span');
-        classNameSpan.className = 'class-name';
-        classNameSpan.textContent = `کلاس: ${result.classroom.info.name}`;
+            resultDiv.appendChild(studentNameSpan);
+            resultDiv.appendChild(classNameSpan);
 
-        resultDiv.appendChild(studentNameSpan);
-        resultDiv.appendChild(classNameSpan);
+            resultDiv.addEventListener('click', () => {
+                state.setCurrentClassroom(result.classroom);
+                state.setSelectedStudentForProfile(result.student);
+                renderStudentProfilePage();
+                showPage('student-profile-page');
+                globalStudentSearchResultsDiv.style.display = 'none';
+                globalStudentSearchInput.value = '';
+            });
 
-        resultDiv.addEventListener('click', () => {
-            state.setCurrentClassroom(result.classroom);
-            state.setSelectedStudentForProfile(result.student);
-            renderStudentProfilePage();
-            showPage('student-profile-page');
-            globalStudentSearchResultsDiv.style.display = 'none';
-            globalStudentSearchInput.value = '';
+            globalStudentSearchResultsDiv.appendChild(resultDiv);
         });
-
-        globalStudentSearchResultsDiv.appendChild(resultDiv);
-    });
-
-    globalStudentSearchResultsDiv.style.display = 'block';
+        globalStudentSearchResultsDiv.style.display = 'block';
+    } else {
+        // This logic now mirrors the other search function perfectly.
+        if (globalStudentSearchInput.value.trim() !== '') {
+            const noResultsDiv = document.createElement('div');
+            noResultsDiv.className = 'no-results';
+            noResultsDiv.textContent = 'پیدا نشد';
+            globalStudentSearchResultsDiv.appendChild(noResultsDiv);
+            globalStudentSearchResultsDiv.style.display = 'block';
+        } else {
+            globalStudentSearchResultsDiv.style.display = 'none';
+        }
+    }
 }
+
 
 export function renderTrashPage() {
     // Clear previous lists
