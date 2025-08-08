@@ -28,7 +28,7 @@ export class Student {
         this.logs = {
             parentContacts: [],
             scores: {},
-            discipline: [],
+            discipline: {}, // stores positives and negatives objects
             sessionHistory: {},
         };
         this.profile = {
