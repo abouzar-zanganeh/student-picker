@@ -272,12 +272,33 @@ export function renderAttendancePage() {
         const absenceSpan = document.createElement('span');
         absenceSpan.className = 'absence-info';
 
+        // First, get an array of objects containing the session number and its makeup status
         const absentSessions = state.currentClassroom.sessions
-            .filter(session => session.studentRecords[student.identity.studentId]?.attendance === 'absent')
-            .map(session => ` ${session.sessionNumber}`);
+            .filter(session => !session.isDeleted && session.studentRecords[student.identity.studentId]?.attendance === 'absent')
+            .map(session => ({
+                number: session.sessionNumber,
+                isMakeup: session.isMakeup
+            }));
 
         if (absentSessions.length > 0) {
-            absenceSpan.textContent = `جلسات غایب: ${absentSessions.join('، ')}`;
+            // Instead of setting textContent, we build the content node by node
+            absenceSpan.appendChild(document.createTextNode('جلسات غایب: '));
+
+            absentSessions.forEach((sessionInfo, index) => {
+                const numberSpan = document.createElement('span');
+                numberSpan.textContent = sessionInfo.number;
+
+                // Apply our new class if the session was a makeup
+                if (sessionInfo.isMakeup) {
+                    numberSpan.classList.add('makeup-absence');
+                }
+                absenceSpan.appendChild(numberSpan);
+
+                // Add a comma separator, but not after the last number
+                if (index < absentSessions.length - 1) {
+                    absenceSpan.appendChild(document.createTextNode('، '));
+                }
+            });
         } else {
             absenceSpan.textContent = 'جلسات غایب: بدون غیبت';
         }
@@ -837,7 +858,8 @@ export function renderClassList() {
 
         // Get the number of students and sessions
         const studentCount = getActiveItems(classroom.students).length;
-        const sessionCount = getActiveItems(classroom.sessions).length;
+
+        const sessionCount = getActiveItems(classroom.sessions).filter(session => session.isFinished).length;
 
         // Create a new DIV to hold both badges (this will be our inner flex container)
         const statsRowDiv = document.createElement('div');
@@ -850,7 +872,7 @@ export function renderClassList() {
 
         // Create session count span
         const sessionCountSpan = document.createElement('span');
-        sessionCountSpan.textContent = `جلسه ${sessionCount}`;
+        sessionCountSpan.textContent = `${sessionCount} جلسه`;
         sessionCountSpan.classList.add('session-count-badge');
 
         // Append badges to their new container

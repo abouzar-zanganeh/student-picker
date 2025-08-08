@@ -842,6 +842,11 @@ button:disabled:hover {
     color: var(--color-text-dark);
 }
 
+.makeup-absence {
+    color: var(--color-warning);
+    font-weight: bold;
+}
+
 /* --- استایل‌های جستجوی دانش‌آموز --- */
 .student-search-container {
     position: relative;
