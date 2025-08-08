@@ -734,7 +734,7 @@ button:disabled:hover {
 }
 
 /* استایل Tooltip */
-.pill[data-tooltip]::after {
+[data-tooltip]::after {
     content: attr(data-tooltip);
     position: absolute;
     bottom: 125%;
@@ -752,9 +752,13 @@ button:disabled:hover {
     transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
-.pill[data-tooltip]:hover::after {
+[data-tooltip]:hover::after {
     opacity: 1;
     visibility: visible;
+}
+
+.tooltip-container {
+    position: relative;
 }
 
 
@@ -1587,4 +1591,9 @@ textarea,
     /* IE 10 and IE 11 */
     user-select: text;
     /* Standard syntax */
+}
+
+#quick-grade-form-wrapper :disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }

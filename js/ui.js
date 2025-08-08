@@ -616,6 +616,15 @@ export function renderStudentPage() {
     categoryPillsContainer.innerHTML = '';
     studentListUl.innerHTML = '';
     resultDiv.innerHTML = '';
+
+    quickGradeFormWrapper.classList.add('tooltip-container');
+
+    quickScoreInput.disabled = true;
+    quickNoteTextarea.disabled = true;
+    quickGradeSubmitBtn.disabled = true;
+    quickScoreInput.value = '';
+    quickNoteTextarea.value = '';
+
     selectStudentBtnWrapper.classList.add('disabled-wrapper');
 
     const activeCategories = state.currentClassroom.categories.filter(cat => !cat.isDeleted);
@@ -632,6 +641,20 @@ export function renderStudentPage() {
             document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
             state.setSelectedCategory(category);
+
+            if (category.isGradedCategory) {
+                quickScoreInput.disabled = false;
+                quickNoteTextarea.disabled = false;
+                quickGradeSubmitBtn.disabled = false;
+                quickGradeFormWrapper.removeAttribute('data-tooltip');
+
+            } else {
+                quickScoreInput.disabled = true;
+                quickNoteTextarea.disabled = true;
+                quickGradeSubmitBtn.disabled = true;
+                quickGradeFormWrapper.setAttribute('data-tooltip', 'برای این دسته‌بندی قابلیت نمره دهی تعریف نشده است');
+
+            }
             selectStudentBtnWrapper.classList.remove('disabled-wrapper');
         });
 
@@ -651,6 +674,8 @@ export function renderStudentPage() {
             displayWinner(lastWinner, state.selectedCategory.name);
         }
     }
+
+
 
     showPage('student-page');
     renderStudentStatsList();

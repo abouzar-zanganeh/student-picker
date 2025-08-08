@@ -228,10 +228,10 @@ export class Classroom {
             new Category('Grammar', 'Questions about sentence structure and rules.'),
 
             // Default graded categories
-            new Category('Listening', 'Scores related to listening skills.', true),
-            new Category('Speaking', 'Scores related to speaking skills.', true),
-            new Category('Reading', 'Scores related to reading skills.', true),
-            new Category('Writing', 'Scores related to writing skills.', true)
+            new Category('Listening', undefined, true),
+            new Category('Speaking', undefined, true),
+            new Category('Reading', undefined, true),
+            new Category('Writing', undefined, true)
         ];
         this.futurePlans = {};
     }
