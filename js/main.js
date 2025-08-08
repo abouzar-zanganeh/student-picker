@@ -520,6 +520,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (scoreValue > 100 || scoreValue < 0) {
+            ui.showNotification("نمره نباید از ۱۰۰ بیشتر و از صفر کمتر باشد");
+            return;
+        }
+
         const student = state.currentClassroom.students.find(s => s.identity.studentId === studentId);
 
         if (student) {

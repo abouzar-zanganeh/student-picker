@@ -39,6 +39,10 @@ export class Student {
     }
 
     addScore(skill, value, comment) {
+        if (value > 100 || value < 0) {
+            console.log("نمره نباید از ۱۰۰ بیشتر و از صفر کمتر باشد");
+            return;
+        }
         const skillKey = skill.toLowerCase(); // Normalize the key to lowercase
         if (!this.logs.scores[skillKey]) {
             this.logs.scores[skillKey] = [];
