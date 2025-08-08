@@ -369,8 +369,6 @@ export function renderAttendancePage() {
                 if (studentRecord.hadIssue) {
                     student.statusCounters.otherIssues--;
                     studentRecord.hadIssue = false;
-                } else {
-                    student.statusCounters.missedChances++;
                 }
             }
 
