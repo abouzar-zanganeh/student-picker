@@ -343,14 +343,7 @@ export function renderAttendancePage() {
             const wasAbsent = studentRecord.attendance === 'absent';
             const hadIssue = studentRecord.hadIssue;
 
-            if (wasAbsent) {
-                student.statusCounters.missedChances = Math.max(0, student.statusCounters.missedChances - 1);
-            }
-            if (hadIssue) {
-                student.statusCounters.missedChances = Math.max(0, student.statusCounters.missedChances - 1);
-                student.statusCounters.otherIssues = Math.max(0, student.statusCounters.otherIssues - 1);
-                studentRecord.hadIssue = false;
-            }
+
 
             state.selectedSession.setAttendance(student.identity.studentId, 'present');
             presentBtn.classList.add('active');
