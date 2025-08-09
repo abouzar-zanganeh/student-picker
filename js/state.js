@@ -67,6 +67,7 @@ export function rehydrateData(plainClassrooms) {
             sessionInstance.endTime = plainSession.endTime ? new Date(plainSession.endTime) : null;
             sessionInstance.isFinished = plainSession.isFinished;
             sessionInstance.isMakeup = plainSession.isMakeup;
+            sessionInstance.isCancelled = plainSession.isCancelled || false;
             sessionInstance.studentRecords = plainSession.studentRecords;
             sessionInstance.lastWinnerByCategory = plainSession.lastWinnerByCategory;
             sessionInstance.lastUsedCategoryId = plainSession.lastUsedCategoryId;

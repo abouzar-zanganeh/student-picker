@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('new-session-btn').addEventListener('click', () => {
         if (state.currentClassroom) {
-            const unfinishedSession = state.currentClassroom.sessions.find(session => !session.isFinished);
+            const unfinishedSession = state.currentClassroom.sessions.find(session => !session.isFinished && !session.isCancelled);
             if (unfinishedSession) {
                 ui.showNotification(`جلسه ${unfinishedSession.sessionNumber} هنوز تمام نشده است. لطفاً ابتدا با دکمه ✅ آن را خاتمه دهید.`);
                 return;

@@ -1099,6 +1099,13 @@ export function renderSessions() {
         return;
     }
 
+    // First, get all sessions that are not cancelled or deleted, and sort them chronologically.
+    // This array determines the "active" session number for display.
+    const activeSessions = getActiveItems(state.currentClassroom.sessions)
+        .filter(s => !s.isCancelled)
+        .sort((a, b) => a.sessionNumber - b.sessionNumber);
+
+    // Get all non-deleted sessions to render, and reverse them for display order.
     const reversedSessions = [...getActiveItems(state.currentClassroom.sessions)].reverse();
 
     reversedSessions.forEach(session => {
@@ -1108,15 +1115,35 @@ export function renderSessions() {
         infoContainer.style.flexDirection = 'column';
         infoContainer.style.alignItems = 'flex-start';
         infoContainer.style.flexGrow = '1';
-        infoContainer.style.cursor = 'pointer';
+
         const sessionDate = new Date(session.startTime).toLocaleDateString('fa-IR');
         const sessionText = document.createElement('span');
-        sessionText.textContent = `جلسه ${session.sessionNumber} - تاریخ: ${sessionDate}`;
-        infoContainer.appendChild(sessionText);
+
         const badgesContainer = document.createElement('div');
         badgesContainer.style.display = 'flex';
         badgesContainer.style.gap = '5px';
         badgesContainer.style.marginTop = '5px';
+
+        if (session.isCancelled) {
+            sessionText.textContent = `جلسه لغو شده - تاریخ: ${sessionDate}`;
+            infoContainer.style.cursor = 'default'; // No action on click for cancelled sessions
+            const cancelledBadge = document.createElement('span');
+            cancelledBadge.className = 'type-badge cancelled-badge';
+            cancelledBadge.textContent = 'لغو شده';
+            badgesContainer.appendChild(cancelledBadge);
+        } else {
+            // Dynamically find the session's display number
+            const displaySessionNumber = activeSessions.indexOf(session) + 1;
+            sessionText.textContent = `جلسه ${displaySessionNumber} - تاریخ: ${sessionDate}`;
+            infoContainer.style.cursor = 'pointer';
+            infoContainer.addEventListener('click', () => {
+                state.setSelectedSession(session);
+                renderStudentPage();
+            });
+        }
+
+        infoContainer.appendChild(sessionText);
+
         if (session.isFinished) {
             const finishedBadge = document.createElement('span');
             finishedBadge.className = 'type-badge';
@@ -1134,12 +1161,34 @@ export function renderSessions() {
         }
         infoContainer.appendChild(badgesContainer);
         li.appendChild(infoContainer);
-        infoContainer.addEventListener('click', () => {
-            state.setSelectedSession(session);
-            renderStudentPage();
-        });
+
         const buttonsContainer = document.createElement('div');
         buttonsContainer.className = 'list-item-buttons';
+
+        // --- Add the new Cancel Button ---
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn-icon';
+        cancelBtn.innerHTML = '❌';
+        cancelBtn.title = 'لغو جلسه';
+        cancelBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const actionText = session.isCancelled ? 'بازگردانی جلسه' : 'لغو جلسه';
+            const confirmMsg = session.isCancelled ?
+                `آیا از بازگردانی این جلسه مطمئن هستید؟` :
+                `آیا از لغو این جلسه مطمئن هستید؟ جلسه لغو شده در آمار تاثیری ندارد اما قابل بازگردانی است.`;
+
+            showCustomConfirm(confirmMsg,
+                () => {
+                    session.isCancelled = !session.isCancelled; // Toggle the state
+                    state.saveData();
+                    renderSessions();
+                    showNotification(session.isCancelled ? 'جلسه لغو شد.' : 'جلسه بازگردانی شد.');
+                }, { confirmText: actionText, confirmClass: 'btn-warning' }
+            );
+        });
+        buttonsContainer.appendChild(cancelBtn);
+        // --- End of new code ---
+
         const makeupBtn = document.createElement('button');
         makeupBtn.className = 'btn-icon';
         makeupBtn.innerHTML = '🔄';
@@ -1151,7 +1200,8 @@ export function renderSessions() {
             renderSessions();
         });
         buttonsContainer.appendChild(makeupBtn);
-        if (!session.isFinished) {
+
+        if (!session.isFinished && !session.isCancelled) {
             const endSessionBtn = document.createElement('button');
             endSessionBtn.className = 'btn-icon';
             endSessionBtn.innerHTML = '✅';
@@ -1159,18 +1209,18 @@ export function renderSessions() {
             endSessionBtn.addEventListener('click', (event) => {
                 event.stopPropagation();
                 showCustomConfirm(
-                    `آیا از خاتمه دادن جلسه ${session.sessionNumber} مطمئن هستید؟`,
+                    `آیا از خاتمه دادن جلسه ${activeSessions.indexOf(session) + 1} مطمئن هستید؟`,
                     () => {
                         state.currentClassroom.endSpecificSession(session.sessionNumber);
                         state.saveData();
                         renderSessions();
-                        closeActiveModal();
                     },
                     { confirmText: 'بله', confirmClass: 'btn-success' }
                 );
             });
             buttonsContainer.appendChild(endSessionBtn);
         }
+
         const deleteSessionBtn = document.createElement('button');
         deleteSessionBtn.className = 'btn-icon';
         deleteSessionBtn.innerHTML = '🗑️';
@@ -1178,10 +1228,11 @@ export function renderSessions() {
         deleteSessionBtn.style.color = 'var(--color-warning)';
         deleteSessionBtn.addEventListener('click', (event) => {
             event.stopPropagation();
+            const displayNumText = session.isCancelled ? 'لغو شده' : `${activeSessions.indexOf(session) + 1}`;
             showCustomConfirm(
-                `آیا از حذف جلسه ${session.sessionNumber} مطمئن هستید؟ این عمل آمار ثبت شده در این جلسه را نیز حذف می‌کند.`,
+                `آیا از حذف جلسه ${displayNumText} مطمئن هستید؟ این عمل آمار ثبت شده در این جلسه را نیز حذف می‌کند.`,
                 () => {
-                    showUndoToast(`جلسه ${session.sessionNumber} حذف شد.`);
+                    showUndoToast(`جلسه ${displayNumText} حذف شد.`);
                     session.isDeleted = true;
                     state.saveData();
                     renderSessions();
