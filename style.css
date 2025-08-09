@@ -9,6 +9,7 @@
     --color-success: #28a745;
     --color-success-hover: #218838;
     --color-warning: #ffc107;
+    --color-strong-warning: #d9534f;
     --color-warning-hover: #e0a800;
     --color-text-dark: #333;
     --color-text-light: #fff;
@@ -516,6 +517,11 @@ button:disabled:hover {
     border-radius: var(--border-radius-main);
     color: var(--color-text-light);
     margin: 0 10px;
+}
+
+.cancelled-badge {
+    background-color: var(--color-strong-warning);
+    color: var(--color-text-light);
 }
 
 .type-badge.online {

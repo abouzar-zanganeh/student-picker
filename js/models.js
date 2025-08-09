@@ -86,10 +86,12 @@ export class Session {
         this.endTime = null;
         this.isFinished = false;
         this.isMakeup = false;
+        this.isCancelled = false;
         this.studentRecords = {};
         this.lastWinnerByCategory = {};
         this.lastUsedCategoryId = null;
         this.lastSelectedWinnerId = null;
+
     }
 
     end() {
