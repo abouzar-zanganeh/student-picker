@@ -527,10 +527,16 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.quickGradeSubmitBtn.addEventListener('click', () => {
         const scoreValue = ui.quickScoreInput.value;
         const noteText = ui.quickNoteTextarea.value.trim();
-        const studentId = state.selectedSession?.lastSelectedWinnerId;
+        const historyEntry = state.selectedSession?.winnerHistory[state.winnerHistoryIndex];
+        const student = historyEntry?.winner;
+
+        if (!student) {
+            ui.showNotification("خطا: دانش‌آموز معتبری برای ثبت نمره یافت نشد.");
+            return;
+        }
         const category = state.selectedCategory;
 
-        if (!studentId || !category) {
+        if (!student || !category) {
             ui.showNotification("لطفاً ابتدا یک دانش‌آموز و یک دسته‌بندی را انتخاب کنید.");
             return;
         }
@@ -545,7 +551,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const student = state.currentClassroom.students.find(s => s.identity.studentId === studentId);
 
         if (student) {
             student.addScore(category.name, parseFloat(scoreValue), noteText);
