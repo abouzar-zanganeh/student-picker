@@ -612,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const link = document.createElement('a');
         link.href = url;
         const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
-        link.download = `teacher-assistant-backup-${today}.json`;
+        link.download = `SP-${today}.json`;
         link.click();
         URL.revokeObjectURL(url);
         ui.showNotification("پشتیبان‌گیری با موفقیت انجام شد.");
