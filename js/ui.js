@@ -444,26 +444,68 @@ export function renderStudentStatsList() {
     });
 }
 
-export function displayWinner(winner, categoryName) {
+export function displayWinner() {
     const resultDiv = document.getElementById('selected-student-result');
     resultDiv.innerHTML = '';
     resultDiv.classList.remove('absent');
 
+    // Check if there's a valid history entry to display
+    if (!state.selectedSession || state.winnerHistoryIndex < 0 || !state.selectedSession.winnerHistory[state.winnerHistoryIndex]) {
+        return;
+    }
+
+    // Get the current winner from the session's history based on the index
+    const historyEntry = state.selectedSession.winnerHistory[state.winnerHistoryIndex];
+    const { winner, categoryName } = historyEntry;
+
     const studentRecord = state.selectedSession.studentRecords[winner.identity.studentId];
     const isAbsent = studentRecord?.attendance === 'absent';
 
+    // --- Name and Navigation Container ---
+    const nameContainer = document.createElement('div');
+    nameContainer.style.display = 'flex';
+    nameContainer.style.alignItems = 'center';
+    nameContainer.style.justifyContent = 'center';
+    nameContainer.style.width = '100%';
+    nameContainer.style.gap = '20px';
+
+    const backBtn = document.createElement('button');
+    backBtn.className = 'btn-icon';
+    backBtn.innerHTML = '◀️';
+    backBtn.title = 'برنده قبلی';
+    backBtn.disabled = state.winnerHistoryIndex <= 0;
+    backBtn.addEventListener('click', () => {
+        state.setWinnerHistoryIndex(state.winnerHistoryIndex - 1);
+        displayWinner(); // Re-render
+    });
+
     const winnerNameEl = document.createElement('div');
     winnerNameEl.innerHTML = `✨ <strong>${winner.identity.name}</strong>✨`;
-
     winnerNameEl.classList.add('heartbeat-animation');
-
     if (isAbsent) {
         winnerNameEl.style.textDecoration = 'line-through';
         winnerNameEl.style.opacity = '0.6';
     }
 
-    resultDiv.appendChild(winnerNameEl);
+    const forwardBtn = document.createElement('button');
+    forwardBtn.className = 'btn-icon';
+    forwardBtn.innerHTML = '▶️';
+    forwardBtn.title = 'برنده بعدی';
+    forwardBtn.disabled = state.winnerHistoryIndex >= state.selectedSession.winnerHistory.length - 1;
+    forwardBtn.addEventListener('click', () => {
+        state.setWinnerHistoryIndex(state.winnerHistoryIndex + 1);
+        displayWinner(); // Re-render
+    });
 
+    nameContainer.appendChild(backBtn);
+    nameContainer.appendChild(winnerNameEl);
+    nameContainer.appendChild(forwardBtn);
+    resultDiv.appendChild(nameContainer);
+
+    // Disable the main "Select Student" button if we are viewing a past winner
+    selectStudentBtn.disabled = !forwardBtn.disabled;
+
+    // --- Status Buttons (absent, issue, profile) ---
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'status-button-container';
 
@@ -537,6 +579,7 @@ export function displayWinner(winner, categoryName) {
     buttonContainer.appendChild(profileBtn);
     resultDiv.appendChild(buttonContainer);
 
+    // --- Details Container (scores, notes) ---
     const detailsContainer = document.createElement('div');
     detailsContainer.className = 'student-details-container';
 
