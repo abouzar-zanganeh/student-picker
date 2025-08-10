@@ -669,6 +669,7 @@ export function renderStudentPage() {
     quickNoteTextarea.value = '';
 
     selectStudentBtnWrapper.classList.add('disabled-wrapper');
+    selectStudentBtn.disabled = true;
 
     const activeCategories = state.currentClassroom.categories.filter(cat => !cat.isDeleted);
     activeCategories.forEach(category => {
@@ -699,6 +700,7 @@ export function renderStudentPage() {
 
             }
             selectStudentBtnWrapper.classList.remove('disabled-wrapper');
+            selectStudentBtn.disabled = false;
         });
 
         categoryPillsContainer.appendChild(pill);
