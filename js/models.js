@@ -91,6 +91,7 @@ export class Session {
         this.lastWinnerByCategory = {};
         this.lastUsedCategoryId = null;
         this.lastSelectedWinnerId = null;
+        this.winnerHistory = [];
 
     }
 

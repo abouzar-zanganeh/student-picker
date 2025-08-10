@@ -182,7 +182,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 winner.statusCounters.missedChances++;
                 winner.statusCounters.otherIssues++;
             }
+
+
+            // --- New History Logic ---
+            const historyEntry = {
+                winner,
+                categoryName: state.selectedCategory.name
+            };
+            state.selectedSession.winnerHistory.push(historyEntry);
+
+            // Keep the history capped at 10 items
+            if (state.selectedSession.winnerHistory.length > 10) {
+                state.selectedSession.winnerHistory.shift();
+            }
+
+            // Set the index to point to the newest winner we just added
+            state.setWinnerHistoryIndex(state.selectedSession.winnerHistory.length - 1);
+            // --- End New History Logic ---
+
+
             ui.displayWinner(winner, state.selectedCategory.name);
+
             state.selectedSession.lastUsedCategoryId = state.selectedCategory.id;
             state.selectedSession.lastSelectedWinnerId = winner.identity.studentId;
             ui.renderStudentStatsList();

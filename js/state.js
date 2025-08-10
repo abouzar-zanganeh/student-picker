@@ -20,6 +20,7 @@ export let confirmCallback = null;
 export let cancelCallback = null;
 export let secureConfirmCallback = null;
 export let activeModal = null; // Will hold the ID of the currently open modal
+export let winnerHistoryIndex = -1; // -1 indicates we're not in history view
 
 
 
@@ -72,6 +73,7 @@ export function rehydrateData(plainClassrooms) {
             sessionInstance.lastWinnerByCategory = plainSession.lastWinnerByCategory;
             sessionInstance.lastUsedCategoryId = plainSession.lastUsedCategoryId;
             sessionInstance.lastSelectedWinnerId = plainSession.lastSelectedWinnerId;
+            sessionInstance.winnerHistory = plainSession.winnerHistory || [];
             return sessionInstance;
         });
 
@@ -137,4 +139,8 @@ export function getActiveItems(items) {
         return [];
     }
     return items.filter(item => !item.isDeleted);
+}
+
+export function setWinnerHistoryIndex(index) {
+    winnerHistoryIndex = index;
 }
