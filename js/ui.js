@@ -465,18 +465,22 @@ export function displayWinner() {
     const nameContainer = document.createElement('div');
     nameContainer.style.display = 'flex';
     nameContainer.style.alignItems = 'center';
-    nameContainer.style.justifyContent = 'center';
+    nameContainer.style.justifyContent = 'space-between';
     nameContainer.style.width = '100%';
-    nameContainer.style.gap = '20px';
 
     const backBtn = document.createElement('button');
     backBtn.className = 'btn-icon';
     backBtn.innerHTML = '◀️';
     backBtn.title = 'برنده قبلی';
-    backBtn.disabled = state.winnerHistoryIndex <= 0;
+    backBtn.classList.toggle('is-disabled', state.winnerHistoryIndex <= 0);
     backBtn.addEventListener('click', () => {
-        state.setWinnerHistoryIndex(state.winnerHistoryIndex - 1);
-        displayWinner(); // Re-render
+        if (backBtn.classList.contains('is-disabled')) {
+            backBtn.classList.add('shake-animation');
+            setTimeout(() => backBtn.classList.remove('shake-animation'), 200);
+        } else {
+            state.setWinnerHistoryIndex(state.winnerHistoryIndex - 1);
+            displayWinner(); // Re-render
+        }
     });
 
     const winnerNameEl = document.createElement('div');
@@ -491,19 +495,24 @@ export function displayWinner() {
     forwardBtn.className = 'btn-icon';
     forwardBtn.innerHTML = '▶️';
     forwardBtn.title = 'برنده بعدی';
-    forwardBtn.disabled = state.winnerHistoryIndex >= state.selectedSession.winnerHistory.length - 1;
+    forwardBtn.classList.toggle('is-disabled', state.winnerHistoryIndex >= state.selectedSession.winnerHistory.length - 1);
     forwardBtn.addEventListener('click', () => {
-        state.setWinnerHistoryIndex(state.winnerHistoryIndex + 1);
-        displayWinner(); // Re-render
+        if (forwardBtn.classList.contains('is-disabled')) {
+            forwardBtn.classList.add('shake-animation');
+            setTimeout(() => forwardBtn.classList.remove('shake-animation'), 200);
+        } else {
+            state.setWinnerHistoryIndex(state.winnerHistoryIndex + 1);
+            displayWinner(); // Re-render
+        }
     });
 
-    nameContainer.appendChild(backBtn);
-    nameContainer.appendChild(winnerNameEl);
     nameContainer.appendChild(forwardBtn);
+    nameContainer.appendChild(winnerNameEl);
+    nameContainer.appendChild(backBtn);
     resultDiv.appendChild(nameContainer);
 
     // Disable the main "Select Student" button if we are viewing a past winner
-    selectStudentBtn.disabled = !forwardBtn.disabled;
+    selectStudentBtn.disabled = !forwardBtn.classList.contains('is-disabled');
 
     // --- Status Buttons (absent, issue, profile) ---
     const buttonContainer = document.createElement('div');

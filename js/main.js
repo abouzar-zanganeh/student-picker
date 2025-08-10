@@ -72,6 +72,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Event Listeners ---
+
+    ui.selectStudentBtnWrapper.addEventListener('click', () => {
+        // Check for either of the two conditions that make the button disabled.
+        if (ui.selectStudentBtnWrapper.classList.contains('disabled-wrapper') || ui.selectStudentBtn.disabled) {
+
+            ui.selectStudentBtn.classList.add('shake-animation');
+
+            // Remove the animation class after it finishes so it can be re-triggered.
+            setTimeout(() => {
+                ui.selectStudentBtn.classList.remove('shake-animation');
+            }, 200); // This duration must match the animation in style.css
+        }
+    });
+
     studentStatsHeader.addEventListener('click', () => {
         const now = new Date().getTime();
         if (now - state.resetEasterEggLastClickTime > 500) {
@@ -782,6 +796,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                     break;
+
+                case 'arrowleft': {
+                    const backBtn = document.querySelector('button[title="برنده قبلی"]');
+                    if (backBtn && !backBtn.disabled) {
+                        event.preventDefault(); // Prevent page scrolling
+                        backBtn.click();
+                    }
+                    break;
+                }
+
+                case 'arrowright': {
+                    const forwardBtn = document.querySelector('button[title="برنده بعدی"]');
+                    if (forwardBtn && !forwardBtn.disabled) {
+                        event.preventDefault(); // Prevent page scrolling
+                        forwardBtn.click();
+                    }
+                    break;
+                }
             }
         }
     });
