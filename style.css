@@ -256,7 +256,6 @@ button:disabled:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    direction: rtl;
 }
 
 .list-container li:first-child {
@@ -583,8 +582,7 @@ button:disabled:hover {
     margin-top: 20px;
     padding-top: 7px;
     border-top: 1px solid var(--color-border);
-    text-align: right;
-    /* راست‌چین کردن متن‌ها */
+
 }
 
 /* استایل‌های ستون‌های نمرات و یادداشت‌ها */
@@ -673,8 +671,7 @@ button:disabled:hover {
     background: none;
     border: none;
     display: block;
-    text-align: left;
-    direction: ltr;
+    text-align: start;
 }
 
 .notes-list li:last-child {
@@ -963,6 +960,7 @@ button:disabled:hover {
 
 .item-content {
     flex-grow: 1;
+    width: 100%;
 }
 
 .delete-item-btn {
@@ -1006,13 +1004,21 @@ button:disabled:hover {
 }
 
 .score-comment {
+    display: flex;
+    gap: 5px;
+    align-items: baseline;
     margin: 0;
     padding-top: 10px;
-    border-top: 1px solid var(--color-border);
     font-size: 14px;
     color: #333;
     white-space: pre-wrap;
     /* To respect newlines in comment */
+
+    text-align: start;
+}
+
+.score-comment .comment-ltr {
+    margin-right: auto;
 }
 
 .note-history-item {
@@ -1037,6 +1043,7 @@ button:disabled:hover {
     font-size: 14px;
     color: #333;
     white-space: pre-wrap;
+    text-align: start;
 }
 
 .history-section-header {

@@ -10,6 +10,16 @@ export function normalizeText(str) {
         .replace(/ك/g, 'ک'); // Arabic Kaf to Persian Kaf
 }
 
+export function detectTextDirection(str) {
+    // A safeguard to ensure we're always working with a string
+    if (typeof str !== 'string' || str.length === 0) {
+        return 'ltr'; // Default to LTR for empty or invalid input
+    }
+
+    const rtlRegex = /[\u0590-\u07FF]/;
+    return rtlRegex.test(str) ? 'rtl' : 'ltr';
+}
+
 // --- Console Debugging Utilities ---
 
 // This function will log the current classroom and its active session

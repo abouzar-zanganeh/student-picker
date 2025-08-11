@@ -1,5 +1,6 @@
 import * as state from './state.js';
 import { getActiveItems } from './state.js';
+import { detectTextDirection } from './utils.js';
 
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');
@@ -667,7 +668,8 @@ export function displayWinner() {
         const sortedNotes = [...winner.profile.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         sortedNotes.forEach(note => {
             const noteItem = document.createElement('li');
-            noteItem.textContent = note.content;
+            noteItem.dir = detectTextDirection(note.content); // Set the direction
+            noteItem.textContent = note.content;              // Set the content
             notesList.appendChild(noteItem);
         });
     } else {
@@ -677,6 +679,14 @@ export function displayWinner() {
     notesDiv.appendChild(notesList);
     detailsContainer.appendChild(notesDiv);
     resultDiv.appendChild(detailsContainer);
+}
+
+export function setAutoDirectionOnInput(inputElement) {
+    inputElement.addEventListener('input', () => {
+        const text = inputElement.value;
+        const direction = detectTextDirection(text);
+        inputElement.setAttribute('dir', direction);
+    });
 }
 
 // New Refactored Functions for renderStudentPage
@@ -834,14 +844,30 @@ export function renderStudentProfilePage() {
             li.className = 'score-history-item';
             const scoreContent = document.createElement('div');
             scoreContent.className = 'item-content';
+
+            // Build the comment HTML separately to determine the correct direction
+            let commentHtml = '';
+            if (score.comment) {
+                const fullCommentString = `توضیحات: ${score.comment}`;
+                const blockDirection = detectTextDirection(fullCommentString);
+
+                // Check the direction of the comment itself to determine alignment
+                const commentDirection = detectTextDirection(score.comment);
+                const alignmentClass = commentDirection === 'ltr' ? 'comment-ltr' : '';
+
+                // Add the new class to the <bdi> tag
+                commentHtml = `<p class="score-comment" dir="${blockDirection}"><strong>توضیحات:</strong> <bdi class="${alignmentClass}">${score.comment}</bdi></p>`;
+            }
+
             scoreContent.innerHTML = `
-                <div class="score-info">
-                    <span class="score-date">${new Date(score.timestamp).toLocaleDateString('fa-IR')}</span>
-                    <span class="score-value">نمره: <strong>${score.value}</strong></span>
-                    <span class="score-skill-badge">${score.skill}</span>
-                </div>
-                ${score.comment ? `<p class="score-comment"><strong>توضیحات:</strong> ${score.comment}</p>` : ''}
-            `;
+    <div class="score-info">
+        <span class="score-date">${new Date(score.timestamp).toLocaleDateString('fa-IR')}</span>
+        <span class="score-value">نمره: <strong>${score.value}</strong></span>
+        <span class="score-skill-badge">${score.skill}</span>
+    </div>
+    ${commentHtml}
+`;
+
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'btn-icon delete-item-btn';
             deleteBtn.innerHTML = '🗑️';
@@ -890,14 +916,18 @@ export function renderStudentNotes() {
     sortedNotes.forEach(note => {
         const li = document.createElement('li');
         li.className = 'note-history-item';
-        const noteContent = document.createElement('div');
-        noteContent.className = 'item-content';
-        noteContent.innerHTML = `
-            <div class="note-info">
-                <span class="note-date">${new Date(note.timestamp).toLocaleDateString('fa-IR')}</span>
-            </div>
-            <p class="note-content">${note.content}</p>
-        `;
+
+        const itemContentDiv = document.createElement('div');
+        itemContentDiv.className = 'item-content';
+
+        // --- Build the note header programmatically ---
+        const noteInfoDiv = document.createElement('div');
+        noteInfoDiv.className = 'note-info';
+
+        const noteDateSpan = document.createElement('span');
+        noteDateSpan.className = 'note-date';
+        noteDateSpan.textContent = new Date(note.timestamp).toLocaleDateString('fa-IR');
+
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn-icon delete-item-btn';
         deleteBtn.innerHTML = '🗑️';
@@ -917,8 +947,26 @@ export function renderStudentNotes() {
                 { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
             );
         });
-        li.appendChild(noteContent);
-        li.appendChild(deleteBtn);
+
+        // Append date and the button to the info header
+        noteInfoDiv.appendChild(noteDateSpan);
+        noteInfoDiv.appendChild(deleteBtn);
+        // --- End of header build ---
+
+        // --- Create the note content paragraph ---
+        const noteContentP = document.createElement('p');
+        noteContentP.className = 'note-content';
+        noteContentP.dir = detectTextDirection(note.content);
+        noteContentP.textContent = note.content;
+        // --- End of content paragraph ---
+
+        // Append the new header and content to the main item container
+        itemContentDiv.appendChild(noteInfoDiv);
+        itemContentDiv.appendChild(noteContentP);
+
+        // Append the main container to the list item
+        li.appendChild(itemContentDiv);
+
         profileNotesListUl.appendChild(li);
     });
 }

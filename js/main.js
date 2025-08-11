@@ -844,6 +844,19 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeAnimatedSearch('.global-search-container .animated-search-container', ui.renderGlobalSearchResults);
     initializeAnimatedSearch('.action-column-header .animated-search-container', ui.renderSearchResults);
 
+    // --- Apply Auto-Direction to Textareas ---
+    const textareasToMonitor = [
+        ui.newNoteContent,          // Main note modal
+        ui.newScoreCommentTextarea, // Score comments on profile page
+        ui.quickNoteTextarea,       // Quick-grade note on student page
+        ui.pasteArea                // Pasting student names in settings
+    ];
+
+    textareasToMonitor.forEach(textarea => {
+        if (textarea) { // A small check to ensure the element exists
+            ui.setAutoDirectionOnInput(textarea);
+        }
+    });
 
 });
 
