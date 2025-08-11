@@ -81,6 +81,8 @@ export const trashedClassesList = document.getElementById('trashed-classes-list'
 export const trashedStudentsList = document.getElementById('trashed-students-list');
 export const trashedSessionsList = document.getElementById('trashed-sessions-list');
 export const trashedCategoriesList = document.getElementById('trashed-categories-list');
+export const trashedNotesList = document.getElementById('trashed-notes-list');
+export const trashedScoreCommentsList = document.getElementById('trashed-score-comments-list');
 export const quickGradeFormWrapper = document.getElementById('quick-grade-form-wrapper');
 export const quickScoreInput = document.getElementById('quick-score-input');
 export const quickNoteTextarea = document.getElementById('quick-note-textarea');
@@ -829,8 +831,11 @@ export function renderStudentProfilePage() {
     profileScoresListUl.innerHTML = '';
     const allScores = [];
     for (const skill in student.logs.scores) {
+
         student.logs.scores[skill].forEach(score => {
-            allScores.push(score);
+            if (!score.isDeleted) {
+                allScores.push(score);
+            }
         });
     }
 
@@ -893,16 +898,12 @@ export function renderStudentProfilePage() {
                 showCustomConfirm(
                     `آیا از حذف نمره ${score.value} برای مهارت ${score.skill} مطمئن هستید؟`,
                     () => {
-                        const skillScores = student.logs.scores[score.skill.toLowerCase()];
-                        const scoreIndex = skillScores.findIndex(s => s.id === score.id);
-                        if (scoreIndex > -1) {
-                            skillScores.splice(scoreIndex, 1);
-                            state.saveData();
-                            renderStudentProfilePage();
-                            showNotification('نمره با موفقیت حذف شد.');
-                        }
+                        score.isDeleted = true;
+                        state.saveData();
+                        renderStudentProfilePage(); // Re-render to hide the deleted item
+                        showNotification('نمره به سطل زباله منتقل شد.');
                     },
-                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
+                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
                 );
             });
 
@@ -929,7 +930,10 @@ export function renderStudentNotes() {
         return;
     }
 
-    const sortedNotes = [...state.selectedStudentForProfile.profile.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+    const sortedNotes = [...state.selectedStudentForProfile.profile.notes]
+        .filter(note => !note.isDeleted)
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     sortedNotes.forEach(note => {
         const li = document.createElement('li');
@@ -954,15 +958,12 @@ export function renderStudentNotes() {
             showCustomConfirm(
                 `آیا از حذف این یادداشت مطمئن هستید؟`,
                 () => {
-                    const noteIndex = state.selectedStudentForProfile.profile.notes.findIndex(n => n.id === note.id);
-                    if (noteIndex > -1) {
-                        state.selectedStudentForProfile.profile.notes.splice(noteIndex, 1);
-                        state.saveData();
-                        renderStudentNotes();
-                        showNotification('یادداشت با موفقیت حذف شد.');
-                    }
+                    note.isDeleted = true;
+                    state.saveData();
+                    renderStudentNotes(); // Re-render to hide the deleted item
+                    showNotification('یادداشت به سطل زباله منتقل شد.');
                 },
-                { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
+                { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
             );
         });
 
@@ -1580,6 +1581,8 @@ export function renderTrashPage() {
     trashedStudentsList.innerHTML = '';
     trashedSessionsList.innerHTML = '';
     trashedCategoriesList.innerHTML = '';
+    trashedNotesList.innerHTML = '';
+    trashedScoreCommentsList.innerHTML = '';
 
     // --- Render Trashed Classes ---
     const trashedClasses = Object.values(state.classrooms).filter(c => c.isDeleted);
@@ -1792,6 +1795,143 @@ export function renderTrashPage() {
             buttonsContainer.appendChild(permanentDeleteBtn);
             li.appendChild(buttonsContainer);
             trashedCategoriesList.appendChild(li);
+        });
+    }
+    // --- Render Trashed Notes ---
+    const trashedNotes = [];
+    Object.values(state.classrooms).forEach(classroom => {
+        if (!classroom.isDeleted) {
+            classroom.students.forEach(student => {
+                if (!student.isDeleted) {
+                    student.profile.notes.forEach(note => {
+                        if (note.isDeleted) {
+                            trashedNotes.push({ note, student, classroom });
+                        }
+                    });
+                }
+            });
+        }
+    });
+
+    if (trashedNotes.length === 0) {
+        trashedNotesList.innerHTML = '<li>هیچ یادداشتی در سطل زباله نیست.</li>';
+    } else {
+        trashedNotes.forEach(({ note, student, classroom }) => {
+            const li = document.createElement('li');
+            const previewText = note.content.length > 50 ? note.content.substring(0, 50) + '...' : note.content;
+            li.innerHTML = `<span>"${previewText}" <small>(برای: ${student.identity.name}، کلاس: ${classroom.info.name})</small></span>`;
+
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.className = 'list-item-buttons';
+
+            const restoreBtn = document.createElement('button');
+            restoreBtn.className = 'btn-icon';
+            restoreBtn.innerHTML = '🔄';
+            restoreBtn.title = 'بازیابی';
+            restoreBtn.addEventListener('click', () => {
+                note.isDeleted = false;
+                state.saveData();
+                renderTrashPage(); // Refresh the trash page
+                showNotification(`یادداشت بازیابی شد.`);
+            });
+
+            const permanentDeleteBtn = document.createElement('button');
+            permanentDeleteBtn.className = 'btn-icon';
+            permanentDeleteBtn.innerHTML = '🔥';
+            permanentDeleteBtn.title = 'حذف دائمی';
+            permanentDeleteBtn.addEventListener('click', () => {
+                showCustomConfirm(
+                    `آیا از حذف دائمی این یادداشت مطمئن هستید؟ این عمل غیرقابل بازگشت است.`,
+                    () => {
+                        const noteIndex = student.profile.notes.findIndex(n => n.id === note.id);
+                        if (noteIndex > -1) {
+                            student.profile.notes.splice(noteIndex, 1);
+                        }
+                        state.saveData();
+                        renderTrashPage();
+                        showNotification(`یادداشت برای همیشه حذف شد.`);
+                    },
+                    { confirmText: 'حذف دائمی', confirmClass: 'btn-warning' }
+                );
+            });
+
+            buttonsContainer.appendChild(restoreBtn);
+            buttonsContainer.appendChild(permanentDeleteBtn);
+            li.appendChild(buttonsContainer);
+            trashedNotesList.appendChild(li);
+        });
+    }
+
+    // --- Render Trashed Score Comments ---
+    const trashedScoreComments = [];
+    Object.values(state.classrooms).forEach(classroom => {
+        if (!classroom.isDeleted) {
+            classroom.students.forEach(student => {
+                if (!student.isDeleted) {
+                    // Scores are nested under skill keys, so we must loop through them
+                    for (const skill in student.logs.scores) {
+                        student.logs.scores[skill].forEach(score => {
+                            // We only care about scores that are deleted AND have a comment
+                            if (score.isDeleted && score.comment) {
+                                trashedScoreComments.push({ score, student, classroom });
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    });
+
+    if (trashedScoreComments.length === 0) {
+        trashedScoreCommentsList.innerHTML = '<li>هیچ توضیح نمره‌ای در سطل زباله نیست.</li>';
+    } else {
+        trashedScoreComments.forEach(({ score, student, classroom }) => {
+            const li = document.createElement('li');
+            const previewText = score.comment.length > 50 ? score.comment.substring(0, 50) + '...' : score.comment;
+            li.innerHTML = `<span>"${previewText}" <small>(برای نمره ${score.value} در مهارت ${score.skill} / دانش‌آموز: ${student.identity.name})</small></span>`;
+
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.className = 'list-item-buttons';
+
+            const restoreBtn = document.createElement('button');
+            restoreBtn.className = 'btn-icon';
+            restoreBtn.innerHTML = '🔄';
+            restoreBtn.title = 'بازیابی';
+            restoreBtn.addEventListener('click', () => {
+                score.isDeleted = false;
+                state.saveData();
+                renderTrashPage();
+                showNotification(`توضیح نمره بازیابی شد.`);
+            });
+
+            const permanentDeleteBtn = document.createElement('button');
+            permanentDeleteBtn.className = 'btn-icon';
+            permanentDeleteBtn.innerHTML = '🔥';
+            permanentDeleteBtn.title = 'حذف دائمی';
+            permanentDeleteBtn.addEventListener('click', () => {
+                showCustomConfirm(
+                    `آیا از حذف دائمی این توضیح مطمئن هستید؟ این عمل غیرقابل بازگشت است.`,
+                    () => {
+                        const skillKey = score.skill.toLowerCase();
+                        const skillScores = student.logs.scores[skillKey];
+                        if (skillScores) {
+                            const scoreIndex = skillScores.findIndex(s => s.id === score.id);
+                            if (scoreIndex > -1) {
+                                skillScores.splice(scoreIndex, 1);
+                            }
+                        }
+                        state.saveData();
+                        renderTrashPage();
+                        showNotification(`توضیح نمره برای همیشه حذف شد.`);
+                    },
+                    { confirmText: 'حذف دائمی', confirmClass: 'btn-warning' }
+                );
+            });
+
+            buttonsContainer.appendChild(restoreBtn);
+            buttonsContainer.appendChild(permanentDeleteBtn);
+            li.appendChild(buttonsContainer);
+            trashedScoreCommentsList.appendChild(li);
         });
     }
 }
