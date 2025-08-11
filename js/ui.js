@@ -842,31 +842,48 @@ export function renderStudentProfilePage() {
         allScores.forEach(score => {
             const li = document.createElement('li');
             li.className = 'score-history-item';
+
             const scoreContent = document.createElement('div');
             scoreContent.className = 'item-content';
 
-            // Build the comment HTML separately to determine the correct direction
-            let commentHtml = '';
+            const scoreInfo = document.createElement('div');
+            scoreInfo.className = 'score-info';
+            scoreInfo.innerHTML = `
+        <span class="score-date">${new Date(score.timestamp).toLocaleDateString('fa-IR')}</span>
+        <span class="score-value">نمره: <strong>${score.value}</strong></span>
+        <span class="score-skill-badge">${score.skill}</span>
+    `;
+            scoreContent.appendChild(scoreInfo);
+
             if (score.comment) {
                 const fullCommentString = `توضیحات: ${score.comment}`;
                 const blockDirection = detectTextDirection(fullCommentString);
 
-                // Check the direction of the comment itself to determine alignment
+                // --- Start of Re-introduced Logic ---
                 const commentDirection = detectTextDirection(score.comment);
                 const alignmentClass = commentDirection === 'ltr' ? 'comment-ltr' : '';
+                // --- End of Re-introduced Logic ---
 
-                // Add the new class to the <bdi> tag
-                commentHtml = `<p class="score-comment" dir="${blockDirection}"><strong>توضیحات:</strong> <bdi class="${alignmentClass}">${score.comment}</bdi></p>`;
+                const commentP = document.createElement('p');
+                commentP.className = 'score-comment';
+                commentP.dir = blockDirection;
+                // Re-add the alignmentClass to the <bdi> tag
+                commentP.innerHTML = `<strong>توضیحات:</strong> <bdi class="${alignmentClass}">${score.comment}</bdi>`;
+
+                commentP.addEventListener('click', () => {
+                    newNoteContent.value = score.comment;
+                    newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
+                    state.setSaveNoteCallback((newText) => {
+                        score.comment = newText;
+                        state.saveData();
+                        renderStudentProfilePage();
+                    });
+                    openModal('add-note-modal');
+                    newNoteContent.focus();
+                });
+
+                scoreContent.appendChild(commentP);
             }
-
-            scoreContent.innerHTML = `
-    <div class="score-info">
-        <span class="score-date">${new Date(score.timestamp).toLocaleDateString('fa-IR')}</span>
-        <span class="score-value">نمره: <strong>${score.value}</strong></span>
-        <span class="score-skill-badge">${score.skill}</span>
-    </div>
-    ${commentHtml}
-`;
 
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'btn-icon delete-item-btn';
@@ -876,7 +893,7 @@ export function renderStudentProfilePage() {
                 showCustomConfirm(
                     `آیا از حذف نمره ${score.value} برای مهارت ${score.skill} مطمئن هستید؟`,
                     () => {
-                        const skillScores = student.logs.scores[score.skill];
+                        const skillScores = student.logs.scores[score.skill.toLowerCase()];
                         const scoreIndex = skillScores.findIndex(s => s.id === score.id);
                         if (scoreIndex > -1) {
                             skillScores.splice(scoreIndex, 1);
@@ -888,6 +905,7 @@ export function renderStudentProfilePage() {
                     { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
                 );
             });
+
             li.appendChild(scoreContent);
             li.appendChild(deleteBtn);
             profileScoresListUl.appendChild(li);
@@ -958,6 +976,25 @@ export function renderStudentNotes() {
         noteContentP.className = 'note-content';
         noteContentP.dir = detectTextDirection(note.content);
         noteContentP.textContent = note.content;
+
+        noteContentP.addEventListener('click', () => {
+            // 1. Populate the modal with the current note text
+            newNoteContent.value = note.content;
+            newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
+
+            // 2. Set the callback for what "Save" should do
+            state.setSaveNoteCallback((newText) => {
+                note.content = newText;
+                state.saveData();
+                renderStudentNotes();
+            });
+
+            // 3. Open the modal
+            openModal('add-note-modal');
+            newNoteContent.focus();
+        });
+
+
         // --- End of content paragraph ---
 
         // Append the new header and content to the main item container

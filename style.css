@@ -1017,6 +1017,13 @@ button:disabled:hover {
     text-align: start;
 }
 
+.score-comment:hover,
+.note-content:hover {
+    cursor: pointer;
+    background-color: #f1f1f1;
+    border-radius: 3px;
+}
+
 .score-comment .comment-ltr {
     margin-right: auto;
 }

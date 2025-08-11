@@ -614,6 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!state.selectedStudentForProfile) return;
 
         newNoteContent.value = ''; // Start with a blank slate for a new note
+        newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
         // Set the callback with the specific logic for saving a STUDENT note
         state.setSaveNoteCallback((content) => {
