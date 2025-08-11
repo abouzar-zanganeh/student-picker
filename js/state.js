@@ -73,7 +73,20 @@ export function rehydrateData(plainClassrooms) {
             sessionInstance.lastWinnerByCategory = plainSession.lastWinnerByCategory;
             sessionInstance.lastUsedCategoryId = plainSession.lastUsedCategoryId;
             sessionInstance.lastSelectedWinnerId = plainSession.lastSelectedWinnerId;
-            sessionInstance.winnerHistory = plainSession.winnerHistory || [];
+
+            const plainWinnerHistory = plainSession.winnerHistory || [];
+            sessionInstance.winnerHistory = plainWinnerHistory.map(historyEntry => {
+                // Find the fully rehydrated student instance from the main student list
+                const rehydratedStudent = classroomInstance.students.find(
+                    s => s.identity.studentId === historyEntry.winner.identity.studentId
+                );
+                // Return a new history entry with the proper Student instance
+                return {
+                    winner: rehydratedStudent,
+                    categoryName: historyEntry.categoryName
+                };
+            });
+
             return sessionInstance;
         });
 

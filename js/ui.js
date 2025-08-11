@@ -84,6 +84,9 @@ export const quickGradeFormWrapper = document.getElementById('quick-grade-form-w
 export const quickScoreInput = document.getElementById('quick-score-input');
 export const quickNoteTextarea = document.getElementById('quick-note-textarea');
 export const quickGradeSubmitBtn = document.getElementById('quick-grade-submit-btn');
+const classNameHeader = document.getElementById('class-name-header');
+const categoryPillsContainer = document.getElementById('category-selection-container');
+const resultDiv = document.getElementById('selected-student-result');
 
 
 export function showUndoToast(message) {
@@ -458,6 +461,25 @@ export function displayWinner() {
     const historyEntry = state.selectedSession.winnerHistory[state.winnerHistoryIndex];
     const { winner, categoryName } = historyEntry;
 
+    // --- NEW: Sync Category State and UI ---
+    const correspondingCategory = state.currentClassroom.categories.find(c => c.name === categoryName);
+    if (correspondingCategory) {
+        // Update the application state to the historical category
+        state.setSelectedCategory(correspondingCategory);
+
+        // Update the UI to show the correct active pill
+        const allPills = document.querySelectorAll('#category-selection-container .pill');
+        allPills.forEach(p => p.classList.remove('active'));
+        const activePill = Array.from(allPills).find(p => p.textContent === categoryName);
+        if (activePill) {
+            activePill.classList.add('active');
+        }
+
+        // Update the quick grade form to match the new active category
+        updateQuickGradeUIForCategory(correspondingCategory);
+    }
+    // --- END NEW ---
+
     const studentRecord = state.selectedSession.studentRecords[winner.identity.studentId];
     const isAbsent = studentRecord?.attendance === 'absent';
 
@@ -653,33 +675,30 @@ export function displayWinner() {
     resultDiv.appendChild(detailsContainer);
 }
 
-export function renderStudentPage() {
-    const categoryPillsContainer = document.getElementById('category-selection-container');
-    const studentListUl = document.getElementById('student-list');
-    const classNameHeader = document.getElementById('class-name-header');
-    const resultDiv = document.getElementById('selected-student-result');
+// New Refactored Functions for renderStudentPage
 
-    if (!state.currentClassroom || !state.selectedSession) {
-        showPage('class-management-page');
-        return;
-    }
+function initializeStudentPageUI() {
 
+
+    // Set header and clear containers
     classNameHeader.textContent = `جلسه ${state.selectedSession.sessionNumber} / کلاس: ${state.currentClassroom.info.name}`;
     categoryPillsContainer.innerHTML = '';
-    studentListUl.innerHTML = '';
     resultDiv.innerHTML = '';
 
+    // Reset the quick grade form
     quickGradeFormWrapper.classList.add('tooltip-container');
-
     quickScoreInput.disabled = true;
     quickNoteTextarea.disabled = true;
     quickGradeSubmitBtn.disabled = true;
     quickScoreInput.value = '';
     quickNoteTextarea.value = '';
 
+    // Reset the main action button
     selectStudentBtnWrapper.classList.add('disabled-wrapper');
     selectStudentBtn.disabled = true;
+}
 
+function renderCategoryPills() {
     const activeCategories = state.currentClassroom.categories.filter(cat => !cat.isDeleted);
     activeCategories.forEach(category => {
         const pill = document.createElement('span');
@@ -695,41 +714,60 @@ export function renderStudentPage() {
             pill.classList.add('active');
             state.setSelectedCategory(category);
 
-            if (category.isGradedCategory) {
-                quickScoreInput.disabled = false;
-                quickNoteTextarea.disabled = false;
-                quickGradeSubmitBtn.disabled = false;
-                quickGradeFormWrapper.removeAttribute('data-tooltip');
+            updateQuickGradeUIForCategory(category);
 
-            } else {
-                quickScoreInput.disabled = true;
-                quickNoteTextarea.disabled = true;
-                quickGradeSubmitBtn.disabled = true;
-                quickGradeFormWrapper.setAttribute('data-tooltip', 'برای این دسته‌بندی قابلیت نمره دهی تعریف نشده است');
-
-            }
             selectStudentBtnWrapper.classList.remove('disabled-wrapper');
             selectStudentBtn.disabled = false;
         });
 
         categoryPillsContainer.appendChild(pill);
     });
+}
 
+function restoreSessionState() {
     if (state.selectedSession.lastUsedCategoryId) {
         const lastCategoryPill = categoryPillsContainer.querySelector(`.pill[data-category-id="${state.selectedSession.lastUsedCategoryId}"]`);
         if (lastCategoryPill) {
             lastCategoryPill.click();
         }
     }
+    // Checks the winner history to restore the last displayed winner
+    if (state.selectedSession.winnerHistory && state.selectedSession.winnerHistory.length > 0) {
+        // Point the index to the last winner in the history
+        state.setWinnerHistoryIndex(state.selectedSession.winnerHistory.length - 1);
+        // Call displayWinner to show them
+        displayWinner();
+    }
+}
 
-    if (state.selectedSession.lastSelectedWinnerId) {
-        const lastWinner = state.currentClassroom.students.find(s => s.identity.studentId === state.selectedSession.lastSelectedWinnerId);
-        if (lastWinner && state.selectedCategory) {
-            displayWinner(lastWinner, state.selectedCategory.name);
-        }
+// End of New Refactored Functions
+
+function updateQuickGradeUIForCategory(category) {
+    if (!category) return; // Do nothing if no category is provided
+
+    if (category.isGradedCategory) {
+        quickScoreInput.disabled = false;
+        quickNoteTextarea.disabled = false;
+        quickGradeSubmitBtn.disabled = false;
+        quickGradeFormWrapper.removeAttribute('data-tooltip');
+    } else {
+        quickScoreInput.disabled = true;
+        quickNoteTextarea.disabled = true;
+        quickGradeSubmitBtn.disabled = true;
+        quickGradeFormWrapper.setAttribute('data-tooltip', 'برای این دسته‌بندی قابلیت نمره دهی تعریف نشده است');
+    }
+}
+
+export function renderStudentPage() {
+
+    if (!state.currentClassroom || !state.selectedSession) {
+        showPage('class-management-page');
+        return;
     }
 
-
+    initializeStudentPageUI();
+    renderCategoryPills();
+    restoreSessionState();
 
     showPage('student-page');
     renderStudentStatsList();
