@@ -610,7 +610,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('add-note-btn').addEventListener('click', () => {
-        newNoteContent.value = '';
+        // Ensure a student is selected before opening the modal
+        if (!state.selectedStudentForProfile) return;
+
+        newNoteContent.value = ''; // Start with a blank slate for a new note
+
+        // Set the callback with the specific logic for saving a STUDENT note
+        state.setSaveNoteCallback((content) => {
+            if (content) { // Only add a note if there's text content
+                state.selectedStudentForProfile.addNote(content);
+                state.saveData();
+                ui.renderStudentNotes(); // This re-renders the notes list on the profile page
+            }
+        });
+
         ui.openModal('add-note-modal');
         newNoteContent.focus();
     });
@@ -621,10 +634,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     saveNoteBtn.addEventListener('click', () => {
         const content = newNoteContent.value.trim();
-        if (content && state.selectedStudentForProfile) {
-            state.selectedStudentForProfile.addNote(content);
-            state.saveData();
-            ui.renderStudentNotes();
+        // Check if a save function has been set in the state
+        if (typeof state.saveNoteCallback === 'function') {
+            state.saveNoteCallback(content); // Execute the specific save logic
             ui.closeActiveModal();
             ui.showNotification("یادداشت با موفقیت ذخیره شد.");
         }

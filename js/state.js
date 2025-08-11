@@ -21,6 +21,7 @@ export let cancelCallback = null;
 export let secureConfirmCallback = null;
 export let activeModal = null; // Will hold the ID of the currently open modal
 export let winnerHistoryIndex = -1; // -1 indicates we're not in history view
+export let saveNoteCallback = null;
 
 
 
@@ -46,6 +47,8 @@ export function rehydrateData(plainClassrooms) {
         const classroomInstance = new Classroom(plainClass.info);
         classroomInstance.isDeleted = plainClass.isDeleted;
 
+        classroomInstance.note = plainClass.note || '';
+
         classroomInstance.students = plainClass.students.map(plainStudent => {
             const studentInstance = new Student(plainStudent.identity);
             studentInstance.isDeleted = plainStudent.isDeleted;
@@ -64,6 +67,9 @@ export function rehydrateData(plainClassrooms) {
         classroomInstance.sessions = plainClass.sessions.map(plainSession => {
             const sessionInstance = new Session(plainSession.sessionNumber);
             sessionInstance.isDeleted = plainSession.isDeleted;
+
+            sessionInstance.note = plainSession.note || '';
+
             sessionInstance.startTime = new Date(plainSession.startTime);
             sessionInstance.endTime = plainSession.endTime ? new Date(plainSession.endTime) : null;
             sessionInstance.isFinished = plainSession.isFinished;
@@ -157,3 +163,5 @@ export function getActiveItems(items) {
 export function setWinnerHistoryIndex(index) {
     winnerHistoryIndex = index;
 }
+
+export function setSaveNoteCallback(callback) { saveNoteCallback = callback; }
