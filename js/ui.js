@@ -239,6 +239,10 @@ export function closeActiveModal(onClosed) { // The new parameter
                 state.setSecureConfirmCallback(null);
             }
 
+            if (activeModalId === 'add-note-modal') {
+                state.setSaveNoteCallback(null);
+            }
+
             // Run the callback function after everything is done
             if (typeof onClosed === 'function') {
                 onClosed();
@@ -1010,11 +1014,41 @@ export function renderClassList() {
         const typeBadge = document.createElement('span');
         typeBadge.className = `type-badge ${classroom.info.type}`;
         typeBadge.textContent = classroom.info.type === 'online' ? 'آنلاین' : 'حضوری';
+        typeBadge.title = 'نوع کلاس';
         const buttonsContainer = document.createElement('div');
         buttonsContainer.className = 'list-item-buttons';
+
+        const noteBtn = document.createElement('button');
+        noteBtn.className = 'btn-icon';
+        noteBtn.innerHTML = '📝';
+        noteBtn.title = 'افزودن/ویرایش یادداشت کلاس';
+
+        // Make the icon less prominent if there's no note
+        if (!classroom.note) {
+            noteBtn.style.opacity = '0.3';
+        }
+
+        noteBtn.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevents navigating to the class sessions page
+
+            // Load the existing class note into the modal
+            newNoteContent.value = classroom.note || '';
+
+            // Define what happens when the "Save" button is clicked for a class note
+            state.setSaveNoteCallback((content) => {
+                classroom.note = content;
+                state.saveData();
+                renderClassList(); // Re-render the list to update the icon's opacity
+            });
+
+            openModal('add-note-modal');
+            newNoteContent.focus();
+        });
+
         const settingsBtn = document.createElement('button');
         settingsBtn.className = 'btn-icon';
         settingsBtn.innerHTML = '⚙️';
+        settingsBtn.title = 'تنظیمات کلاس';
         settingsBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             state.setCurrentClassroom(classroom);
@@ -1027,6 +1061,7 @@ export function renderClassList() {
         deleteBtn.className = 'btn-icon';
         deleteBtn.innerHTML = '🗑️';
         deleteBtn.style.color = 'var(--color-warning)';
+        deleteBtn.title = 'حذف کلاس';
         deleteBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             showCustomConfirm(
@@ -1040,6 +1075,7 @@ export function renderClassList() {
                 { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
             );
         });
+        buttonsContainer.appendChild(noteBtn);
         buttonsContainer.appendChild(settingsBtn);
         buttonsContainer.appendChild(deleteBtn);
 
@@ -1257,7 +1293,35 @@ export function renderSessions() {
         const buttonsContainer = document.createElement('div');
         buttonsContainer.className = 'list-item-buttons';
 
-        // --- Add the new Cancel Button ---
+        // --- Add the note Button ---
+        const noteBtn = document.createElement('button');
+        noteBtn.className = 'btn-icon';
+        noteBtn.innerHTML = '📝';
+        noteBtn.title = 'افزودن/ویرایش یادداشت جلسه';
+
+        // Make the icon less prominent if there's no note
+        if (!session.note) {
+            noteBtn.style.opacity = '0.3';
+        }
+
+        noteBtn.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevents other click events on the list item
+
+            // Load the existing session note into the modal
+            newNoteContent.value = session.note || '';
+
+            // Define what happens when "Save" is clicked for a session note
+            state.setSaveNoteCallback((content) => {
+                session.note = content;
+                state.saveData();
+                renderSessions(); // Re-render the list to update this icon's opacity
+            });
+
+            openModal('add-note-modal');
+            newNoteContent.focus();
+        });
+
+        // --- Add the Cancel Button ---
         const cancelBtn = document.createElement('button');
         cancelBtn.className = 'btn-icon';
         cancelBtn.innerHTML = '❌';
@@ -1278,6 +1342,7 @@ export function renderSessions() {
                 }, { confirmText: actionText, confirmClass: 'btn-warning' }
             );
         });
+        buttonsContainer.appendChild(noteBtn);
         buttonsContainer.appendChild(cancelBtn);
         // --- End of new code ---
 

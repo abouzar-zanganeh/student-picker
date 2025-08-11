@@ -82,6 +82,7 @@ export class Session {
     constructor(sessionNumber) {
         this.sessionNumber = sessionNumber;
         this.startTime = new Date();
+        this.note = '';
         this.isDeleted = false;
         this.endTime = null;
         this.isFinished = false;
@@ -228,6 +229,7 @@ export class Classroom {
         };
         this.students = [];
         this.sessions = [];
+        this.note = '';
         this.isDeleted = false;
         this.categories = [
             // Default participation categories
