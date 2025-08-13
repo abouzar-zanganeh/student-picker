@@ -1421,7 +1421,17 @@ export function renderSessions() {
 
             showCustomConfirm(confirmMsg,
                 () => {
-                    session.isCancelled = !session.isCancelled; // Toggle the state
+                    // Toggle the cancelled state first
+                    session.isCancelled = !session.isCancelled;
+
+                    // Also update the isFinished state accordingly
+                    if (session.isCancelled) {
+                        // When cancelling, mark as finished.
+                        session.isFinished = true;
+                    } else {
+                        // When restoring, mark as not finished.
+                        session.isFinished = false;
+                    }
                     state.saveData();
                     renderSessions();
                     showNotification(session.isCancelled ? 'جلسه لغو شد.' : 'جلسه بازگردانی شد.');
