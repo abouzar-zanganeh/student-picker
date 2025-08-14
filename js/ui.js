@@ -713,7 +713,6 @@ export function setAutoDirectionOnInput(inputElement) {
     });
 }
 
-// New Refactored Functions for renderStudentPage
 
 function initializeStudentPageUI() {
 
@@ -777,8 +776,6 @@ function restoreSessionState() {
         displayWinner();
     }
 }
-
-// End of New Refactored Functions
 
 function updateQuickGradeUIForCategory(category) {
     if (!category) return; // Do nothing if no category is provided
@@ -1058,165 +1055,171 @@ export function renderImportPreview() {
     });
 }
 
+
+function createClassActionButtons(classroom) {
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.className = 'list-item-buttons';
+
+    // --- Note Button ---
+    const noteBtn = document.createElement('button');
+    noteBtn.className = 'btn-icon';
+    noteBtn.innerHTML = '📝';
+    noteBtn.title = 'افزودن/ویرایش یادداشت کلاس';
+    if (!classroom.note) {
+        noteBtn.style.opacity = '0.3';
+    }
+    noteBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        newNoteContent.value = classroom.note || '';
+        state.setSaveNoteCallback((content) => {
+            classroom.note = content;
+            state.saveData();
+            renderClassList();
+        });
+        openModal('add-note-modal');
+        newNoteContent.focus();
+    });
+
+    // --- Settings Button ---
+    const settingsBtn = document.createElement('button');
+    settingsBtn.className = 'btn-icon';
+    settingsBtn.innerHTML = '⚙️';
+    settingsBtn.title = 'تنظیمات کلاس';
+    settingsBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        state.setCurrentClassroom(classroom);
+        settingsClassNameHeader.textContent = `تنظیمات کلاس: ${state.currentClassroom.info.name}`;
+        renderSettingsStudentList();
+        renderSettingsCategories();
+        showPage('settings-page');
+    });
+
+    // --- Delete Button ---
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn-icon';
+    deleteBtn.innerHTML = '🗑️';
+    deleteBtn.style.color = 'var(--color-warning)';
+    deleteBtn.title = 'حذف کلاس';
+    deleteBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        showCustomConfirm(
+            `آیا از حذف کلاس «${classroom.info.name}» مطمئن هستید؟ این عمل تمام جلسات و آمار مربوط به آن را نیز حذف می‌کند.`,
+            () => {
+                showUndoToast(`کلاس «${classroom.info.name}» حذف شد.`);
+                classroom.isDeleted = true;
+                state.saveData();
+                renderClassList();
+            },
+            { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
+        );
+    });
+
+    buttonsContainer.appendChild(noteBtn);
+    buttonsContainer.appendChild(settingsBtn);
+    buttonsContainer.appendChild(deleteBtn);
+
+    return buttonsContainer;
+}
+
+function createClassInfoContainer(classroom) {
+    const nameContainer = document.createElement('div');
+    nameContainer.style.flexGrow = '1';
+    nameContainer.style.display = 'flex';
+    nameContainer.style.flexDirection = 'column';
+    nameContainer.style.alignItems = 'flex-start';
+
+    // Class Name
+    const classNameSpan = document.createElement('span');
+    classNameSpan.textContent = classroom.info.name;
+    classNameSpan.classList.add('class-name-display');
+    nameContainer.appendChild(classNameSpan);
+
+    // Stats Row (Student and Session Counts)
+    const studentCount = getActiveItems(classroom.students).length;
+    const sessionCount = getActiveItems(classroom.sessions).filter(session => session.isFinished).length;
+
+    const statsRowDiv = document.createElement('div');
+    statsRowDiv.classList.add('class-stats-row');
+
+    const studentCountSpan = document.createElement('span');
+    studentCountSpan.textContent = `${studentCount} نفر`;
+    studentCountSpan.classList.add('student-count-badge');
+    statsRowDiv.appendChild(studentCountSpan);
+
+    const sessionCountSpan = document.createElement('span');
+    sessionCountSpan.textContent = `${sessionCount} جلسه`;
+    sessionCountSpan.classList.add('session-count-badge');
+    statsRowDiv.appendChild(sessionCountSpan);
+
+    nameContainer.appendChild(statsRowDiv);
+
+    // Add navigation event listener
+    nameContainer.addEventListener('click', () => {
+        state.setCurrentClassroom(classroom);
+        state.setSelectedSession(null);
+        state.setLiveSession(state.currentClassroom.liveSession);
+        renderSessions();
+        updateSessionPageHeader();
+        showPage('session-page');
+    });
+
+    return nameContainer;
+}
+
+function createClassListItem(classroom) {
+    const li = document.createElement('li');
+
+    // Add special styling if there's an active session
+    if (classroom.liveSession) {
+        li.classList.add('has-unfinished-session');
+    }
+
+    // --- 1. Info Container (Name and Counts) ---
+    const infoContainer = createClassInfoContainer(classroom);
+    li.appendChild(infoContainer);
+
+    // --- 2. Badges Container ---
+    const badgesContainer = document.createElement('div');
+    badgesContainer.className = 'list-item-badges';
+
+    // 'Unfinished Session' Badge
+    if (classroom.liveSession) {
+        const warningBadge = document.createElement('span');
+        warningBadge.className = 'warning-badge';
+        warningBadge.textContent = 'جلسه باز';
+        badgesContainer.appendChild(warningBadge);
+    }
+
+    // 'Class Type' Badge
+    const typeBadge = document.createElement('span');
+    typeBadge.className = `type-badge ${classroom.info.type}`;
+    typeBadge.textContent = classroom.info.type === 'online' ? 'آنلاین' : 'حضوری';
+    typeBadge.title = 'نوع کلاس';
+    badgesContainer.appendChild(typeBadge);
+
+    li.appendChild(badgesContainer);
+
+    // --- 3. Action Buttons ---
+    const buttonsContainer = createClassActionButtons(classroom);
+    li.appendChild(buttonsContainer);
+
+    return li;
+}
+
+
+
 export function renderClassList() {
     classListUl.innerHTML = '';
     for (const name in state.classrooms) {
         const classroom = state.classrooms[name];
         if (classroom.isDeleted) continue;
-        const li = document.createElement('li');
-        const nameContainer = document.createElement('div');
 
-        nameContainer.style.flexGrow = '1'; // Keep flexGrow on the container
-
-        // Create a span for the class name itself
-        const classNameSpan = document.createElement('span');
-        classNameSpan.textContent = name;
-        classNameSpan.classList.add('class-name-display'); // Add a class for potential future styling
-
-        // Append the class name span to the nameContainer
-        nameContainer.appendChild(classNameSpan);
-
-        // Get the number of students and sessions
-        const studentCount = getActiveItems(classroom.students).length;
-
-        const sessionCount = getActiveItems(classroom.sessions).filter(session => session.isFinished).length;
-
-        // Create a new DIV to hold both badges (this will be our inner flex container)
-        const statsRowDiv = document.createElement('div');
-        statsRowDiv.classList.add('class-stats-row'); // Add a class for styling
-
-        // Create student count span
-        const studentCountSpan = document.createElement('span');
-        studentCountSpan.textContent = `${studentCount} نفر`;
-        studentCountSpan.classList.add('student-count-badge');
-
-        // Create session count span
-        const sessionCountSpan = document.createElement('span');
-        sessionCountSpan.textContent = `${sessionCount} جلسه`;
-        sessionCountSpan.classList.add('session-count-badge');
-
-        // Append badges to their new container
-        statsRowDiv.appendChild(studentCountSpan);
-        statsRowDiv.appendChild(sessionCountSpan);
-
-        // Append the stats row container to the nameContainer
-        nameContainer.appendChild(statsRowDiv);
-
-        // Make the nameContainer a flex column to stack the name and the stats row
-        nameContainer.style.display = 'flex';
-        nameContainer.style.flexDirection = 'column';
-        nameContainer.style.alignItems = 'flex-start'; // Align content to the right (RTL)
-        // --- End of new code ---
-
-
-        nameContainer.addEventListener('click', () => {
-            state.setCurrentClassroom(classroom);
-            state.setSelectedSession(null);
-            state.setLiveSession(state.currentClassroom.liveSession);
-            renderSessions();
-            updateSessionPageHeader();
-            showPage('session-page');
-
-
-        });
-        const typeBadge = document.createElement('span');
-        typeBadge.className = `type-badge ${classroom.info.type}`;
-        typeBadge.textContent = classroom.info.type === 'online' ? 'آنلاین' : 'حضوری';
-        typeBadge.title = 'نوع کلاس';
-        const buttonsContainer = document.createElement('div');
-        buttonsContainer.className = 'list-item-buttons';
-
-        const noteBtn = document.createElement('button');
-        noteBtn.className = 'btn-icon';
-        noteBtn.innerHTML = '📝';
-        noteBtn.title = 'افزودن/ویرایش یادداشت کلاس';
-
-        // Make the icon less prominent if there's no note
-        if (!classroom.note) {
-            noteBtn.style.opacity = '0.3';
-        }
-
-        noteBtn.addEventListener('click', (event) => {
-            event.stopPropagation(); // Prevents navigating to the class sessions page
-
-            // Load the existing class note into the modal
-            newNoteContent.value = classroom.note || '';
-
-            // Define what happens when the "Save" button is clicked for a class note
-            state.setSaveNoteCallback((content) => {
-                classroom.note = content;
-                state.saveData();
-                renderClassList(); // Re-render the list to update the icon's opacity
-            });
-
-            openModal('add-note-modal');
-            newNoteContent.focus();
-        });
-
-        const settingsBtn = document.createElement('button');
-        settingsBtn.className = 'btn-icon';
-        settingsBtn.innerHTML = '⚙️';
-        settingsBtn.title = 'تنظیمات کلاس';
-        settingsBtn.addEventListener('click', (event) => {
-            event.stopPropagation();
-            state.setCurrentClassroom(classroom);
-            settingsClassNameHeader.textContent = `تنظیمات کلاس: ${state.currentClassroom.info.name}`;
-            renderSettingsStudentList();
-            renderSettingsCategories();
-            showPage('settings-page');
-        });
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn-icon';
-        deleteBtn.innerHTML = '🗑️';
-        deleteBtn.style.color = 'var(--color-warning)';
-        deleteBtn.title = 'حذف کلاس';
-        deleteBtn.addEventListener('click', (event) => {
-            event.stopPropagation();
-            showCustomConfirm(
-                `آیا از حذف کلاس «${name}» مطمئن هستید؟ این عمل تمام جلسات و آمار مربوط به آن را نیز حذف می‌کند.`,
-                () => {
-                    showUndoToast(`کلاس «${name}» حذف شد.`);
-                    classroom.isDeleted = true;
-                    state.saveData();
-                    renderClassList();
-                },
-                { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
-            );
-        });
-        buttonsContainer.appendChild(noteBtn);
-        buttonsContainer.appendChild(settingsBtn);
-        buttonsContainer.appendChild(deleteBtn);
-
-
-
-        // --- Append child elements in a structured way ---
-        li.appendChild(nameContainer);
-
-        // Create a dedicated container for all status badges
-        const badgesContainer = document.createElement('div');
-        badgesContainer.className = 'list-item-badges';
-
-        // Badge 1: Unfinished Session (will always be the first from the right)
-        if (classroom.liveSession) {
-            li.classList.add('has-unfinished-session');
-            const warningBadge = document.createElement('span');
-            warningBadge.className = 'warning-badge';
-            warningBadge.textContent = 'جلسه باز';
-            badgesContainer.appendChild(warningBadge);
-        }
-
-        // Badge 2: Class Type (this element is created earlier in the function)
-        badgesContainer.appendChild(typeBadge);
-
-        // --- (Future badges can be added to the badgesContainer here) ---
-
-        // Append the main containers to the list item
-        li.appendChild(badgesContainer);
-        li.appendChild(buttonsContainer);
-
+        const li = createClassListItem(classroom);
         classListUl.appendChild(li);
     }
 }
+
+// End of functions needed for rendering the classroom page
 
 export function renderSettingsStudentList() {
     settingsStudentListUl.innerHTML = '';
@@ -1508,8 +1511,6 @@ function createSessionListItem(session, activeSessions) {
 
     return li;
 }
-
-// end of refactored...
 
 export function renderSessions() {
     const sessionListUl = document.getElementById('session-list');
