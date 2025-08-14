@@ -544,6 +544,11 @@ button:disabled:hover {
     color: var(--color-text-dark);
 }
 
+.day-badge {
+
+    background-color: var(--color-secondary);
+}
+
 .list-item-buttons {
     display: flex;
 }

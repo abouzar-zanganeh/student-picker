@@ -1360,6 +1360,13 @@ export function renderSessions() {
         badgesContainer.style.gap = '5px';
         badgesContainer.style.marginTop = '5px';
 
+        //adds the badge of the day of the week
+        const dayOfWeek = new Date(session.startTime).toLocaleDateString('fa-IR', { weekday: 'long' });
+        const dayBadge = document.createElement('span');
+        dayBadge.className = 'type-badge day-badge';
+        dayBadge.textContent = dayOfWeek;
+        badgesContainer.appendChild(dayBadge);
+        //...
         if (session.isCancelled) {
             sessionText.textContent = `جلسه لغو شده - تاریخ: ${sessionDate}`;
             infoContainer.style.cursor = 'default'; // No action on click for cancelled sessions
