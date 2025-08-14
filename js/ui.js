@@ -335,12 +335,34 @@ export function renderAttendancePage() {
         }
 
         const updateAbsenceInfo = () => {
-            const updatedAbsentSessions = state.currentClassroom.sessions
-                .filter(session => session.studentRecords[student.identity.studentId]?.attendance === 'absent')
-                .map(session => ` ${session.sessionNumber}`);
+            // Clear the existing content first
+            absenceSpan.innerHTML = '';
 
-            if (updatedAbsentSessions.length > 0) {
-                absenceSpan.textContent = `جلسات غایب: ${updatedAbsentSessions.join('، ')}`;
+            // Get full info for each absent session, including makeup status
+            const absentSessions = state.currentClassroom.sessions
+                .filter(session => !session.isDeleted && session.studentRecords[student.identity.studentId]?.attendance === 'absent')
+                .map(session => ({
+                    number: session.sessionNumber,
+                    isMakeup: session.isMakeup
+                }));
+
+            // Rebuild the content with proper styling
+            if (absentSessions.length > 0) {
+                absenceSpan.appendChild(document.createTextNode('جلسات غایب: '));
+
+                absentSessions.forEach((sessionInfo, index) => {
+                    const numberSpan = document.createElement('span');
+                    numberSpan.textContent = sessionInfo.number;
+
+                    if (sessionInfo.isMakeup) {
+                        numberSpan.classList.add('makeup-absence');
+                    }
+                    absenceSpan.appendChild(numberSpan);
+
+                    if (index < absentSessions.length - 1) {
+                        absenceSpan.appendChild(document.createTextNode('، '));
+                    }
+                });
             } else {
                 absenceSpan.textContent = 'جلسات غایب: بدون غیبت';
             }
