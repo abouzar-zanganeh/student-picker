@@ -1,5 +1,6 @@
 import { Classroom, Student, Session, Category } from './models.js';
 
+
 // --- وضعیت کلی برنامه (Global State) ---
 export let classrooms = {}; // آبجکتی برای نگهداری تمام کلاس‌ها بر اساس نام آنها
 export let currentClassroom = null; // کلاسی که کاربر در حال کار با آن است

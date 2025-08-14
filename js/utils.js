@@ -41,3 +41,23 @@ function printStatus() {
 
 // By attaching the function to the 'window' object, we make it accessible from the console.
 window.printStatus = printStatus;
+
+
+export function normalizeKeyboard(str) {
+    if (typeof str !== 'string') {
+        return '';
+    }
+
+    const keyMap = {
+        'q': 'ض', 'w': 'ص', 'e': 'ث', 'r': 'ق', 't': 'ف', 'y': 'غ', 'u': 'ع', 'i': 'ه', 'o': 'خ', 'p': 'ح', '[': 'ج', ']': 'چ',
+        'a': 'ش', 's': 'س', 'd': 'ی', 'f': 'ب', 'g': 'ل', 'h': 'ا', 'j': 'ت', 'k': 'ن', 'l': 'م', ';': 'ک', '\'': 'گ',
+        'z': 'ظ', 'x': 'ط', 'c': 'ز', 'v': 'ر', 'b': 'ذ', 'n': 'د', 'm': 'پ', ',': 'و'
+    };
+
+    let result = '';
+    for (let i = 0; i < str.length; i++) {
+        const char = str[i].toLowerCase(); // Ensure we match lowercase keys
+        result += keyMap[char] || str[i]; // If char is in map, replace it; otherwise, keep original
+    }
+    return result;
+}

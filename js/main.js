@@ -2,7 +2,7 @@ import * as state from './state.js';
 import { resetAllStudentCounters, getActiveItems } from './state.js';
 import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
-import { normalizeText } from './utils.js';
+import { normalizeText, normalizeKeyboard } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- HTML Elements (from ui.js, but needed for event listeners) ---
@@ -456,15 +456,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const normalizedSearchTerm = normalizeText(searchTerm.toLowerCase());
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        const keyboardNormalizedTerm = normalizeKeyboard(lowerCaseSearchTerm);
+
         const allResults = [];
         for (const className in state.classrooms) {
             const classroom = state.classrooms[className];
             if (classroom.isDeleted) continue;
 
-            const foundStudents = getActiveItems(classroom.students).filter(student =>
-                normalizeText(student.identity.name.toLowerCase()).includes(normalizedSearchTerm)
-            );
+            const foundStudents = getActiveItems(classroom.students).filter(student => {
+                const normalizedStudentName = normalizeText(student.identity.name.toLowerCase());
+
+                // Check if student name includes the term as typed
+                const matchesOriginal = normalizedStudentName.includes(normalizeText(lowerCaseSearchTerm));
+
+                // Check if student name includes the keyboard-mapped term
+                const matchesMapped = normalizedStudentName.includes(normalizeText(keyboardNormalizedTerm));
+
+                return matchesOriginal || matchesMapped;
+            });
 
             foundStudents.forEach(student => {
                 allResults.push({ student, classroom });
@@ -516,12 +526,21 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const normalizedSearchTerm = normalizeText(searchTerm.toLowerCase());
+        const lowerCaseSearchTerm = searchTerm.toLowerCase();
+        const keyboardNormalizedTerm = normalizeKeyboard(lowerCaseSearchTerm);
         const allStudents = getActiveItems(state.currentClassroom.students);
 
-        const foundStudents = allStudents.filter(student =>
-            normalizeText(student.identity.name.toLowerCase()).includes(normalizedSearchTerm)
-        );
+        const foundStudents = allStudents.filter(student => {
+            const normalizedStudentName = normalizeText(student.identity.name.toLowerCase());
+
+            // Check if student name includes the term as typed
+            const matchesOriginal = normalizedStudentName.includes(normalizeText(lowerCaseSearchTerm));
+
+            // Check if student name includes the keyboard-mapped term
+            const matchesMapped = normalizedStudentName.includes(normalizeText(keyboardNormalizedTerm));
+
+            return matchesOriginal || matchesMapped;
+        });
 
         ui.renderSearchResults(foundStudents);
     });
