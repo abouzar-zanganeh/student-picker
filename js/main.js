@@ -73,6 +73,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners ---
 
+    document.addEventListener('click', (e) => {
+        // If the context menu is visible and the click was outside of it, close it.
+        if (ui.contextMenu.classList.contains('visible') && !ui.contextMenu.contains(e.target)) {
+            ui.closeContextMenu();
+        }
+    });
+
     ui.selectStudentBtnWrapper.addEventListener('click', () => {
         // Check for either of the two conditions that make the button disabled.
         if (ui.selectStudentBtnWrapper.classList.contains('disabled-wrapper') || ui.selectStudentBtn.disabled) {
@@ -760,7 +767,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Global 'Escape' key handler ---
         // This code now only runs if the user is NOT typing.
         if (event.key === 'Escape') {
-            if (state.activeModal) {
+            if (ui.contextMenu.classList.contains('visible')) {
+                ui.closeContextMenu();
+            } else if (state.activeModal) {
                 ui.closeActiveModal();
             } else {
                 history.back();

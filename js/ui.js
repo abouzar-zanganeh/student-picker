@@ -90,6 +90,7 @@ export const quickGradeSubmitBtn = document.getElementById('quick-grade-submit-b
 const classNameHeader = document.getElementById('class-name-header');
 const categoryPillsContainer = document.getElementById('category-selection-container');
 const resultDiv = document.getElementById('selected-student-result');
+export const contextMenu = document.getElementById('custom-context-menu');
 
 
 export function showUndoToast(message) {
@@ -254,6 +255,66 @@ export function closeActiveModal(onClosed) { // The new parameter
         }, 300); // This must match the animation duration
     }
     state.setActiveModal(null);
+}
+
+export function openContextMenu(event, menuItems) {
+    // First, ensure any previously open menu is closed.
+    closeContextMenu();
+
+    event.preventDefault(); // This is crucial to stop the default browser menu.
+
+    const menu = contextMenu;
+    const ul = menu.querySelector('ul');
+    ul.innerHTML = ''; // Clear out items from any previous menu.
+
+    // Dynamically create and add the new menu items.
+    menuItems.forEach(item => {
+        const li = document.createElement('li');
+
+        if (item.isSeparator) {
+            li.className = 'separator';
+        } else {
+            li.innerHTML = `
+                <span class="icon">${item.icon || ''}</span>
+                <span class="label">${item.label}</span>
+            `;
+            if (item.className) {
+                li.classList.add(item.className);
+            }
+            li.addEventListener('click', () => {
+                // When an item is clicked, perform its action and close the menu.
+                item.action();
+                closeContextMenu();
+            });
+        }
+        ul.appendChild(li);
+    });
+
+    // --- Positioning Logic ---
+    const { clientX, clientY } = event;
+    const { innerWidth: windowWidth, innerHeight: windowHeight } = window;
+
+    // Position and show the menu
+    menu.style.top = `${clientY}px`;
+    menu.style.left = `${clientX}px`;
+    menu.classList.add('visible');
+
+    // --- Edge Collision Detection ---
+    const { offsetWidth: menuWidth, offsetHeight: menuHeight } = menu;
+
+    // Adjust position if it overflows the window
+    if (clientX + menuWidth > windowWidth) {
+        menu.style.left = `${windowWidth - menuWidth - 5}px`; // 5px padding from edge
+    }
+    if (clientY + menuHeight > windowHeight) {
+        menu.style.top = `${windowHeight - menuHeight - 5}px`; // 5px padding from edge
+    }
+}
+
+export function closeContextMenu() {
+    if (contextMenu.classList.contains('visible')) {
+        contextMenu.classList.remove('visible');
+    }
 }
 
 export function renderAttendancePage() {
@@ -1352,47 +1413,7 @@ function createSessionActionButtons(session, activeSessions) {
         newNoteContent.focus();
     });
 
-    // --- Add the Cancel Button ---
-    const cancelBtn = document.createElement('button');
-    cancelBtn.className = 'btn-icon';
-    cancelBtn.innerHTML = '❌';
-    cancelBtn.title = 'لغو جلسه';
-    cancelBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const actionText = session.isCancelled ? 'بازگردانی جلسه' : 'لغو جلسه';
-        const confirmMsg = session.isCancelled ?
-            `آیا از بازگردانی این جلسه مطمئن هستید؟` :
-            `آیا از لغو این جلسه مطمئن هستید؟ جلسه لغو شده در آمار تاثیری ندارد اما قابل بازگردانی است.`;
-
-        showCustomConfirm(confirmMsg,
-            () => {
-                session.isCancelled = !session.isCancelled;
-                if (session.isCancelled) {
-                    session.isFinished = true;
-                } else {
-                    session.isFinished = false;
-                }
-                state.saveData();
-                renderSessions();
-                showNotification(session.isCancelled ? 'جلسه لغو شد.' : 'جلسه بازگردانی شد.');
-            }, { confirmText: actionText, confirmClass: 'btn-warning' }
-        );
-    });
-
-    const makeupBtn = document.createElement('button');
-    makeupBtn.className = 'btn-icon';
-    makeupBtn.innerHTML = '🔄';
-    makeupBtn.title = 'تغییر وضعیت جبرانی';
-    makeupBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        state.currentClassroom.markAsMakeup(session.sessionNumber);
-        state.saveData();
-        renderSessions();
-    });
-
     buttonsContainer.appendChild(noteBtn);
-    buttonsContainer.appendChild(cancelBtn);
-    buttonsContainer.appendChild(makeupBtn);
 
     if (!session.isFinished && !session.isCancelled) {
         const endSessionBtn = document.createElement('button');
@@ -1413,27 +1434,6 @@ function createSessionActionButtons(session, activeSessions) {
         });
         buttonsContainer.appendChild(endSessionBtn);
     }
-
-    const deleteSessionBtn = document.createElement('button');
-    deleteSessionBtn.className = 'btn-icon';
-    deleteSessionBtn.innerHTML = '🗑️';
-    deleteSessionBtn.title = 'حذف جلسه';
-    deleteSessionBtn.style.color = 'var(--color-warning)';
-    deleteSessionBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        const displayNumText = session.isCancelled ? 'لغو شده' : `${activeSessions.indexOf(session) + 1}`;
-        showCustomConfirm(
-            `آیا از حذف جلسه ${displayNumText} مطمئن هستید؟ این عمل آمار ثبت شده در این جلسه را نیز حذف می‌کند.`,
-            () => {
-                showUndoToast(`جلسه ${displayNumText} حذف شد.`);
-                session.isDeleted = true;
-                state.saveData();
-                renderSessions();
-            },
-            { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
-        );
-    });
-    buttonsContainer.appendChild(deleteSessionBtn);
 
     return buttonsContainer;
 }
@@ -1508,6 +1508,63 @@ function createSessionListItem(session, activeSessions) {
 
     const buttonsContainer = createSessionActionButtons(session, activeSessions);
     li.appendChild(buttonsContainer);
+
+    // --- Add the right-click context menu ---
+    li.addEventListener('contextmenu', (event) => {
+        const menuItems = [
+            {
+                label: session.isCancelled ? 'بازگردانی جلسه' : 'لغو جلسه',
+                icon: '❌',
+                action: () => {
+                    const actionText = session.isCancelled ? 'بازگردانی جلسه' : 'لغو جلسه';
+                    const confirmMsg = session.isCancelled ?
+                        `آیا از بازگردانی این جلسه مطمئن هستید؟` :
+                        `آیا از لغو این جلسه مطمئن هستید؟ جلسه لغو شده در آمار تاثیری ندارد اما قابل بازگردانی است.`;
+                    showCustomConfirm(confirmMsg, () => {
+                        session.isCancelled = !session.isCancelled;
+                        if (session.isCancelled) {
+                            session.isFinished = true;
+                        } else {
+                            session.isFinished = false;
+                        }
+                        state.saveData();
+                        renderSessions();
+                        showNotification(session.isCancelled ? 'جلسه لغو شد.' : 'جلسه بازگردانی شد.');
+                    }, { confirmText: actionText, confirmClass: 'btn-warning' });
+                }
+            },
+            {
+                label: 'تغییر وضعیت جبرانی',
+                icon: '🔄',
+                action: () => {
+                    state.currentClassroom.markAsMakeup(session.sessionNumber);
+                    state.saveData();
+                    renderSessions();
+                }
+            },
+            { isSeparator: true }, // This will render as a dividing line
+            {
+                label: 'حذف جلسه',
+                icon: '🗑️',
+                className: 'danger', // This will style the item in red
+                action: () => {
+                    const displayNumText = session.isCancelled ? 'لغو شده' : `${activeSessions.indexOf(session) + 1}`;
+                    showCustomConfirm(
+                        `آیا از حذف جلسه ${displayNumText} مطمئن هستید؟ این عمل آمار ثبت شده در این جلسه را نیز حذف می‌کند.`,
+                        () => {
+                            showUndoToast(`جلسه ${displayNumText} حذف شد.`);
+                            session.isDeleted = true;
+                            state.saveData();
+                            renderSessions();
+                        },
+                        { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
+                    );
+                }
+            }
+        ];
+
+        openContextMenu(event, menuItems);
+    });
 
     return li;
 }

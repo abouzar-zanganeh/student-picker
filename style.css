@@ -1659,3 +1659,69 @@ textarea,
 .shake-animation {
     animation: shake-horizontal 0.2s ease-in-out;
 }
+
+/* --- Context Menu Styles --- */
+.context-menu {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Positioned relative to the viewport */
+    z-index: 4000;
+    /* Ensures it's on top of other content */
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-main);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    padding: 5px 0;
+    min-width: 180px;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+}
+
+.context-menu.visible {
+    display: block;
+    opacity: 1;
+    transform: scale(1);
+}
+
+.context-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.context-menu li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    font-size: 15px;
+    color: var(--color-text-dark);
+    cursor: pointer;
+    user-select: none;
+}
+
+.context-menu li:hover {
+    background-color: #e9ecef;
+}
+
+.context-menu li .icon {
+    font-size: 16px;
+    width: 20px;
+    /* Ensures alignment */
+    text-align: center;
+}
+
+.context-menu .separator {
+    height: 1px;
+    background-color: var(--color-border);
+    margin: 5px 0;
+}
+
+/* For destructive actions like delete */
+.context-menu li.danger {
+    color: var(--color-strong-warning);
+}
+
+/* End of Context Menu Styles --- */
