@@ -1321,6 +1321,196 @@ export function showPage(pageId) {
     _internalShowPage(pageId);
 }
 
+// Reactored rendersessions sub functions
+
+function createSessionActionButtons(session, activeSessions) {
+    const buttonsContainer = document.createElement('div');
+    buttonsContainer.className = 'list-item-buttons';
+
+    // --- Add the note Button ---
+    const noteBtn = document.createElement('button');
+    noteBtn.className = 'btn-icon';
+    noteBtn.innerHTML = '📝';
+    noteBtn.title = 'افزودن/ویرایش یادداشت جلسه';
+
+    if (!session.note) {
+        noteBtn.style.opacity = '0.3';
+    }
+
+    noteBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        newNoteContent.value = session.note || '';
+        state.setSaveNoteCallback((content) => {
+            session.note = content;
+            state.saveData();
+            renderSessions();
+        });
+        openModal('add-note-modal');
+        newNoteContent.focus();
+    });
+
+    // --- Add the Cancel Button ---
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-icon';
+    cancelBtn.innerHTML = '❌';
+    cancelBtn.title = 'لغو جلسه';
+    cancelBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const actionText = session.isCancelled ? 'بازگردانی جلسه' : 'لغو جلسه';
+        const confirmMsg = session.isCancelled ?
+            `آیا از بازگردانی این جلسه مطمئن هستید؟` :
+            `آیا از لغو این جلسه مطمئن هستید؟ جلسه لغو شده در آمار تاثیری ندارد اما قابل بازگردانی است.`;
+
+        showCustomConfirm(confirmMsg,
+            () => {
+                session.isCancelled = !session.isCancelled;
+                if (session.isCancelled) {
+                    session.isFinished = true;
+                } else {
+                    session.isFinished = false;
+                }
+                state.saveData();
+                renderSessions();
+                showNotification(session.isCancelled ? 'جلسه لغو شد.' : 'جلسه بازگردانی شد.');
+            }, { confirmText: actionText, confirmClass: 'btn-warning' }
+        );
+    });
+
+    const makeupBtn = document.createElement('button');
+    makeupBtn.className = 'btn-icon';
+    makeupBtn.innerHTML = '🔄';
+    makeupBtn.title = 'تغییر وضعیت جبرانی';
+    makeupBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        state.currentClassroom.markAsMakeup(session.sessionNumber);
+        state.saveData();
+        renderSessions();
+    });
+
+    buttonsContainer.appendChild(noteBtn);
+    buttonsContainer.appendChild(cancelBtn);
+    buttonsContainer.appendChild(makeupBtn);
+
+    if (!session.isFinished && !session.isCancelled) {
+        const endSessionBtn = document.createElement('button');
+        endSessionBtn.className = 'btn-icon';
+        endSessionBtn.innerHTML = '✅';
+        endSessionBtn.title = 'خاتمه جلسه';
+        endSessionBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            showCustomConfirm(
+                `آیا از خاتمه دادن جلسه ${activeSessions.indexOf(session) + 1} مطمئن هستید؟`,
+                () => {
+                    state.currentClassroom.endSpecificSession(session.sessionNumber);
+                    state.saveData();
+                    renderSessions();
+                },
+                { confirmText: 'بله', confirmClass: 'btn-success' }
+            );
+        });
+        buttonsContainer.appendChild(endSessionBtn);
+    }
+
+    const deleteSessionBtn = document.createElement('button');
+    deleteSessionBtn.className = 'btn-icon';
+    deleteSessionBtn.innerHTML = '🗑️';
+    deleteSessionBtn.title = 'حذف جلسه';
+    deleteSessionBtn.style.color = 'var(--color-warning)';
+    deleteSessionBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const displayNumText = session.isCancelled ? 'لغو شده' : `${activeSessions.indexOf(session) + 1}`;
+        showCustomConfirm(
+            `آیا از حذف جلسه ${displayNumText} مطمئن هستید؟ این عمل آمار ثبت شده در این جلسه را نیز حذف می‌کند.`,
+            () => {
+                showUndoToast(`جلسه ${displayNumText} حذف شد.`);
+                session.isDeleted = true;
+                state.saveData();
+                renderSessions();
+            },
+            { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
+        );
+    });
+    buttonsContainer.appendChild(deleteSessionBtn);
+
+    return buttonsContainer;
+}
+
+function createSessionInfoContainer(session, activeSessions) {
+    const infoContainer = document.createElement('div');
+    infoContainer.style.display = 'flex';
+    infoContainer.style.flexDirection = 'column';
+    infoContainer.style.alignItems = 'flex-start';
+    infoContainer.style.flexGrow = '1';
+
+    const sessionDate = new Date(session.startTime).toLocaleDateString('fa-IR');
+    const sessionText = document.createElement('span');
+
+    const badgesContainer = document.createElement('div');
+    badgesContainer.style.display = 'flex';
+    badgesContainer.style.gap = '5px';
+    badgesContainer.style.marginTop = '5px';
+
+    // Day of the week badge
+    const dayOfWeek = new Date(session.startTime).toLocaleDateString('fa-IR', { weekday: 'long' });
+    const dayBadge = document.createElement('span');
+    dayBadge.className = 'type-badge day-badge';
+    dayBadge.textContent = dayOfWeek;
+    badgesContainer.appendChild(dayBadge);
+
+    if (session.isCancelled) {
+        sessionText.textContent = `جلسه لغو شده - تاریخ: ${sessionDate}`;
+        infoContainer.style.cursor = 'default';
+        const cancelledBadge = document.createElement('span');
+        cancelledBadge.className = 'type-badge cancelled-badge';
+        cancelledBadge.textContent = 'لغو شده';
+        badgesContainer.appendChild(cancelledBadge);
+    } else {
+        // Dynamically find the session's display number
+        const displaySessionNumber = activeSessions.indexOf(session) + 1;
+        sessionText.textContent = `جلسه ${displaySessionNumber} - تاریخ: ${sessionDate}`;
+        infoContainer.style.cursor = 'pointer';
+        infoContainer.addEventListener('click', () => {
+            state.setSelectedSession(session);
+            renderStudentPage();
+        });
+    }
+
+    infoContainer.appendChild(sessionText);
+
+    if (session.isFinished) {
+        const finishedBadge = document.createElement('span');
+        finishedBadge.className = 'type-badge';
+        finishedBadge.textContent = 'خاتمه یافته';
+        finishedBadge.style.backgroundColor = 'var(--color-secondary)';
+        badgesContainer.appendChild(finishedBadge);
+    }
+    if (session.isMakeup) {
+        const makeupBadge = document.createElement('span');
+        makeupBadge.className = 'type-badge';
+        makeupBadge.textContent = 'جبرانی';
+        makeupBadge.style.backgroundColor = 'var(--color-warning)';
+        makeupBadge.style.color = 'var(--color-text-dark)';
+        badgesContainer.appendChild(makeupBadge);
+    }
+    infoContainer.appendChild(badgesContainer);
+
+    return infoContainer;
+}
+
+function createSessionListItem(session, activeSessions) {
+    const li = document.createElement('li');
+
+    const infoContainer = createSessionInfoContainer(session, activeSessions);
+    li.appendChild(infoContainer);
+
+    const buttonsContainer = createSessionActionButtons(session, activeSessions);
+    li.appendChild(buttonsContainer);
+
+    return li;
+}
+
+// end of refactored...
+
 export function renderSessions() {
     const sessionListUl = document.getElementById('session-list');
     const sessionClassNameHeader = document.getElementById('session-class-name-header');
@@ -1335,195 +1525,16 @@ export function renderSessions() {
         return;
     }
 
-    // First, get all sessions that are not cancelled or deleted, and sort them chronologically.
-    // This array determines the "active" session number for display.
+    // Get active sessions for correct numbering
     const activeSessions = getActiveItems(state.currentClassroom.sessions)
         .filter(s => !s.isCancelled)
         .sort((a, b) => a.sessionNumber - b.sessionNumber);
 
-    // Get all non-deleted sessions to render, and reverse them for display order.
+    // Get all non-deleted sessions to render, and reverse them for display order
     const reversedSessions = [...getActiveItems(state.currentClassroom.sessions)].reverse();
 
     reversedSessions.forEach(session => {
-        const li = document.createElement('li');
-        const infoContainer = document.createElement('div');
-        infoContainer.style.display = 'flex';
-        infoContainer.style.flexDirection = 'column';
-        infoContainer.style.alignItems = 'flex-start';
-        infoContainer.style.flexGrow = '1';
-
-        const sessionDate = new Date(session.startTime).toLocaleDateString('fa-IR');
-        const sessionText = document.createElement('span');
-
-        const badgesContainer = document.createElement('div');
-        badgesContainer.style.display = 'flex';
-        badgesContainer.style.gap = '5px';
-        badgesContainer.style.marginTop = '5px';
-
-        //adds the badge of the day of the week
-        const dayOfWeek = new Date(session.startTime).toLocaleDateString('fa-IR', { weekday: 'long' });
-        const dayBadge = document.createElement('span');
-        dayBadge.className = 'type-badge day-badge';
-        dayBadge.textContent = dayOfWeek;
-        badgesContainer.appendChild(dayBadge);
-        //...
-        if (session.isCancelled) {
-            sessionText.textContent = `جلسه لغو شده - تاریخ: ${sessionDate}`;
-            infoContainer.style.cursor = 'default'; // No action on click for cancelled sessions
-            const cancelledBadge = document.createElement('span');
-            cancelledBadge.className = 'type-badge cancelled-badge';
-            cancelledBadge.textContent = 'لغو شده';
-            badgesContainer.appendChild(cancelledBadge);
-        } else {
-            // Dynamically find the session's display number
-            const displaySessionNumber = activeSessions.indexOf(session) + 1;
-            sessionText.textContent = `جلسه ${displaySessionNumber} - تاریخ: ${sessionDate}`;
-            infoContainer.style.cursor = 'pointer';
-            infoContainer.addEventListener('click', () => {
-                state.setSelectedSession(session);
-                renderStudentPage();
-            });
-        }
-
-        infoContainer.appendChild(sessionText);
-
-        if (session.isFinished) {
-            const finishedBadge = document.createElement('span');
-            finishedBadge.className = 'type-badge';
-            finishedBadge.textContent = 'خاتمه یافته';
-            finishedBadge.style.backgroundColor = 'var(--color-secondary)';
-            badgesContainer.appendChild(finishedBadge);
-        }
-        if (session.isMakeup) {
-            const makeupBadge = document.createElement('span');
-            makeupBadge.className = 'type-badge';
-            makeupBadge.textContent = 'جبرانی';
-            makeupBadge.style.backgroundColor = 'var(--color-warning)';
-            makeupBadge.style.color = 'var(--color-text-dark)';
-            badgesContainer.appendChild(makeupBadge);
-        }
-        infoContainer.appendChild(badgesContainer);
-        li.appendChild(infoContainer);
-
-        const buttonsContainer = document.createElement('div');
-        buttonsContainer.className = 'list-item-buttons';
-
-        // --- Add the note Button ---
-        const noteBtn = document.createElement('button');
-        noteBtn.className = 'btn-icon';
-        noteBtn.innerHTML = '📝';
-        noteBtn.title = 'افزودن/ویرایش یادداشت جلسه';
-
-        // Make the icon less prominent if there's no note
-        if (!session.note) {
-            noteBtn.style.opacity = '0.3';
-        }
-
-        noteBtn.addEventListener('click', (event) => {
-            event.stopPropagation(); // Prevents other click events on the list item
-
-            // Load the existing session note into the modal
-            newNoteContent.value = session.note || '';
-
-            // Define what happens when "Save" is clicked for a session note
-            state.setSaveNoteCallback((content) => {
-                session.note = content;
-                state.saveData();
-                renderSessions(); // Re-render the list to update this icon's opacity
-            });
-
-            openModal('add-note-modal');
-            newNoteContent.focus();
-        });
-
-        // --- Add the Cancel Button ---
-        const cancelBtn = document.createElement('button');
-        cancelBtn.className = 'btn-icon';
-        cancelBtn.innerHTML = '❌';
-        cancelBtn.title = 'لغو جلسه';
-        cancelBtn.addEventListener('click', (event) => {
-            event.stopPropagation();
-            const actionText = session.isCancelled ? 'بازگردانی جلسه' : 'لغو جلسه';
-            const confirmMsg = session.isCancelled ?
-                `آیا از بازگردانی این جلسه مطمئن هستید؟` :
-                `آیا از لغو این جلسه مطمئن هستید؟ جلسه لغو شده در آمار تاثیری ندارد اما قابل بازگردانی است.`;
-
-            showCustomConfirm(confirmMsg,
-                () => {
-                    // Toggle the cancelled state first
-                    session.isCancelled = !session.isCancelled;
-
-                    // Also update the isFinished state accordingly
-                    if (session.isCancelled) {
-                        // When cancelling, mark as finished.
-                        session.isFinished = true;
-                    } else {
-                        // When restoring, mark as not finished.
-                        session.isFinished = false;
-                    }
-                    state.saveData();
-                    renderSessions();
-                    showNotification(session.isCancelled ? 'جلسه لغو شد.' : 'جلسه بازگردانی شد.');
-                }, { confirmText: actionText, confirmClass: 'btn-warning' }
-            );
-        });
-        buttonsContainer.appendChild(noteBtn);
-        buttonsContainer.appendChild(cancelBtn);
-        // --- End of new code ---
-
-        const makeupBtn = document.createElement('button');
-        makeupBtn.className = 'btn-icon';
-        makeupBtn.innerHTML = '🔄';
-        makeupBtn.title = 'تغییر وضعیت جبرانی';
-        makeupBtn.addEventListener('click', (event) => {
-            event.stopPropagation();
-            state.currentClassroom.markAsMakeup(session.sessionNumber);
-            state.saveData();
-            renderSessions();
-        });
-        buttonsContainer.appendChild(makeupBtn);
-
-        if (!session.isFinished && !session.isCancelled) {
-            const endSessionBtn = document.createElement('button');
-            endSessionBtn.className = 'btn-icon';
-            endSessionBtn.innerHTML = '✅';
-            endSessionBtn.title = 'خاتمه جلسه';
-            endSessionBtn.addEventListener('click', (event) => {
-                event.stopPropagation();
-                showCustomConfirm(
-                    `آیا از خاتمه دادن جلسه ${activeSessions.indexOf(session) + 1} مطمئن هستید؟`,
-                    () => {
-                        state.currentClassroom.endSpecificSession(session.sessionNumber);
-                        state.saveData();
-                        renderSessions();
-                    },
-                    { confirmText: 'بله', confirmClass: 'btn-success' }
-                );
-            });
-            buttonsContainer.appendChild(endSessionBtn);
-        }
-
-        const deleteSessionBtn = document.createElement('button');
-        deleteSessionBtn.className = 'btn-icon';
-        deleteSessionBtn.innerHTML = '🗑️';
-        deleteSessionBtn.title = 'حذف جلسه';
-        deleteSessionBtn.style.color = 'var(--color-warning)';
-        deleteSessionBtn.addEventListener('click', (event) => {
-            event.stopPropagation();
-            const displayNumText = session.isCancelled ? 'لغو شده' : `${activeSessions.indexOf(session) + 1}`;
-            showCustomConfirm(
-                `آیا از حذف جلسه ${displayNumText} مطمئن هستید؟ این عمل آمار ثبت شده در این جلسه را نیز حذف می‌کند.`,
-                () => {
-                    showUndoToast(`جلسه ${displayNumText} حذف شد.`);
-                    session.isDeleted = true;
-                    state.saveData();
-                    renderSessions();
-                },
-                { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
-            );
-        });
-        buttonsContainer.appendChild(deleteSessionBtn);
-        li.appendChild(buttonsContainer);
+        const li = createSessionListItem(session, activeSessions);
         sessionListUl.appendChild(li);
     });
 }
