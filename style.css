@@ -437,6 +437,7 @@ button:disabled:hover {
     cursor: pointer;
 }
 
+/* To disable the default highlighting of the list item when you tap an hold on it for its context menu */
 #class-list li,
 #session-list li {
     -webkit-tap-highlight-color: transparent;
