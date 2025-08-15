@@ -1306,10 +1306,19 @@ export function renderSettingsStudentList() {
         deleteBtn.style.color = 'var(--color-warning)';
         deleteBtn.addEventListener('click', (event) => {
             event.stopPropagation();
-            showUndoToast(`دانش‌آموز «${student.identity.name}» حذف شد.`);
-            student.isDeleted = true;
-            state.saveData();
-            renderSettingsStudentList();
+            showCustomConfirm(
+                `آیا از حذف دانش‌آموز «${student.identity.name}» مطمئن هستید؟`,
+                () => {
+                    showUndoToast(`دانش‌آموز «${student.identity.name}» حذف شد.`);
+                    student.isDeleted = true;
+                    state.saveData();
+                    renderSettingsStudentList();
+                },
+                {
+                    confirmText: 'تایید حذف',
+                    confirmClass: 'btn-warning'
+                }
+            );
         });
         li.appendChild(nameSpan);
         li.appendChild(deleteBtn);
