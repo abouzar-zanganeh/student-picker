@@ -217,16 +217,27 @@ export function showSecureConfirm(message, onConfirm) {
 export function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
+        // Prevents opening a new modal if one is already active
+        if (state.activeModal) return;
+
         modal.classList.add('modal-visible');
         state.setActiveModal(modalId);
+        // Adds a dummy state to the history to "trap" the back button
+        history.pushState(null, '', location.href);
     }
 }
 
-export function closeActiveModal(onClosed) { // The new parameter
+export function closeActiveModal(onClosed) {
     if (!state.activeModal) return;
 
     const modal = document.getElementById(state.activeModal);
-    const activeModalId = state.activeModal; // Store the ID before we reset the state
+    const activeModalId = state.activeModal;
+
+    // IMPORTANT: We clear the activeModal state *before* navigating back.
+    // This lets our 'popstate' listener (in the next step) know that we are closing the modal
+    // intentionally and that it should not spring the "trap".
+    state.setActiveModal(null);
+    history.back(); // Programmatically go back to clear the dummy state from the history.
 
     if (modal) {
         modal.classList.add('modal-closing');
@@ -254,7 +265,6 @@ export function closeActiveModal(onClosed) { // The new parameter
 
         }, 300); // This must match the animation duration
     }
-    state.setActiveModal(null);
 }
 
 export function openContextMenu(event, menuItems) {

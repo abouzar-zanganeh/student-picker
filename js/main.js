@@ -732,6 +732,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('popstate', (event) => {
+        if (state.activeModal) {
+            history.pushState(null, '', location.href);
+        }
         ui.closeContextMenu();
         if (event.state) {
             const { pageId, currentClassName, selectedSessionNumber, selectedStudentId } = event.state;
