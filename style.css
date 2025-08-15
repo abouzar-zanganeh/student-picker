@@ -421,12 +421,6 @@ button:disabled:hover {
     transform: translateX(-50%) translateY(0);
 }
 
-#class-list li:hover,
-#session-list li:hover {
-    background-color: #e9ecef;
-    cursor: pointer;
-}
-
 .notification-toast {
     transition: transform 0.4s ease, visibility 0.4s ease;
     visibility: hidden;
@@ -441,6 +435,11 @@ button:disabled:hover {
 #session-list li:hover {
     background-color: #e9ecef;
     cursor: pointer;
+}
+
+#class-list li,
+#session-list li {
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* استایل‌های مربوط به غیرفعال کردن دکمه با Tooltip */
