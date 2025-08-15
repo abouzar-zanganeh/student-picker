@@ -1151,43 +1151,7 @@ function createClassActionButtons(classroom) {
         newNoteContent.focus();
     });
 
-    // --- Settings Button ---
-    const settingsBtn = document.createElement('button');
-    settingsBtn.className = 'btn-icon';
-    settingsBtn.innerHTML = '⚙️';
-    settingsBtn.title = 'تنظیمات کلاس';
-    settingsBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        state.setCurrentClassroom(classroom);
-        settingsClassNameHeader.textContent = `تنظیمات کلاس: ${state.currentClassroom.info.name}`;
-        renderSettingsStudentList();
-        renderSettingsCategories();
-        showPage('settings-page');
-    });
-
-    // --- Delete Button ---
-    const deleteBtn = document.createElement('button');
-    deleteBtn.className = 'btn-icon';
-    deleteBtn.innerHTML = '🗑️';
-    deleteBtn.style.color = 'var(--color-warning)';
-    deleteBtn.title = 'حذف کلاس';
-    deleteBtn.addEventListener('click', (event) => {
-        event.stopPropagation();
-        showCustomConfirm(
-            `آیا از حذف کلاس «${classroom.info.name}» مطمئن هستید؟ این عمل تمام جلسات و آمار مربوط به آن را نیز حذف می‌کند.`,
-            () => {
-                showUndoToast(`کلاس «${classroom.info.name}» حذف شد.`);
-                classroom.isDeleted = true;
-                state.saveData();
-                renderClassList();
-            },
-            { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
-        );
-    });
-
     buttonsContainer.appendChild(noteBtn);
-    buttonsContainer.appendChild(settingsBtn);
-    buttonsContainer.appendChild(deleteBtn);
 
     return buttonsContainer;
 }
@@ -1273,6 +1237,41 @@ function createClassListItem(classroom) {
     // --- 3. Action Buttons ---
     const buttonsContainer = createClassActionButtons(classroom);
     li.appendChild(buttonsContainer);
+
+    // --- 4. Add the right-click context menu ---
+    li.addEventListener('contextmenu', (event) => {
+        const menuItems = [
+            {
+                label: 'تنظیمات کلاس',
+                icon: '⚙️',
+                action: () => {
+                    state.setCurrentClassroom(classroom);
+                    settingsClassNameHeader.textContent = `تنظیمات کلاس: ${state.currentClassroom.info.name}`;
+                    renderSettingsStudentList();
+                    renderSettingsCategories();
+                    showPage('settings-page');
+                }
+            },
+            {
+                label: 'حذف کلاس',
+                icon: '🗑️',
+                className: 'danger',
+                action: () => {
+                    showCustomConfirm(
+                        `آیا از حذف کلاس «${classroom.info.name}» مطمئن هستید؟ این عمل تمام جلسات و آمار مربوط به آن را نیز حذف می‌کند.`,
+                        () => {
+                            showUndoToast(`کلاس «${classroom.info.name}» حذف شد.`);
+                            classroom.isDeleted = true;
+                            state.saveData();
+                            renderClassList();
+                        },
+                        { confirmText: 'تایید حذف', confirmClass: 'btn-warning', isDelete: true }
+                    );
+                }
+            }
+        ];
+        openContextMenu(event, menuItems);
+    });
 
     return li;
 }
