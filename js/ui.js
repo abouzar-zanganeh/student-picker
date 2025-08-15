@@ -1542,7 +1542,6 @@ function createSessionListItem(session, activeSessions) {
                     renderSessions();
                 }
             },
-            { isSeparator: true }, // This will render as a dividing line
             {
                 label: 'حذف جلسه',
                 icon: '🗑️',
