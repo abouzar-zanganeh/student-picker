@@ -1662,7 +1662,7 @@ textarea,
 
 /* --- Context Menu Styles --- */
 .context-menu {
-    display: none;
+    visibility: hidden;
     /* Hidden by default */
     position: fixed;
     /* Positioned relative to the viewport */
@@ -1676,13 +1676,14 @@ textarea,
     min-width: 180px;
     opacity: 0;
     transform: scale(0.95);
-    transition: opacity 0.1s ease-out, transform 0.1s ease-out;
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out, visibility 0s linear 0.15s;
 }
 
 .context-menu.visible {
-    display: block;
+    visibility: visible;
     opacity: 1;
     transform: scale(1);
+    transition-delay: 0s;
 }
 
 .context-menu ul {

@@ -268,57 +268,58 @@ export function closeActiveModal(onClosed) {
 }
 
 export function openContextMenu(event, menuItems) {
-    // First, ensure any previously open menu is closed.
+    event.preventDefault();
+
+    // Start by closing any existing menu. This will trigger the fade-out.
     closeContextMenu();
 
-    event.preventDefault(); // This is crucial to stop the default browser menu.
+    // Use a timeout to allow the close transition to begin before we re-open.
+    setTimeout(() => {
+        const menu = contextMenu;
+        const ul = menu.querySelector('ul');
+        ul.innerHTML = ''; // Clear out items from any previous menu.
 
-    const menu = contextMenu;
-    const ul = menu.querySelector('ul');
-    ul.innerHTML = ''; // Clear out items from any previous menu.
+        // Dynamically create and add the new menu items.
+        menuItems.forEach(item => {
+            const li = document.createElement('li');
 
-    // Dynamically create and add the new menu items.
-    menuItems.forEach(item => {
-        const li = document.createElement('li');
-
-        if (item.isSeparator) {
-            li.className = 'separator';
-        } else {
-            li.innerHTML = `
-                <span class="icon">${item.icon || ''}</span>
-                <span class="label">${item.label}</span>
-            `;
-            if (item.className) {
-                li.classList.add(item.className);
+            if (item.isSeparator) {
+                li.className = 'separator';
+            } else {
+                li.innerHTML = `
+                    <span class="icon">${item.icon || ''}</span>
+                    <span class="label">${item.label}</span>
+                `;
+                if (item.className) {
+                    li.classList.add(item.className);
+                }
+                li.addEventListener('click', () => {
+                    item.action();
+                    closeContextMenu();
+                });
             }
-            li.addEventListener('click', () => {
-                // When an item is clicked, perform its action and close the menu.
-                item.action();
-                closeContextMenu();
-            });
+            ul.appendChild(li);
+        });
+
+        // --- Positioning Logic ---
+        const { clientX, clientY } = event;
+        const { innerWidth: windowWidth, innerHeight: windowHeight } = window;
+
+        // Position and show the menu. This will now trigger the fade-in.
+        menu.style.top = `${clientY}px`;
+        menu.style.left = `${clientX}px`;
+        menu.classList.add('visible');
+
+        // --- Edge Collision Detection ---
+        const { offsetWidth: menuWidth, offsetHeight: menuHeight } = menu;
+
+        if (clientX + menuWidth > windowWidth) {
+            menu.style.left = `${windowWidth - menuWidth - 5}px`;
         }
-        ul.appendChild(li);
-    });
-
-    // --- Positioning Logic ---
-    const { clientX, clientY } = event;
-    const { innerWidth: windowWidth, innerHeight: windowHeight } = window;
-
-    // Position and show the menu
-    menu.style.top = `${clientY}px`;
-    menu.style.left = `${clientX}px`;
-    menu.classList.add('visible');
-
-    // --- Edge Collision Detection ---
-    const { offsetWidth: menuWidth, offsetHeight: menuHeight } = menu;
-
-    // Adjust position if it overflows the window
-    if (clientX + menuWidth > windowWidth) {
-        menu.style.left = `${windowWidth - menuWidth - 5}px`; // 5px padding from edge
-    }
-    if (clientY + menuHeight > windowHeight) {
-        menu.style.top = `${windowHeight - menuHeight - 5}px`; // 5px padding from edge
-    }
+        if (clientY + menuHeight > windowHeight) {
+            menu.style.top = `${windowHeight - menuHeight - 5}px`;
+        }
+    }, 50); // A small delay like 50ms is enough for a smooth effect
 }
 
 export function closeContextMenu() {

@@ -73,6 +73,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners ---
 
+    window.addEventListener('scroll', ui.closeContextMenu);
+
     document.addEventListener('click', (e) => {
         // If the context menu is visible and the click was outside of it, close it.
         if (ui.contextMenu.classList.contains('visible') && !ui.contextMenu.contains(e.target)) {
