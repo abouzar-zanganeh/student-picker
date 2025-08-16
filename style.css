@@ -1776,6 +1776,11 @@ textarea,
     /* Aligns the name to the start */
     text-align: start;
     padding-right: 15px;
+
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: max-width 0.3s ease-in-out;
 }
 
 /* Ensure the sticky header-cell has a background */
@@ -1790,4 +1795,16 @@ textarea,
     background-color: #f1f1f1;
 }
 
-/*End of -------------------- Styles for Student Stats Table ------------------------ */
+/* ----------------- Styles for Name Column Toggle ----------------------- */
+.student-stats-table th:first-child {
+    cursor: pointer;
+    user-select: none;
+    /* Prevents selecting the header text on click */
+}
+
+/* This rule defines the expanded state */
+.student-stats-table.name-column-expanded th:first-child,
+.student-stats-table.name-column-expanded td:first-child {
+    max-width: 500px;
+    /* A large value that allows the column to expand */
+}

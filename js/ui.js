@@ -540,7 +540,7 @@ export function renderStudentStatsList() {
         row.insertCell().textContent = student.statusCounters.missedChances || 0;
         row.insertCell().textContent = student.statusCounters.otherIssues || 0;
 
-        // 2. Loop through our dynamic list of gradable categories to add the rest of the data
+        // 2. Loops through our dynamic list of gradable categories to add the rest of the data
         gradedCategoryHeaders.forEach(categoryName => {
             const cell = row.insertCell();
             // The key in categoryCounts is the exact category name (e.g., "Listening")
@@ -550,6 +550,15 @@ export function renderStudentStatsList() {
     });
 
     tableContainer.appendChild(table);
+    // --- Adds event listener for the name header toggle ---
+    const tableElement = tableContainer.querySelector('.student-stats-table');
+    const nameHeader = tableElement?.querySelector('thead th:first-child');
+
+    if (nameHeader) {
+        nameHeader.addEventListener('click', () => {
+            tableElement.classList.toggle('name-column-expanded');
+        });
+    }
 }
 
 export function displayWinner() {
