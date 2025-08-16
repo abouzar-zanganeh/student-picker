@@ -159,32 +159,27 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
         isDelete = false
     } = options;
 
-    if (isDelete) {
-        const firstConfirm = () => {
-            // Close the current modal, and when the animation is finished,
-            // execute the function to open the next one.
-            closeActiveModal(() => {
-                showSecureConfirm(message, onConfirm);
-            });
-        };
-        confirmModalMessage.textContent = message;
-        confirmModalConfirmBtn.textContent = confirmText;
-        confirmModalCancelBtn.textContent = cancelText;
-        confirmModalConfirmBtn.className = 'modal-action-btn';
-        confirmModalConfirmBtn.classList.add(confirmClass);
-        state.setConfirmCallback(firstConfirm);
-        state.setCancelCallback(onCancel);
-        openModal('custom-confirm-modal');
-    } else {
-        confirmModalMessage.textContent = message;
-        confirmModalConfirmBtn.textContent = confirmText;
-        confirmModalCancelBtn.textContent = cancelText;
-        confirmModalConfirmBtn.className = 'modal-action-btn';
-        confirmModalConfirmBtn.classList.add(confirmClass);
-        state.setConfirmCallback(onConfirm);
-        state.setCancelCallback(onCancel);
-        openModal('custom-confirm-modal');
-    }
+    // Determine the correct confirm action based on the isDelete flag.
+    // If it's a delete action, the callback will be to open the next modal.
+    // Otherwise, it's the original onConfirm function passed into this function.
+    const confirmAction = isDelete
+        ? () => showSecureConfirm(message, onConfirm)
+        : onConfirm;
+
+    // --- This part sets up the modal's appearance and is now used for all cases ---
+    confirmModalMessage.textContent = message;
+    confirmModalConfirmBtn.textContent = confirmText;
+    confirmModalCancelBtn.textContent = cancelText;
+
+    // Reset classes before adding the new one to avoid style conflicts
+    confirmModalConfirmBtn.className = 'modal-action-btn';
+    confirmModalConfirmBtn.classList.add(confirmClass);
+
+    // Set the appropriate callbacks in the global state
+    state.setConfirmCallback(confirmAction);
+    state.setCancelCallback(onCancel);
+
+    openModal('custom-confirm-modal');
 }
 
 export function showSecureConfirm(message, onConfirm) {

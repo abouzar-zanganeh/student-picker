@@ -144,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     createRandomClass();
                     ui.showNotification("کلاس تستی با موفقیت ساخته شد!");
-                    ui.closeActiveModal();
                 },
                 { confirmText: 'بساز', confirmClass: 'btn-success' }
             );
@@ -165,19 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     confirmModalCancelBtn.addEventListener('click', () => {
-        ui.closeActiveModal();
-        if (typeof state.cancelCallback === 'function') {
-            state.cancelCallback();
-        }
-        state.setConfirmCallback(null);
-        state.setCancelCallback(null);
+        ui.closeActiveModal(state.cancelCallback);
     });
 
     confirmModalConfirmBtn.addEventListener('click', () => {
-        if (typeof state.confirmCallback === 'function') {
-            state.confirmCallback();
-            ui.closeActiveModal();
-        }
+        ui.closeActiveModal(state.confirmCallback);
     });
 
     backToAttendanceBtn.addEventListener('click', () => {
@@ -413,7 +404,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 "آیا تمایل به انجام فرآیند حضور و غیاب دارید؟",
                 () => { // This is the onConfirm callback for "Yes"
                     startSession(true);
-                    ui.closeActiveModal();
                 },
                 {   // This is the options object
                     confirmText: 'بله',
@@ -421,7 +411,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     confirmClass: 'btn-success',
                     onCancel: () => { // This is the onCancel callback for "No"
                         startSession(false);
-                        ui.closeActiveModal();
                     }
                 }
             );
@@ -720,7 +709,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         ui.renderClassList();
                         ui.showPage('class-management-page');
                         ui.showNotification("اطلاعات با موفقیت بازیابی شد.");
-                        ui.closeActiveModal();
 
                     },
                     { confirmText: 'بازیابی کن', confirmClass: 'btn-warning' }
