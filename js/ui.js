@@ -480,67 +480,50 @@ export function renderAttendancePage() {
 }
 
 export function renderStudentStatsList() {
-    const studentListUl = document.getElementById('student-list');
-    studentListUl.innerHTML = '';
+    const tableContainer = document.getElementById('student-stats-table-container');
+    if (!tableContainer) return; // A safeguard in case the element isn't found
+    tableContainer.innerHTML = ''; // Clear any previous content
 
     if (!state.currentClassroom) return;
 
-    // Get the total number of students in the current class
-    const totalStudents = state.currentClassroom.students.length;
-
-    // Update the header's text to include the student count
+    // We'll keep the logic that updates the header with the student count
+    const totalStudents = getActiveItems(state.currentClassroom.students).length;
     studentStatsHeader.textContent = `آمار عملکرد دانش‌آموزان -- ${totalStudents} نفر`;
-    // --- End of new code ---
 
-    const calculateAbsences = (student) => {
-        let absenceCount = 0;
-        if (state.currentClassroom && state.currentClassroom.sessions) {
-            state.currentClassroom.sessions.forEach(session => {
-                const record = session.studentRecords[student.identity.studentId];
-                if (record && record.attendance === 'absent') {
-                    absenceCount++;
-                }
-            });
-        }
-        return absenceCount;
-    };
+    // --- 1. Create the main table element ---
+    const table = document.createElement('table');
+    table.className = 'student-stats-table';
 
-    getActiveItems(state.currentClassroom.students).forEach(student => {
-        const li = document.createElement('li');
-        li.className = 'student-list-item';
+    // --- 2. Create the table header (thead) ---
+    const thead = table.createTHead();
+    const headerRow = thead.insertRow();
+    const headers = ['نام', 'کل انتخاب ها', 'غیبت', 'فرصت ازدست‌رفته', 'مشکل', 'listening', 'speaking', 'reading', 'writing'];
 
-        const absenceCount = calculateAbsences(student);
-
-        const totalStatsDiv = document.createElement('div');
-        totalStatsDiv.className = 'total-stats';
-        totalStatsDiv.innerHTML = `
-            <span>${student.identity.name}</span>
-            <span>کل انتخاب: ${student.statusCounters.totalSelections} | غیبت: ${absenceCount} | فرصت از دست رفته: ${student.statusCounters.missedChances || 0} | مشکل: ${student.statusCounters.otherIssues}</span>
-        `;
-
-        const categoryStatsDiv = document.createElement('div');
-        categoryStatsDiv.className = 'category-stats';
-
-        if (Object.keys(student.categoryCounts).length > 0) {
-            let statsText = '';
-            for (const categoryName in student.categoryCounts) {
-                const count = student.categoryCounts[categoryName];
-                statsText += `${categoryName}: ${count} | `;
-            }
-            categoryStatsDiv.textContent = statsText.slice(0, -3);
-        } else {
-            categoryStatsDiv.textContent = 'هنوز در هیچ دسته‌بندی انتخاب نشده است.';
-        }
-
-        li.appendChild(totalStatsDiv);
-        li.appendChild(categoryStatsDiv);
-
-        totalStatsDiv.addEventListener('click', () => {
-            categoryStatsDiv.classList.toggle('visible');
-        });
-
-        studentListUl.appendChild(li);
+    headers.forEach(headerText => {
+        const th = document.createElement('th');
+        th.textContent = headerText;
+        headerRow.appendChild(th);
     });
+
+    // --- 3. Create the table body (tbody) and populate it with names ---
+    const tbody = table.createTBody();
+    const activeStudents = getActiveItems(state.currentClassroom.students);
+
+    activeStudents.forEach(student => {
+        const row = tbody.insertRow();
+
+        // Add the student's name to the first cell
+        const nameCell = row.insertCell();
+        nameCell.textContent = student.identity.name;
+
+        // Add empty placeholder cells for the rest of the columns for now
+        for (let i = 1; i < headers.length; i++) {
+            row.insertCell(); // This creates an empty <td>
+        }
+    });
+
+    // --- 4. Add the completed table to our container div ---
+    tableContainer.appendChild(table);
 }
 
 export function displayWinner() {

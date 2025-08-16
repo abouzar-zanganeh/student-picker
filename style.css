@@ -1726,3 +1726,68 @@ textarea,
 }
 
 /* End of Context Menu Styles --- */
+
+/* -------------------- Styles for Student Stats Table ------------------------ */
+#student-stats-table-container {
+    overflow-x: auto;
+    /* Enables horizontal scrolling */
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-main);
+}
+
+.student-stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    /* For a clean, single-border look */
+    white-space: nowrap;
+    /* Prevents text from wrapping */
+}
+
+.student-stats-table th,
+.student-stats-table td {
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    text-align: center;
+    vertical-align: middle;
+}
+
+.student-stats-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    /* Makes header sticky on vertical scroll */
+    z-index: 10;
+}
+
+.student-stats-table tbody tr:hover {
+    background-color: #f1f1f1;
+    /* Highlight row on hover */
+}
+
+/* --- Styles for Sticky First Column --- */
+.student-stats-table th:first-child,
+.student-stats-table td:first-child {
+    position: sticky;
+    right: 0;
+    /* Freezes the column to the right for RTL */
+    background-color: var(--color-surface);
+    z-index: 5;
+    /* Aligns the name to the start */
+    text-align: start;
+    padding-right: 15px;
+}
+
+/* Ensure the sticky header-cell has a background */
+.student-stats-table th:first-child {
+    background-color: #f8f9fa;
+    z-index: 15;
+    /* Must be higher than other sticky elements */
+}
+
+/* Ensure the sticky cell changes color on row hover */
+.student-stats-table tbody tr:hover td:first-child {
+    background-color: #f1f1f1;
+}
+
+/*End of -------------------- Styles for Student Stats Table ------------------------ */
