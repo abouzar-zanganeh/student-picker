@@ -1777,3 +1777,12 @@ strong {
     max-width: 500px;
     /* A large value that allows the column to expand */
 }
+
+@media screen and (max-width: 600px) {
+
+    .action-column,
+    .info-column {
+        margin-left: -20px;
+        margin-right: -20px;
+    }
+}
