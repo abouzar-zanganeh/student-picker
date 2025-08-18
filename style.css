@@ -1786,3 +1786,66 @@ strong {
         margin-right: -20px;
     }
 }
+
+/* --- Styles for Absentees Summary Box --- */
+.absentees-summary {
+    background-color: #fff3cd;
+    border: 1px solid var(--color-warning);
+    border-radius: var(--border-radius-main);
+    padding: 15px;
+    margin-top: 20px;
+    /* Adds space above the box */
+    box-sizing: border-box;
+
+    /* Visibility transitions remain the same */
+    transform: translateY(20px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+.absentees-summary.visible {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.absentees-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.absentees-summary-header h4 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--color-text-dark);
+}
+
+.summary-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 15px;
+    justify-content: center;
+}
+
+.summary-name {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-main);
+    background-color: rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    font-size: 15px;
+}
+
+.summary-name:hover {
+    background-color: var(--color-strong-warning);
+    color: var(--color-text-light);
+    text-decoration: line-through;
+}
+
+.summary-name.fading-out {
+    opacity: 0;
+    transform: scale(0.9);
+}

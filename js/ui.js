@@ -91,6 +91,13 @@ const classNameHeader = document.getElementById('class-name-header');
 const categoryPillsContainer = document.getElementById('category-selection-container');
 const resultDiv = document.getElementById('selected-student-result');
 export const contextMenu = document.getElementById('custom-context-menu');
+export const absenteesSummaryBox = document.getElementById('absentees-summary-box');
+export const absenteesSummaryList = document.getElementById('absentees-summary-list');
+export const absenteeSummarySessionNumber = document.getElementById('absentee-summary-session-number');
+export const copyAbsenteesBtn = document.getElementById('copy-absentees-btn');
+
+// Other global variables..
+let isCopyListenerInitialized = false;
 
 
 export function showUndoToast(message) {
@@ -449,6 +456,7 @@ export function renderAttendancePage() {
             absentBtn.classList.remove('active');
             updateAbsenceInfo();
             state.saveData();
+            renderAbsenteesSummary();
         });
 
         absentBtn.addEventListener('click', () => {
@@ -469,6 +477,8 @@ export function renderAttendancePage() {
             presentBtn.classList.remove('active');
             updateAbsenceInfo();
             state.saveData();
+            renderAbsenteesSummary();
+
         });
 
         buttonGroup.appendChild(presentBtn);
@@ -477,6 +487,9 @@ export function renderAttendancePage() {
         li.appendChild(buttonGroup);
         attendanceListUl.appendChild(li);
     });
+
+    setupAbsenteesCopyButton();
+    renderAbsenteesSummary();
 }
 
 export function renderStudentStatsList() {
@@ -2122,4 +2135,110 @@ export function renderTrashPage() {
             trashedScoreCommentsList.appendChild(li);
         });
     }
+}
+
+function renderAbsenteesSummary() {
+    // 1. Make sure we are in a valid session
+    if (!state.currentClassroom || !state.selectedSession) {
+        // Hide the box if we're not in a session
+        absenteesSummaryBox.classList.remove('visible');
+        return;
+    }
+
+    // 2. Get a list of all students marked as absent in the current session
+    const absentStudents = getActiveItems(state.currentClassroom.students).filter(student => {
+        const record = state.selectedSession.studentRecords[student.identity.studentId];
+        return record && record.attendance === 'absent';
+    });
+
+    // 3. Update the session number in the title
+    absenteeSummarySessionNumber.textContent = state.selectedSession.sessionNumber;
+
+    // 4. Show or hide the box based on whether there are any absentees
+    if (absentStudents.length > 0) {
+        absenteesSummaryBox.classList.add('visible');
+    } else {
+        absenteesSummaryBox.classList.remove('visible');
+    }
+
+    // 5. Clear the old list and build the new one
+    absenteesSummaryList.innerHTML = '';
+    absentStudents.forEach(student => {
+        // Helper function to calculate total absences for a student
+        const calculateTotalAbsences = (s) => {
+            return state.currentClassroom.sessions.reduce((count, session) => {
+                if (session.isDeleted || session.isCancelled) return count;
+                const record = session.studentRecords[s.identity.studentId];
+                return count + (record && record.attendance === 'absent' ? 1 : 0);
+            }, 0);
+        };
+
+        const totalAbsences = calculateTotalAbsences(student);
+
+        // Create the clickable name tag
+        const nameTag = document.createElement('span');
+        nameTag.className = 'summary-name';
+        nameTag.textContent = `${student.identity.name} (غیبت: ${totalAbsences})`;
+
+        // Add the magic click event
+        nameTag.addEventListener('click', () => {
+            // Add the fading-out class for the animation
+            nameTag.classList.add('fading-out');
+
+            // Wait for the animation to finish before updating the state
+            setTimeout(() => {
+                state.selectedSession.setAttendance(student.identity.studentId, 'present');
+                state.saveData();
+                // Re-render the main list and the summary box to reflect the change
+                renderAttendancePage();
+            }, 200); // Should be slightly less than the CSS transition time
+        });
+
+        absenteesSummaryList.appendChild(nameTag);
+    });
+}
+
+function setupAbsenteesCopyButton() {
+    if (isCopyListenerInitialized) return;
+
+    copyAbsenteesBtn.addEventListener('click', () => {
+        if (!state.currentClassroom || !state.selectedSession) return;
+
+        // Get the list of absent students
+        const absentStudents = getActiveItems(state.currentClassroom.students).filter(student => {
+            const record = state.selectedSession.studentRecords[student.identity.studentId];
+            return record && record.attendance === 'absent';
+        });
+
+        if (absentStudents.length === 0) {
+            showNotification('لیست غایبین خالی است.');
+            return;
+        }
+
+        // Helper to calculate total absences for the text format
+        const calculateTotalAbsences = (s) => {
+            return state.currentClassroom.sessions.reduce((count, session) => {
+                if (session.isDeleted || session.isCancelled) return count;
+                const record = session.studentRecords[s.identity.studentId];
+                return count + (record && record.attendance === 'absent' ? 1 : 0);
+            }, 0);
+        };
+
+        // Build the formatted string for the clipboard
+        let textToCopy = `لیست غایبین جلسه شماره ${state.selectedSession.sessionNumber}:\n\n`;
+        absentStudents.forEach(student => {
+            const totalAbsences = calculateTotalAbsences(student);
+            textToCopy += `- ${student.identity.name} (تعداد غیبت‌ها: ${totalAbsences})\n`;
+        });
+
+        // Use the modern Clipboard API to copy the text
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            showNotification('لیست غایبین با موفقیت کپی شد.');
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+            showNotification('خطا در کپی کردن لیست.');
+        });
+    });
+    isCopyListenerInitialized = true;
+
 }
