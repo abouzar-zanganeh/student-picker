@@ -284,6 +284,12 @@ export class Classroom {
         this.futurePlans[sessionNumber] = planText;
     }
 
+    hasSessionToday() {
+        const todayString = new Date().toDateString();
+        return this.sessions.some(session =>
+            !session.isDeleted && session.startTime.toDateString() === todayString);
+    }
+
     selectNextWinner(category, session) {
         if (session) {
             // Pass the full list of categories and all students to the selection algorithm.

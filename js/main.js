@@ -384,36 +384,47 @@ document.addEventListener('DOMContentLoaded', () => {
                 ui.showNotification(`جلسه ${unfinishedSession.sessionNumber} هنوز تمام نشده است. لطفاً ابتدا با دکمه ✅ آن را خاتمه دهید.`);
                 return;
             }
-            const startSession = (takeAttendance) => {
-                const newSession = state.currentClassroom.startNewSession();
-                state.setLiveSession(newSession);
-                state.setSelectedSession(newSession);
-                state.currentClassroom.students.forEach(student => {
-                    state.liveSession.setAttendance(student.identity.studentId, 'present');
-                });
-                if (takeAttendance) {
-                    ui.renderAttendancePage();
-                    ui.showPage('attendance-page');
-                }
-                else {
-                    ui.renderStudentPage();
-                }
-                state.saveData();
-            };
-            ui.showCustomConfirm(
-                "آیا تمایل به انجام فرآیند حضور و غیاب دارید؟",
-                () => { // This is the onConfirm callback for "Yes"
-                    startSession(true);
-                },
-                {   // This is the options object
-                    confirmText: 'بله',
-                    cancelText: 'خیر',
-                    confirmClass: 'btn-success',
-                    onCancel: () => { // This is the onCancel callback for "No"
-                        startSession(false);
+
+            // This function encapsulates the original logic of asking about attendance.
+            const askAboutAttendanceAndStart = () => {
+                const startSession = (takeAttendance) => {
+                    const newSession = state.currentClassroom.startNewSession();
+                    state.setLiveSession(newSession);
+                    state.setSelectedSession(newSession);
+                    state.currentClassroom.students.forEach(student => {
+                        state.liveSession.setAttendance(student.identity.studentId, 'present');
+                    });
+                    if (takeAttendance) {
+                        ui.renderAttendancePage();
+                        ui.showPage('attendance-page');
+                    } else {
+                        ui.renderStudentPage();
                     }
-                }
-            );
+                    state.saveData();
+                };
+                ui.showCustomConfirm(
+                    "آیا تمایل به انجام فرآیند حضور و غیاب دارید؟",
+                    () => startSession(true),
+                    {
+                        confirmText: 'بله',
+                        cancelText: 'خیر',
+                        confirmClass: 'btn-success',
+                        onCancel: () => startSession(false)
+                    }
+                );
+            };
+
+            //checks if a session exists for today.
+            if (state.currentClassroom.hasSessionToday()) {
+                ui.showCustomConfirm(
+                    "شما امروز یک جلسه برای این کلاس ثبت کرده‌اید. آیا از شروع یک جلسه جدید دیگر مطمئن هستید؟",
+                    askAboutAttendanceAndStart, // On confirm, it proceeds to ask about attendance.
+                    { confirmText: 'بله، ادامه بده', confirmClass: 'btn-warning' }
+                );
+            } else {
+                // Otherwise, just ask about attendance as before.
+                askAboutAttendanceAndStart();
+            }
         }
     });
 
