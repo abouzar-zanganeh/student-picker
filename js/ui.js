@@ -1,6 +1,6 @@
 import * as state from './state.js';
 import { getActiveItems } from './state.js';
-import { detectTextDirection } from './utils.js';
+import { detectTextDirection, renderMultiLineText } from './utils.js';
 
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');
@@ -977,9 +977,7 @@ export function renderStudentProfilePage() {
                 commentP.className = 'score-comment';
                 commentP.dir = blockDirection;
                 // Re-add the alignmentClass to the <bdi> tag
-                commentP.innerHTML = `<strong>توضیحات:</strong> <bdi class="${alignmentClass}">${score.comment}</bdi>`;
-
-                commentP.addEventListener('click', () => {
+                commentP.innerHTML = `<strong>توضیحات:</strong> <div>${renderMultiLineText(score.comment)}</div>`; commentP.addEventListener('click', () => {
                     newNoteContent.value = score.comment;
                     newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
                     state.setSaveNoteCallback((newText) => {
@@ -1079,8 +1077,7 @@ export function renderStudentNotes() {
         // --- Create the note content paragraph ---
         const noteContentP = document.createElement('p');
         noteContentP.className = 'note-content';
-        noteContentP.dir = detectTextDirection(note.content);
-        noteContentP.textContent = note.content;
+        noteContentP.innerHTML = renderMultiLineText(note.content);
 
         noteContentP.addEventListener('click', () => {
             // 1. Populate the modal with the current note text

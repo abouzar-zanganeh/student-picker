@@ -11,13 +11,33 @@ export function normalizeText(str) {
 }
 
 export function detectTextDirection(str) {
-    // A safeguard to ensure we're always working with a string
     if (typeof str !== 'string' || str.length === 0) {
         return 'ltr'; // Default to LTR for empty or invalid input
     }
 
     const rtlRegex = /[\u0590-\u07FF]/;
     return rtlRegex.test(str) ? 'rtl' : 'ltr';
+}
+
+export function renderMultiLineText(textContent) {
+    // If the input is empty or just whitespace, return an empty string.
+    if (!textContent || !textContent.trim()) {
+        return '';
+    }
+
+    // 1. Split the text into an array of individual lines.
+    const lines = textContent.split('\n');
+
+    // 2. Map each line to a <div> with the correct direction.
+    const htmlLines = lines.map(line => {
+        const direction = detectTextDirection(line);
+        // Using '&nbsp;' ensures that empty lines still take up space.
+        const content = line || '&nbsp;';
+        return `<div dir="${direction}">${content}</div>`;
+    });
+
+    // 3. Join the array of HTML strings into a single block.
+    return htmlLines.join('');
 }
 
 // --- Console Debugging Utilities ---
