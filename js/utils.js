@@ -40,29 +40,6 @@ export function renderMultiLineText(textContent) {
     return htmlLines.join('');
 }
 
-// --- Console Debugging Utilities ---
-
-// This function will log the current classroom and its active session
-function printStatus() {
-    console.log("--- Current Status ---");
-    if (state.currentClassroom) {
-        console.log("Current Classroom:", state.currentClassroom.info.name);
-        console.log("Students:", state.currentClassroom.students.length);
-        if (state.selectedSession) {
-            console.log(`Selected Session: ${state.selectedSession.sessionNumber}`);
-        } else {
-            console.log("No session is selected.");
-        }
-    } else {
-        console.log("No classroom is selected.");
-    }
-    console.log("----------------------");
-}
-
-// By attaching the function to the 'window' object, we make it accessible from the console.
-window.printStatus = printStatus;
-
-
 export function normalizeKeyboard(str) {
     if (typeof str !== 'string') {
         return '';
@@ -81,3 +58,5 @@ export function normalizeKeyboard(str) {
     }
     return result;
 }
+
+// --- Console Debugging Utilities ---

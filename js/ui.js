@@ -1596,11 +1596,6 @@ function createSessionListItem(session, activeSessions) {
                         `آیا از لغو این جلسه مطمئن هستید؟ جلسه لغو شده در آمار تاثیری ندارد اما قابل بازگردانی است.`;
                     showCustomConfirm(confirmMsg, () => {
                         session.isCancelled = !session.isCancelled;
-                        if (session.isCancelled) {
-                            session.isFinished = true;
-                        } else {
-                            session.isFinished = false;
-                        }
                         state.saveData();
                         renderSessions();
                         showNotification(session.isCancelled ? 'جلسه لغو شد.' : 'جلسه بازگردانی شد.');
