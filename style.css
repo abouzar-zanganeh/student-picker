@@ -1575,11 +1575,9 @@ body {
 /* 2. Re-enable text selection on specific, useful elements */
 input,
 textarea,
-.student-name,
 .note-content,
 .score-comment,
-.class-name-display,
-#selected-student-result strong {
+strong {
     /* The selected winner's name */
     -webkit-user-select: text;
     /* Safari */
