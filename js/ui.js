@@ -599,14 +599,11 @@ export function displayWinner() {
 
     // --- Name and Navigation Container ---
     const nameContainer = document.createElement('div');
-    nameContainer.style.display = 'flex';
-    nameContainer.style.alignItems = 'center';
-    nameContainer.style.justifyContent = 'space-between';
-    nameContainer.style.width = '100%';
+    nameContainer.className = 'winner-name-container';
 
     const backBtn = document.createElement('button');
     backBtn.className = 'btn-icon';
-    backBtn.innerHTML = '◀️';
+    backBtn.innerHTML = '🔽';
     backBtn.title = 'برنده قبلی';
     backBtn.classList.toggle('is-disabled', state.winnerHistoryIndex <= 0);
     backBtn.addEventListener('click', () => {
@@ -620,6 +617,7 @@ export function displayWinner() {
     });
 
     const winnerNameEl = document.createElement('div');
+    winnerNameEl.className = 'winner-name';
     winnerNameEl.innerHTML = `✨ <strong>${winner.identity.name}</strong>✨`;
     winnerNameEl.classList.add('heartbeat-animation');
     if (isAbsent) {
@@ -629,7 +627,7 @@ export function displayWinner() {
 
     const forwardBtn = document.createElement('button');
     forwardBtn.className = 'btn-icon';
-    forwardBtn.innerHTML = '▶️';
+    forwardBtn.innerHTML = '🔼';
     forwardBtn.title = 'برنده بعدی';
     forwardBtn.classList.toggle('is-disabled', state.winnerHistoryIndex >= state.selectedSession.winnerHistory.length - 1);
     forwardBtn.addEventListener('click', () => {
@@ -665,7 +663,7 @@ export function displayWinner() {
     if (studentRecord?.hadIssue) issueBtn.classList.add('active');
 
     const profileBtn = document.createElement('button');
-    profileBtn.textContent = 'پروفایل / نمره‌دهی';
+    profileBtn.textContent = 'پروفایل';
     profileBtn.className = 'status-button profile-btn';
 
     absentBtn.addEventListener('click', () => {

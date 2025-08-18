@@ -554,6 +554,20 @@ button:disabled:hover {
     transition: all 0.3s ease;
 }
 
+.winner-name {
+    margin: 10px 0;
+    /* Creates vertical spacing */
+    padding: 0 15px;
+    text-align: center;
+}
+
+.winner-name-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* This now centers the items horizontally */
+}
+
 /* استایل‌های کانتینر اصلی جزئیات دانش‌آموز */
 .student-details-container {
     display: flex;
@@ -694,8 +708,6 @@ button:disabled:hover {
 .info-column {
     background-color: var(--color-surface);
     padding: 20px;
-    border-radius: var(--border-radius-main);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 
