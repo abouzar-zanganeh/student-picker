@@ -1365,8 +1365,13 @@ button:disabled:hover {
     padding: 10px 15px;
 }
 
-.search-results-dropdown .global-search-result .student-name {
-    font-weight: bold;
+.search-results-dropdown .global-search-result .class-name {
+    cursor: pointer;
+}
+
+.search-results-dropdown .global-search-result .class-name:hover {
+    text-decoration: underline;
+    color: var(--color-primary);
 }
 
 /* --- Styles for Category Creation Options --- */

@@ -1721,8 +1721,10 @@ export function renderGlobalSearchResults(results) {
             classNameSpan.className = 'class-name';
             classNameSpan.textContent = `کلاس: ${result.classroom.info.name}`;
 
-            // 1. Add a new listener specifically for the student's name.
-            studentNameSpan.addEventListener('click', () => {
+            // --- REVISED LOGIC ---
+
+            // 1. The main container now navigates to the student profile.
+            resultDiv.addEventListener('click', () => {
                 state.setCurrentClassroom(result.classroom);
                 state.setSelectedStudentForProfile(result.student);
                 renderStudentProfilePage();
@@ -1731,8 +1733,9 @@ export function renderGlobalSearchResults(results) {
                 globalStudentSearchInput.value = '';
             });
 
-            // 2. Add a second listener specifically for the class name.
-            classNameSpan.addEventListener('click', () => {
+            // 2. The class name is a separate action that stops the parent click.
+            classNameSpan.addEventListener('click', (event) => {
+                event.stopPropagation(); // This is crucial to prevent both actions from firing.
                 state.setCurrentClassroom(result.classroom);
                 state.setSelectedSession(null);
                 state.setLiveSession(result.classroom.liveSession);
@@ -1747,9 +1750,7 @@ export function renderGlobalSearchResults(results) {
             resultDiv.appendChild(classNameSpan);
             globalStudentSearchResultsDiv.appendChild(resultDiv);
         });
-
         globalStudentSearchResultsDiv.style.display = 'block';
-
     } else {
         if (globalStudentSearchInput.value.trim() !== '') {
             const noResultsDiv = document.createElement('div');
