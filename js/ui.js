@@ -1267,6 +1267,46 @@ function createClassListItem(classroom) {
                 }
             },
             {
+                label: 'تغییر نام',
+                icon: '✏️',
+                action: () => {
+                    const oldName = classroom.info.name;
+
+                    // 1. Configure the modal for renaming the class
+                    const modalTitle = document.getElementById('add-note-modal-title');
+                    modalTitle.textContent = 'تغییر نام کلاس';
+                    newNoteContent.value = oldName;
+                    newNoteContent.rows = 1;
+
+                    // 2. Define what happens when the "Save" button is clicked
+                    state.setSaveNoteCallback((newName) => {
+                        const trimmedNewName = newName.trim();
+
+                        // Only proceed if the name is new and not empty
+                        if (trimmedNewName && trimmedNewName !== oldName) {
+                            const result = state.renameClassroom(oldName, trimmedNewName);
+
+                            if (result.success) {
+                                state.saveData();
+                                renderClassList();
+                                showNotification(`نام کلاس به «${trimmedNewName}» تغییر یافت.`);
+                            } else {
+                                showNotification(result.message);
+                            }
+                        }
+
+                        // 3. Reset the modal to its default state for adding notes
+                        modalTitle.textContent = 'ثبت یادداشت جدید';
+                        newNoteContent.rows = 4;
+                    });
+
+                    // 4. Open the modal and pre-select the text
+                    openModal('add-note-modal');
+                    newNoteContent.focus();
+                    newNoteContent.select();
+                }
+            },
+            {
                 label: 'حذف کلاس',
                 icon: '🗑️',
                 className: 'danger',
@@ -1294,13 +1334,18 @@ function createClassListItem(classroom) {
 
 export function renderClassList() {
     classListUl.innerHTML = '';
-    for (const name in state.classrooms) {
-        const classroom = state.classrooms[name];
-        if (classroom.isDeleted) continue;
+
+    // Convert the classrooms object to an array and sort it by creation date
+    const sortedClasses = Object.values(state.classrooms)
+        .sort((a, b) => new Date(a.info.creationDate) - new Date(b.info.creationDate));
+
+    // Now, iterate over the sorted array instead of the original object
+    sortedClasses.forEach(classroom => {
+        if (classroom.isDeleted) return; // Use return instead of continue in forEach
 
         const li = createClassListItem(classroom);
         classListUl.appendChild(li);
-    }
+    });
 }
 
 // End of functions needed for rendering the classroom page
