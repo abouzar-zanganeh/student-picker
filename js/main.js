@@ -881,5 +881,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    profileStudentNameHeader.addEventListener('click', () => {
+        const student = state.selectedStudentForProfile;
+        const classroom = state.currentClassroom;
+        if (!student || !classroom) return;
+
+        // 1. Configure the modal for renaming
+        const modalTitle = document.getElementById('add-note-modal-title');
+        modalTitle.textContent = 'تغییر نام دانش‌آموز';
+        ui.newNoteContent.value = student.identity.name;
+        ui.newNoteContent.rows = 1; // Make textarea look like a single-line input
+
+        // 2. Define what happens when the "Save" button is clicked
+        state.setSaveNoteCallback((newName) => {
+            const trimmedNewName = newName.trim();
+            if (!trimmedNewName || trimmedNewName === student.identity.name) {
+            } else {
+                const isDuplicate = classroom.students.some(
+                    s => !s.isDeleted && s.identity.name.toLowerCase() === trimmedNewName.toLowerCase()
+                );
+
+                if (isDuplicate) {
+                    ui.showNotification('دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.');
+                } else {
+                    student.identity.name = trimmedNewName;
+                    state.saveData();
+                    ui.renderStudentProfilePage();
+                    ui.renderStudentStatsList();
+                    ui.showNotification(`نام دانش‌آموز به «${trimmedNewName}» تغییر یافت.`);
+                }
+            }
+
+            // 3. Reset the modal to its default state for adding notes
+            modalTitle.textContent = 'ثبت یادداشت جدید';
+            ui.newNoteContent.rows = 4; // A reasonable default for notes
+        });
+
+        // 4. Open the modal
+        ui.openModal('add-note-modal');
+        ui.newNoteContent.focus();
+        ui.newNoteContent.select(); // Select the text for easy editing
+    });
+
 });
 

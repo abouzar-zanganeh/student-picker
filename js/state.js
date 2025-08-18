@@ -108,6 +108,33 @@ export function rehydrateData(plainClassrooms) {
     }
 }
 
+export function renameClassroom(oldName, newName) {
+    // First, check if a class with the new name already exists to prevent duplicates.
+    if (classrooms[newName]) {
+        return { success: false, message: 'کلاسی با این نام از قبل وجود دارد.' };
+    }
+
+    // Get the classroom object from the old name.
+    const classroom = classrooms[oldName];
+    if (!classroom) {
+        return { success: false, message: 'کلاس مورد نظر یافت نشد.' };
+    }
+
+    // Update the name property within the object itself for consistency.
+    classroom.info.name = newName;
+
+    // Create the new key in the classrooms object and delete the old one.
+    classrooms[newName] = classroom;
+    delete classrooms[oldName];
+
+    // If the renamed class was the currently active one, update the reference.
+    if (currentClassroom === classroom) {
+        setCurrentClassroom(classroom);
+    }
+
+    return { success: true };
+}
+
 
 export function setCurrentClassroom(classroom) { currentClassroom = classroom; }
 export function setLiveSession(session) { liveSession = session; }

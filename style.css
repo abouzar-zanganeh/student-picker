@@ -1194,6 +1194,22 @@ button:disabled:hover {
     /* Same width as hamburger button to keep title centered */
 }
 
+/* Add a visual cue for the clickable student name header */
+#profile-student-name-header {
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+#profile-student-name-header:hover {
+    color: var(--color-primary);
+}
+
+#profile-student-name-header:hover::after {
+    content: ' ✏️';
+    font-size: 0.8em;
+    vertical-align: middle;
+}
+
 .side-nav {
     height: 100%;
     width: 0;
