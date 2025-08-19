@@ -557,7 +557,29 @@ export function renderStudentStatsList() {
         gradedCategoryHeaders.forEach(categoryName => {
             const cell = row.insertCell();
             // The key in categoryCounts is the exact category name (e.g., "Listening")
-            cell.textContent = student.categoryCounts[categoryName] || 0;
+            const skillKey = categoryName.toLowerCase();
+            const scoresForSkill = student.logs.scores[skillKey]?.filter(s => !s.isDeleted) || [];
+
+            if (scoresForSkill.length > 0) {
+                scoresForSkill.forEach((score, index) => {
+                    const scoreSpan = document.createElement('span');
+                    scoreSpan.textContent = score.value;
+                    scoreSpan.style.position = 'relative'; // This provides the context for the tooltip.
+
+                    if (score.comment) {
+                        scoreSpan.dataset.tooltip = score.comment;
+                    }
+
+                    cell.appendChild(scoreSpan);
+
+                    // Add a comma if it's not the last score, without a space.
+                    if (index < scoresForSkill.length - 1) {
+                        cell.appendChild(document.createTextNode(','));
+                    }
+                });
+            } else {
+                cell.textContent = ''; // Leave the cell empty if there are no scores.
+            }
         });
         // --- END DYNAMIC DATA POPULATION ---
     });
