@@ -215,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- End New History Logic ---
 
 
-            ui.displayWinner(winner, state.selectedCategory.name);
+            ui.displayWinner();
 
             state.selectedSession.lastUsedCategoryId = state.selectedCategory.id;
             state.selectedSession.lastSelectedWinnerId = winner.identity.studentId;

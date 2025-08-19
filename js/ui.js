@@ -595,6 +595,19 @@ export function renderStudentStatsList() {
             } else {
                 cell.textContent = ''; // Leave the cell empty if there are no scores.
             }
+
+            // --- NEW: Make the entire cell clickable ---
+            cell.style.cursor = 'pointer';
+            cell.addEventListener('click', () => {
+                // 1. Display the student and category in the selector panel.
+                displayWinner(student, categoryName);
+
+                // 2. Smoothly scroll the panel into view.
+                const resultDiv = document.getElementById('selected-student-result');
+                if (resultDiv) {
+                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
         });
         row.insertCell().textContent = student.statusCounters.totalSelections || 0;
         row.insertCell().textContent = calculateAbsences(student);
@@ -616,19 +629,28 @@ export function renderStudentStatsList() {
     }
 }
 
-export function displayWinner() {
+export function displayWinner(manualWinner = null, manualCategoryName = null) {
     const resultDiv = document.getElementById('selected-student-result');
     resultDiv.innerHTML = '';
     resultDiv.classList.remove('absent');
 
-    // Check if there's a valid history entry to display
-    if (!state.selectedSession || state.winnerHistoryIndex < 0 || !state.selectedSession.winnerHistory[state.winnerHistoryIndex]) {
-        return;
-    }
+    let winner, categoryName;
 
-    // Get the current winner from the session's history based on the index
-    const historyEntry = state.selectedSession.winnerHistory[state.winnerHistoryIndex];
-    const { winner, categoryName } = historyEntry;
+    // --- NEW: Prioritize manual override from table click ---
+    if (manualWinner && manualCategoryName) {
+        winner = manualWinner;
+        categoryName = manualCategoryName;
+        // When a student is manually selected, we are not browsing the history.
+        state.setWinnerHistoryIndex(-1);
+    } else {
+        // --- FALLBACK: Original logic for showing a historical winner ---
+        if (!state.selectedSession || state.winnerHistoryIndex < 0 || !state.selectedSession.winnerHistory[state.winnerHistoryIndex]) {
+            return;
+        }
+        const historyEntry = state.selectedSession.winnerHistory[state.winnerHistoryIndex];
+        winner = historyEntry.winner;
+        categoryName = historyEntry.categoryName;
+    }
 
     // --- NEW: Sync Category State and UI ---
     const correspondingCategory = state.currentClassroom.categories.find(c => c.name === categoryName);
@@ -660,7 +682,8 @@ export function displayWinner() {
     backBtn.className = 'btn-icon';
     backBtn.innerHTML = '🔽';
     backBtn.title = 'برنده قبلی';
-    backBtn.classList.toggle('is-disabled', state.winnerHistoryIndex <= 0);
+    const isInHistoryMode = !manualWinner;
+    backBtn.classList.toggle('is-disabled', !isInHistoryMode || state.winnerHistoryIndex <= 0);
     backBtn.addEventListener('click', () => {
         if (backBtn.classList.contains('is-disabled')) {
             backBtn.classList.add('shake-animation');
@@ -684,7 +707,7 @@ export function displayWinner() {
     forwardBtn.className = 'btn-icon';
     forwardBtn.innerHTML = '🔼';
     forwardBtn.title = 'برنده بعدی';
-    forwardBtn.classList.toggle('is-disabled', state.winnerHistoryIndex >= state.selectedSession.winnerHistory.length - 1);
+    forwardBtn.classList.toggle('is-disabled', !isInHistoryMode || state.winnerHistoryIndex >= state.selectedSession.winnerHistory.length - 1);
     forwardBtn.addEventListener('click', () => {
         if (forwardBtn.classList.contains('is-disabled')) {
             forwardBtn.classList.add('shake-animation');
@@ -701,7 +724,7 @@ export function displayWinner() {
     resultDiv.appendChild(nameContainer);
 
     // Disable the main "Select Student" button if we are viewing a past winner
-    selectStudentBtn.disabled = !forwardBtn.classList.contains('is-disabled');
+    selectStudentBtn.disabled = isInHistoryMode && !forwardBtn.classList.contains('is-disabled');
 
     // --- Status Buttons (absent, issue, profile) ---
     const buttonContainer = document.createElement('div');
