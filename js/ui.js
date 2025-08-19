@@ -521,9 +521,17 @@ export function renderStudentStatsList() {
     // Create the header row using our combined list
     const thead = table.createTHead();
     const headerRow = thead.insertRow();
-    allHeaders.forEach(headerText => {
+    allHeaders.forEach((headerText, index) => {
         const th = document.createElement('th');
-        th.textContent = headerText;
+
+        // Check if it's the first header (the 'Name' column) and add the cue.
+        if (index === 0) {
+            th.innerHTML = `${headerText} <span style="opacity: 0.6;">🔗</span>`;
+            th.title = 'ردیف‌های این ستون قابل کلیک هستند';
+        } else {
+            th.textContent = headerText;
+        }
+
         headerRow.appendChild(th);
     });
 
@@ -547,7 +555,16 @@ export function renderStudentStatsList() {
 
         // --- DYNAMIC DATA POPULATION ---
         // 1. Add data for the static columns
-        row.insertCell().textContent = student.identity.name;
+        const nameCell = row.insertCell();
+        const nameLink = document.createElement('span');
+        nameLink.textContent = student.identity.name;
+        nameLink.className = 'student-name-link';
+        nameLink.addEventListener('click', () => {
+            state.setSelectedStudentForProfile(student);
+            renderStudentProfilePage();
+            showPage('student-profile-page');
+        });
+        nameCell.appendChild(nameLink);
         row.insertCell().textContent = student.statusCounters.totalSelections || 0;
         row.insertCell().textContent = calculateAbsences(student);
         row.insertCell().textContent = student.statusCounters.missedChances || 0;
