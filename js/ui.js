@@ -503,16 +503,19 @@ export function renderStudentStatsList() {
     studentStatsHeader.textContent = `آمار عملکرد دانش‌آموزان -- ${totalStudents} نفر`;
 
     // --- DYNAMIC HEADER GENERATION ---
-    // 1. Define the static part of our headers.
-    const staticHeaders = ['نام', 'کل انتخاب ها', 'غیبت', 'فرصت ازدست‌رفته', 'مشکل'];
+    // 1. Isolate the 'Name' header, which always comes first.
+    const nameHeader = ['نام'];
 
-    // 2. Get the dynamic part by filtering for gradable categories.
+    // 2. Define the static counter headers that will now go at the end.
+    const counterHeaders = ['کل انتخاب ها', 'غیبت', 'فرصت ازدست‌رفته', 'مشکل'];
+
+    // 3. Get the dynamic part by filtering for gradable categories.
     const gradedCategoryHeaders = state.currentClassroom.categories
         .filter(cat => cat.isGradedCategory && !cat.isDeleted)
-        .map(cat => cat.name); // e.g., ['Listening', 'Speaking', ...]
+        .map(cat => cat.name);
 
-    // 3. Combine them to create the final, complete list of headers.
-    const allHeaders = [...staticHeaders, ...gradedCategoryHeaders];
+    // 4. Combine them in the new desired order: Name, Graded Categories, Counters.
+    const allHeaders = [...nameHeader, ...gradedCategoryHeaders, ...counterHeaders];
     // --- END DYNAMIC HEADER GENERATION ---
 
     const table = document.createElement('table');
@@ -565,11 +568,6 @@ export function renderStudentStatsList() {
             showPage('student-profile-page');
         });
         nameCell.appendChild(nameLink);
-        row.insertCell().textContent = student.statusCounters.totalSelections || 0;
-        row.insertCell().textContent = calculateAbsences(student);
-        row.insertCell().textContent = student.statusCounters.missedChances || 0;
-        row.insertCell().textContent = student.statusCounters.otherIssues || 0;
-
         // 2. Loops through our dynamic list of gradable categories to add the rest of the data
         gradedCategoryHeaders.forEach(categoryName => {
             const cell = row.insertCell();
@@ -598,16 +596,21 @@ export function renderStudentStatsList() {
                 cell.textContent = ''; // Leave the cell empty if there are no scores.
             }
         });
+        row.insertCell().textContent = student.statusCounters.totalSelections || 0;
+        row.insertCell().textContent = calculateAbsences(student);
+        row.insertCell().textContent = student.statusCounters.missedChances || 0;
+        row.insertCell().textContent = student.statusCounters.otherIssues || 0;
+
         // --- END DYNAMIC DATA POPULATION ---
     });
 
     tableContainer.appendChild(table);
     // --- Adds event listener for the name header toggle ---
     const tableElement = tableContainer.querySelector('.student-stats-table');
-    const nameHeader = tableElement?.querySelector('thead th:first-child');
+    const nameHeaderCell = tableElement?.querySelector('thead th:first-child');
 
-    if (nameHeader) {
-        nameHeader.addEventListener('click', () => {
+    if (nameHeaderCell) {
+        nameHeaderCell.addEventListener('click', () => {
             tableElement.classList.toggle('name-column-expanded');
         });
     }
