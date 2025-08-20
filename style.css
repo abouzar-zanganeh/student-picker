@@ -861,6 +861,8 @@ button:disabled:hover {
     transform: translateY(-50%);
     color: var(--color-text-muted);
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
 }
 
 .search-results-dropdown {
@@ -1221,6 +1223,8 @@ button:disabled:hover {
 #hamburger-menu-btn {
     font-size: 28px;
     padding: 0 10px;
+    -webkit-tap-highlight-color: transparent;
+
 }
 
 .header-placeholder {
