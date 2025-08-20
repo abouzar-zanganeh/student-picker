@@ -499,14 +499,6 @@ button:disabled:hover {
     cursor: pointer;
     font-size: 15px;
     color: var(--color-text-muted);
-
-    /* --- Add this entire block --- */
-    -webkit-user-select: none;
-    /* For Safari/Chrome on mobile */
-    -ms-user-select: none;
-    /* For IE/Edge */
-    user-select: none;
-    /* Standard syntax */
     -webkit-tap-highlight-color: transparent;
     /* Removes the tap highlight */
 }
