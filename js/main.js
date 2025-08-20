@@ -776,6 +776,15 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // --- Developer shortcut for restoring data ---
+        if (event.key.toLowerCase() === 'o' && event.shiftKey) {
+            // We only want this to work on the main page
+            if (ui.classManagementPage.classList.contains('active')) {
+                event.preventDefault(); // Prevents any default browser action for this shortcut
+                ui.restoreFileInput.click(); // Programmatically clicks the hidden file input
+            }
+        }
+
         // --- Global 'Escape' key handler ---
         // This code now only runs if the user is NOT typing.
         if (event.key === 'Escape') {
