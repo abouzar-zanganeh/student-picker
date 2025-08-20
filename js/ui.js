@@ -91,10 +91,6 @@ const classNameHeader = document.getElementById('class-name-header');
 const categoryPillsContainer = document.getElementById('category-selection-container');
 const resultDiv = document.getElementById('selected-student-result');
 export const contextMenu = document.getElementById('custom-context-menu');
-export const absenteesSummaryBox = document.getElementById('absentees-summary-box');
-export const absenteesSummaryList = document.getElementById('absentees-summary-list');
-export const absenteeSummarySessionNumber = document.getElementById('absentee-summary-session-number');
-export const copyAbsenteesBtn = document.getElementById('copy-absentees-btn');
 
 // Other global variables..
 let isCopyListenerInitialized = false;
@@ -1294,11 +1290,6 @@ function createClassInfoContainer(classroom) {
 function createClassListItem(classroom) {
     const li = document.createElement('li');
 
-    // Add special styling if there's an active session
-    if (classroom.liveSession) {
-        li.classList.add('has-unfinished-session');
-    }
-
     // --- 1. Info Container (Name and Counts) ---
     const infoContainer = createClassInfoContainer(classroom);
     li.appendChild(infoContainer);
@@ -1308,11 +1299,12 @@ function createClassListItem(classroom) {
     badgesContainer.className = 'list-item-badges';
 
     // 'Unfinished Session' Badge
-    if (classroom.liveSession) {
+    if (classroom.liveSession && !classroom.liveSession.isCancelled && !classroom.liveSession.isDeleted) {
         const warningBadge = document.createElement('span');
         warningBadge.className = 'warning-badge';
         warningBadge.textContent = 'جلسه باز';
         badgesContainer.appendChild(warningBadge);
+        li.classList.add('has-unfinished-session');
     }
 
     // 'Class Type' Badge
@@ -2206,33 +2198,42 @@ export function renderTrashPage() {
 }
 
 function renderAbsenteesSummary() {
-    // 1. Make sure we are in a valid session
-    if (!state.currentClassroom || !state.selectedSession) {
-        // Hide the box if we're not in a session
-        absenteesSummaryBox.classList.remove('visible');
+    // --- NEW: Get references to elements just-in-time ---
+    const summaryBox = document.getElementById('absentees-summary-box');
+    const summaryList = document.getElementById('absentees-summary-list');
+    const sessionNumberSpan = document.getElementById('absentee-summary-session-number');
+
+    // --- NEW: Defensive check to ensure all elements exist before proceeding ---
+    if (!summaryBox || !summaryList || !sessionNumberSpan) {
+        console.error('Could not find all absentee summary elements.');
         return;
     }
 
-    // 2. Get a list of all students marked as absent in the current session
+    // 1. Make sure we are in a valid session
+    if (!state.currentClassroom || !state.selectedSession) {
+        summaryBox.classList.remove('visible');
+        return;
+    }
+
+    // 2. Get a list of all students marked as absent
     const absentStudents = getActiveItems(state.currentClassroom.students).filter(student => {
         const record = state.selectedSession.studentRecords[student.identity.studentId];
         return record && record.attendance === 'absent';
     });
 
     // 3. Update the session number in the title
-    absenteeSummarySessionNumber.textContent = state.selectedSession.sessionNumber;
+    sessionNumberSpan.textContent = state.selectedSession.sessionNumber;
 
     // 4. Show or hide the box based on whether there are any absentees
     if (absentStudents.length > 0) {
-        absenteesSummaryBox.classList.add('visible');
+        summaryBox.classList.add('visible');
     } else {
-        absenteesSummaryBox.classList.remove('visible');
+        summaryBox.classList.remove('visible');
     }
 
     // 5. Clear the old list and build the new one
-    absenteesSummaryList.innerHTML = '';
+    summaryList.innerHTML = '';
     absentStudents.forEach(student => {
-        // Helper function to calculate total absences for a student
         const calculateTotalAbsences = (s) => {
             return state.currentClassroom.sessions.reduce((count, session) => {
                 if (session.isDeleted || session.isCancelled) return count;
@@ -2240,36 +2241,37 @@ function renderAbsenteesSummary() {
                 return count + (record && record.attendance === 'absent' ? 1 : 0);
             }, 0);
         };
-
         const totalAbsences = calculateTotalAbsences(student);
 
-        // Create the clickable name tag
         const nameTag = document.createElement('span');
         nameTag.className = 'summary-name';
         nameTag.textContent = `${student.identity.name} (غیبت: ${totalAbsences})`;
 
-        // Add the magic click event
         nameTag.addEventListener('click', () => {
-            // Add the fading-out class for the animation
             nameTag.classList.add('fading-out');
-
-            // Wait for the animation to finish before updating the state
             setTimeout(() => {
                 state.selectedSession.setAttendance(student.identity.studentId, 'present');
                 state.saveData();
-                // Re-render the main list and the summary box to reflect the change
                 renderAttendancePage();
-            }, 200); // Should be slightly less than the CSS transition time
+            }, 200);
         });
-
-        absenteesSummaryList.appendChild(nameTag);
+        summaryList.appendChild(nameTag);
     });
 }
 
 function setupAbsenteesCopyButton() {
     if (isCopyListenerInitialized) return;
 
-    copyAbsenteesBtn.addEventListener('click', () => {
+    // 1. Get a fresh reference to the button just in time.
+    const copyBtn = document.getElementById('copy-absentees-btn');
+
+    // 2. Add a defensive check to ensure the button exists before proceeding.
+    if (!copyBtn) {
+        console.error('Could not find the copy absentees button to attach listener.');
+        return;
+    }
+
+    copyBtn.addEventListener('click', () => {
         if (!state.currentClassroom || !state.selectedSession) return;
 
         // Get the list of absent students
@@ -2308,5 +2310,4 @@ function setupAbsenteesCopyButton() {
         });
     });
     isCopyListenerInitialized = true;
-
 }
