@@ -1,4 +1,24 @@
-@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;700&display=swap');
+/* vazirmatn-regular - latin */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Vazirmatn';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/vazirmatn-v15-latin-regular.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* vazirmatn-700 - latin */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Vazirmatn';
+    font-style: normal;
+    font-weight: 700;
+    src: url('../fonts/vazirmatn-v15-latin-700.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
 
 :root {
     --font-family-main: 'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
