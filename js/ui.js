@@ -640,9 +640,12 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
     if (manualWinner && manualCategoryName) {
         winner = manualWinner;
         categoryName = manualCategoryName;
+        state.setManualSelection({ student: manualWinner, categoryName: manualCategoryName });
+
         // When a student is manually selected, we are not browsing the history.
         state.setWinnerHistoryIndex(-1);
     } else {
+        state.setManualSelection(null);
         // --- FALLBACK: Original logic for showing a historical winner ---
         if (!state.selectedSession || state.winnerHistoryIndex < 0 || !state.selectedSession.winnerHistory[state.winnerHistoryIndex]) {
             return;

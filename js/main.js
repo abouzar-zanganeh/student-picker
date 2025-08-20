@@ -569,8 +569,15 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.quickGradeSubmitBtn.addEventListener('click', () => {
         const scoreValue = ui.quickScoreInput.value;
         const noteText = ui.quickNoteTextarea.value.trim();
-        const historyEntry = state.selectedSession?.winnerHistory[state.winnerHistoryIndex];
-        const student = historyEntry?.winner;
+        let student;
+        //Checks for a manual selection (from the stats table) first ---
+        if (state.manualSelection) {
+            student = state.manualSelection.student;
+        } else {
+            // Fallback to the original history logic
+            const historyEntry = state.selectedSession?.winnerHistory[state.winnerHistoryIndex];
+            student = historyEntry?.winner;
+        }
 
         if (!student) {
             ui.showNotification("خطا: دانش‌آموز معتبری برای ثبت نمره یافت نشد.");

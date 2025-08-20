@@ -23,6 +23,7 @@ export let secureConfirmCallback = null;
 export let activeModal = null; // Will hold the ID of the currently open modal
 export let winnerHistoryIndex = -1; // -1 indicates we're not in history view
 export let saveNoteCallback = null;
+export let manualSelection = null; // To hold a student selected from the stats table
 
 
 
@@ -154,6 +155,7 @@ export function setConfirmCallback(callback) { confirmCallback = callback; }
 export function setCancelCallback(callback) { cancelCallback = callback; }
 export function setSecureConfirmCallback(callback) { secureConfirmCallback = callback; }
 export function setActiveModal(modalId) { activeModal = modalId; }
+export function setManualSelection(selection) { manualSelection = selection; }
 
 
 export function resetAllStudentCounters() {
