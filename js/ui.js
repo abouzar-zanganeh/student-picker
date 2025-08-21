@@ -328,6 +328,8 @@ export function closeContextMenu() {
 
 export function renderAttendancePage() {
     if (!state.currentClassroom || !state.selectedSession) return;
+    createAbsenteesSummaryBox();
+
 
     attendanceClassNameHeader.textContent = `حضور و غیاب کلاس: ${state.currentClassroom.info.name}`;
     attendanceListUl.innerHTML = '';
@@ -483,6 +485,7 @@ export function renderAttendancePage() {
         li.appendChild(buttonGroup);
         attendanceListUl.appendChild(li);
     });
+
 
     setupAbsenteesCopyButton();
     renderAbsenteesSummary();
@@ -2195,6 +2198,21 @@ export function renderTrashPage() {
             trashedScoreCommentsList.appendChild(li);
         });
     }
+}
+
+function createAbsenteesSummaryBox() {
+    const summaryContainer = document.getElementById('absentees-summary-container');
+    if (!summaryContainer) return;
+
+    summaryContainer.innerHTML = `
+        <div id="absentees-summary-box" class="absentees-summary">
+            <div class="absentees-summary-header">
+                <h4>لیست غایبین جلسه شماره <span id="absentee-summary-session-number"></span></h4>
+                <button id="copy-absentees-btn" class="btn-icon" title="کپی لیست غایبین">📋</button>
+            </div>
+            <div id="absentees-summary-list" class="summary-list"></div>
+        </div>
+    `;
 }
 
 function renderAbsenteesSummary() {
