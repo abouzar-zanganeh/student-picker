@@ -3,9 +3,6 @@ real class data for analysis.txt
 *.drawio
 student-picker first icon.png
 /node_modules
+/dist
 package-lock.json
 package.json
-package.json
-package.json
-package-lock.json
-node_modules/.package-lock.json
