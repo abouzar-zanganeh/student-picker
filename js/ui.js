@@ -328,7 +328,19 @@ export function closeContextMenu() {
 
 export function renderAttendancePage() {
     if (!state.currentClassroom || !state.selectedSession) return;
+
+    // Create a map to correlate the permanent session number with its dynamic display number
+    const activeSessionsForNumbering = getActiveItems(state.currentClassroom.sessions)
+        .filter(s => !s.isCancelled)
+        .sort((a, b) => a.sessionNumber - b.sessionNumber);
+
+    const sessionDisplayNumberMap = new Map();
+    activeSessionsForNumbering.forEach((session, index) => {
+        sessionDisplayNumberMap.set(session.sessionNumber, index + 1);
+    });
     createAbsenteesSummaryBox();
+
+
 
 
     attendanceClassNameHeader.textContent = `حضور و غیاب کلاس: ${state.currentClassroom.info.name}`;
@@ -356,11 +368,15 @@ export function renderAttendancePage() {
 
         // First, get an array of objects containing the session number and its makeup status
         const absentSessions = state.currentClassroom.sessions
-            .filter(session => !session.isDeleted && session.studentRecords[student.identity.studentId]?.attendance === 'absent')
+            .filter(session => !session.isDeleted && !session.isCancelled && session
+                .studentRecords[student.identity.studentId]?.attendance === 'absent')
             .map(session => ({
-                number: session.sessionNumber,
+                // Use the map to get the correct display number
+                number: sessionDisplayNumberMap.get(session.sessionNumber),
                 isMakeup: session.isMakeup
-            }));
+            }))
+            // This safely filters out any sessions that might be absent but are now cancelled
+            .filter(sessionInfo => sessionInfo.number !== undefined);
 
         if (absentSessions.length > 0) {
             // Instead of setting textContent, we build the content node by node
@@ -412,11 +428,15 @@ export function renderAttendancePage() {
 
             // Get full info for each absent session, including makeup status
             const absentSessions = state.currentClassroom.sessions
-                .filter(session => !session.isDeleted && session.studentRecords[student.identity.studentId]?.attendance === 'absent')
+                .filter(session => !session.isDeleted && !session.isCancelled && session
+                    .studentRecords[student.identity.studentId]?.attendance === 'absent')
                 .map(session => ({
-                    number: session.sessionNumber,
+                    // Use the map to get the correct display number
+                    number: sessionDisplayNumberMap.get(session.sessionNumber),
                     isMakeup: session.isMakeup
-                }));
+                }))
+                // This safely filters out any sessions that might be absent but are now cancelled
+                .filter(sessionInfo => sessionInfo.number !== undefined);
 
             // Rebuild the content with proper styling
             if (absentSessions.length > 0) {
