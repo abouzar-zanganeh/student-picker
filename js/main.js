@@ -604,6 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (student) {
             student.addScore(category.name, parseFloat(scoreValue), noteText);
             state.saveData();
+            ui.renderStudentStatsList(); // Refreshes the stats table to show the new score.
             ui.showNotification(`نمره برای ${student.identity.name} در مهارت ${category.name} ثبت شد.`);
             // Clear inputs for the next entry
             ui.quickScoreInput.value = '';

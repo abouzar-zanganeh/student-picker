@@ -598,13 +598,10 @@ export function renderStudentStatsList() {
             // --- NEW: Make the entire cell clickable ---
             cell.style.cursor = 'pointer';
             cell.addEventListener('click', () => {
-                // 1. Display the student and category in the selector panel.
                 displayWinner(student, categoryName);
-
-                // 2. Smoothly scroll the panel into view.
-                const resultDiv = document.getElementById('selected-student-result');
-                if (resultDiv) {
-                    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const categoryContainer = document.getElementById('category-selection-container');
+                if (categoryContainer) {
+                    categoryContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             });
         });
