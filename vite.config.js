@@ -4,6 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig({
     plugins: [
         VitePWA({
+			base: '/student-picker/',
             registerType: 'autoUpdate',
             manifest: {
                 name: 'دستیار هوشمند معلم',
