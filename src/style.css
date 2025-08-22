@@ -1,0 +1,1892 @@
+/* vazirmatn-regular - arabic_latin */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Vazirmatn';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/vazirmatn-v15-arabic_latin-regular.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+/* vazirmatn-700 - arabic_latin */
+@font-face {
+    font-display: swap;
+    /* Check https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face/font-display for other options. */
+    font-family: 'Vazirmatn';
+    font-style: normal;
+    font-weight: 700;
+    src: url('../fonts/vazirmatn-v15-arabic_latin-700.woff2') format('woff2');
+    /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
+}
+
+:root {
+    --font-family-main: 'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --color-primary: #007bff;
+    --color-primary-hover: #0056b3;
+    --color-secondary: #6c757d;
+    --color-secondary-hover: #5a6268;
+    --color-success: #28a745;
+    --color-success-hover: #218838;
+    --color-warning: #ffc107;
+    --color-strong-warning: #d9534f;
+    --color-warning-hover: #e0a800;
+    --color-text-dark: #333;
+    --color-text-light: #fff;
+    --color-text-muted: #555;
+    --color-background: #f4f4f9;
+    --color-surface: #fff;
+    --color-border: #ddd;
+    --color-toast-bg: #323232;
+    --color-toast-action: #bb86fc;
+    --border-radius-main: 5px;
+}
+
+body {
+    font-family: var(--font-family-main);
+    max-width: 600px;
+    margin: auto;
+    padding: 20px 20px 5rem 20px;
+    background-color: var(--color-background);
+}
+
+h1,
+h2 {
+    color: var(--color-text-dark);
+}
+
+h3 {
+    padding-bottom: 5px;
+    margin-top: 30px;
+}
+
+.action-column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.action-column-header h3 {
+    margin: 0;
+    border: none;
+    flex-grow: 1;
+}
+
+.student-search-container {
+    position: relative;
+    width: 40%;
+    /* Adjust width as needed */
+}
+
+input[type="text"]:not(.animated-search-input),
+input[type="number"],
+textarea {
+    font-family: var(--font-family-main);
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-main);
+    box-sizing: border-box;
+}
+
+input[type="text"]:not(.animated-search-input),
+input[type="number"] {
+    text-align: center;
+}
+
+/* --- Style for Placeholder Text --- */
+input::placeholder,
+textarea::placeholder {
+    font-size: 0.9em;
+    /* 90% of the input's normal font size */
+    color: #aaa;
+    /* A slightly lighter gray for better contrast */
+}
+
+input::placeholder {
+    text-align: center;
+}
+
+/* For older browser compatibility */
+input::-webkit-input-placeholder,
+textarea::-webkit-input-placeholder {
+    font-size: 0.9em;
+    color: #aaa;
+}
+
+input::-moz-placeholder,
+textarea::-moz-placeholder {
+    font-size: 0.9em;
+    color: #aaa;
+}
+
+textarea {
+    width: 100%;
+    min-height: 100px;
+    resize: vertical;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.app-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.input-group {
+    display: flex;
+    margin-bottom: 10px;
+    gap: 10px;
+}
+
+.input-group input[type="text"] {
+    width: 100%;
+}
+
+.centered-input-group {
+    justify-content: center;
+}
+
+.separator {
+    margin: 20px 0;
+}
+
+.section-title {
+    margin-top: 40px;
+}
+
+.divider-text {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.form-actions {
+    margin-top: 20px;
+}
+
+button {
+    font-family: var(--font-family-main);
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: var(--color-primary);
+    color: var(--color-text-light);
+    border: none;
+    border-radius: var(--border-radius-main);
+    margin: 5px 0;
+}
+
+button:hover {
+    background-color: var(--color-primary-hover);
+    color: var(--color-text-light);
+}
+
+button:disabled,
+button:disabled:hover {
+    background-color: var(--color-secondary);
+    border-color: var(--color-secondary);
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background-color: var(--color-secondary);
+    width: 100%;
+}
+
+.btn-secondary:hover {
+    background-color: var(--color-secondary-hover);
+}
+
+.btn-success {
+    background-color: var(--color-success);
+}
+
+.btn-success:hover {
+    background-color: var(--color-success-hover);
+}
+
+.btn-warning {
+    background-color: var(--color-warning);
+    color: var(--color-text-dark);
+}
+
+.btn-warning:hover {
+    background-color: var(--color-warning-hover);
+}
+
+.btn-icon {
+    background: none;
+    background-color: transparent;
+    padding: 5px;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--color-secondary);
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-icon:hover {
+    background: none;
+    color: var(--color-text-dark);
+    background-color: transparent;
+    transform: scale(1.3);
+}
+
+.btn-icon.is-disabled {
+    background: none;
+    background-color: transparent;
+    opacity: 0.4;
+    transform: scale(1);
+}
+
+.btn-large {
+    font-size: 18px;
+    padding: 15px;
+    width: 100%;
+}
+
+#select-student-btn {
+    font-size: 20px;
+    padding: 20px;
+}
+
+.list-container {
+    padding-right: 0;
+}
+
+.list-container li {
+    padding: 12px;
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.list-container li:first-child {
+    border-top-left-radius: var(--border-radius-main);
+    border-top-right-radius: var(--border-radius-main);
+}
+
+.list-container li:last-child {
+    border-bottom: none;
+    border-bottom-left-radius: var(--border-radius-main);
+    border-bottom-right-radius: var(--border-radius-main);
+}
+
+.preview-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.accordion-toggle {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    user-select: none;
+}
+
+.accordion-toggle.open .arrow {
+    transform: rotate(180deg);
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    background-color: var(--color-surface);
+    padding: 0 15px;
+    border-radius: 0 0 var(--border-radius-main) var(--border-radius-main);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.accordion-content.open {
+    max-height: 1000px;
+    padding: 20px 15px;
+}
+
+.category-container {
+    margin-bottom: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.category-btn.active {
+    background-color: var(--color-primary-hover);
+    border: 2px solid var(--color-primary);
+}
+
+.session-actions {
+    margin-bottom: 20px;
+}
+
+.status-button-container {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+.status-button {
+    background-color: #f8f9fa;
+    color: #495057;
+    border: 1px solid #ced4da;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+
+
+}
+
+.status-button.active {
+    background-color: var(--color-secondary);
+    color: var(--color-text-light);
+    border-color: var(--color-secondary-hover);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(1px);
+}
+
+.hidden-input {
+    display: none;
+}
+
+.toast-base {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(150%);
+    background-color: var(--color-toast-bg);
+    color: var(--color-text-light);
+    padding: 14px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    width: fit-content;
+    max-width: 90%;
+    white-space: nowrap;
+    text-align: center;
+}
+
+.undo-toast {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.undo-toast button {
+    background: none;
+    border: none;
+    color: var(--color-toast-action);
+    font-weight: bold;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+}
+
+.accordion-toggle .arrow,
+.accordion-content,
+.undo-toast,
+.status-button {
+    transition: all 0.3s ease;
+}
+
+.undo-toast {
+    transform: translateX(-50%) translateY(150%);
+}
+
+.undo-toast.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+.notification-toast {
+    transition: transform 0.4s ease, visibility 0.4s ease;
+    visibility: hidden;
+}
+
+.notification-toast.show {
+    transform: translateX(-50%) translateY(0);
+    visibility: visible;
+}
+
+#class-list li:hover,
+#session-list li:hover {
+    background-color: #e9ecef;
+    cursor: pointer;
+}
+
+/* To disable the default highlighting of the list item when you tap an hold on it for its context menu */
+#class-list li,
+#session-list li {
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* استایل‌های مربوط به غیرفعال کردن دکمه با Tooltip */
+#select-student-btn-wrapper.disabled-wrapper {
+    cursor: not-allowed;
+    position: relative;
+}
+
+#select-student-btn-wrapper.disabled-wrapper>button {
+    background-color: var(--color-secondary);
+    opacity: 0.65;
+    pointer-events: none;
+}
+
+#select-student-btn-wrapper.disabled-wrapper:hover::after {
+    content: 'ابتدا یک دسته‌بندی انتخاب کنید';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 14px;
+    white-space: nowrap;
+    margin-bottom: 5px;
+    z-index: 10;
+}
+
+/* اصلاح چیدمان گروه ورودی برای ساخت کلاس جدید */
+.composite-input {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-main);
+    background-color: #fff;
+    overflow: hidden;
+    flex-direction: row-reverse;
+}
+
+.composite-input:focus-within {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.class-type-selection {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 0 15px;
+    border-right: 1px solid var(--color-border);
+}
+
+.class-type-selection label {
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--color-text-muted);
+    -webkit-tap-highlight-color: transparent;
+    /* Removes the tap highlight */
+}
+
+#new-class-name {
+    padding: 10px;
+    border: none;
+    outline: none;
+    flex-grow: 1;
+    background: none;
+    width: 100%;
+}
+
+#add-class-btn {
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+/* استایل‌های مربوط به برچسب نوع کلاس */
+.type-badge {
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-main);
+    color: var(--color-text-light);
+    margin: 0 10px;
+    min-width: 60px;
+    text-align: center;
+}
+
+.cancelled-badge {
+    background-color: var(--color-strong-warning);
+    color: var(--color-text-light);
+}
+
+.type-badge.online {
+    background-color: var(--color-primary);
+}
+
+.type-badge.in-person {
+    background-color: var(--color-warning);
+    color: var(--color-text-dark);
+}
+
+.day-badge {
+
+    background-color: var(--color-secondary);
+}
+
+.list-item-buttons {
+    display: flex;
+}
+
+/* استایل‌های مربوط به نمایش فرد غایب */
+
+.result-display {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /* محتوا از بالا شروع شود */
+    align-items: center;
+    min-height: 250px;
+    /* حداقل ارتفاع برای جای دادن محتوای جدید */
+    height: auto;
+    /* ارتفاع خودکار برای تطبیق با محتوا */
+    text-align: center;
+    font-size: 22px;
+    margin-top: 20px;
+    font-weight: bold;
+    color: var(--color-success);
+    padding: 20px;
+    /* افزایش پدینگ برای فضای بیشتر */
+    border: 1px solid transparent;
+    border-radius: var(--border-radius-main);
+    transition: all 0.3s ease;
+}
+
+.winner-name {
+    margin: 10px 0;
+    /* Creates vertical spacing */
+    padding: 0 15px;
+    text-align: center;
+}
+
+.winner-name-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* This now centers the items horizontally */
+}
+
+/* استایل‌های کانتینر اصلی جزئیات دانش‌آموز */
+.student-details-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 20px;
+    width: 100%;
+    margin-top: 20px;
+    padding-top: 7px;
+    border-top: 1px solid var(--color-border);
+
+}
+
+/* استایل‌های ستون‌های نمرات و یادداشت‌ها */
+.student-details-scores,
+.student-details-notes {
+    flex: 1;
+    /* هر ستون نصف فضا را بگیرد */
+    font-size: 14px;
+    /* فونت کوچکتر برای حالت فشرده */
+    font-weight: normal;
+    color: var(--color-text-dark);
+}
+
+.student-details-container h4 {
+    font-size: 15px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--color-text-muted);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+    text-align: center;
+}
+
+/* لیست نمرات */
+.scores-list {
+    list-style: none;
+    padding: 10px;
+    margin: 0;
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius-main);
+    min-height: 30px;
+    /* Added for alignment */
+    display: flex;
+    flex-direction: column;
+}
+
+.scores-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    /* پدینگ کمتر برای فشردگی */
+    border: none;
+    /* حذف حاشیه پیش‌فرض آیتم لیست */
+    background: none;
+    /* حذف پس‌زمینه پیش‌فرض */
+    direction: ltr;
+    /* نمایش محتوا از چپ به راست */
+}
+
+.skill-name {
+    font-weight: bold;
+}
+
+.skill-scores {
+    font-family: monospace;
+    /* فونت مناسب برای اعداد */
+    direction: ltr;
+    /* اعداد از چپ به راست نمایش داده شوند */
+    text-align: left;
+}
+
+/* لیست یادداشت‌ها */
+.notes-list {
+    list-style: none;
+    padding: 10px;
+    margin: 0;
+    min-height: 30px;
+    /* Matched height */
+    overflow-y: auto;
+    /* اسکرول در صورت بلند بودن لیست */
+    background-color: #f8f9fa;
+    /* Matched background */
+    border-radius: var(--border-radius-main);
+    display: flex;
+    flex-direction: column;
+}
+
+.notes-list li {
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    padding: 5px 0;
+    /* کمی فاصله بین یادداشت‌ها */
+    border-bottom: 1px solid #f0f0c9;
+    /* جداکننده ظریف */
+    background: none;
+    border: none;
+    display: block;
+    text-align: start;
+}
+
+.notes-list li:last-child {
+    border-bottom: none;
+    /* حذف جداکننده برای آخرین آیتم */
+}
+
+/* پیام برای محتوای خالی */
+.no-content-message {
+    color: var(--color-text-muted);
+    font-style: italic;
+    font-size: 13px;
+    direction: rtl;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.result-display.absent {
+    background-color: var(--color-warning-bg);
+    color: var(--color-warning-text);
+}
+
+.absent-student-name {
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+/* --- استایل‌های داشبورد دو ستونی --- */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.action-column,
+.info-column {
+    background-color: var(--color-surface);
+    padding: 20px;
+}
+
+
+
+/* --- استایل‌های دکمه‌های کپسولی دسته‌بندی --- */
+.category-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 25px;
+    justify-content: center;
+}
+
+.pill {
+    background-color: #e9ecef;
+    color: #495057;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+    position: relative;
+    /* برای Tooltip */
+}
+
+.pill:hover {
+    background-color: #d3d9df;
+}
+
+.pill.active {
+    background-color: var(--color-primary);
+    color: var(--color-text-light);
+    font-weight: bold;
+    border-color: var(--color-primary-hover);
+}
+
+/* استایل Tooltip */
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 13px;
+    white-space: nowrap;
+    z-index: 10;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+[data-tooltip]:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+.tooltip-container {
+    position: relative;
+}
+
+
+
+.absent-student-name {
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+/* حذف فاصله اضافی بالای عنوان‌ها در ستون‌ها */
+.action-column>h3:first-child,
+.info-column>h3:first-child {
+    margin-top: 0;
+}
+
+.attendance-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.attendance-button-group {
+    display: flex;
+    gap: 8px;
+}
+
+.attendance-status-btn {
+    padding: 8px 16px;
+    border: 1px solid var(--color-border);
+    background-color: #f0f0f0;
+    color: var(--color-text-muted);
+    border-radius: var(--border-radius-main);
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease-in-out;
+}
+
+.attendance-status-btn.present.active {
+    background-color: var(--color-success);
+    border-color: var(--color-success-hover);
+    color: var(--color-text-light);
+}
+
+.attendance-status-btn.absent.active {
+    background-color: var(--color-warning);
+    border-color: var(--color-warning-hover);
+    color: var(--color-text-dark);
+}
+
+.makeup-absence {
+    color: var(--color-warning);
+    font-weight: bold;
+}
+
+/* --- استایل‌های جستجوی دانش‌آموز --- */
+.student-search-container {
+    position: relative;
+}
+
+.search-icon {
+    font-size: x-large;
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+
+}
+
+.search-results-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-top: none;
+    border-radius: 0 0 var(--border-radius-main) var(--border-radius-main);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.search-results-dropdown div {
+    padding: 12px 15px;
+    cursor: pointer;
+}
+
+.search-results-dropdown div:hover {
+    background-color: #e9ecef;
+}
+
+.search-results-dropdown .no-results {
+    padding: 12px 15px;
+    color: var(--color-text-muted);
+    cursor: default;
+}
+
+#new-score-value {
+    width: 150px;
+    text-align: center;
+    /* Or any other suitable width */
+}
+
+/* --- استایل‌های صفحه پروفایل دانش‌آموز --- */
+.profile-content-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.scoring-section,
+.history-section {
+    background-color: var(--color-surface);
+    padding: 20px;
+    border-radius: var(--border-radius-main);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.stats-summary-box {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: var(--border-radius-main);
+    border: 1px solid var(--color-border);
+}
+
+.stats-summary-box p {
+    margin: 8px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.score-history-item,
+.note-history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+    padding: 15px;
+}
+
+.item-content {
+    flex-grow: 1;
+    width: 100%;
+}
+
+.delete-item-btn {
+    flex-shrink: 0;
+    margin-right: 15px;
+    /* فاصله دکمه از محتوا */
+    opacity: 0.3;
+    transition: opacity 0.2s ease;
+}
+
+.score-history-item:hover .delete-item-btn,
+.note-history-item:hover .delete-item-btn {
+    opacity: 1;
+}
+
+.score-info {
+    display: flex;
+    justify-content: flex-start;
+    /* Align to the start (right in RTL) */
+    align-items: center;
+    gap: 20px;
+    /* Add space between items */
+    margin-bottom: 10px;
+}
+
+.score-skill-badge {
+    background-color: var(--color-secondary);
+    color: var(--color-text-light);
+    padding: 4px 10px;
+    border-radius: 50px;
+    font-size: 13px;
+}
+
+.score-value {
+    font-size: 16px;
+}
+
+.score-date {
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.score-comment {
+    display: flex;
+    gap: 5px;
+    align-items: baseline;
+    margin: 0;
+    padding-top: 10px;
+    font-size: 14px;
+    color: #333;
+    white-space: pre-wrap;
+    /* To respect newlines in comment */
+
+    text-align: start;
+}
+
+.score-comment:hover,
+.note-content:hover {
+    cursor: pointer;
+    background-color: #f1f1f1;
+    border-radius: 3px;
+}
+
+.score-comment .comment-ltr {
+    margin-right: auto;
+}
+
+.note-history-item {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 15px;
+    background-color: #fdfde9;
+    /* A light yellow for distinction */
+}
+
+.note-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.note-content {
+    margin: 0;
+    font-size: 14px;
+    color: #333;
+    white-space: pre-wrap;
+    text-align: start;
+}
+
+.history-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.history-section-header h3 {
+    margin: 0;
+}
+
+.status-button.profile-btn {
+    background-color: var(--color-success);
+    color: white;
+}
+
+/* --- استایل‌های مودال تایید --- */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: flex-start;
+    z-index: 2000;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.modal-content {
+    background-color: var(--color-surface);
+    padding: 30px;
+    border-radius: var(--border-radius-main);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    text-align: justify;
+    max-width: 400px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#secure-confirm-code {
+    text-align: center;
+}
+
+.modal-content p {
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--color-text-dark);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.modal-actions button {
+    padding: 12px 25px;
+    font-size: 16px;
+    width: 120px;
+    white-space: nowrap;
+    min-width: 100px;
+}
+
+#add-note-modal .modal-content {
+    max-width: 500px;
+}
+
+#add-note-modal textarea {
+    width: 100%;
+    min-height: 150px;
+    margin-bottom: 20px;
+}
+
+/* --- استایل‌های مودال تایید امن --- */
+.secure-code-display {
+    font-size: 32px;
+    font-weight: bold;
+    color: var(--color-primary);
+    letter-spacing: 8px;
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: var(--border-radius-main);
+    user-select: none;
+    /* جلوگیری از انتخاب متن کد */
+}
+
+#secure-confirm-input {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 4px;
+    margin-bottom: 20px;
+}
+
+/* --- استایل‌های جدید برای لیست حضور و غیاب --- */
+.attendance-list-item .student-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1;
+    gap: 4px;
+}
+
+.attendance-list-item .student-name {
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.attendance-list-item .student-name:hover {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.attendance-list-item .absence-info {
+    font-size: 0.85em;
+    color: var(--color-text-muted);
+}
+
+/* Container for student and session counts */
+.class-stats-row {
+    display: flex;
+    /* Make it a flex container */
+    align-items: center;
+    /* Vertically align items */
+    gap: 8px;
+    /* Space between the badges and separator */
+    margin-top: 5px;
+    /* Space below the class name */
+    font-size: 13px;
+    /* Apply base font size to the row */
+    color: var(--color-text-muted);
+    /* Apply base color to the row */
+}
+
+/* Style for the student count badge */
+.student-count-badge {
+    /* No display: block needed here, as parent is flex row */
+    /* No margin-top needed here, as gap handles spacing */
+    white-space: nowrap;
+    color: var(--color-secondary);
+    /* Prevent text from wrapping */
+}
+
+/* Style for the separator */
+.student-count-badge::after {
+    content: '|';
+    /* The separator character */
+    margin-left: 1px;
+    margin-right: 8px;
+    /* Space after the separator */
+    color: var(--color-secondary);
+    /* Muted color for the separator */
+}
+
+/* Style for the session count badge */
+.session-count-badge {
+    color: var(--color-secondary);
+
+    /* No display: block needed here */
+    /* No margin-top needed here */
+    white-space: nowrap;
+    /* Prevent text from wrapping */
+}
+
+/* --- Hamburger Menu & Side Nav --- */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.app-header h1 {
+    margin: 0;
+    font-size: 24px;
+    /* Adjust as needed */
+}
+
+#hamburger-menu-btn {
+    font-size: 28px;
+    padding: 0 10px;
+    -webkit-tap-highlight-color: transparent;
+
+}
+
+.header-placeholder {
+    width: 40px;
+    /* Same width as hamburger button to keep title centered */
+}
+
+/* Add a visual cue for the clickable student name header */
+#profile-student-name-header {
+    cursor: pointer;
+    transition: color 0.2s ease-in-out;
+}
+
+#profile-student-name-header:hover {
+    color: var(--color-primary);
+}
+
+#profile-student-name-header:hover::after {
+    content: ' ✏️';
+    font-size: 0.8em;
+    vertical-align: middle;
+}
+
+.side-nav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 3000;
+    top: 0;
+    right: 0;
+    background-color: #fff;
+    overflow-x: hidden;
+    transition: 0.4s;
+    padding-top: 60px;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+.side-nav .nav-btn {
+    padding: 15px 20px;
+    text-decoration: none;
+    font-size: 18px;
+    color: var(--color-text-dark);
+    display: block;
+    transition: 0.3s;
+    background-color: transparent;
+    width: 100%;
+    text-align: right;
+    border: none;
+}
+
+.side-nav .nav-btn:hover {
+    background-color: #f1f1f1;
+}
+
+.side-nav .close-btn {
+    position: absolute;
+    top: 0;
+    left: 15px;
+    font-size: 36px;
+    margin-right: 50px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 2500;
+    display: none;
+    transition: opacity 0.4s;
+}
+
+/* Fix for side nav menu position on wider screens. */
+@media screen and (min-width: 640px) {
+    .side-nav {
+        right: calc((100vw - 640px) / 2);
+    }
+}
+
+/* --- انیمیشن ضربان قلب --- */
+@keyframes heartbeat {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.3);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.heartbeat-animation {
+    animation: heartbeat 0.2s ease-in-out;
+}
+
+/* --- Styles for Reusable Animated Search Component --- */
+
+.global-search-container {
+    margin: 5px 0;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    min-height: 40px;
+    /* This creates a stable height to prevent the jump */
+}
+
+.animated-search-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: relative;
+    /* Set positioning context for the dropdown */
+}
+
+/* The student-page search bar needs to take up its original 40% width */
+.action-column-header .animated-search-container {
+    width: 40%;
+}
+
+/* The global search bar should be full width inside its container */
+.global-search-container .animated-search-container {
+    width: 100%;
+}
+
+.animated-search-container .search-icon {
+    position: static;
+    transform: none;
+    margin-right: 8px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.animated-search-container .search-icon:hover {
+    background-color: #f0f0f0;
+}
+
+.animated-search-input {
+    font-family: var(--font-family-main);
+    font-size: 16px;
+    width: 0;
+    opacity: 0;
+    padding: 5px 0;
+    border-bottom: 1px solid transparent;
+    transition: width 0.2s ease-in-out, opacity 0.2s ease-in-out, padding 0.2s ease;
+}
+
+/* The input's visible state when the container is active */
+.animated-search-container.search-active .animated-search-input {
+    width: 100%;
+    /* Input will now fill its container */
+    opacity: 1;
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--color-primary);
+}
+
+.global-search-container .animated-search-container.search-active .animated-search-input {
+    width: 25%;
+}
+
+/* --- Styles for dropdowns in search fields --- */
+
+.search-results-dropdown .global-search-result {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.4;
+    padding: 10px 15px;
+}
+
+.search-results-dropdown .global-search-result .class-name {
+    cursor: pointer;
+}
+
+.search-results-dropdown .global-search-result .class-name:hover {
+    text-decoration: underline;
+    color: var(--color-primary);
+}
+
+/* --- Styles for Category Creation Options --- */
+.category-options {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 0 4px;
+    /* Adds space around the checkbox */
+    white-space: nowrap;
+    /* Prevents the label from wrapping */
+}
+
+.category-options label {
+    font-size: 14px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    user-select: none;
+    /* Prevents text selection on click */
+}
+
+#is-graded-checkbox {
+    cursor: pointer;
+}
+
+/* --- Styles for Category List in Settings --- */
+.name-and-badge-container {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    gap: 10px;
+}
+
+.category-badge {
+    font-size: 11px;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 10px;
+    background-color: var(--color-success);
+    color: var(--color-text-light);
+}
+
+/* --- Style for Sticky Profile Header --- */
+#profile-student-name-header {
+    position: sticky;
+    top: 0;
+    background-color: var(--color-surface);
+    z-index: 100;
+    padding: 20px 15px;
+    margin-top: 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.input-wrapper {
+    flex-grow: 1;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* This class will be toggled by JavaScript to show the modal */
+.modal-overlay.modal-visible {
+    display: flex;
+    animation: fadeInBackground 0.3s ease-out forwards;
+}
+
+.modal-overlay.modal-closing {
+    /* This applies the fade-out and holds the final transparent state */
+    animation: fadeOutBackground 0.3s ease-in forwards;
+}
+
+/* This applies the animation to the content box inside the visible modal */
+.modal-overlay.modal-visible .modal-content {
+    animation: slideUp 0.3s ease-out;
+}
+
+/* Animation for the modal sliding down and fading out */
+@keyframes slideDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+}
+
+/* This class applies the closing animation */
+.modal-overlay.modal-closing .modal-content {
+    animation: slideDown 0.3s ease-in;
+    animation-fill-mode: forwards;
+}
+
+@keyframes fadeInBackground {
+    from {
+        background-color: rgba(0, 0, 0, 0);
+    }
+
+    to {
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+}
+
+@keyframes fadeOutBackground {
+    from {
+        background-color: rgba(0, 0, 0, 0.6);
+    }
+
+    to {
+        background-color: rgba(0, 0, 0, 0);
+    }
+}
+
+#quick-grade-form-wrapper {
+    display: flex;
+    /* Hidden by default */
+    gap: 10px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+#quick-score-input {
+    width: 80px;
+    flex-shrink: 0;
+}
+
+#quick-note-textarea {
+    flex-grow: 1;
+    /* Takes up the remaining available space */
+    resize: vertical;
+    min-height: 0px;
+}
+
+#quick-grade-submit-btn {
+    flex-shrink: 0;
+}
+
+/* Hide spinners from number inputs */
+
+/* For WebKit browsers like Chrome, Safari, and Edge */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* For Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* These two rules styles the warning badge of an unfinished session on the class management page */
+.has-unfinished-session {
+    border-right: 4px solid var(--color-warning);
+    padding-right: 8px;
+    /* Adjusts padding to make space for the border */
+}
+
+.warning-badge {
+    background-color: var(--color-warning);
+    color: var(--color-text-dark);
+    padding: 4px 10px;
+    margin-right: 10px;
+    border-radius: var(--border-radius-main);
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.list-item-badges {
+    display: flex;
+    align-items: center;
+}
+
+/* 1. Disable text selection globally for a cleaner app-like feel */
+body {
+    -webkit-user-select: none;
+    /* Safari */
+    -ms-user-select: none;
+    /* IE 10 and IE 11 */
+    user-select: none;
+    /* Standard syntax */
+}
+
+/* 2. Re-enable text selection on specific, useful elements */
+input,
+textarea,
+.note-content,
+.score-comment,
+strong {
+    /* The selected winner's name */
+    -webkit-user-select: text;
+    /* Safari */
+    -ms-user-select: text;
+    /* IE 10 and IE 11 */
+    user-select: text;
+    /* Standard syntax */
+}
+
+#quick-grade-form-wrapper :disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@keyframes shake-horizontal {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-3px);
+    }
+
+    75% {
+        transform: translateX(3px);
+    }
+}
+
+.shake-animation {
+    animation: shake-horizontal 0.2s ease-in-out;
+}
+
+/* --- Context Menu Styles --- */
+.context-menu {
+    visibility: hidden;
+    /* Hidden by default */
+    position: fixed;
+    /* Positioned relative to the viewport */
+    z-index: 4000;
+    /* Ensures it's on top of other content */
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-main);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    padding: 5px 0;
+    min-width: 180px;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.15s ease-out, transform 0.15s ease-out, visibility 0s linear 0.15s;
+}
+
+.context-menu.visible {
+    visibility: visible;
+    opacity: 1;
+    transform: scale(1);
+    transition-delay: 0s;
+}
+
+.context-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.context-menu li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    font-size: 15px;
+    color: var(--color-text-dark);
+    cursor: pointer;
+    user-select: none;
+}
+
+.context-menu li:hover {
+    background-color: #e9ecef;
+}
+
+.context-menu li .icon {
+    font-size: 16px;
+    width: 20px;
+    /* Ensures alignment */
+    text-align: center;
+}
+
+.context-menu .separator {
+    height: 1px;
+    background-color: var(--color-border);
+    margin: 5px 0;
+}
+
+/* For destructive actions like delete */
+.context-menu li.danger {
+    color: var(--color-strong-warning);
+}
+
+/* End of Context Menu Styles --- */
+
+/* -------------------- Styles for Student Stats Table ------------------------ */
+#student-stats-table-container {
+    overflow-x: auto;
+    /* Enables horizontal scrolling */
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-main);
+}
+
+.student-stats-table {
+    width: 100%;
+    border-collapse: collapse;
+    /* For a clean, single-border look */
+    white-space: nowrap;
+    /* Prevents text from wrapping */
+}
+
+.student-stats-table th,
+.student-stats-table td {
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    text-align: center;
+    vertical-align: middle;
+}
+
+.student-stats-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    position: sticky;
+    top: 0;
+    /* Makes header sticky on vertical scroll */
+    z-index: 10;
+}
+
+.student-stats-table tbody tr:hover {
+    background-color: #f1f1f1;
+    /* Highlight row on hover */
+}
+
+/* --- Styles for Sticky First Column --- */
+.student-stats-table th:first-child,
+.student-stats-table td:first-child {
+    position: sticky;
+    right: 0;
+    /* Freezes the column to the right for RTL */
+    background-color: var(--color-surface);
+    z-index: 5;
+    /* Aligns the name to the start */
+    text-align: start;
+    padding-right: 15px;
+
+    max-width: 100px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: max-width 0.3s ease-in-out;
+}
+
+/* Ensure the sticky header-cell has a background */
+.student-stats-table th:first-child {
+    background-color: #f8f9fa;
+    z-index: 15;
+    /* Must be higher than other sticky elements */
+}
+
+/* Ensure the sticky cell changes color on row hover */
+.student-stats-table tbody tr:hover td:first-child {
+    background-color: #f1f1f1;
+}
+
+/* ----------------- Styles for Name Column Toggle ----------------------- */
+.student-stats-table th:first-child {
+    cursor: pointer;
+    user-select: none;
+    /* Prevents selecting the header text on click */
+}
+
+/* This rule defines the expanded state */
+.student-stats-table.name-column-expanded th:first-child,
+.student-stats-table.name-column-expanded td:first-child {
+    max-width: 500px;
+    /* A large value that allows the column to expand */
+}
+
+@media screen and (max-width: 600px) {
+
+    .action-column,
+    .info-column {
+        margin-left: -20px;
+        margin-right: -20px;
+    }
+}
+
+/* --- Styles for Absentees Summary Box --- */
+.absentees-summary {
+    background-color: #fff3cd;
+    border: 1px solid var(--color-warning);
+    border-radius: var(--border-radius-main);
+    padding: 15px;
+    margin-top: 20px;
+    /* Adds space above the box */
+    box-sizing: border-box;
+
+    /* Visibility transitions remain the same */
+    transform: translateY(20px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease-in-out;
+}
+
+.absentees-summary.visible {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+.absentees-summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.absentees-summary-header h4 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--color-text-dark);
+}
+
+.summary-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 15px;
+    justify-content: center;
+}
+
+.summary-name {
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: var(--border-radius-main);
+    background-color: rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+    font-size: 15px;
+}
+
+.summary-name:hover {
+    background-color: var(--color-strong-warning);
+    color: var(--color-text-light);
+    text-decoration: line-through;
+}
+
+.summary-name.fading-out {
+    opacity: 0;
+    transform: scale(0.9);
+}
+
+/* Currently only for the stats table in student page */
+.student-name-link {
+    cursor: pointer;
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+}
+
+.student-stats-table tbody tr:hover .student-name-link {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+/* -------------------------------------------- */
