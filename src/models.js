@@ -225,7 +225,7 @@ export class Classroom {
             term: info.term || null,
             scheduleText: info.scheduleText || null,
             level: info.level || null,
-            creationDate: new Date(),
+            creationDate: info.creationDate ? new Date(info.creationDate) : new Date()
         };
         this.students = [];
         this.sessions = [];
