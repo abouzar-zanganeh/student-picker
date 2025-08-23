@@ -92,8 +92,6 @@ const categoryPillsContainer = document.getElementById('category-selection-conta
 const resultDiv = document.getElementById('selected-student-result');
 export const contextMenu = document.getElementById('custom-context-menu');
 
-// Other global variables..
-let isCopyListenerInitialized = false;
 
 
 export function showUndoToast(message) {
@@ -326,9 +324,7 @@ export function closeContextMenu() {
     }
 }
 
-export function renderAttendancePage() {
-    if (!state.currentClassroom || !state.selectedSession) return;
-
+function createSessionDisplayNumberMap() {
     // Create a map to correlate the permanent session number with its dynamic display number
     const activeSessionsForNumbering = getActiveItems(state.currentClassroom.sessions)
         .filter(s => !s.isCancelled)
@@ -338,6 +334,120 @@ export function renderAttendancePage() {
     activeSessionsForNumbering.forEach((session, index) => {
         sessionDisplayNumberMap.set(session.sessionNumber, index + 1);
     });
+    return sessionDisplayNumberMap; // Return the map we created.
+}
+
+function renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan) {
+    absenceSpan.innerHTML = '';
+
+    // Get full info for each absent session, including makeup status
+    const absentSessions = state.currentClassroom.sessions
+        .filter(session => !session.isDeleted && !session.isCancelled && session
+            .studentRecords[student.identity.studentId]?.attendance === 'absent')
+        .map(session => ({
+            // Use the map to get the correct display number
+            number: sessionDisplayNumberMap.get(session.sessionNumber),
+            isMakeup: session.isMakeup
+        }))
+        // This safely filters out any sessions that might be absent but are now cancelled
+        .filter(sessionInfo => sessionInfo.number !== undefined);
+
+    // Rebuild the content with proper styling
+    if (absentSessions.length > 0) {
+        absenceSpan.appendChild(document.createTextNode('جلسات غایب: '));
+
+        absentSessions.forEach((sessionInfo, index) => {
+            const numberSpan = document.createElement('span');
+            numberSpan.textContent = sessionInfo.number;
+
+            if (sessionInfo.isMakeup) {
+                numberSpan.classList.add('makeup-absence');
+            }
+            absenceSpan.appendChild(numberSpan);
+
+            if (index < absentSessions.length - 1) {
+                absenceSpan.appendChild(document.createTextNode('، '));
+            }
+        });
+    } else {
+        absenceSpan.textContent = 'جلسات غایب: بدون غیبت';
+    }
+}
+
+function createAttendanceListItem(student, sessionDisplayNumberMap) {
+    const li = document.createElement('li');
+    li.className = 'attendance-list-item';
+
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'student-info';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'student-name';
+    nameSpan.textContent = student.identity.name;
+
+    nameSpan.addEventListener('click', () => {
+        state.setSelectedStudentForProfile(student);
+        renderStudentProfilePage();
+        showPage('student-profile-page');
+    });
+
+    const absenceSpan = document.createElement('span');
+    absenceSpan.className = 'absence-info';
+
+    renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
+
+    infoDiv.appendChild(nameSpan);
+    infoDiv.appendChild(absenceSpan);
+
+    const buttonGroup = document.createElement('div');
+    buttonGroup.className = 'attendance-button-group';
+
+    const presentBtn = document.createElement('button');
+    presentBtn.textContent = 'حاضر';
+    presentBtn.className = 'attendance-status-btn present';
+
+    const absentBtn = document.createElement('button');
+    absentBtn.textContent = 'غایب';
+    absentBtn.className = 'attendance-status-btn absent';
+
+    const currentStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
+    if (currentStatus === 'present') {
+        presentBtn.classList.add('active');
+    } else if (currentStatus === 'absent') {
+        absentBtn.classList.add('active');
+    }
+
+    presentBtn.addEventListener('click', () => {
+        state.selectedSession.setAttendance(student.identity.studentId, 'present');
+        presentBtn.classList.add('active');
+        absentBtn.classList.remove('active');
+        renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
+        state.saveData();
+        renderAbsenteesSummary();
+    });
+
+    absentBtn.addEventListener('click', () => {
+        state.selectedSession.setAttendance(student.identity.studentId, 'absent');
+        absentBtn.classList.add('active');
+        presentBtn.classList.remove('active');
+        renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
+        state.saveData();
+        renderAbsenteesSummary();
+    });
+
+    buttonGroup.appendChild(presentBtn);
+    buttonGroup.appendChild(absentBtn);
+    li.appendChild(infoDiv);
+    li.appendChild(buttonGroup);
+
+    return li;
+}
+
+export function renderAttendancePage() {
+    if (!state.currentClassroom || !state.selectedSession) return;
+
+    const sessionDisplayNumberMap = createSessionDisplayNumberMap();
+
     createAbsenteesSummaryBox();
 
 
@@ -347,162 +457,7 @@ export function renderAttendancePage() {
     attendanceListUl.innerHTML = '';
 
     getActiveItems(state.currentClassroom.students).forEach(student => {
-        const li = document.createElement('li');
-        li.className = 'attendance-list-item';
-
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'student-info';
-
-        const nameSpan = document.createElement('span');
-        nameSpan.className = 'student-name';
-        nameSpan.textContent = student.identity.name;
-
-        nameSpan.addEventListener('click', () => {
-            state.setSelectedStudentForProfile(student);
-            renderStudentProfilePage();
-            showPage('student-profile-page');
-        });
-
-        const absenceSpan = document.createElement('span');
-        absenceSpan.className = 'absence-info';
-
-        // First, get an array of objects containing the session number and its makeup status
-        const absentSessions = state.currentClassroom.sessions
-            .filter(session => !session.isDeleted && !session.isCancelled && session
-                .studentRecords[student.identity.studentId]?.attendance === 'absent')
-            .map(session => ({
-                // Use the map to get the correct display number
-                number: sessionDisplayNumberMap.get(session.sessionNumber),
-                isMakeup: session.isMakeup
-            }))
-            // This safely filters out any sessions that might be absent but are now cancelled
-            .filter(sessionInfo => sessionInfo.number !== undefined);
-
-        if (absentSessions.length > 0) {
-            // Instead of setting textContent, we build the content node by node
-            absenceSpan.appendChild(document.createTextNode('جلسات غایب: '));
-
-            absentSessions.forEach((sessionInfo, index) => {
-                const numberSpan = document.createElement('span');
-                numberSpan.textContent = sessionInfo.number;
-
-                // Apply our new class if the session was a makeup
-                if (sessionInfo.isMakeup) {
-                    numberSpan.classList.add('makeup-absence');
-                }
-                absenceSpan.appendChild(numberSpan);
-
-                // Add a comma separator, but not after the last number
-                if (index < absentSessions.length - 1) {
-                    absenceSpan.appendChild(document.createTextNode('، '));
-                }
-            });
-        } else {
-            absenceSpan.textContent = 'جلسات غایب: بدون غیبت';
-        }
-
-        infoDiv.appendChild(nameSpan);
-        infoDiv.appendChild(absenceSpan);
-
-        const buttonGroup = document.createElement('div');
-        buttonGroup.className = 'attendance-button-group';
-
-        const presentBtn = document.createElement('button');
-        presentBtn.textContent = 'حاضر';
-        presentBtn.className = 'attendance-status-btn present';
-
-        const absentBtn = document.createElement('button');
-        absentBtn.textContent = 'غایب';
-        absentBtn.className = 'attendance-status-btn absent';
-
-        const currentStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
-        if (currentStatus === 'present') {
-            presentBtn.classList.add('active');
-        } else if (currentStatus === 'absent') {
-            absentBtn.classList.add('active');
-        }
-
-        const updateAbsenceInfo = () => {
-            // Clear the existing content first
-            absenceSpan.innerHTML = '';
-
-            // Get full info for each absent session, including makeup status
-            const absentSessions = state.currentClassroom.sessions
-                .filter(session => !session.isDeleted && !session.isCancelled && session
-                    .studentRecords[student.identity.studentId]?.attendance === 'absent')
-                .map(session => ({
-                    // Use the map to get the correct display number
-                    number: sessionDisplayNumberMap.get(session.sessionNumber),
-                    isMakeup: session.isMakeup
-                }))
-                // This safely filters out any sessions that might be absent but are now cancelled
-                .filter(sessionInfo => sessionInfo.number !== undefined);
-
-            // Rebuild the content with proper styling
-            if (absentSessions.length > 0) {
-                absenceSpan.appendChild(document.createTextNode('جلسات غایب: '));
-
-                absentSessions.forEach((sessionInfo, index) => {
-                    const numberSpan = document.createElement('span');
-                    numberSpan.textContent = sessionInfo.number;
-
-                    if (sessionInfo.isMakeup) {
-                        numberSpan.classList.add('makeup-absence');
-                    }
-                    absenceSpan.appendChild(numberSpan);
-
-                    if (index < absentSessions.length - 1) {
-                        absenceSpan.appendChild(document.createTextNode('، '));
-                    }
-                });
-            } else {
-                absenceSpan.textContent = 'جلسات غایب: بدون غیبت';
-            }
-        };
-
-        presentBtn.addEventListener('click', () => {
-            const studentRecord = state.selectedSession.studentRecords[student.identity.studentId];
-            if (!studentRecord) return;
-
-            const wasAbsent = studentRecord.attendance === 'absent';
-            const hadIssue = studentRecord.hadIssue;
-
-
-
-            state.selectedSession.setAttendance(student.identity.studentId, 'present');
-            presentBtn.classList.add('active');
-            absentBtn.classList.remove('active');
-            updateAbsenceInfo();
-            state.saveData();
-            renderAbsenteesSummary();
-        });
-
-        absentBtn.addEventListener('click', () => {
-            const studentRecord = state.selectedSession.studentRecords[student.identity.studentId];
-            if (!studentRecord) return;
-
-            const wasPresent = studentRecord.attendance === 'present';
-
-            if (wasPresent) {
-                if (studentRecord.hadIssue) {
-                    student.statusCounters.otherIssues--;
-                    studentRecord.hadIssue = false;
-                }
-            }
-
-            state.selectedSession.setAttendance(student.identity.studentId, 'absent');
-            absentBtn.classList.add('active');
-            presentBtn.classList.remove('active');
-            updateAbsenceInfo();
-            state.saveData();
-            renderAbsenteesSummary();
-
-        });
-
-        buttonGroup.appendChild(presentBtn);
-        buttonGroup.appendChild(absentBtn);
-        li.appendChild(infoDiv);
-        li.appendChild(buttonGroup);
+        const li = createAttendanceListItem(student, sessionDisplayNumberMap);
         attendanceListUl.appendChild(li);
     });
 
@@ -2295,7 +2250,6 @@ function renderAbsenteesSummary() {
 }
 
 function setupAbsenteesCopyButton() {
-    if (isCopyListenerInitialized) return;
 
     // 1. Get a fresh reference to the button just in time.
     const copyBtn = document.getElementById('copy-absentees-btn');
@@ -2344,5 +2298,4 @@ function setupAbsenteesCopyButton() {
             showNotification('خطا در کپی کردن لیست.');
         });
     });
-    isCopyListenerInitialized = true;
 }
