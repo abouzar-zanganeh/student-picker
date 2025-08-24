@@ -218,7 +218,7 @@ export class Session {
 export class Classroom {
     constructor(info) {
         this.info = {
-            name: info.name,
+            name: info.name || 'NotNamed',
             scheduleCode: info.scheduleCode || `code_${new Date().getTime()}`,
             teacherName: info.teacherName || null,
             type: info.type || 'in-person',
