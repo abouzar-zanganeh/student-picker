@@ -2,7 +2,7 @@
 real class data for analysis.txt
 *.drawio
 student-picker first icon.png
-/node_modules
+node_modules/
 /dist
 /symlinks
 My Professional Development Workflow.md
