@@ -2,11 +2,12 @@
 real class data for analysis.txt
 *.drawio
 student-picker first icon.png
-node_modules/
-/dist
-/symlinks
+/node_modules/
+/dist/
+/symlinks/
 My Professional Development Workflow.md
 Things an AI needs to know about me.md
 start-dev-mode
 Start Dev Mode.lnk
 start-dev-mode.ps1
+.$SelectNextStudentFlowChart.drawio.dtmp
