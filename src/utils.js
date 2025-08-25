@@ -60,3 +60,34 @@ export function normalizeKeyboard(str) {
 }
 
 // --- Console Debugging Utilities ---
+export function backfillClassroomDates(state) {
+    const classOrder = [
+        "Pre1 Sat 9:00",
+        "Inter1 Sat 16:30",
+        "Ad2 Sat 18:30",
+        "Ad1 Sun 10:45",
+        "High2 Sun 14:30",
+        "Inter2 Sun 16:30",
+        "Pre1 Sun 18:30"
+    ];
+
+    const startDate = new Date('2025-07-12T09:00:00Z'); // Corresponds to July 12, 2025
+
+    console.group("Starting Classroom Date Backfill...");
+
+    classOrder.forEach((className, index) => {
+        if (state.classrooms[className]) {
+            // Add 1 second for each subsequent class to create a unique, ordered timestamp
+            const newDate = new Date(startDate.getTime() + index * 1000);
+            state.classrooms[className].info.creationDate = newDate;
+            console.log(`Updated "${className}" creationDate to: ${newDate.toISOString()}`);
+        } else {
+            console.warn(`Class "${className}" not found. Skipping.`);
+        }
+    });
+
+    state.saveData();
+    console.log("✅ All creation dates have been updated and saved to localStorage.");
+    console.groupEnd();
+    alert("Classroom date backfill is complete! Check the console for details.");
+}

@@ -2,7 +2,7 @@ import * as state from './state.js';
 import { resetAllStudentCounters, getActiveItems } from './state.js';
 import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
-import { normalizeText, normalizeKeyboard } from './utils.js';
+import { normalizeText, normalizeKeyboard, backfillClassroomDates } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- HTML Elements (from ui.js, but needed for event listeners) ---
@@ -951,4 +951,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.newNoteContent.select(); // Select the text for easy editing
     });
 
+    // temporary for backfilling 
+    window.runDateBackfill = () => backfillClassroomDates(state);
+    console.log("Date backfill utility is ready. Type 'runDateBackfill()' in the console to execute.");
 });
