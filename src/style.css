@@ -1790,6 +1790,27 @@ strong {
     background-color: #f1f1f1;
 }
 
+/* --- Styles for Highlighting Absent Students --- */
+.student-stats-table tbody tr.absent-row-highlight {
+    background-color: #fff3cd;
+    /* A light yellow for absent status */
+}
+
+.student-stats-table tbody tr.absent-row-highlight td:first-child {
+    background-color: #fff3cd;
+    /* Ensures sticky column matches */
+}
+
+.student-stats-table tbody tr.absent-row-highlight:hover {
+    background-color: #fbeaba;
+    /* A slightly darker yellow on hover */
+}
+
+.student-stats-table tbody tr.absent-row-highlight:hover td:first-child {
+    background-color: #fbeaba;
+    /* Ensures sticky column matches on hover */
+}
+
 /* ----------------- Styles for Name Column Toggle ----------------------- */
 .student-stats-table th:first-child {
     cursor: pointer;

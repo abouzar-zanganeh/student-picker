@@ -530,6 +530,14 @@ export function renderStudentStatsList() {
     activeStudents.forEach(student => {
         const row = tbody.insertRow();
 
+        // Highlight absent students' rows
+        if (state.selectedSession) {
+            const studentRecord = state.selectedSession.studentRecords[student.identity.studentId];
+            if (studentRecord && studentRecord.attendance === 'absent') {
+                row.classList.add('absent-row-highlight');
+            }
+        }
+
         // --- DYNAMIC DATA POPULATION ---
         // 1. Add data for the static columns
         const nameCell = row.insertCell();
