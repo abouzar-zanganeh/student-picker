@@ -756,7 +756,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     state.setSelectedStudentForProfile(state.currentClassroom.students.find(s => s.identity.studentId === selectedStudentId));
                 }
             }
-            ui._internalShowPage(pageId);
+            // If navigating to the student page, re-render it completely to show fresh data.
+            if (pageId === 'student-page') {
+                ui.renderStudentPage();
+            } else {
+                // For all other pages, use the old method of just showing/hiding.
+                ui._internalShowPage(pageId);
+            }
         } else {
             state.setCurrentClassroom(null);
             state.setSelectedSession(null);
