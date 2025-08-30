@@ -1811,6 +1811,27 @@ strong {
     /* Ensures sticky column matches on hover */
 }
 
+/* --- Styles for Highlighting the Current Winner --- */
+.student-stats-table tbody tr.current-winner-highlight {
+    background-color: #e6ffed;
+    /* A very light green */
+}
+
+.student-stats-table tbody tr.current-winner-highlight td:first-child {
+    background-color: #e6ffed;
+    /* Ensures sticky column matches */
+}
+
+.student-stats-table tbody tr.current-winner-highlight:hover {
+    background-color: #d1f7e0;
+    /* A slightly darker green on hover */
+}
+
+.student-stats-table tbody tr.current-winner-highlight:hover td:first-child {
+    background-color: #d1f7e0;
+    /* Ensures sticky column matches on hover */
+}
+
 /* ----------------- Styles for Name Column Toggle ----------------------- */
 .student-stats-table th:first-child {
     cursor: pointer;

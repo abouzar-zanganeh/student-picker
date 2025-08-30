@@ -529,6 +529,7 @@ export function renderStudentStatsList() {
 
     activeStudents.forEach(student => {
         const row = tbody.insertRow();
+        row.dataset.studentId = student.identity.studentId;
 
         // Highlight absent students' rows
         if (state.selectedSession) {
@@ -633,6 +634,23 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
         winner = historyEntry.winner;
         categoryName = historyEntry.categoryName;
     }
+
+    // --- Table Row Highlight Management ---
+    // First, clear any existing winner highlight from the table
+    const previousWinnerRow = document.querySelector('.current-winner-highlight');
+    if (previousWinnerRow) {
+        previousWinnerRow.classList.remove('current-winner-highlight');
+    }
+
+    // Now, find and highlight the new winner's row
+    if (winner) {
+
+        const winnerRow = document.querySelector(`.student-stats-table tr[data-student-id="${winner.identity.studentId}"]`);
+        if (winnerRow) {
+            winnerRow.classList.add('current-winner-highlight');
+        }
+    }
+    // --- End Highlight Management ---
 
     // --- NEW: Sync Category State and UI ---
     const correspondingCategory = state.currentClassroom.categories.find(c => c.name === categoryName);

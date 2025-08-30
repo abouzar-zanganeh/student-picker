@@ -215,11 +215,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- End New History Logic ---
 
 
-            ui.displayWinner();
 
             state.selectedSession.lastUsedCategoryId = state.selectedCategory.id;
             state.selectedSession.lastSelectedWinnerId = winner.identity.studentId;
             ui.renderStudentStatsList();
+            ui.displayWinner();
             state.saveData();
         } else {
             ui.showNotification("دانش‌آموز واجد شرایطی برای انتخاب یافت نشد.");
@@ -951,7 +951,4 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.newNoteContent.select(); // Select the text for easy editing
     });
 
-    // temporary for backfilling 
-    window.runDateBackfill = () => backfillClassroomDates(state);
-    console.log("Date backfill utility is ready. Type 'runDateBackfill()' in the console to execute.");
 });
