@@ -569,7 +569,6 @@ button:disabled:hover {
     margin-top: 20px;
     font-weight: bold;
     color: var(--color-success);
-    padding: 20px;
     /* افزایش پدینگ برای فضای بیشتر */
     border: 1px solid transparent;
     border-radius: var(--border-radius-main);

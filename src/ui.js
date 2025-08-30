@@ -474,7 +474,7 @@ export function renderStudentStatsList() {
     if (!state.currentClassroom) return;
 
     const totalStudents = getActiveItems(state.currentClassroom.students).length;
-    studentStatsHeader.textContent = `آمار عملکرد دانش‌آموزان -- ${totalStudents} نفر`;
+    studentStatsHeader.textContent = `آمار عملکرد -- ${totalStudents} نفر`;
 
     // --- DYNAMIC HEADER GENERATION ---
     // 1. Isolate the 'Name' header, which always comes first.
@@ -826,7 +826,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
         const scoresForSkill = studentScores[skillKey];
         if (scoresForSkill && scoresForSkill.length > 0) {
             hasAnyScore = true;
-            skillScoresSpan.textContent = scoresForSkill.slice(-3).map(s => s.value).join(', ');
+            skillScoresSpan.textContent = scoresForSkill.slice(-3).map(s => s.value).join(',');
         } else {
             skillScoresSpan.textContent = 'none';
         }
