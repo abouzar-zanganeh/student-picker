@@ -374,6 +374,42 @@ function renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan)
     }
 }
 
+function renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkSpan) {
+    homeworkSpan.innerHTML = ''; // Clear previous content
+
+    // Find all sessions where homework was 'incomplete' or 'none'
+    const incompleteSessions = state.currentClassroom.sessions
+        .filter(session => {
+            if (session.isDeleted || session.isCancelled) return false;
+            const record = session.studentRecords[student.identity.studentId];
+            return record && record.homework && (record.homework.status === 'incomplete' || record.homework.status === 'none');
+        })
+        .map(session => ({
+            number: sessionDisplayNumberMap.get(session.sessionNumber),
+            status: session.studentRecords[student.identity.studentId].homework.status
+        }))
+        .filter(sessionInfo => sessionInfo.number !== undefined); // Ensure cancelled sessions are out
+
+    if (incompleteSessions.length > 0) {
+        homeworkSpan.appendChild(document.createTextNode('تکالیف ناقص: '));
+        incompleteSessions.forEach((sessionInfo, index) => {
+            const numberSpan = document.createElement('span');
+            numberSpan.textContent = sessionInfo.number;
+            // Add a special style for 'incomplete' to distinguish from 'none'
+            if (sessionInfo.status === 'incomplete') {
+                numberSpan.classList.add('incomplete-homework');
+            }
+            homeworkSpan.appendChild(numberSpan);
+
+            if (index < incompleteSessions.length - 1) {
+                homeworkSpan.appendChild(document.createTextNode('، '));
+            }
+        });
+    } else {
+        homeworkSpan.textContent = 'تکالیف ناقص: ندارد';
+    }
+}
+
 function createAttendanceListItem(student, sessionDisplayNumberMap) {
     const li = document.createElement('li');
     li.className = 'attendance-list-item';
@@ -398,6 +434,8 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     homeworkInfoSpan.className = 'homework-info';
 
     renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
+
+    renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
 
     infoDiv.appendChild(nameSpan);
     infoDiv.appendChild(absenceSpan);
