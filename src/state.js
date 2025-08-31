@@ -78,6 +78,20 @@ export function rehydrateData(plainClassrooms) {
             sessionInstance.isMakeup = plainSession.isMakeup;
             sessionInstance.isCancelled = plainSession.isCancelled || false;
             sessionInstance.studentRecords = plainSession.studentRecords;
+
+            // Homework Rehydration Section
+            for (const studentId in sessionInstance.studentRecords) {
+                const record = sessionInstance.studentRecords[studentId];
+                // Check if homework exists and is a plain object (from old data)
+                if (record.homework && !(record.homework instanceof Homework)) {
+                    // Re-instantiate it from the plain object's data
+                    sessionInstance.studentRecords[studentId].homework = new Homework(
+                        record.homework.status,
+                        record.homework.comment
+                    );
+                }
+            }
+
             sessionInstance.lastWinnerByCategory = plainSession.lastWinnerByCategory;
             sessionInstance.lastUsedCategoryId = plainSession.lastUsedCategoryId;
             sessionInstance.lastSelectedWinnerId = plainSession.lastSelectedWinnerId;

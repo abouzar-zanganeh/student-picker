@@ -117,7 +117,7 @@ export class Session {
         if (!this.studentRecords[studentId]) {
             this.studentRecords[studentId] = {
                 attendance: 'present',
-                homework: 'complete',
+                homework: new Homework(),
                 selections: {},
                 hadIssue: false,
 
@@ -132,7 +132,7 @@ export class Session {
 
     setHomeworkStatus(studentId, status) {
         this.initializeStudentRecord(studentId);
-        this.studentRecords[studentId].homework = status;
+        this.studentRecords[studentId].homework.status = status;
     }
 
     selectNextWinner(categoryName, studentList, allCategories) {
