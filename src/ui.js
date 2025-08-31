@@ -451,6 +451,24 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     homeworkBtn.className = `homework-status-btn ${homeworkStatus}`;
     homeworkBtn.title = 'تغییر وضعیت تکلیف';
 
+    homeworkBtn.addEventListener('click', () => {
+        const homework = state.selectedSession.studentRecords[student.identity.studentId].homework;
+        const statusCycle = {
+            'none': 'incomplete',
+            'incomplete': 'complete',
+            'complete': 'none'
+        };
+        const nextStatus = statusCycle[homework.status];
+
+        // Update the data
+        state.selectedSession.setHomeworkStatus(student.identity.studentId, nextStatus);
+        state.saveData();
+
+        // Update the UI
+        homeworkBtn.className = `homework-status-btn ${nextStatus}`;
+        renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
+    });
+
     const homeworkNoteBtn = document.createElement('button');
     homeworkNoteBtn.className = 'btn-icon';
     homeworkNoteBtn.innerHTML = '📝';
@@ -459,6 +477,25 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     if (!homeworkComment) {
         homeworkNoteBtn.style.opacity = '0.3';
     }
+
+    homeworkNoteBtn.addEventListener('click', () => {
+        const homework = state.selectedSession.studentRecords[student.identity.studentId].homework;
+
+        // Populate the modal with the existing comment
+        newNoteContent.value = homework.comment || '';
+        newNoteContent.dispatchEvent(new Event('input', { bubbles: true })); // Trigger auto-direction
+
+        // Define what "Save" does for this specific context
+        state.setSaveNoteCallback((content) => {
+            homework.comment = content;
+            state.saveData();
+            // Update the button's opacity based on whether there's a comment
+            homeworkNoteBtn.style.opacity = content ? '1' : '0.3';
+        });
+
+        openModal('add-note-modal');
+        newNoteContent.focus();
+    });
 
     homeworkControls.appendChild(homeworkBtn);
     homeworkControls.appendChild(homeworkNoteBtn);
