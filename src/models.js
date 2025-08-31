@@ -78,6 +78,14 @@ export class Note {
     }
 }
 
+export class Homework {
+    constructor(status = 'none', comment = '') {
+        this.status = status; // 'none', 'incomplete', 'complete'
+        this.comment = comment;
+        this.timestamp = new Date();
+    }
+}
+
 export class Session {
     constructor(sessionNumber) {
         this.sessionNumber = sessionNumber;
