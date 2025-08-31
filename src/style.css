@@ -1160,6 +1160,68 @@ button:disabled:hover {
     color: var(--color-text-muted);
 }
 
+.attendance-list-item .homework-info {
+    font-size: 0.85em;
+    color: var(--color-text-muted);
+}
+
+.incomplete-homework {
+    color: var(--color-strong-warning);
+    font-weight: bold;
+}
+
+.homework-controls {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-right: 15px;
+    /* Add some space between homework and attendance buttons */
+}
+
+.homework-status-btn {
+    font-size: 20px;
+    /* Makes the icon bigger */
+    padding: 5px 10px;
+    line-height: 1;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-main);
+    background-color: #f0f0f0;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.homework-status-btn.complete {
+    background-color: var(--color-success);
+    border-color: var(--color-success-hover);
+}
+
+.homework-status-btn.incomplete {
+    background-color: var(--color-warning);
+    border-color: var(--color-warning-hover);
+}
+
+.homework-status-btn.none {
+    background-color: #f0f0f0;
+}
+
+.homework-status-btn::before {
+    color: white;
+}
+
+.homework-status-btn.complete::before {
+    content: '✅';
+}
+
+.homework-status-btn.incomplete::before {
+    content: '⚠️';
+}
+
+.homework-status-btn.none::before {
+    content: '❌';
+    filter: grayscale(1);
+    opacity: 0.6;
+}
+
 /* Container for student and session counts */
 .class-stats-row {
     display: flex;

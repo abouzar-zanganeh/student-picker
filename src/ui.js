@@ -394,10 +394,38 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     const absenceSpan = document.createElement('span');
     absenceSpan.className = 'absence-info';
 
+    const homeworkInfoSpan = document.createElement('span');
+    homeworkInfoSpan.className = 'homework-info';
+
     renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
 
     infoDiv.appendChild(nameSpan);
     infoDiv.appendChild(absenceSpan);
+    infoDiv.appendChild(homeworkInfoSpan);
+
+
+    // Homework related controls
+    const homeworkControls = document.createElement('div');
+    homeworkControls.className = 'homework-controls';
+
+    const homeworkBtn = document.createElement('button');
+    const homeworkStatus = state.selectedSession.studentRecords[student.identity.studentId]?.homework.status || 'none';
+    homeworkBtn.className = `homework-status-btn ${homeworkStatus}`;
+    homeworkBtn.title = 'تغییر وضعیت تکلیف';
+
+    const homeworkNoteBtn = document.createElement('button');
+    homeworkNoteBtn.className = 'btn-icon';
+    homeworkNoteBtn.innerHTML = '📝';
+    homeworkNoteBtn.title = 'افزودن یادداشت برای تکلیف';
+    const homeworkComment = state.selectedSession.studentRecords[student.identity.studentId]?.homework.comment;
+    if (!homeworkComment) {
+        homeworkNoteBtn.style.opacity = '0.3';
+    }
+
+    homeworkControls.appendChild(homeworkBtn);
+    homeworkControls.appendChild(homeworkNoteBtn);
+    // End of Homework related..
+
 
     const buttonGroup = document.createElement('div');
     buttonGroup.className = 'attendance-button-group';
@@ -439,6 +467,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     buttonGroup.appendChild(absentBtn);
     li.appendChild(infoDiv);
     li.appendChild(buttonGroup);
+    li.appendChild(homeworkControls);
 
     return li;
 }
