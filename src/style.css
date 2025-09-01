@@ -526,7 +526,7 @@ button:disabled:hover {
     padding: 4px 8px;
     border-radius: var(--border-radius-main);
     color: var(--color-text-light);
-    margin: 0 10px;
+    margin: 0 5px;
     min-width: 60px;
     text-align: center;
 }
