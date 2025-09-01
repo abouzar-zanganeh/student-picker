@@ -1738,8 +1738,7 @@ body {
 input,
 textarea,
 .note-content,
-.score-comment,
-strong {
+.score-comment {
     /* The selected winner's name */
     -webkit-user-select: text;
     /* Safari */
