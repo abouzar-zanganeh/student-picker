@@ -957,8 +957,4 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.newNoteContent.select(); // Select the text for easy editing
     });
 
-    window.backfillHomework = () => backfillHomeworkStatus(state);
-    console.log("Dev utility loaded: To migrate old homework data, call backfillHomework() in the console.");
-
-
 });
