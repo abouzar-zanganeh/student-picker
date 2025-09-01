@@ -190,6 +190,14 @@ button {
     border-radius: var(--border-radius-main);
 }
 
+.back-to-classes-btn {
+    margin-bottom: 10px;
+}
+
+#back-to-sessions-btn {
+    margin-bottom: 10px;
+}
+
 
 button:disabled,
 button:disabled:hover {
