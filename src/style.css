@@ -181,14 +181,13 @@ ul {
 
 button {
     font-family: var(--font-family-main);
-    padding: 10px 15px;
+    padding: 5px 14px;
     font-size: 16px;
     cursor: pointer;
     background-color: var(--color-primary);
     color: var(--color-text-light);
     border: none;
     border-radius: var(--border-radius-main);
-    margin: 5px 0;
 }
 
 
@@ -231,7 +230,6 @@ button:disabled:hover {
     background-color: transparent;
     padding: 5px;
     font-size: 20px;
-    line-height: 1;
     color: var(--color-secondary);
     transition: all 0.2s ease-in-out;
 }
@@ -1171,7 +1169,6 @@ button:disabled:hover {
 .homework-status-btn {
     font-size: 20px;
     /* Makes the icon bigger */
-    line-height: 1;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     background-color: transparent;

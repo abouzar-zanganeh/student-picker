@@ -1,5 +1,5 @@
 import * as state from './state.js';
-import { getActiveItems } from './state.js';
+import { getActiveItems, getSessionDisplayMap } from './state.js';
 import { detectTextDirection, renderMultiLineText } from './utils.js';
 
 // --- HTML Elements ---
@@ -324,18 +324,7 @@ export function closeContextMenu() {
     }
 }
 
-function createSessionDisplayNumberMap() {
-    // Create a map to correlate the permanent session number with its dynamic display number
-    const activeSessionsForNumbering = getActiveItems(state.currentClassroom.sessions)
-        .filter(s => !s.isCancelled)
-        .sort((a, b) => a.sessionNumber - b.sessionNumber);
 
-    const sessionDisplayNumberMap = new Map();
-    activeSessionsForNumbering.forEach((session, index) => {
-        sessionDisplayNumberMap.set(session.sessionNumber, index + 1);
-    });
-    return sessionDisplayNumberMap; // Return the map we created.
-}
 
 function renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan) {
     absenceSpan.innerHTML = '';
@@ -551,7 +540,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
 export function renderAttendancePage() {
     if (!state.currentClassroom || !state.selectedSession) return;
 
-    const sessionDisplayNumberMap = createSessionDisplayNumberMap();
+    const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
 
     createAbsenteesSummaryBox();
 
@@ -1638,7 +1627,7 @@ export function showPage(pageId) {
 
 // Reactored rendersessions sub functions
 
-function createSessionActionButtons(session, activeSessions) {
+function createSessionActionButtons(session, displaySessionNumber) {
     const buttonsContainer = document.createElement('div');
     buttonsContainer.className = 'list-item-buttons';
 
@@ -1674,7 +1663,7 @@ function createSessionActionButtons(session, activeSessions) {
         endSessionBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             showCustomConfirm(
-                `آیا از خاتمه دادن جلسه ${activeSessions.indexOf(session) + 1} مطمئن هستید؟`,
+                `آیا از خاتمه دادن جلسه ${displaySessionNumber} مطمئن هستید؟`,
                 () => {
                     state.currentClassroom.endSpecificSession(session.sessionNumber);
                     state.saveData();
@@ -1689,7 +1678,7 @@ function createSessionActionButtons(session, activeSessions) {
     return buttonsContainer;
 }
 
-function createSessionInfoContainer(session, activeSessions) {
+function createSessionInfoContainer(session, displaySessionNumber) {
     const infoContainer = document.createElement('div');
     infoContainer.style.display = 'flex';
     infoContainer.style.flexDirection = 'column';
@@ -1720,7 +1709,6 @@ function createSessionInfoContainer(session, activeSessions) {
         badgesContainer.appendChild(cancelledBadge);
     } else {
         // Dynamically find the session's display number
-        const displaySessionNumber = activeSessions.indexOf(session) + 1;
         sessionText.textContent = `جلسه ${displaySessionNumber} - تاریخ: ${sessionDate}`;
         infoContainer.style.cursor = 'pointer';
         infoContainer.addEventListener('click', () => {
@@ -1751,13 +1739,15 @@ function createSessionInfoContainer(session, activeSessions) {
     return infoContainer;
 }
 
-function createSessionListItem(session, activeSessions) {
+function createSessionListItem(session, sessionDisplayNumberMap) {
     const li = document.createElement('li');
 
-    const infoContainer = createSessionInfoContainer(session, activeSessions);
+    const displaySessionNumber = sessionDisplayNumberMap.get(session.sessionNumber);
+
+    const infoContainer = createSessionInfoContainer(session, displaySessionNumber);
     li.appendChild(infoContainer);
 
-    const buttonsContainer = createSessionActionButtons(session, activeSessions);
+    const buttonsContainer = createSessionActionButtons(session, displaySessionNumber);
     li.appendChild(buttonsContainer);
 
     // --- Add the right-click context menu ---
@@ -1793,7 +1783,7 @@ function createSessionListItem(session, activeSessions) {
                 icon: '🗑️',
                 className: 'danger', // This will style the item in red
                 action: () => {
-                    const displayNumText = session.isCancelled ? 'لغو شده' : `${activeSessions.indexOf(session) + 1}`;
+                    const displayNumText = session.isCancelled ? 'لغو شده' : displaySessionNumber;
                     showCustomConfirm(
                         `آیا از حذف جلسه ${displayNumText} مطمئن هستید؟ این عمل آمار ثبت شده در این جلسه را نیز حذف می‌کند.`,
                         () => {
@@ -1828,16 +1818,12 @@ export function renderSessions() {
         return;
     }
 
-    // Get active sessions for correct numbering
-    const activeSessions = getActiveItems(state.currentClassroom.sessions)
-        .filter(s => !s.isCancelled)
-        .sort((a, b) => a.sessionNumber - b.sessionNumber);
-
-    // Get all non-deleted sessions to render, and reverse them for display order
+    const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
     const reversedSessions = [...getActiveItems(state.currentClassroom.sessions)].reverse();
 
     reversedSessions.forEach(session => {
-        const li = createSessionListItem(session, activeSessions);
+        // Pass the map instead of the activeSessions array
+        const li = createSessionListItem(session, sessionDisplayNumberMap);
         sessionListUl.appendChild(li);
     });
 }
@@ -2343,7 +2329,8 @@ function renderAbsenteesSummary() {
     });
 
     // 3. Update the session number in the title
-    sessionNumberSpan.textContent = state.selectedSession.sessionNumber;
+    const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
+    sessionNumberSpan.textContent = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
 
     // 4. Show or hide the box based on whether there are any absentees
     if (absentStudents.length > 0) {
