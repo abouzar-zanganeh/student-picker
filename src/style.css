@@ -266,7 +266,7 @@ button:disabled:hover {
 
 #select-student-btn {
     font-size: 20px;
-    padding: 20px;
+    padding: 10px;
 }
 
 .list-container {
@@ -570,7 +570,7 @@ button:disabled:hover {
     /* ارتفاع خودکار برای تطبیق با محتوا */
     text-align: center;
     font-size: 22px;
-    margin-top: 20px;
+    margin-top: 10px;
     font-weight: bold;
     color: var(--color-success);
     /* افزایش پدینگ برای فضای بیشتر */
@@ -1638,10 +1638,21 @@ button:disabled:hover {
     margin-bottom: 10px;
 }
 
+/* Custom focus style for quick-grade inputs */
+#quick-score-input:focus,
+#quick-note-textarea:focus {
+    outline: none;
+    /* Remove the default browser outline */
+    border-color: var(--color-primary);
+    /* Change border color to match the glow */
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    /* Add a subtle blue glow */
+}
+
 #quick-score-input {
     width: 60px;
     flex-shrink: 0;
-    max-height: 40px;
+    max-height: 43px;
 }
 
 #quick-note-textarea {
@@ -1649,7 +1660,7 @@ button:disabled:hover {
     /* Takes up the remaining available space */
     resize: vertical;
     min-height: 0px;
-    max-height: 40px;
+    height: 43px;
 }
 
 #quick-note-textarea::placeholder {
@@ -1660,7 +1671,7 @@ button:disabled:hover {
 #quick-grade-submit-btn {
     flex-shrink: 0;
     max-width: 53px;
-    height: 40px;
+    height: 43px;
 }
 
 /* Hide spinners from number inputs */
