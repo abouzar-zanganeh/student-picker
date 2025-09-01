@@ -79,7 +79,7 @@ export class Note {
 }
 
 export class Homework {
-    constructor(status = 'none', comment = '') {
+    constructor(status = 'complete', comment = '') {
         this.status = status; // 'none', 'incomplete', 'complete'
         this.comment = comment;
         this.timestamp = new Date();
