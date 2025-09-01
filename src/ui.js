@@ -414,6 +414,12 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     const li = document.createElement('li');
     li.className = 'attendance-list-item';
 
+    const homeworkTooltipMap = {
+        none: 'بدون تکلیف',
+        complete: 'تکلیف کامل',
+        incomplete: 'تکلیف ناقص'
+    };
+
     const infoDiv = document.createElement('div');
     infoDiv.className = 'student-info';
 
@@ -449,8 +455,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     const homeworkBtn = document.createElement('button');
     const homeworkStatus = state.selectedSession.studentRecords[student.identity.studentId]?.homework.status || 'none';
     homeworkBtn.className = `homework-status-btn ${homeworkStatus}`;
-    homeworkBtn.title = 'تغییر وضعیت تکلیف';
-
+    homeworkBtn.title = homeworkTooltipMap[homeworkStatus];
     homeworkBtn.addEventListener('click', () => {
         const homework = state.selectedSession.studentRecords[student.identity.studentId].homework;
         const statusCycle = {
@@ -459,6 +464,8 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
             'complete': 'none'
         };
         const nextStatus = statusCycle[homework.status];
+        homeworkBtn.title = homeworkTooltipMap[nextStatus];
+
 
         // Update the data
         state.selectedSession.setHomeworkStatus(student.identity.studentId, nextStatus);
