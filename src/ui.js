@@ -502,47 +502,41 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     // End of Homework related..
 
 
-    const buttonGroup = document.createElement('div');
-    buttonGroup.className = 'attendance-button-group';
-
-    const presentBtn = document.createElement('button');
-    presentBtn.textContent = 'حاضر';
-    presentBtn.className = 'attendance-status-btn present';
-
-    const absentBtn = document.createElement('button');
-    absentBtn.textContent = 'غایب';
-    absentBtn.className = 'attendance-status-btn absent';
-
+    const attendanceToggleBtn = document.createElement('button');
     const currentStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
-    if (currentStatus === 'present') {
-        presentBtn.classList.add('active');
-    } else if (currentStatus === 'absent') {
-        absentBtn.classList.add('active');
-    }
 
-    presentBtn.addEventListener('click', () => {
-        state.selectedSession.setAttendance(student.identity.studentId, 'present');
-        presentBtn.classList.add('active');
-        absentBtn.classList.remove('active');
-        renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
+    // Function to update button appearance
+    const updateButtonUI = (status) => {
+        if (status === 'present') {
+            attendanceToggleBtn.textContent = 'حاضر';
+            attendanceToggleBtn.className = 'attendance-status-btn present active';
+        } else {
+            attendanceToggleBtn.textContent = 'غایب';
+            attendanceToggleBtn.className = 'attendance-status-btn absent active';
+        }
+    };
+
+    // Set initial state
+    updateButtonUI(currentStatus);
+
+    // Add toggle logic
+    attendanceToggleBtn.addEventListener('click', () => {
+        const oldStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
+        const newStatus = oldStatus === 'present' ? 'absent' : 'present';
+
+        state.selectedSession.setAttendance(student.identity.studentId, newStatus);
         state.saveData();
+
+        // Update UI
+        updateButtonUI(newStatus);
+        renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
         renderAbsenteesSummary();
     });
 
-    absentBtn.addEventListener('click', () => {
-        state.selectedSession.setAttendance(student.identity.studentId, 'absent');
-        absentBtn.classList.add('active');
-        presentBtn.classList.remove('active');
-        renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
-        state.saveData();
-        renderAbsenteesSummary();
-    });
-
-    buttonGroup.appendChild(presentBtn);
-    buttonGroup.appendChild(absentBtn);
+    // Final assembly of the list item
     li.appendChild(infoDiv);
-    li.appendChild(buttonGroup);
     li.appendChild(homeworkControls);
+    li.appendChild(attendanceToggleBtn);
 
     return li;
 }
