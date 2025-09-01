@@ -280,7 +280,7 @@ button:disabled:hover {
     align-items: center;
 }
 
-.list-container li:first-child {
+.list-container li:nth-child(2) {
     border-top-left-radius: var(--border-radius-main);
     border-top-right-radius: var(--border-radius-main);
 }
@@ -1139,11 +1139,14 @@ button:disabled:hover {
 .attendance-list-header {
     /* This rule removes the list item's default appearance */
     background: transparent !important;
-    border-bottom: 2px solid var(--color-border) !important;
     margin-bottom: 5px;
     padding: 0 12px 8px 12px !important;
     cursor: default !important;
+    border-bottom: none !important;
 }
+
+
+
 
 .attendance-list-header:hover {
     background: transparent !important;
