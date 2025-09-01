@@ -188,6 +188,7 @@ button {
     color: var(--color-text-light);
     border: none;
     border-radius: var(--border-radius-main);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .back-to-classes-btn {
@@ -578,9 +579,6 @@ button:disabled:hover {
 }
 
 .winner-name {
-    margin: 10px 0;
-    /* Creates vertical spacing */
-    padding: 0 15px;
     text-align: center;
 }
 
@@ -819,8 +817,8 @@ button:disabled:hover {
 
 
 .attendance-status-btn {
-    max-width: 59px;
-    max-height: 40px;
+    max-width: 57px;
+    max-height: 33px;
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-main);
     cursor: pointer;

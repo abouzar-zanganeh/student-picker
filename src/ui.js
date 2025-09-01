@@ -786,7 +786,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
     const backBtn = document.createElement('button');
     backBtn.className = 'btn-icon';
-    backBtn.innerHTML = '🔽';
+    backBtn.innerHTML = '🔻';
     backBtn.title = 'برنده قبلی';
     const isInHistoryMode = !manualWinner;
     backBtn.classList.toggle('is-disabled', !isInHistoryMode || state.winnerHistoryIndex <= 0);
@@ -811,7 +811,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
     const forwardBtn = document.createElement('button');
     forwardBtn.className = 'btn-icon';
-    forwardBtn.innerHTML = '🔼';
+    forwardBtn.innerHTML = '🔺';
     forwardBtn.title = 'برنده بعدی';
     forwardBtn.classList.toggle('is-disabled', !isInHistoryMode || state.winnerHistoryIndex >= state.selectedSession.winnerHistory.length - 1);
     forwardBtn.addEventListener('click', () => {
@@ -2428,33 +2428,4 @@ function setupAbsenteesCopyButton() {
             showNotification('خطا در کپی کردن لیست.');
         });
     });
-}
-export function backfillHomeworkStatus(state) {
-    console.group("Starting Homework Status Backfill...");
-    let updatedCount = 0;
-
-    for (const className in state.classrooms) {
-        const classroom = state.classrooms[className];
-        console.log(`Processing classroom: "${className}"`);
-
-        classroom.sessions.forEach(session => {
-            for (const studentId in session.studentRecords) {
-                const record = session.studentRecords[studentId];
-                // Ensure the homework object exists and its status isn't already 'complete'.
-                if (record.homework && record.homework.status !== 'complete') {
-                    record.homework.status = 'complete';
-                    updatedCount++;
-                }
-            }
-        });
-    }
-
-    if (updatedCount > 0) {
-        state.saveData();
-        console.log(`✅ Backfill complete. ${updatedCount} homework records were updated to 'complete' and saved.`);
-    } else {
-        console.log("No records needed updating. All relevant homework statuses were already 'complete'.");
-    }
-    console.groupEnd();
-    alert("Homework backfill process is complete! Check the console for details.");
 }
