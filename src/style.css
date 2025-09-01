@@ -568,7 +568,7 @@ button:disabled:hover {
     /* ارتفاع خودکار برای تطبیق با محتوا */
     text-align: center;
     font-size: 22px;
-    margin-top: 10px;
+    margin-top: 40px;
     font-weight: bold;
     color: var(--color-success);
     /* افزایش پدینگ برای فضای بیشتر */
