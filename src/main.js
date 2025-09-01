@@ -2,7 +2,7 @@ import * as state from './state.js';
 import { resetAllStudentCounters, getActiveItems } from './state.js';
 import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
-import { normalizeText, normalizeKeyboard, backfillHomeworkStatus } from './utils.js';
+import { normalizeText, normalizeKeyboard } from './utils.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // --- HTML Elements (from ui.js, but needed for event listeners) ---
