@@ -1125,6 +1125,41 @@ button:disabled:hover {
 }
 
 /* --- استایل‌های جدید برای لیست حضور و غیاب --- */
+
+/* --- Styles for Attendance List Header --- */
+.attendance-list-header {
+    background: transparent !important;
+    border-bottom: 2px solid var(--color-border) !important;
+    margin-bottom: 5px;
+    padding: 0 12px 8px 12px !important;
+    cursor: default !important;
+}
+
+.attendance-list-header:hover {
+    background: transparent !important;
+}
+
+.attendance-list-header>div {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--color-text-muted);
+
+    /* Reset button/control styles to act as simple text containers */
+    border: none;
+    background: none;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    /* Make sure our text isn't treated like button content */
+    line-height: normal;
+}
+
+.attendance-list-header .attendance-status-btn {
+    width: 78px;
+    /* Match the width of the button below */
+    text-align: center;
+}
+
 .attendance-list-item .student-info {
     display: flex;
     flex-direction: column;
