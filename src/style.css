@@ -585,6 +585,7 @@ button:disabled:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
+    margin-bottom: 20px;
     /* This now centers the items horizontally */
 }
 
