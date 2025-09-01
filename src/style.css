@@ -1242,7 +1242,7 @@ button:disabled:hover {
 
 .homework-status-btn.none::before {
     content: '❌';
-    filter: grayscale(1);
+    filter: grayscale(0.1);
     opacity: 0.6;
 }
 
