@@ -550,6 +550,16 @@ export function renderAttendancePage() {
     attendanceClassNameHeader.textContent = `حضور و غیاب کلاس: ${state.currentClassroom.info.name}`;
     attendanceListUl.innerHTML = '';
 
+
+    // Creates and adds the header row
+    const headerLi = document.createElement('li');
+    headerLi.className = 'attendance-list-header';
+    headerLi.innerHTML = `
+    <div class="student-info"></div> <div class="homework-controls">وضعیت تکلیف</div>
+    <div class="attendance-status-btn">وضعیت حضور</div>
+`;
+    attendanceListUl.appendChild(headerLi);
+
     getActiveItems(state.currentClassroom.students).forEach(student => {
         const li = createAttendanceListItem(student, sessionDisplayNumberMap);
         attendanceListUl.appendChild(li);
