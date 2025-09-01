@@ -241,6 +241,7 @@ button:disabled:hover {
     font-size: 20px;
     color: var(--color-secondary);
     transition: all 0.2s ease-in-out;
+    filter: grayscale(1);
 }
 
 .btn-icon:hover {
