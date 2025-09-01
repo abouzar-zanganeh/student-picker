@@ -814,10 +814,7 @@ button:disabled:hover {
     gap: 15px;
 }
 
-.attendance-button-group {
-    display: flex;
-    gap: 8px;
-}
+
 
 .attendance-status-btn {
     padding: 8px 16px;
