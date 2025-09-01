@@ -1127,7 +1127,9 @@ button:disabled:hover {
 /* --- استایل‌های جدید برای لیست حضور و غیاب --- */
 
 /* --- Styles for Attendance List Header --- */
+/* --- Styles for Attendance List Header --- */
 .attendance-list-header {
+    /* This rule removes the list item's default appearance */
     background: transparent !important;
     border-bottom: 2px solid var(--color-border) !important;
     margin-bottom: 5px;
@@ -1139,25 +1141,26 @@ button:disabled:hover {
     background: transparent !important;
 }
 
-.attendance-list-header>div {
+.header-label-spacer {
+    flex-grow: 1;
+    /* This pushes the labels to the right, taking up all extra space */
+}
+
+.header-label {
     font-size: 13px;
     font-weight: bold;
     color: var(--color-text-muted);
-
-    /* Reset button/control styles to act as simple text containers */
-    border: none;
-    background: none;
-    justify-content: center;
-    padding: 0;
-    margin: 0;
-    /* Make sure our text isn't treated like button content */
-    line-height: normal;
+    text-align: center;
+    /* These flex-basis values are set to align the labels above the controls */
+    flex-shrink: 0;
+    /* Prevents labels from shrinking */
+    flex-basis: 95px;
+    /* Allocates space for the "Homework State" label */
 }
 
-.attendance-list-header .attendance-status-btn {
-    width: 78px;
-    /* Match the width of the button below */
-    text-align: center;
+.header-label:last-child {
+    flex-basis: 60px;
+    /* Allocates a smaller space for the "Presence State" label */
 }
 
 .attendance-list-item .student-info {

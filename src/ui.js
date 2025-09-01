@@ -556,8 +556,8 @@ export function renderAttendancePage() {
     headerLi.className = 'attendance-list-header';
     headerLi.innerHTML = `
     <span class="header-label-spacer"></span>
-    <span class="header-label">وضعیت تکلیف</span>
-    <span class="header-label">وضعیت حضور</span>
+    <span class="header-label">تکلیف</span>
+    <span class="header-label">حضور</span>
 `;
 
     attendanceListUl.appendChild(headerLi);
