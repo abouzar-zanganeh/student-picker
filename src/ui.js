@@ -555,8 +555,10 @@ export function renderAttendancePage() {
     const headerLi = document.createElement('li');
     headerLi.className = 'attendance-list-header';
     headerLi.innerHTML = `
-    <div class="student-info"></div> <div class="homework-controls">وضعیت تکلیف</div>
-    <div class="attendance-status-btn">وضعیت حضور</div>`;
+    <span class="header-label-spacer"></span>
+    <span class="header-label">وضعیت تکلیف</span>
+    <span class="header-label">وضعیت حضور</span>
+`;
 
     attendanceListUl.appendChild(headerLi);
 
