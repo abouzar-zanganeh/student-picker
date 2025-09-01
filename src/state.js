@@ -204,6 +204,23 @@ export function getActiveItems(items) {
     return items.filter(item => !item.isDeleted);
 }
 
+export function getSessionDisplayMap(classroom) {
+    const sessionDisplayMap = new Map();
+    if (!classroom) return sessionDisplayMap; // Return an empty map if no classroom is provided
+
+    const activeSessionsForNumbering = getActiveItems(classroom.sessions)
+        .filter(s => !s.isCancelled)
+        .sort((a, b) => a.sessionNumber - b.sessionNumber);
+
+    activeSessionsForNumbering.forEach((session, index) => {
+        // The Map will store the permanent session number as the key,
+        // and the calculated display number as the value.
+        sessionDisplayMap.set(session.sessionNumber, index + 1);
+    });
+
+    return sessionDisplayMap;
+}
+
 export function setWinnerHistoryIndex(index) {
     winnerHistoryIndex = index;
 }
