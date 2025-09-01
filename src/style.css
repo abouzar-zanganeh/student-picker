@@ -752,6 +752,8 @@ button:disabled:hover {
     transition: all 0.2s ease;
     border: 1px solid transparent;
     position: relative;
+    -webkit-tap-highlight-color: transparent;
+
     /* برای Tooltip */
 }
 
