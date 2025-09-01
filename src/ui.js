@@ -786,7 +786,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
     const backBtn = document.createElement('button');
     backBtn.className = 'btn-icon';
-    backBtn.innerHTML = '🔻';
+    backBtn.innerHTML = '˅';
     backBtn.title = 'برنده قبلی';
     const isInHistoryMode = !manualWinner;
     backBtn.classList.toggle('is-disabled', !isInHistoryMode || state.winnerHistoryIndex <= 0);
@@ -811,7 +811,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
     const forwardBtn = document.createElement('button');
     forwardBtn.className = 'btn-icon';
-    forwardBtn.innerHTML = '🔺';
+    forwardBtn.innerHTML = '˄';
     forwardBtn.title = 'برنده بعدی';
     forwardBtn.classList.toggle('is-disabled', !isInHistoryMode || state.winnerHistoryIndex >= state.selectedSession.winnerHistory.length - 1);
     forwardBtn.addEventListener('click', () => {
