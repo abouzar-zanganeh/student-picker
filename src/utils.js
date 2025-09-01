@@ -59,35 +59,32 @@ export function normalizeKeyboard(str) {
     return result;
 }
 
-// --- Console Debugging Utilities ---
-export function backfillClassroomDates(state) {
-    const classOrder = [
-        "Pre1 Sat 9:00",
-        "Inter1 Sat 16:30",
-        "Ad2 Sat 18:30",
-        "Ad1 Sun 10:45",
-        "High2 Sun 14:30",
-        "Inter2 Sun 16:30",
-        "Pre1 Sun 18:30"
-    ];
+export function backfillHomeworkStatus(state) {
+    console.group("Starting Homework Status Backfill...");
+    let updatedCount = 0;
 
-    const startDate = new Date('2025-07-12T09:00:00Z'); // Corresponds to July 12, 2025
+    for (const className in state.classrooms) {
+        const classroom = state.classrooms[className];
+        console.log(`Processing classroom: "${className}"`);
 
-    console.group("Starting Classroom Date Backfill...");
+        classroom.sessions.forEach(session => {
+            for (const studentId in session.studentRecords) {
+                const record = session.studentRecords[studentId];
+                // Ensure the homework object exists and its status isn't already 'complete'.
+                if (record.homework && record.homework.status !== 'complete') {
+                    record.homework.status = 'complete';
+                    updatedCount++;
+                }
+            }
+        });
+    }
 
-    classOrder.forEach((className, index) => {
-        if (state.classrooms[className]) {
-            // Add 1 second for each subsequent class to create a unique, ordered timestamp
-            const newDate = new Date(startDate.getTime() + index * 1000);
-            state.classrooms[className].info.creationDate = newDate;
-            console.log(`Updated "${className}" creationDate to: ${newDate.toISOString()}`);
-        } else {
-            console.warn(`Class "${className}" not found. Skipping.`);
-        }
-    });
-
-    state.saveData();
-    console.log("✅ All creation dates have been updated and saved to localStorage.");
+    if (updatedCount > 0) {
+        state.saveData();
+        console.log(`✅ Backfill complete. ${updatedCount} homework records were updated to 'complete' and saved.`);
+    } else {
+        console.log("No records needed updating. All relevant homework statuses were already 'complete'.");
+    }
     console.groupEnd();
-    alert("Classroom date backfill is complete! Check the console for details.");
+    alert("Homework backfill process is complete! Check the console for details.");
 }
