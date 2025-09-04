@@ -737,7 +737,7 @@ button:disabled:hover {
 .category-pills {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 7px;
     margin-bottom: 25px;
     justify-content: center;
 }
