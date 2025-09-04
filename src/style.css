@@ -1491,6 +1491,8 @@ button:disabled:hover {
 
 .search-results-dropdown .global-search-result .class-name {
     cursor: pointer;
+    font-size: 0.7em;
+    margin-top: 0.7em;
 }
 
 .search-results-dropdown .global-search-result .class-name:hover {
