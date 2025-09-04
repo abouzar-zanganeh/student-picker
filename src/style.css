@@ -2057,4 +2057,18 @@ textarea,
     text-align: center;
 }
 
+
+#student-stats-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+#student-stats-header::after {
+    content: "تعداد: " attr(data-student-count);
+    font-size: 0.6em;
+    color: var(--color-text-muted);
+}
+
 /* -------------------------------------------- */

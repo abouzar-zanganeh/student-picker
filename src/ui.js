@@ -582,7 +582,7 @@ export function renderStudentStatsList() {
     if (!state.currentClassroom) return;
 
     const totalStudents = getActiveItems(state.currentClassroom.students).length;
-    studentStatsHeader.textContent = `آمار عملکرد -- ${totalStudents} نفر`;
+    studentStatsHeader.textContent = `آمار عملکرد`;
 
 
     // --- DYNAMIC HEADER GENERATION ---
@@ -705,6 +705,9 @@ export function renderStudentStatsList() {
 
         // --- END DYNAMIC DATA POPULATION ---
     });
+
+    getActiveItems(state.currentClassroom.students);
+    studentStatsHeader.setAttribute('data-student-count', activeStudents.length);
 
     tableContainer.appendChild(table);
     // --- Adds event listener for the name header toggle ---
