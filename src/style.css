@@ -2049,4 +2049,12 @@ textarea,
     text-decoration: underline;
 }
 
+#attendance-class-name-header,
+#profile-student-name-header,
+#class-name-header,
+#session-class-name-header {
+    font-size: 0.9em;
+    text-align: center;
+}
+
 /* -------------------------------------------- */

@@ -542,12 +542,14 @@ export function renderAttendancePage() {
 
     const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
 
+    const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
+
     createAbsenteesSummaryBox();
 
 
 
 
-    attendanceClassNameHeader.textContent = `حضور و غیاب کلاس: ${state.currentClassroom.info.name}`;
+    attendanceClassNameHeader.textContent = `${state.currentClassroom.info.name} - حضور و غیاب جلسه شماره ${displayNumber}`;
     attendanceListUl.innerHTML = '';
 
 
@@ -581,6 +583,7 @@ export function renderStudentStatsList() {
 
     const totalStudents = getActiveItems(state.currentClassroom.students).length;
     studentStatsHeader.textContent = `آمار عملکرد -- ${totalStudents} نفر`;
+
 
     // --- DYNAMIC HEADER GENERATION ---
     // 1. Isolate the 'Name' header, which always comes first.
