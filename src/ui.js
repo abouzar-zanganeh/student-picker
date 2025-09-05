@@ -521,6 +521,11 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         const newStatus = oldStatus === 'present' ? 'absent' : 'present';
 
         state.selectedSession.setAttendance(student.identity.studentId, newStatus);
+
+        if (newStatus === 'absent') {
+            state.selectedSession.studentRecords[student.identity.studentId].hadIssue = false;
+        }
+
         state.saveData();
 
         // Update UI
