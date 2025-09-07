@@ -393,7 +393,7 @@ function renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkSpa
             homeworkSpan.appendChild(numberSpan);
 
             if (index < incompleteSessions.length - 1) {
-                homeworkSpan.appendChild(document.createTextNode('، '));
+                homeworkSpan.appendChild(document.createTextNode('،'));
             }
         });
     } else {
@@ -497,7 +497,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
                 const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
                 const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
                 const noteSource = { type: 'fromAttendance', sessionNumber: state.selectedSession.sessionNumber };
-                const notePrefix = `یادداشت تکلیف جلسه ${displayNumber}: `;
+                const notePrefix = `یادداشت حضور-غیاب ${displayNumber}: `;
 
                 // 3. Find if a note from this source already exists in the student's profile
                 const existingNote = student.profile.notes.find(n =>
