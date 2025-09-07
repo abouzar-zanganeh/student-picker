@@ -482,12 +482,45 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         newNoteContent.dispatchEvent(new Event('input', { bubbles: true })); // Trigger auto-direction
 
         // Define what "Save" does for this specific context
-        state.setSaveNoteCallback((content) => {
-            homework.comment = content;
-            state.saveData();
-            // Update the button's opacity based on whether there's a comment
-            homeworkNoteBtn.style.opacity = content ? '1' : '0.3';
-        });
+        state.setSaveNoteCallback(// This is the new callback logic
+            (content) => {
+                // 1. Save the comment to the session's homework record (original behavior)
+                homework.comment = content;
+
+                // 2. Prepare variables for creating/finding the profile note
+                const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
+                const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
+                const noteSource = { type: 'homework', sessionNumber: state.selectedSession.sessionNumber };
+                const notePrefix = `یادداشت تکلیف جلسه ${displayNumber}: `;
+
+                // 3. Find if a note from this source already exists in the student's profile
+                const existingNote = student.profile.notes.find(n =>
+                    !n.isDeleted && // Important: Only check non-deleted notes
+                    n.source &&
+                    n.source.type === 'homework' &&
+                    n.source.sessionNumber === noteSource.sessionNumber
+                );
+
+                // 4. Intelligently update or create the note
+                if (existingNote) {
+                    if (content) {
+                        // If there's new content, update the existing note
+                        existingNote.content = notePrefix + content;
+                    } else {
+                        // If content is cleared, soft-delete the existing note
+                        existingNote.isDeleted = true;
+                    }
+                } else if (content) {
+                    // If no note exists and there's new content, add a new one
+                    student.addNote(notePrefix + content, noteSource);
+                }
+
+                state.saveData();
+
+                // 5. Update the button's visual cue and re-render homework info
+                homeworkNoteBtn.style.opacity = content ? '1' : '0.3';
+                renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
+            });
 
         openModal('add-note-modal');
         newNoteContent.focus();
