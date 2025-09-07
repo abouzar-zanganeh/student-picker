@@ -496,14 +496,14 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
                 // 2. Prepare variables for creating/finding the profile note
                 const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
                 const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
-                const noteSource = { type: 'homework', sessionNumber: state.selectedSession.sessionNumber };
+                const noteSource = { type: 'fromAttendance', sessionNumber: state.selectedSession.sessionNumber };
                 const notePrefix = `یادداشت تکلیف جلسه ${displayNumber}: `;
 
                 // 3. Find if a note from this source already exists in the student's profile
                 const existingNote = student.profile.notes.find(n =>
                     !n.isDeleted && // Important: Only check non-deleted notes
                     n.source &&
-                    n.source.type === 'homework' &&
+                    n.source.type === 'fromAttendance' &&
                     n.source.sessionNumber === noteSource.sessionNumber
                 );
 
