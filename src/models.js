@@ -52,8 +52,8 @@ export class Student {
         this.logs.scores[skillKey].push(newScore);
     }
 
-    addNote(content) {
-        const newNote = new Note(content);
+    addNote(content, source = null) {
+        const newNote = new Note(content, source);
         this.profile.notes.push(newNote);
     }
 }
@@ -70,11 +70,12 @@ export class Score {
 }
 
 export class Note {
-    constructor(content) {
+    constructor(content, source = null) {
         this.id = `note_${new Date().getTime()}`;
         this.timestamp = new Date();
         this.content = content;
         this.isDeleted = false;
+        this.source = source;
     }
 }
 
