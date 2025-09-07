@@ -363,7 +363,8 @@ function renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan)
     }
 }
 
-function renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkSpan) {
+function renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkSpan, options = {}) {
+    const { includePrefix = true } = options;
     homeworkSpan.innerHTML = ''; // Clear previous content
 
     // Find all sessions where homework was 'incomplete' or 'none'
@@ -380,11 +381,12 @@ function renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkSpa
         .filter(sessionInfo => sessionInfo.number !== undefined); // Ensure cancelled sessions are out
 
     if (incompleteSessions.length > 0) {
-        homeworkSpan.appendChild(document.createTextNode('تکالیف ناقص: '));
+        if (includePrefix) {
+            homeworkSpan.appendChild(document.createTextNode('تکالیف ناقص: '));
+        }
         incompleteSessions.forEach((sessionInfo, index) => {
             const numberSpan = document.createElement('span');
             numberSpan.textContent = sessionInfo.number;
-            // Add a special style for 'incomplete' to distinguish from 'none'
             if (sessionInfo.status === 'incomplete') {
                 numberSpan.classList.add('incomplete-homework');
             }
@@ -395,7 +397,11 @@ function renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkSpa
             }
         });
     } else {
-        homeworkSpan.textContent = 'تکالیف ناقص: ندارد';
+        if (includePrefix) {
+            homeworkSpan.textContent = 'تکالیف ناقص: ندارد';
+        } else {
+            homeworkSpan.textContent = 'ندارد';
+        }
     }
 }
 
@@ -482,9 +488,9 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         newNoteContent.dispatchEvent(new Event('input', { bubbles: true })); // Trigger auto-direction
 
         // Define what "Save" does for this specific context
-        state.setSaveNoteCallback(// This is the new callback logic
+        state.setSaveNoteCallback(
             (content) => {
-                // 1. Save the comment to the session's homework record (original behavior)
+                // 1. Save the comment to the session's homework record
                 homework.comment = content;
 
                 // 2. Prepare variables for creating/finding the profile note
@@ -1136,6 +1142,22 @@ export function renderStudentProfilePage() {
         <p><strong>فرصت از دست رفته:</strong> ${student.statusCounters.missedChances || 0}</p>
         <p><strong>مشکل فنی:</strong> ${student.statusCounters.otherIssues || 0}</p>
     `;
+
+    // --- Homework Info ---
+    const homeworkInfoP = document.createElement('p');
+    const homeworkLabel = document.createElement('strong');
+    homeworkLabel.textContent = 'تکالیف ناقص:';
+
+    const homeworkValuesSpan = document.createElement('span');
+    homeworkValuesSpan.style.marginRight = '5px'; // Adds a little space after the label
+
+    // Call our reusable function without the prefix
+    const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
+    renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkValuesSpan, { includePrefix: false });
+
+    homeworkInfoP.appendChild(homeworkLabel);
+    homeworkInfoP.appendChild(homeworkValuesSpan);
+    profileStatsSummaryDiv.appendChild(homeworkInfoP);
 
     // Get only the categories marked as "gradable" and not deleted
     const gradedCategories = state.currentClassroom.categories.filter(cat => cat.isGradedCategory && !cat.isDeleted);
