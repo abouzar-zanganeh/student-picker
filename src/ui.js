@@ -581,19 +581,26 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     return li;
 }
 
+function getRealSessionNumber() {
+    // Use this function to get the active session number which excludes cancelled and deleted sessions
+    const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
+    const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
+    return displayNumber;
+
+}
+
 export function renderAttendancePage() {
     if (!state.currentClassroom || !state.selectedSession) return;
 
     const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
 
-    const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
 
     createAbsenteesSummaryBox();
 
 
 
 
-    attendanceClassNameHeader.textContent = `${state.currentClassroom.info.name} - حضور و غیاب جلسه شماره ${displayNumber}`;
+    attendanceClassNameHeader.textContent = `${state.currentClassroom.info.name} - حضور و غیاب جلسه شماره ${getRealSessionNumber()}`;
     attendanceListUl.innerHTML = '';
 
 
@@ -1035,7 +1042,7 @@ function initializeStudentPageUI() {
 
 
     // Set header and clear containers
-    classNameHeader.textContent = `جلسه ${state.selectedSession.sessionNumber} / کلاس: ${state.currentClassroom.info.name}`;
+    classNameHeader.textContent = `جلسه ${getRealSessionNumber()} / کلاس: ${state.currentClassroom.info.name}`;
     categoryPillsContainer.innerHTML = '';
     resultDiv.innerHTML = '';
 
