@@ -1,5 +1,5 @@
 import * as state from './state.js';
-import { getActiveItems, getSessionDisplayMap } from './state.js';
+import { getActiveItems, getSessionDisplayMap, createBackup } from './state.js';
 import { detectTextDirection, renderMultiLineText } from './utils.js';
 
 // --- HTML Elements ---
@@ -1748,13 +1748,26 @@ function createSessionActionButtons(session, displaySessionNumber) {
         endSessionBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             showCustomConfirm(
-                `آیا از خاتمه دادن جلسه ${displaySessionNumber} مطمئن هستید؟`,
+                `جلسه شماره ${displaySessionNumber} خاتمه پیدا خواهد کرد!`,
                 () => {
                     state.currentClassroom.endSpecificSession(session.sessionNumber);
                     state.saveData();
                     renderSessions();
-                },
-                { confirmText: 'بله', confirmClass: 'btn-success' }
+
+                    // New: Show a second confirmation for backup
+                    showCustomConfirm(
+                        "جلسه با موفقیت خاتمه یافت. آیا مایل به ایجاد فایل پشتیبان هستید؟",
+                        () => {
+                            createBackup();
+                            showNotification("فایل پشتیبان با موفقیت ایجاد شد.");
+                        },
+                        {
+                            confirmText: 'بله',
+                            cancelText: 'خیر',
+                            confirmClass: 'btn-success'
+                        }
+                    );
+                }
             );
         });
         buttonsContainer.appendChild(endSessionBtn);
