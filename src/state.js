@@ -32,6 +32,18 @@ export function saveData() {
     localStorage.setItem('teacherAssistantData_v2', JSON.stringify(classrooms));
 }
 
+export function createBackup() {
+    const dataStr = JSON.stringify(classrooms, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
+    link.download = `SP-${today}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
 export function loadData() {
     const savedData = localStorage.getItem('teacherAssistantData_v2');
     if (savedData) {
