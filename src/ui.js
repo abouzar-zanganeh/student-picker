@@ -582,7 +582,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
 }
 
 function getRealSessionNumber() {
-    // Use this function to get the active session number which excludes cancelled and deleted sessions
+    // Use this function to get the active session number. This function filters out cancelled and deleted sessions
     const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
     const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
     return displayNumber;
@@ -2487,7 +2487,7 @@ function setupAbsenteesCopyButton() {
         };
 
         // Build the formatted string for the clipboard
-        let textToCopy = `لیست غایبین جلسه شماره ${state.selectedSession.sessionNumber}:\n\n`;
+        let textToCopy = `لیست غایبین جلسه شماره ${getRealSessionNumber()}:\n\n`;
         absentStudents.forEach(student => {
             const totalAbsences = calculateTotalAbsences(student);
             textToCopy += `- ${student.identity.name} (تعداد غیبت‌ها: ${totalAbsences})\n`;
