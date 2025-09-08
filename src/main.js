@@ -1,5 +1,5 @@
 import * as state from './state.js';
-import { resetAllStudentCounters, getActiveItems } from './state.js';
+import { resetAllStudentCounters, getActiveItems, createBackup } from './state.js';
 import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard } from './utils.js';
@@ -694,15 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     backupDataBtn.addEventListener('click', () => {
-        const dataStr = JSON.stringify(state.classrooms, null, 2);
-        const dataBlob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(dataBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
-        link.download = `SP-${today}.json`;
-        link.click();
-        URL.revokeObjectURL(url);
+        createBackup();
         ui.showNotification("پشتیبان‌گیری با موفقیت انجام شد.");
         closeSideNav();
     });
