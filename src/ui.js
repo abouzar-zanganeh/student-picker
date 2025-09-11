@@ -1071,6 +1071,8 @@ function renderCategoryPills() {
         }
 
         pill.addEventListener('click', () => {
+
+
             document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
             state.setSelectedCategory(category);
@@ -1079,6 +1081,32 @@ function renderCategoryPills() {
 
             selectStudentBtnWrapper.classList.remove('disabled-wrapper');
             selectStudentBtn.disabled = false;
+
+
+
+            // --- NEW: Display the last winner for this category ---
+            const lastWinnerId = state.selectedSession.lastWinnerByCategory[category.name];
+            if (lastWinnerId) {
+                const lastWinner = state.currentClassroom.students.find(s => s.identity.studentId === lastWinnerId);
+                if (lastWinner) {
+                    // We call displayWinner with the student and category.
+                    // This sets a manual selection context, bypassing the history index.
+                    displayWinner(lastWinner, category.name);
+                }
+            } else {
+                // If no last winner for this category, clear the display and reset state.
+                resultDiv.innerHTML = '';
+                state.setManualSelection(null);
+                state.setWinnerHistoryIndex(-1);
+                selectStudentBtn.disabled = false; // Ensure button is enabled
+
+                // Clear any lingering winner highlight from the stats table
+                const previousWinnerRow = document.querySelector('.current-winner-highlight');
+                if (previousWinnerRow) {
+                    previousWinnerRow.classList.remove('current-winner-highlight');
+                }
+            }
+
         });
 
         categoryPillsContainer.appendChild(pill);
