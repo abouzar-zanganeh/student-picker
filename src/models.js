@@ -117,7 +117,7 @@ export class Session {
     initializeStudentRecord(studentId) {
         if (!this.studentRecords[studentId]) {
             this.studentRecords[studentId] = {
-                attendance: 'present',
+                attendance: 'present', // 'present', 'absent', 'late', 'leftEarly'
                 homework: new Homework(),
                 selections: {}, //The recording of how many times a student was selected in this session per category. for example: { "Vocabulary": 2, "Grammar": 1 }.
                 hadIssue: false,
