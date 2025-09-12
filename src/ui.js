@@ -752,7 +752,12 @@ export function renderStudentStatsList() {
         row.insertCell().textContent = student.statusCounters.totalSelections || 0;
         row.insertCell().textContent = calculateAbsences(student);
         row.insertCell().textContent = student.statusCounters.missedChances || 0;
-        row.insertCell().textContent = student.statusCounters.otherIssues || 0;
+
+
+        const oldIssues = student.statusCounters.otherIssues || 0;
+        const newIssues = Object.values(student.categoryIssues || {}).reduce((sum, count) => sum + count, 0);
+        const totalIssues = oldIssues + newIssues;
+        row.insertCell().textContent = totalIssues;
 
         // --- END DYNAMIC DATA POPULATION ---
     });
