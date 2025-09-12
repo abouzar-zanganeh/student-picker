@@ -1190,8 +1190,30 @@ export function renderStudentProfilePage() {
     <p><strong>کل انتخاب:</strong> ${student.statusCounters.totalSelections}</p>
     <p><strong>غیبت:</strong> ${absenceCount}</p>
     <p><strong>فرصت از دست رفته:</strong> ${student.statusCounters.missedChances || 0}</p>
-    <p><strong>مشکل فنی:</strong> ${totalIssues}</p>
-`;
+    <p><strong>مشکل فنی:</strong> ${totalIssues}</p>`;
+
+
+    const issuesBreakdownContainer = document.createElement('div');
+    issuesBreakdownContainer.className = 'issues-breakdown';
+
+    // Get all active categories for the classroom
+    const activeCategories = getActiveItems(state.currentClassroom.categories);
+
+    if (activeCategories.length > 0) {
+        activeCategories.forEach(category => {
+            const categoryName = category.name;
+            // Look up the count for this student. Default to 0 if not found.
+            const count = student.categoryIssues?.[categoryName] || 0;
+
+            const p = document.createElement('p');
+            p.className = 'breakdown-item';
+            p.innerHTML = `<strong>${categoryName}:</strong> ${count}`;
+            issuesBreakdownContainer.appendChild(p);
+        });
+
+        profileStatsSummaryDiv.appendChild(issuesBreakdownContainer);
+    }
+
 
     // --- Homework Info ---
     const homeworkInfoP = document.createElement('p');
