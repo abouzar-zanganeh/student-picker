@@ -75,6 +75,7 @@ export function rehydrateData(plainClassrooms) {
             studentInstance.profile = plainStudent.profile;
             studentInstance.finalClassActivityScore = plainStudent.finalClassActivityScore;
             studentInstance.categoryCounts = plainStudent.categoryCounts || {};
+            studentInstance.categoryIssues = plainStudent.categoryIssues || {};
             return studentInstance;
         });
 
