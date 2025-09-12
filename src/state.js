@@ -196,6 +196,7 @@ export function resetAllStudentCounters() {
                 earlyLeaves: 0,
             };
             student.categoryCounts = {};
+            student.categoryIssues = {};
             // Reset absences
             classroom.sessions.forEach(session => {
                 const studentId = student.identity.studentId;
