@@ -1182,12 +1182,16 @@ export function renderStudentProfilePage() {
         return count + (record && record.attendance === 'absent' ? 1 : 0);
     }, 0);
 
+    const oldIssues = student.statusCounters.otherIssues || 0;
+    const newIssues = Object.values(student.categoryIssues || {}).reduce((sum, count) => sum + count, 0);
+    const totalIssues = oldIssues + newIssues;
+
     profileStatsSummaryDiv.innerHTML = `
-        <p><strong>کل انتخاب:</strong> ${student.statusCounters.totalSelections}</p>
-        <p><strong>غیبت:</strong> ${absenceCount}</p>
-        <p><strong>فرصت از دست رفته:</strong> ${student.statusCounters.missedChances || 0}</p>
-        <p><strong>مشکل فنی:</strong> ${student.statusCounters.otherIssues || 0}</p>
-    `;
+    <p><strong>کل انتخاب:</strong> ${student.statusCounters.totalSelections}</p>
+    <p><strong>غیبت:</strong> ${absenceCount}</p>
+    <p><strong>فرصت از دست رفته:</strong> ${student.statusCounters.missedChances || 0}</p>
+    <p><strong>مشکل فنی:</strong> ${totalIssues}</p>
+`;
 
     // --- Homework Info ---
     const homeworkInfoP = document.createElement('p');
