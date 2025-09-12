@@ -940,12 +940,18 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
             }
             issueBtn.classList.add('active');
             studentRecord.hadIssue = true;
-            winner.statusCounters.otherIssues++;
+
+            const categoryName = state.selectedCategory.name;
+            winner.categoryIssues[categoryName] = (winner.categoryIssues[categoryName] || 0) + 1;
+
             winner.statusCounters.missedChances++;
         } else {
             issueBtn.classList.remove('active');
             studentRecord.hadIssue = false;
-            winner.statusCounters.otherIssues = Math.max(0, winner.statusCounters.otherIssues - 1);
+
+            const categoryName = state.selectedCategory.name;
+            if (winner.categoryIssues[categoryName]) { winner.categoryIssues[categoryName] = Math.max(0, winner.categoryIssues[categoryName] - 1); }
+
             winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
         }
         renderStudentStatsList();
