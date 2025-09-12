@@ -24,6 +24,7 @@ export class Student {
         };
 
         this.categoryCounts = {}; // آبجکت جدید برای شمارش انتخاب‌ها بر اساس دسته‌بندی
+        this.categoryIssues = {}; // Object to store issue counts per category
 
         this.logs = {
             parentContacts: [],
