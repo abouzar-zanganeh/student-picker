@@ -192,7 +192,6 @@ export function resetAllStudentCounters() {
             student.statusCounters = {
                 totalSelections: 0,
                 missedChances: 0,
-                otherIssues: 0,
                 earlyLeaves: 0,
             };
             student.categoryCounts = {};

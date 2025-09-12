@@ -754,9 +754,7 @@ export function renderStudentStatsList() {
         row.insertCell().textContent = student.statusCounters.missedChances || 0;
 
 
-        const oldIssues = student.statusCounters.otherIssues || 0;
-        const newIssues = Object.values(student.categoryIssues || {}).reduce((sum, count) => sum + count, 0);
-        const totalIssues = oldIssues + newIssues;
+        const totalIssues = Object.values(student.categoryIssues || {}).reduce((sum, count) => sum + count, 0);
         row.insertCell().textContent = totalIssues;
 
         // --- END DYNAMIC DATA POPULATION ---
@@ -1182,9 +1180,7 @@ export function renderStudentProfilePage() {
         return count + (record && record.attendance === 'absent' ? 1 : 0);
     }, 0);
 
-    const oldIssues = student.statusCounters.otherIssues || 0;
-    const newIssues = Object.values(student.categoryIssues || {}).reduce((sum, count) => sum + count, 0);
-    const totalIssues = oldIssues + newIssues;
+    const totalIssues = Object.values(student.categoryIssues || {}).reduce((sum, count) => sum + count, 0);
 
     profileStatsSummaryDiv.innerHTML = `
     <p><strong>کل انتخاب:</strong> ${student.statusCounters.totalSelections}</p>
