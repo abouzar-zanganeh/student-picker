@@ -194,7 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             if (studentRecord && studentRecord.hadIssue) {
                 winner.statusCounters.missedChances++;
-                winner.statusCounters.otherIssues++;
+
+                const categoryName = state.selectedCategory.name;
+                winner.categoryIssues[categoryName] = (winner.categoryIssues[categoryName] || 0) + 1;
+
             }
 
 
