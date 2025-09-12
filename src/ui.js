@@ -1190,14 +1190,41 @@ export function renderStudentProfilePage() {
     <p><strong>کل انتخاب:</strong> ${student.statusCounters.totalSelections}</p>
     <p><strong>غیبت:</strong> ${absenceCount}</p>
     <p><strong>فرصت از دست رفته:</strong> ${student.statusCounters.missedChances || 0}</p>
-    <p><strong>مشکل فنی:</strong> ${totalIssues}</p>`;
+    <p><strong>مشکل:</strong> ${totalIssues}</p>`;
 
 
-    const issuesBreakdownContainer = document.createElement('div');
-    issuesBreakdownContainer.className = 'issues-breakdown';
+
+    // --- Selections Breakdown ---
 
     // Get all active categories for the classroom
     const activeCategories = getActiveItems(state.currentClassroom.categories);
+
+    const selectionsBreakdownContainer = document.createElement('div');
+    selectionsBreakdownContainer.className = 'stats-breakdown';
+
+    // We can reuse the activeCategories list from the issues breakdown below
+    if (activeCategories.length > 0) {
+        activeCategories.forEach(category => {
+            const categoryName = category.name;
+            const count = student.categoryCounts?.[categoryName] || 0;
+
+            const p = document.createElement('p');
+            p.className = 'stats-breakdown-item';
+            p.innerHTML = `<strong>${categoryName}:</strong> ${count}`;
+            selectionsBreakdownContainer.appendChild(p);
+        });
+
+        // Find the 'total selections' p tag and insert this breakdown right after it
+        const totalSelectionsP = profileStatsSummaryDiv.querySelector('p:first-child');
+        if (totalSelectionsP) {
+            totalSelectionsP.after(selectionsBreakdownContainer);
+        }
+    }
+
+
+    const issuesBreakdownContainer = document.createElement('div');
+    issuesBreakdownContainer.className = 'stats-breakdown';
+
 
     if (activeCategories.length > 0) {
         activeCategories.forEach(category => {
@@ -1206,7 +1233,7 @@ export function renderStudentProfilePage() {
             const count = student.categoryIssues?.[categoryName] || 0;
 
             const p = document.createElement('p');
-            p.className = 'breakdown-item';
+            p.className = 'stats-breakdown-item';
             p.innerHTML = `<strong>${categoryName}:</strong> ${count}`;
             issuesBreakdownContainer.appendChild(p);
         });

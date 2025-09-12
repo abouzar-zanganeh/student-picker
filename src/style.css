@@ -2075,15 +2075,15 @@ textarea,
 
 /* -------------------------------------------- */
 
-/* Category issues on the profile page under total issue count */
-.issues-breakdown {
+/* Category issues and category counts on the profile page */
+.stats-breakdown {
     margin-top: 10px;
     padding-top: 10px;
     border-top: 1px solid #e0e0e0;
     padding-right: 15px;
 }
 
-.issues-breakdown .breakdown-item {
+.stats-breakdown .stats-breakdown-item {
     margin: 5px 0;
     font-size: 0.9em;
     color: var(--color-text-muted);
