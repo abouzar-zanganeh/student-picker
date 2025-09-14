@@ -368,8 +368,12 @@ export function renderBreadcrumbs() {
                 }
             });
 
+            // Check for deeper pages within a session
+            const activePage = document.querySelector('.page.active')?.id;
             if (state.selectedStudentForProfile) {
                 path.push({ label: `پروفایل: ${state.selectedStudentForProfile.identity.name}` });
+            } else if (activePage === 'attendance-page') {
+                path.push({ label: 'حضور و غیاب' });
             }
         }
     }

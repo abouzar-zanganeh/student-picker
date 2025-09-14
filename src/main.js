@@ -790,13 +790,58 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Global 'Escape' key handler ---
         // This code now only runs if the user is NOT typing.
         if (event.key === 'Escape') {
+            // Priority 1: Close context menu if visible
             if (ui.contextMenu.classList.contains('visible')) {
                 ui.closeContextMenu();
-            } else if (state.activeModal) {
-                ui.closeActiveModal();
-            } else {
-                history.back();
+                return;
             }
+
+            // Priority 2: Close active modal
+            if (state.activeModal) {
+                ui.closeActiveModal();
+                return;
+            }
+
+            // Priority 3: Hierarchical back navigation
+            const activePageId = document.querySelector('.page.active')?.id;
+
+            switch (activePageId) {
+                case 'csv-preview-page':
+                case 'column-mapping-page':
+                    ui.showPage('settings-page');
+                    break;
+
+                case 'student-profile-page':
+                    state.setSelectedStudentForProfile(null);
+                    if (state.selectedSession) {
+                        // Came from a session, go back to the student page
+                        ui.showPage('student-page');
+                    } else {
+                        // Came from a shortcut (e.g., search), go back to the session list
+                        ui.showPage('session-page');
+                    }
+                    break;
+
+                case 'attendance-page':
+                    // From attendance, the logical back step is the main student selection page.
+                    ui.showPage('student-page');
+                    break;
+
+                case 'student-page':
+                    // From the student page, the logical back step is the session list.
+                    state.setSelectedSession(null);
+                    ui.renderSessions();
+                    ui.showPage('session-page');
+                    break;
+
+                case 'settings-page':
+                case 'session-page':
+                    // Both pages are children of a class, go back to the class list
+                    state.setCurrentClassroom(null);
+                    ui.showPage('class-management-page');
+                    break;
+            }
+
             return; // Stop processing other shortcuts
         }
 
