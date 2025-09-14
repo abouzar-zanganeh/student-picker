@@ -349,27 +349,49 @@ export class Classroom {
 
     calculateFinalStudentScore(student) {
         const scores = student.logs.scores;
-        const requiredSkills = ['listening', 'speaking', 'reading', 'writing'];
-        for (const skill of requiredSkills) {
+
+        // Step 1: Check for the absolutely required skills.
+        const mandatorySkills = ['reading', 'writing'];
+        for (const skill of mandatorySkills) {
             if (!scores[skill] || scores[skill].length === 0) {
                 console.log(`محاسبه نمره برای دانش‌آموز «${student.identity.name}» انجام نشد. دلیل: نمره‌ای برای مهارت «${skill}» ثبت نشده است.`);
                 return null;
             }
         }
+
+        // Step 2: Check if at least one of the flexible skills (listening or speaking) exists.
+        const hasListening = scores.listening && scores.listening.length > 0;
+        const hasSpeaking = scores.speaking && scores.speaking.length > 0;
+
+        if (!hasListening && !hasSpeaking) {
+            console.log(`محاسبه نمره برای دانش‌آموز «${student.identity.name}» انجام نشد. دلیل: نمره‌ای برای مهارت‌های «listening» و «speaking» ثبت نشده است.`);
+            return null;
+        }
+
+        // Helper function to get the average for a skill.
         const getSkillAverage = (skill) => {
-            // The 'score' parameter represents each object in the array.
-            // We start the sum 'a' at 0 and add each 'score.value' to it.
             const sum = scores[skill].reduce((a, score) => a + score.value, 0);
             return sum / scores[skill].length;
         };
-        const listeningAvg = getSkillAverage('listening');
-        const speakingAvg = getSkillAverage('speaking');
+
+        // Step 3: Calculate the combined listening/speaking average based on what's available.
+        let combinedListeningSpeakingAvg;
+        if (hasListening && hasSpeaking) {
+            combinedListeningSpeakingAvg = (getSkillAverage('listening') + getSkillAverage('speaking')) / 2;
+        } else if (hasListening) {
+            combinedListeningSpeakingAvg = getSkillAverage('listening');
+        } else { // We know hasSpeaking must be true because of the check in Step 2.
+            combinedListeningSpeakingAvg = getSkillAverage('speaking');
+        }
+
+        // Step 4: Calculate the final weighted score with the remaining mandatory skills.
         const readingAvg = getSkillAverage('reading');
         const writingAvg = getSkillAverage('writing');
-        const combinedListeningSpeakingAvg = (listeningAvg + speakingAvg) / 2;
+
         const numerator = (combinedListeningSpeakingAvg * 3) + (readingAvg * 2) + (writingAvg * 1);
         const finalScore = numerator / 6;
-        return Math.round(finalScore * 100) / 100;
+
+        return Math.trunc(finalScore * 10) / 10;
     }
 
     assignAllFinalScores() {
