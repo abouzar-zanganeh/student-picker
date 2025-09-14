@@ -56,6 +56,28 @@ export class Student {
         const newNote = new Note(content, source);
         this.profile.notes.push(newNote);
     }
+
+    getOverallAverageScore() {
+        let totalValue = 0;
+        let scoreCount = 0;
+
+        for (const skill in this.logs.scores) {
+            this.logs.scores[skill].forEach(score => {
+                if (!score.isDeleted) {
+                    totalValue += score.value;
+                    scoreCount++;
+                }
+            });
+        }
+
+        // To avoid dividing by zero...
+        if (scoreCount === 0) {
+            return null;
+        }
+
+        const average = totalValue / scoreCount;
+        return Math.round(average * 100) / 100;
+    }
 }
 
 export class Score {
