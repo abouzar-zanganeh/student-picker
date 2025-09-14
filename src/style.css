@@ -2090,3 +2090,38 @@ textarea,
 }
 
 /* end of category issues */
+
+/* --- Breadcrumb Styles --- */
+.breadcrumb-container {
+    display: none;
+    /* Hidden by default, will be shown by JS on relevant pages */
+    align-items: center;
+    padding: 10px 0;
+    margin-bottom: 15px;
+    font-size: 14px;
+    flex-wrap: wrap;
+}
+
+.breadcrumb-item {
+    color: var(--color-primary);
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.breadcrumb-item:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb-separator {
+    margin: 0 8px;
+    color: var(--color-text-muted);
+}
+
+.breadcrumb-item.active {
+    color: var(--color-text-dark);
+    font-weight: bold;
+    cursor: default;
+    text-decoration: none;
+}
+
+/* end of  Breadcrumb Styles */
