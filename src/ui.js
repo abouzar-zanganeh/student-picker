@@ -1862,6 +1862,7 @@ export function _internalShowPage(pageId) {
     } else {
         appHeader.style.display = 'none';
     }
+    renderBreadcrumbs();
 }
 
 export function showPage(pageId) {
