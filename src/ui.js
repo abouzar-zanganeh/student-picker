@@ -91,6 +91,8 @@ const classNameHeader = document.getElementById('class-name-header');
 const categoryPillsContainer = document.getElementById('category-selection-container');
 const resultDiv = document.getElementById('selected-student-result');
 export const contextMenu = document.getElementById('custom-context-menu');
+export const breadcrumbContainer = document.getElementById('breadcrumb-container');
+
 
 
 
@@ -324,6 +326,85 @@ export function closeContextMenu() {
     }
 }
 
+export function renderBreadcrumbs() {
+    breadcrumbContainer.innerHTML = ''; // Clear previous breadcrumbs
+
+    const path = []; // This array will hold the parts of our breadcrumb trail
+
+    // --- Home Link (Always the first part) ---
+    path.push({
+        label: 'کلاس‌ها',
+        handler: () => {
+            state.setCurrentClassroom(null);
+            state.setSelectedSession(null);
+            state.setSelectedStudentForProfile(null);
+            showPage('class-management-page');
+        }
+    });
+
+    // --- Build path based on current state ---
+    if (state.currentClassroom) {
+        path.push({
+            label: state.currentClassroom.info.name,
+            handler: () => {
+                state.setSelectedSession(null);
+                state.setSelectedStudentForProfile(null);
+                showPage('session-page');
+            }
+        });
+
+        const activePage = document.querySelector('.page.active')?.id;
+
+        if (activePage === 'settings-page') {
+            path.push({ label: 'تنظیمات' });
+        } else if (state.selectedSession) {
+            const sessionMap = getSessionDisplayMap(state.currentClassroom);
+            const displayNumber = sessionMap.get(state.selectedSession.sessionNumber) || ` (#${state.selectedSession.sessionNumber})`;
+            path.push({
+                label: `جلسه ${displayNumber}`,
+                handler: () => {
+                    state.setSelectedStudentForProfile(null);
+                    showPage('student-page');
+                }
+            });
+
+            if (state.selectedStudentForProfile) {
+                path.push({ label: `پروفایل: ${state.selectedStudentForProfile.identity.name}` });
+            }
+        }
+    }
+
+    // --- Render the path to HTML ---
+    if (path.length <= 1) {
+        breadcrumbContainer.style.display = 'none'; // Hide on main page
+        return;
+    }
+
+    breadcrumbContainer.style.display = 'flex'; // Show on other pages
+
+    path.forEach((part, index) => {
+        const item = document.createElement('a');
+        item.textContent = part.label;
+        item.className = 'breadcrumb-item';
+
+        // If it's the last item or has no handler, make it inactive
+        if (index === path.length - 1 || !part.handler) {
+            item.classList.add('active');
+        } else {
+            item.addEventListener('click', part.handler);
+        }
+
+        breadcrumbContainer.appendChild(item);
+
+        // Add separator if it's not the last item
+        if (index < path.length - 1) {
+            const separator = document.createElement('span');
+            separator.className = 'breadcrumb-separator';
+            separator.textContent = '/';
+            breadcrumbContainer.appendChild(separator);
+        }
+    });
+}
 
 
 function renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan) {
