@@ -19,7 +19,6 @@ export class Student {
         this.statusCounters = {
             totalSelections: 0,
             missedChances: 0,
-            otherIssues: 0,
             earlyLeaves: 0,
         };
 
@@ -336,7 +335,10 @@ export class Classroom {
             }
         }
         const getSkillAverage = (skill) => {
-            return scores[skill].reduce((a, b) => a + b, 0) / scores[skill].length;
+            // The 'score' parameter represents each object in the array.
+            // We start the sum 'a' at 0 and add each 'score.value' to it.
+            const sum = scores[skill].reduce((a, score) => a + score.value, 0);
+            return sum / scores[skill].length;
         };
         const listeningAvg = getSkillAverage('listening');
         const speakingAvg = getSkillAverage('speaking');
