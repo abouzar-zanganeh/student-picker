@@ -1061,4 +1061,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // To make the function accessible from the console:
     window.backfillWritingScoresForAll = backfillWritingScoresForAll;
 
+    function onboardNewStudent(newStudent, classroom) {
+        // We will fill this in over the next few steps.
+    }
+
 });
