@@ -35,7 +35,6 @@ export const appHeader = document.querySelector('.app-header');
 export const selectStudentBtn = document.getElementById('select-student-btn');
 export const selectStudentBtnWrapper = document.getElementById('select-student-btn-wrapper');
 export const attendancePage = document.getElementById('attendance-page');
-export const attendanceClassNameHeader = document.getElementById('attendance-class-name-header');
 export const attendanceListUl = document.getElementById('attendance-list');
 export const finishAttendanceBtn = document.getElementById('finish-attendance-btn');
 export const backToSessionsFromAttendanceBtn = document.getElementById('back-to-sessions-from-attendance-btn');
@@ -87,7 +86,6 @@ export const quickGradeFormWrapper = document.getElementById('quick-grade-form-w
 export const quickScoreInput = document.getElementById('quick-score-input');
 export const quickNoteTextarea = document.getElementById('quick-note-textarea');
 export const quickGradeSubmitBtn = document.getElementById('quick-grade-submit-btn');
-const classNameHeader = document.getElementById('class-name-header');
 const categoryPillsContainer = document.getElementById('category-selection-container');
 const resultDiv = document.getElementById('selected-student-result');
 export const contextMenu = document.getElementById('custom-context-menu');
@@ -683,15 +681,9 @@ export function renderAttendancePage() {
 
     const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
 
-
     createAbsenteesSummaryBox();
 
-
-
-
-    attendanceClassNameHeader.textContent = `${state.currentClassroom.info.name} - حضور و غیاب جلسه شماره ${getRealSessionNumber()}`;
     attendanceListUl.innerHTML = '';
-
 
     // Creates and adds the header row
     const headerLi = document.createElement('li');
@@ -1255,7 +1247,6 @@ function initializeStudentPageUI() {
 
 
     // Set header and clear containers
-    classNameHeader.textContent = `جلسه ${getRealSessionNumber()} / کلاس: ${state.currentClassroom.info.name}`;
     categoryPillsContainer.innerHTML = '';
     resultDiv.innerHTML = '';
 
@@ -1754,7 +1745,6 @@ function createClassInfoContainer(classroom) {
         state.setSelectedSession(null);
         state.setLiveSession(state.currentClassroom.liveSession);
         renderSessions();
-        updateSessionPageHeader();
         showPage('session-page');
     });
 
@@ -2202,11 +2192,9 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
 
 export function renderSessions() {
     const sessionListUl = document.getElementById('session-list');
-    const sessionClassNameHeader = document.getElementById('session-class-name-header');
 
     if (!state.currentClassroom) return;
 
-    sessionClassNameHeader.textContent = `کلاس: ${state.currentClassroom.info.name}`;
     sessionListUl.innerHTML = '';
 
     if (state.currentClassroom.sessions.length === 0) {
@@ -2224,12 +2212,7 @@ export function renderSessions() {
     });
 }
 
-export function updateSessionPageHeader() {
-    const sessionClassNameHeader = document.getElementById('session-class-name-header');
-    if (state.currentClassroom) {
-        sessionClassNameHeader.textContent = `کلاس: ${state.currentClassroom.info.name}`;
-    }
-}
+
 
 
 export function renderSearchResults(filteredStudents) {
@@ -2299,7 +2282,6 @@ export function renderGlobalSearchResults(results) {
                 state.setSelectedSession(null);
                 state.setLiveSession(result.classroom.liveSession);
                 renderSessions();
-                updateSessionPageHeader();
                 showPage('session-page');
                 globalStudentSearchResultsDiv.style.display = 'none';
                 globalStudentSearchInput.value = '';
