@@ -1062,10 +1062,14 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
             winner.statusCounters.missedChances++;
 
-            // --- ADDED ---
+            // --- First, clear any potential 'absent' styling ---
+            winnerNameEl.style.textDecoration = '';
+            winnerNameEl.style.opacity = '';
+            // ----------------------------------------------------
+
+            // Now, apply the 'issue' styling
             winnerNameEl.style.color = 'var(--color-strong-warning)';
             winnerNameEl.title = 'این دانش‌آموز در انتخاب قبلی با مشکل مواجه شده بود';
-            // -------------
 
         } else {
             issueBtn.classList.remove('active');
