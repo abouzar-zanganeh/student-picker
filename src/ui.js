@@ -730,7 +730,8 @@ export function renderStudentStatsList() {
     const nameHeader = ['نام'];
 
     // 2. Define the static counter headers that will now go at the end.
-    const counterHeaders = ['کل انتخاب ها', 'غیبت', 'فرصت ازدست‌رفته', 'مشکل', 'میانگین', 'نمره کلاسی (کانون)'];
+    const counterHeaders = ['کل انتخاب ها', 'غیبت', 'خروج', 'فرصت ازدست‌رفته', 'مشکل', 'میانگین', 'نمره کلاسی (کانون)'];
+
     // 3. Get the dynamic part by filtering for gradable categories.
     const gradedCategoryHeaders = state.currentClassroom.categories
         .filter(cat => cat.isGradedCategory && !cat.isDeleted)
@@ -839,6 +840,7 @@ export function renderStudentStatsList() {
         });
         row.insertCell().textContent = student.statusCounters.totalSelections || 0;
         row.insertCell().textContent = calculateAbsences(student);
+        row.insertCell().textContent = student.statusCounters.outOfClassCount || 0;
         row.insertCell().textContent = student.statusCounters.missedChances || 0;
 
 
