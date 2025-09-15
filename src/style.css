@@ -237,10 +237,10 @@ button:disabled:hover {
 .btn-icon {
     background: none;
     background-color: transparent;
-    padding: 5px;
+    padding: 0px 5px;
     font-size: 20px;
     color: var(--color-secondary);
-    opacity: 50%;
+    opacity: 100%;
     transition: all 0.2s ease-in-out;
 }
 

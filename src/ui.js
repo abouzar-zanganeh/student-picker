@@ -1584,8 +1584,10 @@ function createClassActionButtons(classroom) {
     noteBtn.className = 'btn-icon';
     noteBtn.innerHTML = '📝';
     noteBtn.title = 'افزودن/ویرایش یادداشت کلاس';
+    noteBtn.style.borderBottom = 'solid';
     if (!classroom.note) {
-        noteBtn.style.opacity = '0.3';
+        noteBtn.style.opacity = '0.5';
+        noteBtn.style.borderBottom = 'none';
     }
     noteBtn.addEventListener('click', (event) => {
         event.stopPropagation();
@@ -1904,9 +1906,12 @@ function createSessionActionButtons(session, displaySessionNumber) {
     noteBtn.className = 'btn-icon';
     noteBtn.innerHTML = '📝';
     noteBtn.title = 'افزودن/ویرایش یادداشت جلسه';
+    noteBtn.style.borderBottom = 'solid';
 
     if (!session.note) {
-        noteBtn.style.opacity = '0.3';
+        noteBtn.style.opacity = '0.5';
+        noteBtn.style.borderBottom = 'none';
+
     }
 
     noteBtn.addEventListener('click', (event) => {
