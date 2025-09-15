@@ -20,6 +20,7 @@ export class Student {
             totalSelections: 0,
             missedChances: 0,
             earlyLeaves: 0,
+            outOfClassCount: 0,
         };
 
         this.categoryCounts = {};
@@ -143,6 +144,7 @@ export class Session {
                 homework: new Homework(),
                 selections: {}, //The recording of how many times a student was selected in this session per category. for example: { "Vocabulary": 2, "Grammar": 1 }.
                 hadIssue: false,
+                wasOutOfClass: false,
 
             };
         }
