@@ -1124,10 +1124,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // --- 4. Mark student as absent for all past sessions ---
-        const pastSessions = getActiveItems(classroom.sessions).filter(s => !s.isCancelled);
+        const pastSessions = getActiveItems(classroom.sessions).filter(s => !s.isCancelled && s.isFinished);
         pastSessions.forEach(session => {
             session.setAttendance(newStudent.identity.studentId, 'absent');
         });
+
+        // --- 5. Generate the onboarding note content ---
+        const noteHeader = '📝 یادداشت خودکار سیستم';
+        const sessionCount = pastSessions.length;
+        const reason = `این دانش‌آموز پس از جلسه شماره ${sessionCount} به کلاس اضافه شد. آمار پایه‌ای زیر برای حفظ تعادل الگوریتم انتخاب برای او ثبت گردید:`;
+
+        const details = [];
+        if (newStudent.statusCounters.totalSelections > 0) {
+            details.push(`کل انتخاب‌ها: ${newStudent.statusCounters.totalSelections}`);
+        }
+        if (newStudent.statusCounters.missedChances > 0) {
+            details.push(`فرصت‌های از دست رفته: ${newStudent.statusCounters.missedChances}`);
+        }
+
+        for (const categoryName in newStudent.categoryCounts) {
+            if (newStudent.categoryCounts[categoryName] > 0) {
+                details.push(`انتخاب در «${categoryName}»: ${newStudent.categoryCounts[categoryName]}`);
+            }
+        }
+
+        for (const categoryName in newStudent.categoryIssues) {
+            if (newStudent.categoryIssues[categoryName] > 0) {
+                details.push(`مشکل در «${categoryName}»: ${newStudent.categoryIssues[categoryName]}`);
+            }
+        }
+
+        // --- 6. Add the note to the student's profile ---
+        if (details.length > 0) {
+            const noteContent = `${noteHeader}\n${reason}\n\n- ${details.join('\n- ')}`;
+            newStudent.addNote(noteContent);
+        }
+
     }
 
     function showOnboardingNotification(studentCount) {
