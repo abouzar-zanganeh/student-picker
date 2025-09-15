@@ -961,6 +961,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
     if (isAbsent) {
         winnerNameEl.style.textDecoration = 'line-through';
         winnerNameEl.style.opacity = '0.6';
+        winnerNameEl.style.color = 'var(--color-secondary)'; // Make the text gray
     }
 
     const hadIssue = studentRecord?.hadIssue;
@@ -998,12 +999,14 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
     const absentBtn = document.createElement('button');
     absentBtn.textContent = 'غایب';
-    absentBtn.className = 'status-button';
+    absentBtn.classList.add('status-button', 'absent-btn');
+
     if (isAbsent) absentBtn.classList.add('active');
 
     const issueBtn = document.createElement('button');
     issueBtn.textContent = 'مشکل';
-    issueBtn.className = 'status-button';
+    issueBtn.classList.add('status-button', 'issue-btn');
+
     if (studentRecord?.hadIssue) issueBtn.classList.add('active');
 
     const profileBtn = document.createElement('button');
@@ -1024,22 +1027,20 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
             state.selectedSession.setAttendance(winner.identity.studentId, 'absent');
             winner.statusCounters.missedChances++;
 
-            // --- ADDED: Update UI Immediately ---
+            // Update UI Immediately
             winnerNameEl.style.textDecoration = 'line-through';
             winnerNameEl.style.opacity = '0.6';
-            winnerNameEl.style.color = ''; // Remove issue color just in case
-            winnerNameEl.title = '';      // Remove issue tooltip
-            // ------------------------------------
-
+            winnerNameEl.style.color = 'var(--color-secondary)'; // Set text color to gray
+            winnerNameEl.title = '';
         } else {
             absentBtn.classList.remove('active');
             state.selectedSession.setAttendance(winner.identity.studentId, 'present');
             winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
 
-            // --- ADDED: Revert UI Immediately ---
+            // Revert UI Immediately
             winnerNameEl.style.textDecoration = '';
             winnerNameEl.style.opacity = '';
-            // ----------------------------------
+            winnerNameEl.style.color = ''; // Revert text color
         }
         renderStudentStatsList();
         state.saveData();

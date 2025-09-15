@@ -364,6 +364,11 @@ button:disabled:hover {
     transform: translateY(1px);
 }
 
+.status-button.issue-btn.active {
+    background-color: var(--color-strong-warning);
+    border-color: var(--color-strong-warning);
+}
+
 .hidden-input {
     display: none;
 }
