@@ -369,6 +369,12 @@ button:disabled:hover {
     border-color: var(--color-strong-warning);
 }
 
+.status-button.exit-btn.active {
+    background-color: var(--color-warning);
+    border-color: var(--color-warning-hover);
+    color: var(--color-text-dark);
+}
+
 .hidden-input {
     display: none;
 }

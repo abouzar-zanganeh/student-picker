@@ -1000,14 +1000,17 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
     const absentBtn = document.createElement('button');
     absentBtn.textContent = 'غایب';
     absentBtn.classList.add('status-button', 'absent-btn');
-
     if (isAbsent) absentBtn.classList.add('active');
 
     const issueBtn = document.createElement('button');
     issueBtn.textContent = 'مشکل';
     issueBtn.classList.add('status-button', 'issue-btn');
-
     if (studentRecord?.hadIssue) issueBtn.classList.add('active');
+
+    const exitBtn = document.createElement('button');
+    exitBtn.textContent = 'خروج';
+    exitBtn.classList.add('status-button', 'exit-btn');
+    if (studentRecord?.wasOutOfClass) exitBtn.classList.add('active');
 
     const profileBtn = document.createElement('button');
     profileBtn.textContent = 'پروفایل';
@@ -1015,6 +1018,13 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
     absentBtn.addEventListener('click', () => {
         const isCurrentlyActive = absentBtn.classList.contains('active');
+
+        if (exitBtn.classList.contains('active')) {
+            exitBtn.classList.remove('active');
+            studentRecord.wasOutOfClass = false;
+            winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
+            winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+        }
 
         if (!isCurrentlyActive) {
             if (issueBtn.classList.contains('active')) {
@@ -1048,6 +1058,13 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
     issueBtn.addEventListener('click', () => {
         const isCurrentlyActive = issueBtn.classList.contains('active');
+
+        if (exitBtn.classList.contains('active')) {
+            exitBtn.classList.remove('active');
+            studentRecord.wasOutOfClass = false;
+            winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
+            winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+        }
 
         if (!isCurrentlyActive) {
             if (absentBtn.classList.contains('active')) {
@@ -1090,6 +1107,51 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
         state.saveData();
     });
 
+    exitBtn.addEventListener('click', () => {
+        const isCurrentlyActive = exitBtn.classList.contains('active');
+
+        if (!isCurrentlyActive) {
+            // Deactivate other mutually exclusive buttons first
+            if (absentBtn.classList.contains('active')) {
+                absentBtn.classList.remove('active');
+                state.selectedSession.setAttendance(winner.identity.studentId, 'present');
+                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+            }
+            if (issueBtn.classList.contains('active')) {
+                issueBtn.classList.remove('active');
+                studentRecord.hadIssue = false;
+                const categoryName = state.selectedCategory.name;
+                if (winner.categoryIssues[categoryName]) { winner.categoryIssues[categoryName] = Math.max(0, winner.categoryIssues[categoryName] - 1); }
+                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+            }
+
+            exitBtn.classList.add('active');
+            studentRecord.wasOutOfClass = true;
+
+            // Increment both the specific counter and the missed chance counter
+            winner.statusCounters.outOfClassCount = (winner.statusCounters.outOfClassCount || 0) + 1;
+            winner.statusCounters.missedChances++;
+
+            // Visual cue for the winner's name
+            winnerNameEl.style.color = 'var(--color-warning)';
+            winnerNameEl.title = 'این دانش‌آموز در زمان انتخاب خارج از کلاس بود';
+
+        } else {
+            exitBtn.classList.remove('active');
+            studentRecord.wasOutOfClass = false;
+
+            // Decrement both counters
+            winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
+            winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+
+            // Remove the visual cue
+            winnerNameEl.style.color = '';
+            winnerNameEl.title = '';
+        }
+        renderStudentStatsList();
+        state.saveData();
+    });
+
     profileBtn.addEventListener('click', () => {
         state.setSelectedStudentForProfile(winner);
         renderStudentProfilePage();
@@ -1097,6 +1159,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
     });
 
     buttonContainer.appendChild(absentBtn);
+    buttonContainer.appendChild(exitBtn);
     buttonContainer.appendChild(issueBtn);
     buttonContainer.appendChild(profileBtn);
     resultDiv.appendChild(buttonContainer);
