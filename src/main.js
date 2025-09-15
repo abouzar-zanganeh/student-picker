@@ -317,6 +317,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isDuplicate) {
                 const newStudent = new Student({ name: name });
                 state.currentClassroom.addStudent(newStudent);
+                // If the class already has sessions, onboard the new student with baseline stats.
+                if (state.currentClassroom.sessions.length > 0) {
+                    onboardNewStudent(newStudent, state.currentClassroom);
+                }
             } else {
                 console.log(`دانش‌آموز «${name}» به دلیل تکراری بودن اضافه نشد.`);
             }
@@ -369,6 +373,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const newStudent = new Student({ name: studentName });
         state.currentClassroom.addStudent(newStudent);
+        // If the class already has sessions, onboard the new student with baseline stats.
+        if (state.currentClassroom.sessions.length > 0) {
+            onboardNewStudent(newStudent, state.currentClassroom);
+        }
         state.saveData();
         ui.renderSettingsStudentList();
         newStudentNameInput.value = '';
@@ -1062,7 +1070,56 @@ document.addEventListener('DOMContentLoaded', () => {
     window.backfillWritingScoresForAll = backfillWritingScoresForAll;
 
     function onboardNewStudent(newStudent, classroom) {
-        // We will fill this in over the next few steps.
+
+        const existingStudents = getActiveItems(classroom.students).filter(s => s.identity.studentId !== newStudent.identity.studentId);
+
+        // If there are no other students, there's nothing to do.
+        if (existingStudents.length === 0) {
+            return;
+        }
+
+        // --- 1. Assign MAX selection counts ---
+        let newTotalSelections = 0;
+        const activeCategories = getActiveItems(classroom.categories);
+
+        activeCategories.forEach(category => {
+            // Find the highest selection count for this category among existing students.
+            const maxCount = Math.max(0, ...existingStudents.map(s => s.categoryCounts[category.name] || 0));
+
+            // Assign this max count to the new student.
+            newStudent.categoryCounts[category.name] = maxCount;
+            newTotalSelections += maxCount;
+        });
+
+        newStudent.statusCounters.totalSelections = newTotalSelections;
+
+        // --- 2. Calculate class performance RATES ---
+        const totalClassSelections = existingStudents.reduce((sum, s) => sum + s.statusCounters.totalSelections, 0);
+        const totalClassMissedChances = existingStudents.reduce((sum, s) => sum + (s.statusCounters.missedChances || 0), 0);
+        const missedChanceRate = totalClassSelections > 0 ? totalClassMissedChances / totalClassSelections : 0;
+
+        const categoryIssueRates = {};
+        activeCategories.forEach(category => {
+            const totalCatSelections = existingStudents.reduce((sum, s) => sum + (s.categoryCounts[category.name] || 0), 0);
+            const totalCatIssues = existingStudents.reduce((sum, s) => sum + (s.categoryIssues[category.name] || 0), 0);
+            categoryIssueRates[category.name] = totalCatSelections > 0 ? totalCatIssues / totalCatSelections : 0;
+        });
+
+        // --- 3. Apply rates to the new student ---
+        newStudent.statusCounters.missedChances = Math.round(newStudent.statusCounters.totalSelections * missedChanceRate);
+
+        activeCategories.forEach(category => {
+            const studentCatSelections = newStudent.categoryCounts[category.name] || 0;
+            const issueRate = categoryIssueRates[category.name] || 0;
+            newStudent.categoryIssues[category.name] = Math.round(studentCatSelections * issueRate);
+        });
+
+        // --- 4. Mark student as absent for all past sessions ---
+        const pastSessions = getActiveItems(classroom.sessions).filter(s => !s.isCancelled);
+        pastSessions.forEach(session => {
+            session.setAttendance(newStudent.identity.studentId, 'absent');
+        });
     }
+
 
 });
