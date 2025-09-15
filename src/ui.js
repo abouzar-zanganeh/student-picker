@@ -158,7 +158,7 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
         confirmText = 'تایید',
         cancelText = 'لغو',
         confirmClass = 'btn-success',
-        onCancel = null,
+        onCancel = () => { },
         isDelete = false
     } = options;
 
@@ -183,7 +183,7 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
     state.setCancelCallback(onCancel);
 
     const modalActions = confirmModalConfirmBtn.parentElement;
-    confirmModalCancelBtn.style.display = onCancel === null ? 'none' : 'flex';
+    confirmModalCancelBtn.style.display = onCancel === null ? 'none' : 'inline-block';
     modalActions.style.justifyContent = onCancel === null ? 'center' : 'space-between';
 
     openModal('custom-confirm-modal');
@@ -963,6 +963,12 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
         winnerNameEl.style.opacity = '0.6';
     }
 
+    const hadIssue = studentRecord?.hadIssue;
+    if (hadIssue && !isAbsent) {
+        winnerNameEl.style.color = 'var(--color-strong-warning)';
+        winnerNameEl.title = 'این دانش‌آموز در انتخاب قبلی با مشکل مواجه شده بود';
+    }
+
     const forwardBtn = document.createElement('button');
     forwardBtn.className = 'btn-icon';
     forwardBtn.innerHTML = '˄';
@@ -1017,10 +1023,23 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
             absentBtn.classList.add('active');
             state.selectedSession.setAttendance(winner.identity.studentId, 'absent');
             winner.statusCounters.missedChances++;
+
+            // --- ADDED: Update UI Immediately ---
+            winnerNameEl.style.textDecoration = 'line-through';
+            winnerNameEl.style.opacity = '0.6';
+            winnerNameEl.style.color = ''; // Remove issue color just in case
+            winnerNameEl.title = '';      // Remove issue tooltip
+            // ------------------------------------
+
         } else {
             absentBtn.classList.remove('active');
             state.selectedSession.setAttendance(winner.identity.studentId, 'present');
             winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+
+            // --- ADDED: Revert UI Immediately ---
+            winnerNameEl.style.textDecoration = '';
+            winnerNameEl.style.opacity = '';
+            // ----------------------------------
         }
         renderStudentStatsList();
         state.saveData();
@@ -1042,6 +1061,12 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
             winner.categoryIssues[categoryName] = (winner.categoryIssues[categoryName] || 0) + 1;
 
             winner.statusCounters.missedChances++;
+
+            // --- ADDED ---
+            winnerNameEl.style.color = 'var(--color-strong-warning)';
+            winnerNameEl.title = 'این دانش‌آموز در انتخاب قبلی با مشکل مواجه شده بود';
+            // -------------
+
         } else {
             issueBtn.classList.remove('active');
             studentRecord.hadIssue = false;
@@ -1050,6 +1075,11 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
             if (winner.categoryIssues[categoryName]) { winner.categoryIssues[categoryName] = Math.max(0, winner.categoryIssues[categoryName] - 1); }
 
             winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+
+            // --- ADDED ---
+            winnerNameEl.style.color = ''; // Reverts to default color
+            winnerNameEl.title = '';      // Removes the tooltip
+            // -------------
         }
         renderStudentStatsList();
         state.saveData();

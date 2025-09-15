@@ -439,7 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ui.showCustomConfirm(
                     "شما امروز یک جلسه برای این کلاس ثبت کرده‌اید. آیا از شروع یک جلسه جدید دیگر مطمئن هستید؟",
                     askAboutAttendanceAndStart, // On confirm, it proceeds to ask about attendance.
-                    { confirmText: 'بله، ادامه بده', confirmClass: 'btn-warning' }
+                    { confirmText: 'بله', confirmClass: 'btn-warning' }
                 );
             } else {
                 // Otherwise, just ask about attendance as before.
