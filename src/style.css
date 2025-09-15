@@ -365,13 +365,15 @@ button:disabled:hover {
 }
 
 .status-button.issue-btn.active {
-    background-color: var(--color-strong-warning);
-    border-color: var(--color-strong-warning);
+    background-color: var(--color-warning);
+    border-color: var(--color-warning);
+    color: var(--color-text-dark);
+
 }
 
 .status-button.exit-btn.active {
-    background-color: var(--color-warning);
-    border-color: var(--color-warning-hover);
+    background-color: var(--color-strong-warning);
+    border-color: var(--color-strong-warning);
     color: var(--color-text-dark);
 }
 

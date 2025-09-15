@@ -968,8 +968,14 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
     const hadIssue = studentRecord?.hadIssue;
     if (hadIssue && !isAbsent) {
-        winnerNameEl.style.color = 'var(--color-strong-warning)';
+        winnerNameEl.style.color = 'var(--color-warning)';
         winnerNameEl.title = 'این دانش‌آموز در انتخاب قبلی با مشکل مواجه شده بود';
+    }
+
+    const wasOutOfClass = studentRecord?.wasOutOfClass;
+    if (wasOutOfClass && !isAbsent) {
+        winnerNameEl.style.color = 'var(--color-strong-warning)';
+        winnerNameEl.title = 'این دانش‌آموز در زمان انتخاب خارج از کلاس بود';
     }
 
     const forwardBtn = document.createElement('button');
@@ -1088,7 +1094,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
             // ----------------------------------------------------
 
             // Now, apply the 'issue' styling
-            winnerNameEl.style.color = 'var(--color-strong-warning)';
+            winnerNameEl.style.color = 'var(--color-warning)';
             winnerNameEl.title = 'این دانش‌آموز در انتخاب قبلی با مشکل مواجه شده بود';
 
         } else {
@@ -1134,8 +1140,12 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
             winner.statusCounters.outOfClassCount = (winner.statusCounters.outOfClassCount || 0) + 1;
             winner.statusCounters.missedChances++;
 
+            // Reset any potential 'absent' styling first
+            winnerNameEl.style.textDecoration = '';
+            winnerNameEl.style.opacity = '';
+
             // Visual cue for the winner's name
-            winnerNameEl.style.color = 'var(--color-warning)';
+            winnerNameEl.style.color = 'var(--color-strong-warning)';
             winnerNameEl.title = 'این دانش‌آموز در زمان انتخاب خارج از کلاس بود';
 
         } else {
