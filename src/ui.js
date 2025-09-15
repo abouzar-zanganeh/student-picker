@@ -182,6 +182,10 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
     state.setConfirmCallback(confirmAction);
     state.setCancelCallback(onCancel);
 
+    const modalActions = confirmModalConfirmBtn.parentElement;
+    confirmModalCancelBtn.style.display = onCancel === null ? 'none' : 'flex';
+    modalActions.style.justifyContent = onCancel === null ? 'center' : 'space-between';
+
     openModal('custom-confirm-modal');
 }
 

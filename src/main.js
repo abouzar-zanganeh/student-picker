@@ -311,6 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     csvConfirmBtn.addEventListener('click', () => {
         const selectedCheckboxes = csvPreviewList.querySelectorAll('input[type="checkbox"]:checked');
+        let onboardingOccurred = false;
         selectedCheckboxes.forEach(checkbox => {
             const name = checkbox.dataset.name;
             const isDuplicate = state.currentClassroom.students.some(student => student.identity.name.toLowerCase() === name.toLowerCase());
@@ -320,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // If the class already has sessions, onboard the new student with baseline stats.
                 if (state.currentClassroom.sessions.length > 0) {
                     onboardNewStudent(newStudent, state.currentClassroom);
+                    onboardingOccurred = true;
                 }
             } else {
                 console.log(`دانش‌آموز «${name}» به دلیل تکراری بودن اضافه نشد.`);
@@ -327,6 +329,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         state.saveData();
         ui.renderSettingsStudentList();
+
+        if (onboardingOccurred) {
+            showOnboardingNotification(selectedCheckboxes.length);
+        }
+
         ui.showPage('settings-page');
         pasteArea.value = '';
         state.setNamesToImport([]);
@@ -376,6 +383,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // If the class already has sessions, onboard the new student with baseline stats.
         if (state.currentClassroom.sessions.length > 0) {
             onboardNewStudent(newStudent, state.currentClassroom);
+            showOnboardingNotification(1);
+
         }
         state.saveData();
         ui.renderSettingsStudentList();
@@ -1119,6 +1128,21 @@ document.addEventListener('DOMContentLoaded', () => {
         pastSessions.forEach(session => {
             session.setAttendance(newStudent.identity.studentId, 'absent');
         });
+    }
+
+    function showOnboardingNotification(studentCount) {
+        const studentWord = studentCount > 1 ? 'دانش‌آموزان جدید' : 'دانش‌آموز جدید';
+        const message = `چون این کلاس جلسات برگزار شده دارد، برای ${studentWord} آمار پایه‌ای (متناسب با سایر دانش‌آموزان) ثبت شد تا در فرایند انتخاب اختلالی ایجاد نشود.`;
+
+        ui.showCustomConfirm(
+            message,
+            () => { }, // OK button just closes the modal
+            {
+                confirmText: 'متوجه شدم',
+                confirmClass: 'btn-success',
+                onCancel: null // This triggers our new single-button mode
+            }
+        );
     }
 
 

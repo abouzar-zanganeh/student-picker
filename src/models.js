@@ -22,8 +22,8 @@ export class Student {
             earlyLeaves: 0,
         };
 
-        this.categoryCounts = {}; // آبجکت جدید برای شمارش انتخاب‌ها بر اساس دسته‌بندی
-        this.categoryIssues = {}; // Object to store issue counts per category
+        this.categoryCounts = {};
+        this.categoryIssues = {};
 
         this.logs = {
             parentContacts: [],
@@ -354,7 +354,7 @@ export class Classroom {
         const mandatorySkills = ['reading', 'writing'];
         for (const skill of mandatorySkills) {
             if (!scores[skill] || scores[skill].length === 0) {
-                console.log(`محاسبه نمره برای دانش‌آموز «${student.identity.name}» انجام نشد. دلیل: نمره‌ای برای مهارت «${skill}» ثبت نشده است.`);
+                // console.log(`محاسبه نمره برای دانش‌آموز «${student.identity.name}» انجام نشد. دلیل: نمره‌ای برای مهارت «${skill}» ثبت نشده است.`);
                 return null;
             }
         }
@@ -364,7 +364,7 @@ export class Classroom {
         const hasSpeaking = scores.speaking && scores.speaking.length > 0;
 
         if (!hasListening && !hasSpeaking) {
-            console.log(`محاسبه نمره برای دانش‌آموز «${student.identity.name}» انجام نشد. دلیل: نمره‌ای برای مهارت‌های «listening» و «speaking» ثبت نشده است.`);
+            // console.log(`محاسبه نمره برای دانش‌آموز «${student.identity.name}» انجام نشد. دلیل: نمره‌ای برای مهارت‌های «listening» و «speaking» ثبت نشده است.`);
             return null;
         }
 
