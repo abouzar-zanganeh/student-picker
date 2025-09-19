@@ -1,5 +1,5 @@
 import * as state from './state.js';
-import { resetAllStudentCounters, getActiveItems, createBackup } from './state.js';
+import { resetAllStudentCounters, getActiveItems, downloadBackup } from './state.js';
 import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard } from './utils.js';
