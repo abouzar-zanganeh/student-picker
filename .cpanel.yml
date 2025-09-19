@@ -3,3 +3,4 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home/myklasir/public_html/
     - /bin/cp -R dist/* $DEPLOYPATH
+    
