@@ -706,24 +706,41 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     backupShareBtn.addEventListener('click', async () => {
+        ui.closeActiveModal(); // Close the modal immediately for a better user experience.
+
         const dataStr = JSON.stringify(state.classrooms, null, 2);
         const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
         const fileName = `SP-${today}.json`;
         const fileToShare = new File([dataStr], fileName, { type: 'application/json' });
 
-        try {
-            await navigator.share({
-                title: 'پشتیبان دستیار معلم',
-                text: 'فایل پشتیبان داده‌های برنامه',
-                files: [fileToShare],
-            });
-        } catch (error) {
-            if (error.name !== 'AbortError') {
-                console.error('Error sharing file:', error);
-                alert('خطا در اشتراک‌گذاری فایل.'); // Notify user of the error
+        // New check: First, verify if the browser can share these specific files.
+        if (navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
+            try {
+                await navigator.share({
+                    title: 'پشتیبان دستیار معلم',
+                    text: 'فایل پشتیبان داده‌های برنامه',
+                    files: [fileToShare],
+                });
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('Error sharing file:', error);
+                    // Only show an error if it wasn't a user cancellation.
+                    alert('خطا در اشتراک‌گذاری فایل.');
+                }
             }
-        } finally {
-            ui.closeActiveModal();
+        } else {
+            // If the browser can't share files, inform the user and guide them.
+            ui.showCustomConfirm(
+                'متاسفانه مرورگر شما از اشتراک‌گذاری فایل پشتیبانی نمی‌کند. آیا مایلید فایل را دانلود کنید؟',
+                () => {
+                    downloadBackup();
+                },
+                {
+                    confirmText: 'بله، دانلود کن',
+                    cancelText: 'لغو',
+                    confirmClass: 'btn-success'
+                }
+            );
         }
     });
 
