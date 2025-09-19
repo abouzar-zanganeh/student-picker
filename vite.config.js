@@ -2,16 +2,22 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { readFileSync } from 'fs';
 
-// Read package.json to get the version
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
 
 export default defineConfig({
-    
     define: {
         'import.meta.env.VITE_APP_VERSION': JSON.stringify(packageJson.version)
     },
+    server: {
+        https: {
+            key: './localhost-key.pem',
+            cert: './localhost.pem'
+        },
+        host: true
+    },
     plugins: [
         VitePWA({
+
             registerType: 'autoUpdate',
             manifest: {
                 name: 'دستیار هوشمند معلم',
