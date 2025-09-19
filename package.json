@@ -1,12 +1,12 @@
 {
   "name": "student-picker",
-  "version": "3.17.12",
+  "version": "3.17.13",
   "description": "A modern, client-side tool for teachers to manage classroom activities.",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-	"release": "npm version patch && vite build",
+    "release": "npm version patch && vite build",
     "preview": "vite preview",
     "lint": "eslint src/"
   },
