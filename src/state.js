@@ -32,43 +32,19 @@ export function saveData() {
     localStorage.setItem('teacherAssistantData_v2', JSON.stringify(classrooms));
 }
 
-export async function createBackup(shouldShare = false) {
+export function downloadBackup() {
     const dataStr = JSON.stringify(classrooms, null, 2);
     const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
     const fileName = `SP-${today}.json`;
-    const fileToShare = new File([dataStr], fileName, { type: 'application/json' });
+    const file = new File([dataStr], fileName, { type: 'application/json' });
 
-    // Check if sharing is requested and supported by the browser.
-    if (shouldShare && navigator.share && navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
-        try {
-            await navigator.share({
-                title: 'پشتیبان دستیar معلم',
-                text: 'فایل پشتیبان داده‌های برنامه',
-                files: [fileToShare],
-            });
-        } catch (error) {
-            // This is a normal occurrence if the user cancels the share dialog.
-            if (error.name !== 'AbortError') {
-                console.error('Error sharing file:', error);
-                // As a fallback, download the file if sharing fails unexpectedly.
-                downloadBackupFile(fileToShare);
-            }
-        }
-    } else {
-        // If sharing is not requested or not supported, download the file.
-        downloadBackupFile(fileToShare);
-    }
-}
-
-// Helper function for the download logic to avoid repetition
-function downloadBackupFile(file) {
     const url = URL.createObjectURL(file);
     const link = document.createElement('a');
     link.href = url;
     link.download = file.name;
-    document.body.appendChild(link); // Required for Firefox
+    document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link); // Clean up
+    document.body.removeChild(link);
     URL.revokeObjectURL(url);
 }
 

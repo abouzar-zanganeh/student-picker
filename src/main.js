@@ -700,14 +700,31 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     backupDownloadBtn.addEventListener('click', () => {
-        createBackup(false); // We'll tell our function NOT to share.
+        downloadBackup();
         ui.closeActiveModal();
         ui.showNotification("فایل پشتیبان در حال دانلود است...");
     });
 
     backupShareBtn.addEventListener('click', async () => {
-        await createBackup(true);
-        ui.closeActiveModal();
+        const dataStr = JSON.stringify(state.classrooms, null, 2);
+        const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
+        const fileName = `SP-${today}.json`;
+        const fileToShare = new File([dataStr], fileName, { type: 'application/json' });
+
+        try {
+            await navigator.share({
+                title: 'پشتیبان دستیار معلم',
+                text: 'فایل پشتیبان داده‌های برنامه',
+                files: [fileToShare],
+            });
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('Error sharing file:', error);
+                alert('خطا در اشتراک‌گذاری فایل.'); // Notify user of the error
+            }
+        } finally {
+            ui.closeActiveModal();
+        }
     });
 
     backupOptionsCancelBtn.addEventListener('click', () => {
@@ -734,7 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.openModal('backup-options-modal');
         } else {
             // If not supported (like on desktop), download the file directly.
-            createBackup();
+            downloadBackup();
             ui.showNotification("پشتیبان‌گیری با موفقیت انجام شد.");
         }
         closeSideNav();

@@ -1,5 +1,5 @@
 import * as state from './state.js';
-import { getActiveItems, getSessionDisplayMap, createBackup } from './state.js';
+import { getActiveItems, getSessionDisplayMap, downloadBackup } from './state.js';
 import { detectTextDirection, renderMultiLineText } from './utils.js';
 
 // --- HTML Elements ---
@@ -2052,7 +2052,7 @@ function createSessionActionButtons(session, displaySessionNumber) {
                     showCustomConfirm(
                         "جلسه با موفقیت خاتمه یافت. آیا مایل به ایجاد فایل پشتیبان هستید؟",
                         () => {
-                            createBackup();
+                            downloadBackup();
                             showNotification("فایل پشتیبان با موفقیت ایجاد شد.");
                         },
                         {
