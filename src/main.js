@@ -699,6 +699,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    backupDownloadBtn.addEventListener('click', () => {
+        createBackup(false); // We'll tell our function NOT to share.
+        ui.closeActiveModal();
+        ui.showNotification("فایل پشتیبان در حال دانلود است...");
+    });
+
+    backupShareBtn.addEventListener('click', () => {
+        createBackup(true); // We'll tell our function TO share.
+        ui.closeActiveModal();
+    });
+
+    backupOptionsCancelBtn.addEventListener('click', () => {
+        ui.closeActiveModal();
+    });
+
     hamburgerMenuBtn.addEventListener('click', () => {
         sideNavMenu.style.width = '250px';
         overlay.classList.add('modal-visible');
@@ -714,8 +729,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     backupDataBtn.addEventListener('click', () => {
-        createBackup();
-        ui.showNotification("پشتیبان‌گیری با موفقیت انجام شد.");
+        // This is "feature detection"—it checks if the browser supports sharing.
+        if (navigator.share) {
+            ui.openModal('backup-options-modal');
+        } else {
+            // If not supported (like on desktop), download the file directly.
+            createBackup();
+            ui.showNotification("پشتیبان‌گیری با موفقیت انجام شد.");
+        }
         closeSideNav();
     });
 
