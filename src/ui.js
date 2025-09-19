@@ -48,6 +48,12 @@ export const overlay = document.getElementById('overlay');
 export const backupDataBtn = document.getElementById('backup-data-btn');
 export const restoreDataBtn = document.getElementById('restore-data-btn');
 export const restoreFileInput = document.getElementById('restore-file-input');
+
+export const backupOptionsModal = document.getElementById('backup-options-modal');
+export const backupOptionsCancelBtn = document.getElementById('backup-options-cancel-btn');
+export const backupDownloadBtn = document.getElementById('backup-download-btn');
+export const backupShareBtn = document.getElementById('backup-share-btn');
+
 export const customConfirmModal = document.getElementById('custom-confirm-modal');
 export const confirmModalMessage = document.getElementById('confirm-modal-message');
 export const confirmModalCancelBtn = document.getElementById('confirm-modal-cancel-btn');
