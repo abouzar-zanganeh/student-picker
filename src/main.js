@@ -699,54 +699,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    backupDownloadBtn.addEventListener('click', () => {
-        downloadBackup();
-        ui.closeActiveModal();
-        ui.showNotification("فایل پشتیبان در حال دانلود است...");
-    });
-
-    backupShareBtn.addEventListener('click', async () => {
-        ui.closeActiveModal(); // Close the modal immediately for a better user experience.
-
-        const dataStr = JSON.stringify(state.classrooms, null, 2);
-        const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
-        const fileName = `SP-${today}.json`;
-        const fileToShare = new File([dataStr], fileName, { type: 'application/json' });
-
-        // New check: First, verify if the browser can share these specific files.
-        if (navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
-            try {
-                await navigator.share({
-                    title: 'پشتیبان دستیار معلم',
-                    text: 'فایل پشتیبان داده‌های برنامه',
-                    files: [fileToShare],
-                });
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    console.error('Error sharing file:', error);
-                    // Only show an error if it wasn't a user cancellation.
-                    alert('خطا در اشتراک‌گذاری فایل.');
-                }
-            }
-        } else {
-            // If the browser can't share files, inform the user and guide them.
-            ui.showCustomConfirm(
-                'متاسفانه مرورگر شما از اشتراک‌گذاری فایل پشتیبانی نمی‌کند. آیا مایلید فایل را دانلود کنید؟',
-                () => {
-                    downloadBackup();
-                },
-                {
-                    confirmText: 'بله، دانلود کن',
-                    cancelText: 'لغو',
-                    confirmClass: 'btn-success'
-                }
-            );
-        }
-    });
-
-    backupOptionsCancelBtn.addEventListener('click', () => {
-        ui.closeActiveModal();
-    });
 
     hamburgerMenuBtn.addEventListener('click', () => {
         sideNavMenu.style.width = '250px';
@@ -762,16 +714,39 @@ document.addEventListener('DOMContentLoaded', () => {
         closeSideNav(); // Close the nav menu after clicking
     });
 
-    backupDataBtn.addEventListener('click', () => {
-        // This is "feature detection"—it checks if the browser supports sharing.
-        if (navigator.share && ('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
-            ui.openModal('backup-options-modal');
+    backupDataBtn.addEventListener('click', async () => {
+        closeSideNav(); // Close the nav menu immediately
+        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+        // Prepare the file data once
+        const dataStr = JSON.stringify(state.classrooms, null, 2);
+        const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
+        const fileName = `SP-${today}.json`;
+        const fileToShare = new File([dataStr], fileName, { type: 'application/json' });
+
+        // Check for touch device and share capability
+        if (isTouchDevice && navigator.share && navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
+            try {
+                // If sharing is possible, try to share immediately
+                await navigator.share({
+                    title: 'پشتیبان دستیار معلم',
+                    text: 'فایل پشتیبان داده‌های برنامه',
+                    files: [fileToShare],
+                });
+            } catch (error) {
+                // If sharing is cancelled or fails, do nothing. The user chose to cancel.
+                if (error.name !== 'AbortError') {
+                    console.error('Error sharing file:', error);
+                    // If an unexpected error occurs, fall back to downloading
+                    downloadBackup();
+                    ui.showNotification("اشتراک‌گذاری با خطا مواجه شد. فایل در حال دانلود است.");
+                }
+            }
         } else {
-            // If not supported (like on desktop), download the file directly.
+            // On desktop or if sharing is not supported, download directly
             downloadBackup();
             ui.showNotification("پشتیبان‌گیری با موفقیت انجام شد.");
         }
-        closeSideNav();
     });
 
     restoreDataBtn.addEventListener('click', () => {
