@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دستیار هوشمند معلم</title>
+    <meta name="theme-color" content="#007bff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="دستیار معلم">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="images/icon-192.png" type="image/png">
+  <script type="module" crossorigin src="/assets/index-Oam74lcf.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-BNeayVLB.css">
+<link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+
+<body>
+
+    <header class="app-header">
+        <button id="hamburger-menu-btn" class="btn-icon">☰</button>
+        <h1>📚 دستیار هوشمند معلم</h1>
+        <div class="header-placeholder"></div> <!-- To balance the flexbox -->
+    </header>
+    <div id="breadcrumb-container" class="breadcrumb-container"></div>
+
+    <div id="side-nav-menu" class="side-nav">
+        <a href="javascript:void(0)" id="close-nav-btn" class="close-btn">&times;</a>
+        <button id="trash-nav-btn" class="nav-btn">🗑️ سطل زباله</button>
+        <button id="backup-data-btn" class="nav-btn">📤 پشتیبان‌گیری</button>
+        <button id="restore-data-btn" class="nav-btn">📥 بازیابی</button>
+        <input type="file" id="restore-file-input" class="hidden-input" accept=".json">
+    </div>
+    <div id="overlay" class="overlay modal-overlay"></div>
+
+    <main id="class-management-page" class="page active">
+        <h2>لیست کلاس‌ها</h2>
+        <div class="global-search-container">
+            <div class="student-search-container animated-search-container">
+                <input type="text" id="global-student-search-input" class="animated-search-input"
+                    placeholder="جست‌جوی دانش‌آموز...">
+                <span class=" search-icon">🔍</span>
+                <div id="global-student-search-results" class="search-results-dropdown"></div>
+            </div>
+        </div>
+        <div class="input-group">
+            <div class="composite-input">
+                <div class="class-type-selection">
+                    <label>
+                        <input type="radio" name="class-type" value="in-person">
+                        <span>حضوری</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="class-type" value="online">
+                        <span>آنلاین</span>
+                    </label>
+                </div>
+                <input type="text" id="new-class-name" placeholder="نام کلاس جدید...">
+            </div>
+            <button id="add-class-btn">افزودن</button>
+        </div>
+        <ul id="class-list" class="list-container"></ul>
+    </main>
+
+    <p id="app-version" style="text-align: center; font-size: 12px; color: #888; margin-top: 20px;"></p>
+
+    <main id="student-page" class="page">
+        <button id="back-to-attendance-btn" class="btn-secondary" style="width: auto; margin-left: 10px;">📋 حضور و
+            غیاب</button>
+        <button id="back-to-sessions-btn">➡️ لیست جلسات</button>
+
+        <div class="dashboard-container">
+            <div class="action-column">
+                <div class="action-column-header">
+                    <h3>🎲 انتخابگر هوشمند</h3>
+                    <div class="student-search-container animated-search-container">
+                        <input type="text" id="student-search-input" class="animated-search-input"
+                            placeholder="جستجو در این کلاس">
+                        <span class="search-icon">🔍</span>
+                        <div id="student-search-results" class="search-results-dropdown"></div>
+                    </div>
+                </div>
+
+                <div id="category-selection-container" class="category-pills">
+                </div>
+
+                <div id="quick-grade-form-wrapper">
+                    <input type="number" id="quick-score-input" placeholder="نمره">
+                    <textarea id="quick-note-textarea" placeholder="یادداشت (اختیاری)..."></textarea>
+                    <button id="quick-grade-submit-btn">ثبت</button>
+                </div>
+
+                <div id="select-student-btn-wrapper">
+                    <button id="select-student-btn" class="btn-success btn-large">نفر بعدی</button>
+                </div>
+
+                <div id="selected-student-result" class="result-display">
+                </div>
+            </div>
+
+            <div class="info-column">
+                <h3 id="student-stats-header" class="section-title">آمار عملکرد</h3>
+                <div id="student-stats-table-container">
+
+                </div>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <main id="attendance-page" class="page">
+        <button id="back-to-sessions-from-attendance-btn">➡️ لیست جلسات</button>
+
+        <ul id="attendance-list" class="list-container">
+        </ul>
+        <div class="form-actions">
+            <button id="finish-attendance-btn" class="btn-success btn-large">تایید و ادامه</button>
+        </div>
+        <div id="absentees-summary-container"></div>
+    </main>
+
+    <main id="settings-page" class="page">
+        <h2 id="settings-class-name-header"></h2>
+        <button class="back-to-classes-btn">➡️ لیست کلاس‌ها</button>
+
+        <h3 id="student-management-toggle" class="accordion-toggle open">
+            <span class="arrow">▼</span>
+            مدیریت لیست دانش‌آموزان
+        </h3>
+        <div id="student-management-content" class="accordion-content open">
+            <div class="input-group">
+                <input type="text" id="new-student-name" placeholder="افزودن دستی دانش‌آموز...">
+                <button id="add-student-btn">افزودن</button>
+            </div>
+            <div>
+                <textarea id="paste-area"
+                    placeholder="لیست اسامی کپی شده را اینجا Paste کنید... (هر اسم در یک خط)"></textarea>
+                <button id="process-paste-btn" class="btn-secondary">بررسی لیست</button>
+            </div>
+            <div class="divider-text">یا</div>
+            <div>
+                <input type="file" id="csv-file-input" class="hidden-input" accept=".csv">
+                <button id="import-csv-btn" class="btn-secondary">ورود لیست از فایل (CSV)</button>
+            </div>
+        </div>
+
+        <h3 class="section-title">مدیریت دسته‌بندی‌های پرسش</h3>
+        <div class="input-group">
+            <div class="input-wrapper">
+                <input type="text" id="new-category-name" placeholder="نام دسته‌بندی جدید (مثلا: Grammar)">
+            </div>
+            <div class="category-options">
+                <input type="checkbox" id="is-graded-checkbox">
+                <label for="is-graded-checkbox">قابل نمره‌دهی</label>
+            </div>
+            <button id="add-category-btn">افزودن</button>
+        </div>
+        <ul id="category-list" class="list-container"></ul>
+
+        <h3 class="section-title">لیست فعلی دانش‌آموزان</h3>
+        <ul id="settings-student-list" class="list-container"></ul>
+    </main>
+
+    <main id="session-page" class="page">
+        <button class="back-to-classes-btn">➡️ لیست کلاس‌ها</button>
+        <div class="session-actions">
+            <button id="new-session-btn" class="btn-success btn-large">
+                ➕ جلسه جدید
+            </button>
+        </div>
+        <h4>جلسات قبلی:</h4>
+        <ul id="session-list" class="list-container"></ul>
+    </main>
+
+    <main id="column-mapping-page" class="page">
+        <h2>انتخاب ستون نام دانش‌آموزان</h2>
+        <p>فایل شما با موفقیت خوانده شد. لطفاً از لیست زیر، ستونی که حاوی نام کامل دانش‌آموزان است را انتخاب کنید.</p>
+
+        <div class="input-group">
+            <select id="column-select-dropdown" style="width: 100%; padding: 10px;"></select>
+        </div>
+
+        <div class="form-actions">
+            <button id="confirm-column-btn" class="btn-success">ادامه و نمایش پیش‌نمایش</button>
+            <button id="cancel-import-btn" class="btn-secondary" style="width: auto;">لغو عملیات</button>
+        </div>
+    </main>
+
+    <main id="csv-preview-page" class="page">
+        <h2>پیش‌نمایش لیست ورودی</h2>
+        <p>لطفاً لیست زیر را بررسی کرده و موارد مورد نظر برای افزودن را تایید کنید.</p>
+        <ul id="csv-preview-list" class="list-container"></ul>
+        <div class="form-actions">
+            <button id="csv-confirm-btn" class="btn-success">تایید و افزودن موارد انتخاب شده</button>
+            <button id="csv-cancel-btn">لغو عملیات</button>
+        </div>
+    </main>
+
+    <main id="student-profile-page" class="page">
+        <h2 id="profile-student-name-header"></h2>
+        <button id="back-to-student-page-btn" class="btn-secondary" style="width: auto;">➡️ صفحه جلسه</button>
+        <hr class="separator">
+
+        <div class="profile-content-container">
+            <div class="scoring-section">
+                <h3>ثبت نمره جدید</h3>
+                <div id="graded-category-pills-container" class="category-pills">
+                    <!-- Pills for skills will be generated here -->
+                </div>
+                <div class="input-group centered-input-group" style="margin-top: 15px;">
+                    <input type="number" id="new-score-value" placeholder="نمره (مثلا: 85)">
+                </div>
+                <textarea id="new-score-comment" placeholder="توضیحات این نمره (اختیاری)..."
+                    style="margin-top: 10px;"></textarea>
+                <button id="add-score-btn" class="btn-success" style="width: 100%; margin-top: 10px;">ثبت نمره</button>
+            </div>
+
+            <div class="history-section">
+                <div class="history-section-header">
+                    <h3>سوابق دانش‌آموز</h3>
+                    <button id="add-note-btn" class="btn-icon" title="افزودن یادداشت جدید">📝</button>
+                </div>
+                <div id="profile-stats-summary" class="stats-summary-box">
+                    <!-- Student's general stats will be displayed here -->
+                </div>
+                <h4 style="margin-top: 20px;">تاریخچه نمرات:</h4>
+                <ul id="profile-scores-list" class="list-container">
+                    <!-- Scores history will be listed here -->
+                </ul>
+                <h4 style="margin-top: 20px;">تاریخچه یادداشت‌ها:</h4>
+                <ul id="profile-notes-list" class="list-container">
+                    <!-- Notes history will be listed here -->
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <main id="trash-page" class="page">
+        <h2>🗑️ سطل زباله</h2>
+        <button class="back-to-classes-btn">➡️ لیست کلاس‌ها</button>
+        <hr class="separator">
+
+        <h3>کلاس‌های حذف شده</h3>
+        <ul id="trashed-classes-list" class="list-container">
+        </ul>
+
+        <h3>دانش‌آموزان حذف شده</h3>
+        <ul id="trashed-students-list" class="list-container">
+        </ul>
+
+        <h3>جلسات حذف شده</h3>
+        <ul id="trashed-sessions-list" class="list-container">
+        </ul>
+
+        <h3>دسته‌بندی‌های حذف شده</h3>
+        <ul id="trashed-categories-list" class="list-container">
+        </ul>
+
+        <h3>یادداشت‌های حذف شده</h3>
+        <ul id="trashed-notes-list" class="list-container">
+        </ul>
+
+        <h3>توضیحات نمرات حذف شده</h3>
+        <ul id="trashed-score-comments-list" class="list-container">
+        </ul>
+    </main>
+
+    <div id="undo-toast" class="toast-base undo-toast">
+        <span id="undo-message"></span>
+        <button id="undo-btn">واگرد</button>
+    </div>
+
+    <div id="custom-confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <p id="confirm-modal-message"></p>
+            <div class="modal-actions">
+                <button id="confirm-modal-cancel-btn" class="btn-secondary">لغو</button>
+                <button id="confirm-modal-confirm-btn">تایید</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-note-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="add-note-modal-title">ثبت یادداشت جدید</h3>
+            <textarea id="new-note-content" placeholder="متن یادداشت خود را اینجا وارد کنید"></textarea>
+            <div class="modal-actions">
+                <button id="cancel-note-btn" class="btn-secondary">لغو</button>
+                <button id="save-note-btn" class="btn-success">ذخیره</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="secure-confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <p id="secure-confirm-message"></p>
+            <p>برای تایید، لطفاً عدد زیر را در کادر وارد کنید:</p>
+            <div id="secure-confirm-code" class="secure-code-display"></div>
+            <input type="text" id="secure-confirm-input" placeholder="عدد ۵ رقمی..." maxlength="5" autocomplete="off">
+            <div class="modal-actions">
+                <button id="secure-confirm-cancel-btn" class="btn-secondary">لغو</button>
+                <button id="secure-confirm-confirm-btn" class="btn-warning" disabled>تایید حذف</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="backup-options-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>گزینه‌های پشتیبان‌گیری</h3>
+            <p>فایل پشتیبان خود را چگونه می‌خواهید دریافت کنید؟</p>
+            <div class="modal-actions">
+                <button id="backup-options-cancel-btn" class="btn-secondary">لغو</button>
+                <button id="backup-download-btn" class="btn-success">دانلود</button>
+                <button id="backup-share-btn" class="btn-primary">اشتراک‌گذاری</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom-context-menu" class="context-menu">
+        <ul></ul>
+    </div>
+
+    <div id="notification-toast" class="toast-base notification-toast"></div>
+
+
+
+</body>
+
+</html>

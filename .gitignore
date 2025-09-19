@@ -1,6 +1,6 @@
 .env
 /node_modules/
-/dist/
+# /dist/ disabled because of cpanel of myklas.ir needs the dist folder. We can later enable it if things change
 start-dev-mode
 Start Dev Mode.lnk
 start-dev-mode.ps1

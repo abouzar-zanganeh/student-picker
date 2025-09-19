@@ -705,8 +705,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.showNotification("فایل پشتیبان در حال دانلود است...");
     });
 
-    backupShareBtn.addEventListener('click', () => {
-        createBackup(true); // We'll tell our function TO share.
+    backupShareBtn.addEventListener('click', async () => {
+        await createBackup(true);
         ui.closeActiveModal();
     });
 
