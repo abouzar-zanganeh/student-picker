@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         studentSearchResultsDiv, studentProfilePage, profileStudentNameHeader,
         backToStudentPageBtn, gradedCategoryPillsContainer, newScoreValueInput,
         newScoreCommentTextarea, addScoreBtn, profileStatsSummaryDiv,
-        profileScoresListUl, isGradedCheckbox
+        profileScoresListUl, isGradedCheckbox, backupOptionsModal, backupDownloadBtn, backupShareBtn, backupOptionsCancelBtn
     } = ui; // This is a bit of a trick to avoid rewriting all the getElementById calls
     const trashNavBtn = document.getElementById('trash-nav-btn');
 
@@ -730,7 +730,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     backupDataBtn.addEventListener('click', () => {
         // This is "feature detection"—it checks if the browser supports sharing.
-        if (navigator.share) {
+        if (navigator.share && ('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
             ui.openModal('backup-options-modal');
         } else {
             // If not supported (like on desktop), download the file directly.
@@ -1134,6 +1134,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 onCancel: null // This triggers our new single-button mode
             }
         );
+    }
+
+    // Display app version
+    const appVersion = import.meta.env.VITE_APP_VERSION;
+    if (appVersion) {
+        document.getElementById('app-version').textContent = `نسخه ${appVersion}`;
     }
 
     // --- Temporary Universal Utility Function ---

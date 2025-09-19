@@ -1,8 +1,15 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { readFileSync } from 'fs';
+
+// Read package.json to get the version
+const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
 
 export default defineConfig({
     
+    define: {
+        'import.meta.env.VITE_APP_VERSION': JSON.stringify(packageJson.version)
+    },
     plugins: [
         VitePWA({
             registerType: 'autoUpdate',
