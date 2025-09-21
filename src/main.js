@@ -1,5 +1,5 @@
 import * as state from './state.js';
-import { resetAllStudentCounters, getActiveItems, downloadBackup, createZippedBackup } from './state.js';
+import { resetAllStudentCounters, getActiveItems, downloadBackup } from './state.js';
 import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard } from './utils.js';
@@ -715,39 +715,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     backupDataBtn.addEventListener('click', async () => {
-        closeSideNav();
+        closeSideNav(); // Close the nav menu immediately
         const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-        if (isTouchDevice && navigator.share) {
-            try {
-                // First, create the compressed zip blob
-                const blob = await state.createZippedBackup();
-                const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
-                const fileName = `SP-Backup-${today}.stp`;
-                const fileToShare = new File([blob], fileName, { type: 'application/octet-stream' });
+        // Prepare the file data once
+        const dataStr = JSON.stringify(state.classrooms, null, 2);
+        const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
+        const fileName = `SP-${today}.txt`;
+        const fileToShare = new File([dataStr], fileName, { type: 'text/plain' });
 
-                // Then, check if the browser can share this specific file
-                if (navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
-                    await navigator.share({
-                        title: 'پشتیبان دستیار معلم',
-                        text: 'فایل پشتیبان فشرده‌شده',
-                        files: [fileToShare],
-                    });
-                } else {
-                    // If it can't share files, fall back to downloading
-                    ui.showNotification("مرورگر شما از اشتراک‌گذاری فایل ZIP پشتیبانی نمی‌کند. فایل در حال دانلود است.");
-                    await downloadBackup();
-                }
+        // Check for touch device and share capability
+        if (isTouchDevice && navigator.share && navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
+            try {
+                // If sharing is possible, try to share immediately
+                await navigator.share({
+                    title: 'پشتیبان دستیار معلم',
+                    text: 'فایل پشتیبان داده‌های برنامه',
+                    files: [fileToShare],
+                });
             } catch (error) {
+                // If sharing is cancelled or fails, do nothing. The user chose to cancel.
                 if (error.name !== 'AbortError') {
-                    console.error('Error during share process:', error);
-                    await downloadBackup(); // Fallback on any other error
+                    console.error('Error sharing file:', error);
+                    // If an unexpected error occurs, fall back to downloading
+                    downloadBackup();
                     ui.showNotification("اشتراک‌گذاری با خطا مواجه شد. فایل در حال دانلود است.");
                 }
             }
         } else {
-            // On desktop, download directly
-            await downloadBackup();
+            // On desktop or if sharing is not supported, download directly
+            downloadBackup();
             ui.showNotification("پشتیبان‌گیری با موفقیت انجام شد.");
         }
     });
@@ -762,23 +759,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = async (e) => {
+        reader.onload = (e) => {
             try {
-                // Dynamically import JSZip only when it's needed
-                const JSZip = (await import('jszip')).default;
-
-                // Load the binary data from the zip file
-                const zip = await JSZip.loadAsync(e.target.result);
-                const jsonFile = zip.file('backup.json'); // Find our JSON file inside the zip
-
-                if (!jsonFile) {
-                    throw new Error('فایل backup.json در داخل فایل ZIP پیدا نشد.');
-                }
-
-                const jsonContent = await jsonFile.async('string'); // Extract the content as text
-                const plainData = JSON.parse(jsonContent);
-
-                // The rest of the confirmation and restore logic is the same
+                const plainData = JSON.parse(e.target.result);
                 ui.showCustomConfirm(
                     "آیا از بازیابی اطلاعات مطمئن هستید؟ تمام داده‌های فعلی شما بازنویسی خواهد شد.",
                     () => {
@@ -787,18 +770,15 @@ document.addEventListener('DOMContentLoaded', () => {
                         ui.renderClassList();
                         ui.showPage('class-management-page');
                         ui.showNotification("اطلاعات با موفقیت بازیابی شد.");
+
                     },
                     { confirmText: 'بازیابی کن', confirmClass: 'btn-warning' }
                 );
-
             } catch (error) {
-                console.error('Restore error:', error);
-                ui.showNotification("خطا در خواندن فایل. لطفاً فایل پشتیبان ZIP معتبر انتخاب کنید.");
+                ui.showNotification("خطا در خواندن فایل. لطفاً فایل پشتیبان معتبر انتخاب کنید.");
             }
         };
-        // Read the file as a binary ArrayBuffer, which JSZip needs
-        reader.readAsArrayBuffer(file);
-
+        reader.readAsText(file);
         event.target.value = null; // Reset input
     });
 
