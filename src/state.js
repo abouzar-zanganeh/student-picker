@@ -35,8 +35,8 @@ export function saveData() {
 export function downloadBackup() {
     const dataStr = JSON.stringify(classrooms, null, 2);
     const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
-    const fileName = `SP-${today}.json`;
-    const file = new File([dataStr], fileName, { type: 'application/json' });
+    const fileName = `SP-${today}.txt`;
+    const file = new File([dataStr], fileName, { type: 'text/plain' });
 
     const url = URL.createObjectURL(file);
     const link = document.createElement('a');

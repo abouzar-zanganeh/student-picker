@@ -721,8 +721,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Prepare the file data once
         const dataStr = JSON.stringify(state.classrooms, null, 2);
         const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
-        const fileName = `SP-${today}.json`;
-        const fileToShare = new File([dataStr], fileName, { type: 'application/json' });
+        const fileName = `SP-${today}.txt`;
+        const fileToShare = new File([dataStr], fileName, { type: 'text/plain' });
 
         // Check for touch device and share capability
         if (isTouchDevice && navigator.share && navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
