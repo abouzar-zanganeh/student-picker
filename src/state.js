@@ -1,4 +1,5 @@
 import { Classroom, Student, Session, Category, Homework } from './models.js';
+import JSZip from 'jszip';
 
 
 // --- وضعیت کلی برنامه (Global State) ---
@@ -32,16 +33,34 @@ export function saveData() {
     localStorage.setItem('teacherAssistantData_v2', JSON.stringify(classrooms));
 }
 
-export function downloadBackup() {
+// This new async function creates the compressed ZIP blob
+export async function createZippedBackup() {
+    const zip = new JSZip();
     const dataStr = JSON.stringify(classrooms, null, 2);
-    const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
-    const fileName = `SP-${today}.json`;
-    const file = new File([dataStr], fileName, { type: 'application/json' });
 
-    const url = URL.createObjectURL(file);
+    zip.file('backup.json', dataStr);
+
+    // Generate the ZIP file blob with maximum compression
+    const blob = await zip.generateAsync({
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: {
+            level: 9 // 1=fastest, 9=best compression
+        }
+    });
+
+    return blob;
+}
+
+export async function downloadBackup() {
+    const blob = await createZippedBackup(); // Get the zipped blob
+    const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
+    const fileName = `SP-Backup-${today}.stp`;
+
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = file.name;
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
