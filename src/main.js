@@ -715,35 +715,8 @@ document.addEventListener('DOMContentLoaded', () => {
         closeSideNav(); // Close the nav menu after clicking
     });
 
-    backupDataBtn.addEventListener('click', async () => {
-        closeSideNav(); // Close the nav menu immediately
-
-        // 1. Get the prepared file object from our new state function.
-        const fileToShare = state.prepareBackupData();
-
-        // 2. Check for mobile/share capability.
-        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        if (isTouchDevice && navigator.share && navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
-            try {
-                // 3. Use the file with the Web Share API.
-                await navigator.share({
-                    title: 'پشتیبان دستیار معلم',
-                    text: 'فایل پشتیبان داده‌های برنامه',
-                    files: [fileToShare],
-                });
-            } catch (error) {
-                if (error.name !== 'AbortError') {
-                    console.error('Error sharing file:', error);
-                    // 4a. If sharing fails, fall back to our new UI download trigger.
-                    ui.triggerFileDownload(fileToShare);
-                    ui.showNotification("اشتراک‌گذاری با خطا مواجه شد. فایل در حال دانلود است.");
-                }
-            }
-        } else {
-            // 4b. On desktop, use the new UI download trigger directly.
-            ui.triggerFileDownload(fileToShare);
-            ui.showNotification("پشتیبان‌گیری با موفقیت انجام شد.");
-        }
+    backupDataBtn.addEventListener('click', () => {
+        ui.initiateBackupProcess();
     });
 
     restoreDataBtn.addEventListener('click', () => {

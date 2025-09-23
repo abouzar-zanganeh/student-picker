@@ -283,6 +283,35 @@ export function triggerFileDownload(fileObject) {
     URL.revokeObjectURL(url);
 }
 
+export async function initiateBackupProcess() {
+    // 1. Get the prepared file object.
+    const fileToShare = state.prepareBackupData();
+
+    // 2. Check for mobile/share capability.
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice && navigator.share && navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
+        try {
+            // 3. Use the file with the Web Share API.
+            await navigator.share({
+                title: 'پشتیبان دستیار معلم',
+                text: 'فایل پشتیبان داده‌های برنامه',
+                files: [fileToShare],
+            });
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('Error sharing file:', error);
+                // 4a. If sharing fails, fall back to a direct download.
+                triggerFileDownload(fileToShare);
+                showNotification("اشتراک‌گذاری با خطا مواجه شد. فایل در حال دانلود است.");
+            }
+        }
+    } else {
+        // 4b. On desktop, trigger the download directly.
+        triggerFileDownload(fileToShare);
+        showNotification("پشتیبان‌گیری با موفقیت انجام شد.");
+    }
+}
+
 export function openContextMenu(event, menuItems) {
     event.preventDefault();
 
@@ -2062,8 +2091,7 @@ function createSessionActionButtons(session, displaySessionNumber) {
                     showCustomConfirm(
                         "جلسه با موفقیت خاتمه یافت. آیا مایل به ایجاد فایل پشتیبان هستید؟",
                         () => {
-                            const file = state.prepareBackupData();
-                            triggerFileDownload(file);
+                            initiateBackupProcess();
                             showNotification("فایل پشتیبان با موفقیت ایجاد شد.");
                         },
                         {
