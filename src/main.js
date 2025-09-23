@@ -1,5 +1,5 @@
 import * as state from './state.js';
-import { resetAllStudentCounters, getActiveItems, downloadBackup } from './state.js';
+import { resetAllStudentCounters, getActiveItems } from './state.js';
 import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard } from './utils.js';
@@ -170,6 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
     confirmModalConfirmBtn.addEventListener('click', () => {
         ui.closeActiveModal(state.confirmCallback);
     });
+
 
     backToAttendanceBtn.addEventListener('click', () => {
         if (state.currentClassroom && state.selectedSession) {
@@ -716,35 +717,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     backupDataBtn.addEventListener('click', async () => {
         closeSideNav(); // Close the nav menu immediately
+
+        // 1. Get the prepared file object from our new state function.
+        const fileToShare = state.prepareBackupData();
+
+        // 2. Check for mobile/share capability.
         const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-        // Prepare the file data once
-        const dataStr = JSON.stringify(state.classrooms, null, 2);
-        const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
-        const fileName = `SP-${today}.txt`;
-        const fileToShare = new File([dataStr], fileName, { type: 'text/plain' });
-
-        // Check for touch device and share capability
         if (isTouchDevice && navigator.share && navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
             try {
-                // If sharing is possible, try to share immediately
+                // 3. Use the file with the Web Share API.
                 await navigator.share({
                     title: 'پشتیبان دستیار معلم',
                     text: 'فایل پشتیبان داده‌های برنامه',
                     files: [fileToShare],
                 });
             } catch (error) {
-                // If sharing is cancelled or fails, do nothing. The user chose to cancel.
                 if (error.name !== 'AbortError') {
                     console.error('Error sharing file:', error);
-                    // If an unexpected error occurs, fall back to downloading
-                    downloadBackup();
+                    // 4a. If sharing fails, fall back to our new UI download trigger.
+                    ui.triggerFileDownload(fileToShare);
                     ui.showNotification("اشتراک‌گذاری با خطا مواجه شد. فایل در حال دانلود است.");
                 }
             }
         } else {
-            // On desktop or if sharing is not supported, download directly
-            downloadBackup();
+            // 4b. On desktop, use the new UI download trigger directly.
+            ui.triggerFileDownload(fileToShare);
             ui.showNotification("پشتیبان‌گیری با موفقیت انجام شد.");
         }
     });

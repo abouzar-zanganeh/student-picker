@@ -1,5 +1,5 @@
 import * as state from './state.js';
-import { getActiveItems, getSessionDisplayMap, downloadBackup } from './state.js';
+import { getActiveItems, getSessionDisplayMap } from './state.js';
 import { detectTextDirection, renderMultiLineText } from './utils.js';
 
 // --- HTML Elements ---
@@ -265,6 +265,22 @@ export function closeActiveModal(onClosed) {
 
         }, 300); // This must match the animation duration
     }
+}
+
+export function triggerFileDownload(fileObject) {
+    // This creates a temporary URL for the file object.
+    const url = URL.createObjectURL(fileObject);
+
+    // This creates a hidden link, sets its properties, and clicks it programmatically.
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileObject.name;
+    document.body.appendChild(link);
+    link.click();
+
+    // This cleans up by removing the link and revoking the temporary URL.
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }
 
 export function openContextMenu(event, menuItems) {
@@ -2046,7 +2062,8 @@ function createSessionActionButtons(session, displaySessionNumber) {
                     showCustomConfirm(
                         "جلسه با موفقیت خاتمه یافت. آیا مایل به ایجاد فایل پشتیبان هستید؟",
                         () => {
-                            downloadBackup();
+                            const file = state.prepareBackupData();
+                            triggerFileDownload(file);
                             showNotification("فایل پشتیبان با موفقیت ایجاد شد.");
                         },
                         {
