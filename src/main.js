@@ -716,6 +716,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     backupDataBtn.addEventListener('click', () => {
+        closeSideNav();
         ui.initiateBackupProcess();
     });
 
