@@ -302,13 +302,13 @@ export async function initiateBackupProcess() {
                 console.error('Error sharing file:', error);
                 // 4a. If sharing fails, fall back to a direct download.
                 triggerFileDownload(fileToShare);
-                showNotification("اشتراک‌گذاری با خطا مواجه شد. فایل در حال دانلود است.");
+                showNotification("⚠️اشتراک‌گذاری با خطا مواجه شد. فایل در حال دانلود است.");
             }
         }
     } else {
         // 4b. On desktop, trigger the download directly.
         triggerFileDownload(fileToShare);
-        showNotification("پشتیبان‌گیری با موفقیت انجام شد.");
+        showNotification("✅پشتیبان‌گیری با موفقیت انجام شد.");
     }
 }
 
@@ -1586,7 +1586,7 @@ export function renderStudentProfilePage() {
                         score.isDeleted = true;
                         state.saveData();
                         renderStudentProfilePage(); // Re-render to hide the deleted item
-                        showNotification('نمره به سطل زباله منتقل شد.');
+                        showNotification('✅نمره به سطل زباله منتقل شد.');
                     },
                     { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
                 );
@@ -1646,7 +1646,7 @@ export function renderStudentNotes() {
                     note.isDeleted = true;
                     state.saveData();
                     renderStudentNotes(); // Re-render to hide the deleted item
-                    showNotification('یادداشت به سطل زباله منتقل شد.');
+                    showNotification('✅یادداشت به سطل زباله منتقل شد.');
                 },
                 { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
             );
@@ -1866,7 +1866,7 @@ function createClassListItem(classroom) {
                             if (result.success) {
                                 state.saveData();
                                 renderClassList();
-                                showNotification(`نام کلاس به «${trimmedNewName}» تغییر یافت.`);
+                                showNotification(`✅نام کلاس به «${trimmedNewName}» تغییر یافت.`);
                             } else {
                                 showNotification(result.message);
                             }
@@ -2092,7 +2092,7 @@ function createSessionActionButtons(session, displaySessionNumber) {
                         "جلسه با موفقیت خاتمه یافت. آیا مایل به ایجاد فایل پشتیبان هستید؟",
                         () => {
                             initiateBackupProcess();
-                            showNotification("فایل پشتیبان با موفقیت ایجاد شد.");
+                            showNotification("✅فایل پشتیبان با موفقیت ایجاد شد.");
                         },
                         {
                             confirmText: 'بله',
@@ -2132,7 +2132,7 @@ function createSessionInfoContainer(session, displaySessionNumber) {
     badgesContainer.appendChild(dayBadge);
 
     if (session.isCancelled) {
-        sessionText.textContent = `جلسه لغو شده - تاریخ: ${sessionDate}`;
+        sessionText.textContent = `✅جلسه لغو شده - تاریخ: ${sessionDate}`;
         infoContainer.style.cursor = 'default';
         const cancelledBadge = document.createElement('span');
         cancelledBadge.className = 'type-badge cancelled-badge';
@@ -2196,7 +2196,7 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                         session.isCancelled = !session.isCancelled;
                         state.saveData();
                         renderSessions();
-                        showNotification(session.isCancelled ? 'جلسه لغو شد.' : 'جلسه بازگردانی شد.');
+                        showNotification(session.isCancelled ? '✅جلسه لغو شد.' : '✅جلسه بازگردانی شد.');
                     }, { confirmText: actionText, confirmClass: 'btn-warning' });
                 }
             },
@@ -2380,7 +2380,7 @@ export function renderTrashPage() {
                 state.saveData();
                 renderTrashPage();
                 renderClassList();
-                showNotification(`کلاس «${classroom.info.name}» بازیابی شد.`);
+                showNotification(`✅کلاس «${classroom.info.name}» بازیابی شد.`);
             });
             const permanentDeleteBtn = document.createElement('button');
             permanentDeleteBtn.className = 'btn-icon';
@@ -2393,7 +2393,7 @@ export function renderTrashPage() {
                         delete state.classrooms[classroom.info.name];
                         state.saveData();
                         renderTrashPage();
-                        showNotification(`کلاس «${classroom.info.name}» برای همیشه حذف شد.`);
+                        showNotification(`✅کلاس «${classroom.info.name}» برای همیشه حذف شد.`);
                     },
                     { confirmText: 'حذف دائمی', confirmClass: 'btn-warning' }
                 );
@@ -2811,7 +2811,7 @@ function setupAbsenteesCopyButton() {
         });
 
         if (absentStudents.length === 0) {
-            showNotification('لیست غایبین خالی است.');
+            showNotification('⚠️لیست غایبین خالی است.');
             return;
         }
 
@@ -2833,10 +2833,10 @@ function setupAbsenteesCopyButton() {
 
         // Use the modern Clipboard API to copy the text
         navigator.clipboard.writeText(textToCopy).then(() => {
-            showNotification('لیست غایبین با موفقیت کپی شد.');
+            showNotification('✅لیست غایبین با موفقیت کپی شد.');
         }).catch(err => {
             console.error('Failed to copy text: ', err);
-            showNotification('خطا در کپی کردن لیست.');
+            showNotification('❌خطا در کپی کردن لیست.');
         });
     });
 }
