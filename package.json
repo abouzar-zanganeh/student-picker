@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "node generate-cert.js && vite",
     "build": "vite build",
-    "release": "npm version patch && vite build",
+    "release:patch": "npm version patch && vite build",
+    "release:minor": "npm version minor && vite build",
+    "release:major": "npm version major && vite build",
     "preview": "vite preview",
     "lint": "eslint src/"
   },
