@@ -2073,13 +2073,28 @@ export function showPage(pageId) {
         selectedStudentId: state.selectedStudentForProfile ? state.selectedStudentForProfile.identity.studentId : null,
     };
 
-    const currentState = history.state;
-    if (!currentState ||
-        currentState.pageId !== historyState.pageId ||
-        currentState.currentClassName !== historyState.currentClassName ||
-        currentState.selectedSessionNumber !== historyState.selectedSessionNumber ||
-        currentState.selectedStudentId !== historyState.selectedStudentId) {
-        history.pushState(historyState, '', `#${pageId}`);
+    // Build a new URL with query parameters to store the context
+    let hash = `#${pageId}`;
+    const params = new URLSearchParams();
+
+    if (state.currentClassroom) {
+        params.set('class', state.currentClassroom.info.name);
+    }
+    if (state.selectedSession) {
+        params.set('session', state.selectedSession.sessionNumber);
+    }
+    if (state.selectedStudentForProfile) {
+        params.set('student', state.selectedStudentForProfile.identity.studentId);
+    }
+
+    const paramsString = params.toString();
+    if (paramsString) {
+        hash += `?${paramsString}`;
+    }
+
+    // Only push a new entry to browser history if the URL has actually changed
+    if (window.location.hash !== hash) {
+        history.pushState(historyState, '', hash);
     }
 
     _internalShowPage(pageId);

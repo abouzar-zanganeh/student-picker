@@ -4,6 +4,64 @@ import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard } from './utils.js';
 
+function restoreStateFromURL() {
+    const hash = window.location.hash;
+    if (!hash || hash === '#') return false;
+
+    const [hashPath, queryString] = hash.split('?');
+    const pageId = hashPath.substring(1); // Remove the '#'
+    const params = new URLSearchParams(queryString);
+
+    const className = params.get('class');
+    const sessionNumber = parseInt(params.get('session'), 10);
+    const studentId = params.get('student');
+
+    if (className && state.classrooms[className]) {
+        state.setCurrentClassroom(state.classrooms[className]);
+
+        if (sessionNumber && state.currentClassroom.getSession(sessionNumber)) {
+            state.setSelectedSession(state.currentClassroom.getSession(sessionNumber));
+        }
+
+        if (studentId && state.currentClassroom.students.find(s => s.identity.studentId === studentId)) {
+            state.setSelectedStudentForProfile(state.currentClassroom.students.find(s => s.identity.studentId === studentId));
+        }
+    } else {
+        // If there's a hash but no valid class, can't restore the state.
+        return false;
+    }
+
+    // Based on the pageId, render and show the correct page
+    switch (pageId) {
+        case 'session-page':
+            ui.renderSessions();
+            ui.showPage('session-page');
+            break;
+        case 'student-page':
+            ui.renderStudentPage(); // This function also calls showPage
+            break;
+        case 'attendance-page':
+            ui.renderAttendancePage();
+            ui.showPage('attendance-page');
+            break;
+        case 'settings-page':
+            ui.settingsClassNameHeader.textContent = `تنظیمات کلاس: ${state.currentClassroom.info.name}`;
+            ui.renderSettingsStudentList();
+            ui.renderSettingsCategories();
+            ui.showPage('settings-page');
+            break;
+        case 'student-profile-page':
+            ui.renderStudentProfilePage();
+            ui.showPage('student-profile-page');
+            break;
+        default:
+            // If the pageId is something else (like trash-page, etc.), we don't restore it.
+            return false;
+    }
+
+    return true; // Indicates that a page was successfully restored
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- HTML Elements (from ui.js, but needed for event listeners) ---
     const {
@@ -34,7 +92,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initial Load ---
     state.loadData();
-    ui.renderClassList();
+
+    // Try to restore the state from the URL
+    const wasRestored = restoreStateFromURL();
+
+    // If no state was restored from the URL (e.g., it's a fresh visit), load the default page
+    if (!wasRestored) {
+        ui.renderClassList();
+        ui.showPage('class-management-page');
+    }
 
     function initializeAnimatedSearch(containerSelector, clearResultsCallback) {
         const container = document.querySelector(containerSelector);
