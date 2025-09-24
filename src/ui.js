@@ -396,6 +396,7 @@ export function renderBreadcrumbs() {
             handler: () => {
                 state.setSelectedSession(null);
                 state.setSelectedStudentForProfile(null);
+                renderSessions();
                 showPage('session-page');
             }
         });
