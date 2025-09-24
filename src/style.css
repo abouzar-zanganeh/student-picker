@@ -2137,3 +2137,14 @@ textarea,
 }
 
 /* end of  Breadcrumb Styles */
+
+/* --- Styles for Move Student Modal --- */
+#move-student-class-select {
+    font-family: var(--font-family-main);
+    font-size: 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-main);
+    background-color: #fff;
+}
+
+/* end of styles */

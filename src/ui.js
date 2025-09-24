@@ -214,6 +214,38 @@ export function showSecureConfirm(message, onConfirm) {
     };
 }
 
+export function showMoveStudentModal(student, sourceClass) {
+    // Find all other active classes to serve as possible destinations
+    const destinationClasses = Object.values(state.classrooms)
+        .filter(c => !c.isDeleted && c.info.name !== sourceClass.info.name);
+
+    const modalTitle = document.getElementById('move-student-modal-title');
+    const classSelect = document.getElementById('move-student-class-select');
+    const confirmBtn = document.getElementById('move-student-confirm-btn');
+
+    modalTitle.textContent = `انتقال دانش‌آموز: ${student.identity.name}`;
+    classSelect.innerHTML = ''; // Clear previous options
+
+    if (destinationClasses.length === 0) {
+        classSelect.innerHTML = '<option value="">کلاس دیگری برای انتقال وجود ندارد</option>';
+        confirmBtn.disabled = true;
+    } else {
+        destinationClasses.forEach(classroom => {
+            const option = document.createElement('option');
+            option.value = classroom.info.name;
+            option.textContent = classroom.info.name;
+            classSelect.appendChild(option);
+        });
+        confirmBtn.disabled = false;
+    }
+
+
+    state.setStudentToMove(student);
+    state.setSourceClassForMove(sourceClass);
+
+    openModal('move-student-modal');
+}
+
 export function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -1937,28 +1969,40 @@ export function renderSettingsStudentList() {
         const nameSpan = document.createElement('span');
         nameSpan.textContent = student.identity.name;
         nameSpan.style.flexGrow = '1';
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn-icon';
-        deleteBtn.innerHTML = '🗑️';
-        deleteBtn.style.color = 'var(--color-warning)';
-        deleteBtn.addEventListener('click', (event) => {
-            event.stopPropagation();
-            showCustomConfirm(
-                `آیا از حذف دانش‌آموز «${student.identity.name}» مطمئن هستید؟`,
-                () => {
-                    showUndoToast(`دانش‌آموز «${student.identity.name}» حذف شد.`);
-                    student.isDeleted = true;
-                    state.saveData();
-                    renderSettingsStudentList();
-                },
-                {
-                    confirmText: 'تایید حذف',
-                    confirmClass: 'btn-warning'
-                }
-            );
-        });
+
         li.appendChild(nameSpan);
-        li.appendChild(deleteBtn);
+
+        li.addEventListener('contextmenu', (event) => {
+            const menuItems = [
+                {
+                    label: 'انتقال دانش‌آموز',
+                    icon: '➡️',
+                    action: () => {
+                        // This will call the function we create in Part B
+                        showMoveStudentModal(student, state.currentClassroom);
+                    }
+                },
+                { isSeparator: true },
+                {
+                    label: 'حذف دانش‌آموز',
+                    icon: '🗑️',
+                    className: 'danger',
+                    action: () => {
+                        showCustomConfirm(
+                            `آیا از حذف دانش‌آموز «${student.identity.name}» مطمئن هستید؟`,
+                            () => {
+                                showUndoToast(`دانش‌آموز «${student.identity.name}» حذف شد.`);
+                                student.isDeleted = true;
+                                state.saveData();
+                                renderSettingsStudentList();
+                            },
+                            { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
+                        );
+                    }
+                }
+            ];
+            openContextMenu(event, menuItems);
+        });
         settingsStudentListUl.appendChild(li);
     });
 }

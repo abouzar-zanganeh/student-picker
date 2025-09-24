@@ -701,6 +701,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const moveStudentConfirmBtn = document.getElementById('move-student-confirm-btn');
+    const moveStudentCancelBtn = document.getElementById('move-student-cancel-btn');
+    const classSelectDropdown = document.getElementById('move-student-class-select');
+
+    moveStudentCancelBtn.addEventListener('click', () => {
+        ui.closeActiveModal();
+    });
+
+    moveStudentConfirmBtn.addEventListener('click', () => {
+        const destinationClassName = classSelectDropdown.value;
+        const destinationClassroom = state.classrooms[destinationClassName];
+        const { studentToMove, sourceClassForMove } = state;
+
+        if (!studentToMove || !sourceClassForMove || !destinationClassroom) {
+            ui.showNotification('خطایی رخ داد. لطفاً دوباره امتحان کنید.', 'error');
+            ui.closeActiveModal();
+            return;
+        }
+
+        const result = state.moveStudent(studentToMove, sourceClassForMove, destinationClassroom);
+
+        if (result.success) {
+            state.saveData();
+            ui.renderSettingsStudentList(); // Refresh the list in the background
+            ui.showNotification(`دانش‌آموز «${studentToMove.identity.name}» با موفقیت به کلاس «${destinationClassName}» منتقل شد.`);
+        } else {
+            ui.showNotification(result.message, 'error');
+        }
+
+        ui.closeActiveModal();
+    });
+
 
     hamburgerMenuBtn.addEventListener('click', () => {
         sideNavMenu.style.width = '250px';

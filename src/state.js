@@ -25,6 +25,9 @@ export let winnerHistoryIndex = -1; // -1 indicates we're not in history view
 export let saveNoteCallback = null;
 export let manualSelection = null; // To hold a student selected from the stats table
 
+export let studentToMove = null;
+export let sourceClassForMove = null;
+
 
 
 // --- توابع اصلی داده‌ها (Data Functions) ---
@@ -159,6 +162,32 @@ export function renameClassroom(oldName, newName) {
     return { success: true };
 }
 
+export function moveStudent(studentToMove, sourceClassroom, destinationClassroom) {
+    // 1. Check for duplicates in the destination class to prevent conflicts.
+    const isDuplicate = getActiveItems(destinationClassroom.students).some(
+        s => s.identity.name.toLowerCase() === studentToMove.identity.name.toLowerCase()
+    );
+
+    if (isDuplicate) {
+        return { success: false, message: `دانش‌آموزی با نام «${studentToMove.identity.name}» از قبل در کلاس «${destinationClassroom.info.name}» وجود دارد.` };
+    }
+
+    // 2. Add the student to the new class.
+    // We use a deep copy to ensure the original and new student are separate objects.
+    const studentCopy = JSON.parse(JSON.stringify(studentToMove));
+    destinationClassroom.addStudent(studentCopy);
+
+    // 3. Mark the original student as deleted in the source class.
+    const originalStudent = sourceClassroom.students.find(
+        s => s.identity.studentId === studentToMove.identity.studentId
+    );
+    if (originalStudent) {
+        originalStudent.isDeleted = true;
+    }
+
+    return { success: true };
+}
+
 
 export function setCurrentClassroom(classroom) { currentClassroom = classroom; }
 export function setLiveSession(session) { liveSession = session; }
@@ -179,6 +208,9 @@ export function setCancelCallback(callback) { cancelCallback = callback; }
 export function setSecureConfirmCallback(callback) { secureConfirmCallback = callback; }
 export function setActiveModal(modalId) { activeModal = modalId; }
 export function setManualSelection(selection) { manualSelection = selection; }
+
+export function setStudentToMove(student) { studentToMove = student; }
+export function setSourceClassForMove(classroom) { sourceClassForMove = classroom; }
 
 
 export function resetAllStudentCounters() {
