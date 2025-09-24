@@ -773,8 +773,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // If navigating to the student page, re-render it completely to show fresh data.
             if (pageId === 'student-page') {
                 ui.renderStudentPage();
-            } else {
-                // For all other pages, use the old method of just showing/hiding.
+            } else if (pageId === 'session-page') {
+                ui.renderSessions();
+                ui._internalShowPage(pageId);
+            }
+            else {
                 ui._internalShowPage(pageId);
             }
         } else {
