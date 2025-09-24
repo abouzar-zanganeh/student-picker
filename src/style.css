@@ -392,9 +392,8 @@ button:disabled:hover {
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-    width: fit-content;
-    max-width: 90%;
-    white-space: nowrap;
+    width: max-content;
+    max-width: 65%;
     text-align: center;
 }
 
