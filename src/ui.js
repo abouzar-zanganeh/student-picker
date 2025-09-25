@@ -2207,6 +2207,7 @@ function createSessionInfoContainer(session, displaySessionNumber) {
             renderStudentPage();
         });
     }
+    // comment for test
 
     infoContainer.appendChild(sessionText);
 
