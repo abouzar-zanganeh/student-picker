@@ -2770,14 +2770,35 @@ export function renderTrashPage() {
             permanentDeleteBtn.addEventListener('click', () => {
                 showCustomConfirm(
                     `آیا از حذف دائمی دسته‌بندی «${category.name}» مطمئن هستید؟`,
+                    // Inside renderTrashPage -> trashedCategories -> permanentDeleteBtn -> showCustomConfirm...
                     () => {
+                        const categoryName = category.name;
+                        const skillKey = categoryName.toLowerCase();
+
+                        // 1. Loop through all students in the class to remove associated data
+                        classroom.students.forEach(student => {
+                            // Delete selection and issue counters for this category
+                            if (student.categoryCounts && student.categoryCounts[categoryName]) {
+                                delete student.categoryCounts[categoryName];
+                            }
+                            if (student.categoryIssues && student.categoryIssues[categoryName]) {
+                                delete student.categoryIssues[categoryName];
+                            }
+                            // Delete all scores logged for this category/skill
+                            if (student.logs.scores && student.logs.scores[skillKey]) {
+                                delete student.logs.scores[skillKey];
+                            }
+                        });
+
+                        // 2. Remove the category object itself from the classroom
                         const categoryIndex = classroom.categories.findIndex(c => c.id === category.id);
                         if (categoryIndex > -1) {
                             classroom.categories.splice(categoryIndex, 1);
                         }
+
                         state.saveData();
                         renderTrashPage();
-                        showNotification(`دسته‌بندی «${category.name}» برای همیشه حذف شد.`);
+                        showNotification(`دسته‌بندی «${categoryName}» و تمام داده‌های مرتبط با آن برای همیشه حذف شد.`);
                     },
                     { confirmText: 'حذف دائمی', confirmClass: 'btn-warning' }
                 );
