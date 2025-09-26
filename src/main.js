@@ -142,10 +142,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.addEventListener('scroll', ui.closeContextMenu);
 
+    // REPLACE the old document click listener with this one
     document.addEventListener('click', (e) => {
-        // If the context menu is visible and the click was outside of it, close it.
+        // Close context menu if visible
         if (ui.contextMenu.classList.contains('visible') && !ui.contextMenu.contains(e.target)) {
             ui.closeContextMenu();
+        }
+
+        // Hide student search dropdown
+        if (!studentSearchInput.contains(e.target)) {
+            studentSearchResultsDiv.style.display = 'none';
+        }
+
+        // Handle clicks on log links
+        const logLink = e.target.closest('.log-action-link');
+        if (logLink && logLink.dataset.action) {
+            try {
+                const action = JSON.parse(logLink.dataset.action);
+                handleLogClick(action);
+            } catch (error) {
+                console.error("Could not parse log action:", error);
+            }
         }
     });
 
@@ -396,6 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
     csvConfirmBtn.addEventListener('click', () => {
         const selectedCheckboxes = csvPreviewList.querySelectorAll('input[type="checkbox"]:checked');
         let onboardingOccurred = false;
+
         selectedCheckboxes.forEach(checkbox => {
             const name = checkbox.dataset.name;
 
@@ -405,15 +423,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (existingStudent) {
                 if (existingStudent.isDeleted) {
-
+                    // It's a deleted student, so purge them and all their data.
                     permanentlyDeleteStudent(existingStudent, state.currentClassroom);
+                } else {
+                    // It's an active student, so we log it and skip adding this one.
+                    console.log(`دانش‌آموز «${name}» به دلیل تکراری بودن اضافه نشد.`);
+                    return; // Skips to the next item in the forEach loop
                 }
-            } else {
-                // It's an active student, so we skip adding this one.
-                console.log(`دانش‌آموز «${name}» به دلیل تکراری بودن اضافه نشد.`);
-                return; // Skips to the next item in the forEach loop
             }
-
 
             // Now, we can safely add the new student.
             const newStudent = new Student({ name: name });
@@ -424,11 +441,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 onboardingOccurred = true;
             }
         });
+
         state.saveData();
 
         logManager.addLog(state.currentClassroom.info.name,
-            `${selectedCheckboxes.length} دانش‌آموز جدید از لیست ورودی به کلاس اضافه شدند.`,
-            { type: 'VIEW_SESSIONS' });
+            `${selectedCheckboxes.length} دانش‌آموز جدید از لیست ورودی به کلاس اضافه شدند.`, { type: 'VIEW_SESSIONS' });
 
         ui.renderSettingsStudentList();
 
@@ -482,11 +499,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (existingStudent) {
             if (existingStudent.isDeleted) {
-                // It's a deleted student, so find and remove them permanently.
-                const indexToRemove = state.currentClassroom.students.findIndex(s => s === existingStudent);
-                if (indexToRemove > -1) {
-                    state.currentClassroom.students.splice(indexToRemove, 1);
-                }
+                // It's a deleted student, so purge them and all their data.
+                permanentlyDeleteStudent(existingStudent, state.currentClassroom);
             } else {
                 // It's an active student, so show the error.
                 alert("❌دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.");
@@ -496,12 +510,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const newStudent = new Student({ name: studentName });
         state.currentClassroom.addStudent(newStudent);
-        // If the class already has sessions, onboard the new student with baseline stats.
+
         if (state.currentClassroom.sessions.length > 0) {
             onboardNewStudent(newStudent, state.currentClassroom);
             showOnboardingNotification(1);
-
         }
+
         state.saveData();
 
         logManager.addLog(state.currentClassroom.info.name,
@@ -739,11 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    document.addEventListener('click', (e) => {
-        if (!studentSearchInput.contains(e.target)) {
-            studentSearchResultsDiv.style.display = 'none';
-        }
-    });
+
 
     ui.quickGradeSubmitBtn.addEventListener('click', () => {
         const scoreValue = ui.quickScoreInput.value;
@@ -1516,16 +1526,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
     }
 
-    document.getElementById('log-list').addEventListener('click', (event) => {
-        const target = event.target;
-        // Check if the clicked element is a log link
-        if (target.classList.contains('log-action-link') && target.dataset.action) {
-            try {
-                const action = JSON.parse(target.dataset.action);
-                handleLogClick(action);
-            } catch (error) {
-                console.error("Could not parse log action:", error);
-            }
-        }
-    });
+
 });
