@@ -60,7 +60,7 @@ export const secureConfirmCancelBtn = document.getElementById('secure-confirm-ca
 export const secureConfirmConfirmBtn = document.getElementById('secure-confirm-confirm-btn');
 export const addNoteModal = document.getElementById('add-note-modal');
 export const newNoteContent = document.getElementById('new-note-content');
-export const saveNoteBtn = document.getElementById('save-note-btn');
+export const classSaveNoteBtn = document.getElementById('class-save-note-btn');
 export const cancelNoteBtn = document.getElementById('cancel-note-btn');
 export const studentSearchInput = document.getElementById('student-search-input');
 export const studentSearchResultsDiv = document.getElementById('student-search-results');
@@ -81,7 +81,7 @@ export const trashedStudentsList = document.getElementById('trashed-students-lis
 export const trashedSessionsList = document.getElementById('trashed-sessions-list');
 export const trashedCategoriesList = document.getElementById('trashed-categories-list');
 export const trashedNotesList = document.getElementById('trashed-notes-list');
-export const trashedScoreCommentsList = document.getElementById('trashed-score-comments-list');
+export const trashedScoresList = document.getElementById('trashed-scores-list');
 export const quickGradeFormWrapper = document.getElementById('quick-grade-form-wrapper');
 export const quickScoreInput = document.getElementById('quick-score-input');
 export const quickNoteTextarea = document.getElementById('quick-note-textarea');
@@ -2422,7 +2422,7 @@ export function renderTrashPage() {
     trashedSessionsList.innerHTML = '';
     trashedCategoriesList.innerHTML = '';
     trashedNotesList.innerHTML = '';
-    trashedScoreCommentsList.innerHTML = '';
+    trashedScoresList.innerHTML = '';
 
     // --- Render Trashed Classes ---
     const trashedClasses = Object.values(state.classrooms).filter(c => c.isDeleted);
@@ -2702,7 +2702,7 @@ export function renderTrashPage() {
         });
     }
 
-    // --- Render Trashed Score Comments ---
+    // --- Render Trashed Scores ---
     const trashedScoreComments = [];
     Object.values(state.classrooms).forEach(classroom => {
         if (!classroom.isDeleted) {
@@ -2712,7 +2712,7 @@ export function renderTrashPage() {
                     for (const skill in student.logs.scores) {
                         student.logs.scores[skill].forEach(score => {
                             // We only care about scores that are deleted AND have a comment
-                            if (score.isDeleted && score.comment) {
+                            if (score.isDeleted) {
                                 trashedScoreComments.push({ score, student, classroom });
                             }
                         });
@@ -2723,12 +2723,16 @@ export function renderTrashPage() {
     });
 
     if (trashedScoreComments.length === 0) {
-        trashedScoreCommentsList.innerHTML = '<li>هیچ توضیح نمره‌ای در سطل زباله نیست.</li>';
+        trashedScoresList.innerHTML = '<li>هیچ توضیح نمره‌ای در سطل زباله نیست.</li>';
     } else {
         trashedScoreComments.forEach(({ score, student, classroom }) => {
             const li = document.createElement('li');
-            const previewText = score.comment.length > 50 ? score.comment.substring(0, 50) + '...' : score.comment;
-            li.innerHTML = `<span>"${previewText}" <small>(برای نمره ${score.value} در مهارت ${score.skill} / دانش‌آموز: ${student.identity.name})</small></span>`;
+            let displayText = `نمره ${score.value} در مهارت ${score.skill}`;
+            if (score.comment) {
+                const previewText = score.comment.length > 30 ? score.comment.substring(0, 30) + '...' : score.comment;
+                displayText += ` (توضیحات: "${previewText}")`;
+            }
+            li.innerHTML = `<span>${displayText} <small>(دانش‌آموز: ${student.identity.name}، کلاس: ${classroom.info.name})</small></span>`;
 
             const buttonsContainer = document.createElement('div');
             buttonsContainer.className = 'list-item-buttons';
@@ -2771,7 +2775,7 @@ export function renderTrashPage() {
             buttonsContainer.appendChild(restoreBtn);
             buttonsContainer.appendChild(permanentDeleteBtn);
             li.appendChild(buttonsContainer);
-            trashedScoreCommentsList.appendChild(li);
+            trashedScoresList.appendChild(li);
         });
     }
 }

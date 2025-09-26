@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmModalCancelBtn, confirmModalConfirmBtn, secureConfirmModal,
         secureConfirmMessage, secureConfirmCode, secureConfirmInput,
         secureConfirmCancelBtn, secureConfirmConfirmBtn, addNoteModal,
-        newNoteContent, saveNoteBtn, cancelNoteBtn, studentSearchInput,
+        newNoteContent, classSaveNoteBtn, cancelNoteBtn, studentSearchInput,
         studentSearchResultsDiv, studentProfilePage, profileStudentNameHeader,
         backToStudentPageBtn, gradedCategoryPillsContainer, newScoreValueInput,
         newScoreCommentTextarea, addScoreBtn, profileStatsSummaryDiv,
@@ -757,7 +757,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.closeActiveModal();
     });
 
-    saveNoteBtn.addEventListener('click', () => {
+    classSaveNoteBtn.addEventListener('click', () => {
         const content = newNoteContent.value.trim();
         // Check if a save function has been set in the state
         if (typeof state.saveNoteCallback === 'function') {
