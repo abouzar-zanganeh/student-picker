@@ -2,6 +2,7 @@ import * as state from './state.js';
 import { getActiveItems, getSessionDisplayMap } from './state.js';
 import { detectTextDirection, renderMultiLineText } from './utils.js';
 import { getLogsForClass } from './logManager.js';
+import * as logManager from './logManager.js';
 
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');
@@ -1926,6 +1927,17 @@ function createClassListItem(classroom) {
                     showPage('settings-page');
                 }
             },
+
+            {
+                label: 'گزارش فعالیت‌ها',
+                icon: '📋',
+                action: () => {
+                    renderLogModal(classroom.info.name);
+                }
+            },
+
+            { isSeparator: true },
+
             {
                 label: 'تغییر نام',
                 icon: '✏️',
@@ -2043,6 +2055,11 @@ export function renderSettingsStudentList() {
                             () => {
                                 showUndoToast(`دانش‌آموز «${student.identity.name}» حذف شد.`);
                                 student.isDeleted = true;
+
+                                logManager.addLog(state.currentClassroom.info.name,
+                                    `دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`,
+                                    { type: 'VIEW_TRASH' });
+
                                 state.saveData();
                                 renderSettingsStudentList();
                             },
@@ -2306,6 +2323,12 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                         `آیا از لغو این جلسه مطمئن هستید؟ جلسه لغو شده در آمار تاثیری ندارد اما قابل بازگردانی است.`;
                     showCustomConfirm(confirmMsg, () => {
                         session.isCancelled = !session.isCancelled;
+
+                        const logMessage = session.isCancelled
+                            ? `جلسه ${displaySessionNumber} لغو شد.`
+                            : `جلسه لغو شده (تاریخ: ${new Date(session.startTime).toLocaleDateString('fa-IR')}) بازگردانی شد.`;
+                        logManager.addLog(state.currentClassroom.info.name, logMessage, { type: 'VIEW_SESSIONS' });
+
                         state.saveData();
                         renderSessions();
                         showNotification(session.isCancelled ? '✅جلسه لغو شد.' : '✅جلسه بازگردانی شد.');

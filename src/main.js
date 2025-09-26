@@ -3,6 +3,7 @@ import { resetAllStudentCounters, getActiveItems } from './state.js';
 import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard } from './utils.js';
+import * as logManager from './logManager.js';
 
 function restoreStateFromURL() {
     const hash = window.location.hash;
@@ -691,6 +692,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (student) {
             student.addScore(category.name, parseFloat(scoreValue), noteText);
+
+            logManager.addLog(state.currentClassroom.info.name,
+                `نمره ${scoreValue} در ${category.name} برای «${student.identity.name}» ثبت شد.`,
+                { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
+
             state.saveData();
             ui.renderStudentStatsList(); // Refreshes the stats table to show the new score.
             ui.showNotification(`✅نمره برای ${student.identity.name} در مهارت ${category.name} ثبت شد.`);
