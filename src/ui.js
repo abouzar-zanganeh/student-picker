@@ -1,6 +1,7 @@
 import * as state from './state.js';
 import { getActiveItems, getSessionDisplayMap } from './state.js';
 import { detectTextDirection, renderMultiLineText } from './utils.js';
+import { getLogsForClass } from './logManager.js';
 
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');
@@ -298,6 +299,53 @@ export function closeActiveModal(onClosed) {
         }, 300); // This must match the animation duration
     }
 }
+
+export function renderLogModal(classroomName) {
+    const logModalTitle = document.getElementById('log-modal-title');
+    const logListUl = document.getElementById('log-list');
+
+    logModalTitle.textContent = `گزارش فعالیت‌های کلاس: ${classroomName}`;
+    logListUl.innerHTML = ''; // Clear previous entries
+
+    const logs = getLogsForClass(classroomName);
+
+    if (logs.length === 0) {
+        logListUl.innerHTML = `<li class="no-content-message">هنوز فعالیتی برای این کلاس ثبت نشده است.</li>`;
+    } else {
+        logs.forEach(log => {
+            const li = document.createElement('li');
+            li.className = 'log-entry';
+
+            const timestamp = new Date(log.timestamp);
+            // Format for readability: YYYY/MM/DD HH:MM
+            const formattedTime = `${timestamp.toLocaleDateString('fa-IR')} - ${timestamp.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' })}`;
+
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'log-timestamp';
+            timeSpan.textContent = formattedTime;
+
+            const messageSpan = document.createElement('span');
+            messageSpan.className = 'log-message';
+            messageSpan.textContent = log.message;
+
+            // If the log entry has a clickable action, add the necessary data and class
+            if (log.action) {
+                messageSpan.classList.add('log-action-link');
+                // Store the action object as a string in a data attribute
+                messageSpan.dataset.action = JSON.stringify(log.action);
+            }
+
+            li.appendChild(timeSpan);
+            li.appendChild(messageSpan);
+            logListUl.appendChild(li);
+        });
+    }
+    openModal('log-modal');
+}
+
+document.getElementById('log-modal-close-btn').addEventListener('click', () => {
+    closeActiveModal();
+});
 
 export function triggerFileDownload(fileObject) {
     // This creates a temporary URL for the file object.

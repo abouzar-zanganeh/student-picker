@@ -1351,4 +1351,51 @@ document.addEventListener('DOMContentLoaded', () => {
     window.backfillExitCounters = backfillExitCounters;
 
 
+    function handleLogClick(action) {
+        const classroom = state.currentClassroom;
+        if (!action || !classroom) return;
+
+        // Close the modal first
+        ui.closeActiveModal();
+
+        // Use a short delay to allow the modal to close gracefully before navigating
+        setTimeout(() => {
+            switch (action.type) {
+                case 'VIEW_STUDENT_PROFILE': {
+                    const student = classroom.students.find(s => s.identity.studentId === action.studentId);
+                    if (student) {
+                        state.setSelectedStudentForProfile(student);
+                        ui.renderStudentProfilePage();
+                        ui.showPage('student-profile-page');
+                    } else {
+                        ui.showNotification('⚠️ دانش‌آموز مورد نظر یافت نشد.');
+                    }
+                    break;
+                }
+                case 'VIEW_TRASH':
+                    ui.renderTrashPage();
+                    ui.showPage('trash-page');
+                    // We could even scroll to the specific section in the future
+                    break;
+
+                case 'VIEW_SESSIONS':
+                    ui.renderSessions();
+                    ui.showPage('session-page');
+                    break;
+            }
+        }, 300); // Must match the modal closing animation time
+    }
+
+    document.getElementById('log-list').addEventListener('click', (event) => {
+        const target = event.target;
+        // Check if the clicked element is a log link
+        if (target.classList.contains('log-action-link') && target.dataset.action) {
+            try {
+                const action = JSON.parse(target.dataset.action);
+                handleLogClick(action);
+            } catch (error) {
+                console.error("Could not parse log action:", error);
+            }
+        }
+    });
 });
