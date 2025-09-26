@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isGraded = isGradedCheckbox.checked; // Get the checkbox status
 
         if (!categoryName) {
-            alert("لطفاً نام دسته‌بندی را وارد کنید.");
+            alert("⚠️لطفاً نام دسته‌بندی را وارد کنید.");
             return;
         }
         const isDuplicate = state.currentClassroom.categories.some(cat => !cat.isDeleted && cat.name.toLowerCase() === categoryName.toLowerCase());
@@ -763,7 +763,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof state.saveNoteCallback === 'function') {
             state.saveNoteCallback(content); // Execute the specific save logic
             ui.closeActiveModal();
-            ui.showNotification("✅یادداشت با موفقیت ذخیره شد.");
         }
     });
 

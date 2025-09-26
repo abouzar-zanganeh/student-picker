@@ -687,6 +687,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
                 }
 
                 state.saveData();
+                showNotification("✅یادداشت تکلیف ذخیره شد.");
 
                 // 5. Update the button's visual cue and re-render homework info
                 homeworkNoteBtn.style.opacity = content ? '1' : '0.3';
@@ -1705,6 +1706,7 @@ export function renderStudentNotes() {
                 note.content = newText;
                 state.saveData();
                 renderStudentNotes();
+                showNotification("✅یادداشت با موفقیت ویرایش شد.");
             });
 
             // 3. Open the modal
@@ -2126,6 +2128,7 @@ function createSessionActionButtons(session, displaySessionNumber) {
             session.note = content;
             state.saveData();
             renderSessions();
+            showNotification("✅یادداشت جلسه ذخیره شد.");
         });
         openModal('add-note-modal');
         newNoteContent.focus();
