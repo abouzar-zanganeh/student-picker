@@ -1,5 +1,5 @@
 import * as state from './state.js';
-import { resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent } from './state.js';
+import { resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent, getSessionDisplayMap } from './state.js';
 import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard } from './utils.js';
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     selectStudentBtn.addEventListener('click', () => {
         if (ui.quickScoreInput.value.trim() !== '' || ui.quickNoteTextarea.value.trim() !== '') {
-            ui.showNotification("⚠️لطفاً ابتدا با دکمه «ثبت»، تغییرات را ذخیره کنید.");
+            ui.showNotification("⚠️لطفاً ابتدا با دکمه «ثبت»، تغییرات را ذخیره کنید و یا نمره و یادداشت را پاک کنید.");
             return;
         }
         if (!state.currentClassroom || !state.selectedSession || !state.selectedCategory) return;
@@ -552,18 +552,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     state.currentClassroom.students.forEach(student => {
                         state.liveSession.setAttendance(student.identity.studentId, 'present');
                     });
+
+                    // --- CORRECT ORDER ---
+                    // 1. Save the new session data.
+                    state.saveData();
+
+                    // 2. Create the log entry.
+                    const sessionMap = getSessionDisplayMap(state.currentClassroom);
+                    const displayNumber = sessionMap.get(newSession.sessionNumber);
+                    logManager.addLog(state.currentClassroom.info.name, `جلسه ${displayNumber} شروع شد.`, { type: 'VIEW_SESSIONS' });
+
+                    // 3. Navigate to the new page.
                     if (takeAttendance) {
                         ui.renderAttendancePage();
                         ui.showPage('attendance-page');
                     } else {
                         ui.renderStudentPage();
                     }
-                    state.saveData();
-
-                    const sessionMap = getSessionDisplayMap(state.currentClassroom);
-                    const displayNumber = sessionMap.get(newSession.sessionNumber);
-                    logManager.addLog(state.currentClassroom.info.name, `جلسه ${displayNumber} شروع شد.`,
-                        { type: 'VIEW_SESSIONS' });
                 };
                 ui.showCustomConfirm(
                     "آیا تمایل به انجام فرآیند حضور و غیاب دارید؟",
