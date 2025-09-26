@@ -307,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const isDuplicate = state.currentClassroom.categories.some(cat => !cat.isDeleted && cat.name.toLowerCase() === categoryName.toLowerCase());
         if (isDuplicate) {
-            alert("این دسته‌بندی از قبل وجود دارد.");
+            alert("⚠️این دسته‌بندی از قبل وجود دارد.");
             return;
         }
         // Pass the 'isGraded' status to the constructor
@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     confirmColumnBtn.addEventListener('click', () => {
         if (!state.importedFileContent) {
-            alert("خطایی رخ داده است. لطفاً فایل را دوباره انتخاب کنید.");
+            alert("❌خطایی رخ داده است. لطفاً فایل را دوباره انتخاب کنید.");
             ui.showPage('settings-page');
             return;
         }
@@ -781,7 +781,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { studentToMove, sourceClassForMove } = state;
 
         if (!studentToMove || !sourceClassForMove || !destinationClassroom) {
-            ui.showNotification('خطایی رخ داد. لطفاً دوباره امتحان کنید.', 'error');
+            ui.showNotification('خطایی رخ داد. لطفاً دوباره امتحان کنید⚠️.', 'error');
             ui.closeActiveModal();
             return;
         }
@@ -791,7 +791,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (result.success) {
             state.saveData();
             ui.renderSettingsStudentList(); // Refresh the list in the background
-            ui.showNotification(`دانش‌آموز «${studentToMove.identity.name}» با موفقیت به کلاس «${destinationClassName}» منتقل شد.`);
+            ui.showNotification(`دانش‌آموز «${studentToMove.identity.name}» با موفقیت به کلاس «${destinationClassName}» منتقل شد✅.`);
         } else {
             ui.showNotification(result.message, 'error');
         }
