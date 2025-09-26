@@ -315,6 +315,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const newCategory = new Category(categoryName, '', isGraded);
         state.currentClassroom.categories.push(newCategory);
         state.saveData();
+
+        logManager.addLog(state.currentClassroom.info.name, `دسته‌بندی جدید «${categoryName}» اضافه شد.`, { type: 'VIEW_SESSIONS' });
+
         ui.renderSettingsCategories();
 
         // Reset the form fields for the next entry
@@ -396,6 +399,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         state.saveData();
+
+        logManager.addLog(state.currentClassroom.info.name,
+            `${selectedCheckboxes.length} دانش‌آموز جدید از لیست ورودی به کلاس اضافه شدند.`,
+            { type: 'VIEW_SESSIONS' });
+
         ui.renderSettingsStudentList();
 
         if (onboardingOccurred) {
@@ -455,6 +463,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         }
         state.saveData();
+
+        logManager.addLog(state.currentClassroom.info.name,
+            `دانش‌آموز «${studentName}» به کلاس اضافه شد.`, {
+            type: 'VIEW_STUDENT_PROFILE',
+            studentId: newStudent.identity.studentId
+        });
+
         ui.renderSettingsStudentList();
         newStudentNameInput.value = '';
         newStudentNameInput.focus();
@@ -490,6 +505,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         ui.renderStudentPage();
                     }
                     state.saveData();
+
+                    const sessionMap = getSessionDisplayMap(state.currentClassroom);
+                    const displayNumber = sessionMap.get(newSession.sessionNumber);
+                    logManager.addLog(state.currentClassform.info.name, `جلسه ${displayNumber} شروع شد.`,
+                        { type: 'VIEW_SESSIONS' });
                 };
                 ui.showCustomConfirm(
                     "آیا تمایل به انجام فرآیند حضور و غیاب دارید؟",
@@ -540,6 +560,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const newClassroom = new Classroom({ name: className, type: classType });
         state.classrooms[className] = newClassroom;
         state.saveData();
+
+        logManager.addLog(className, `کلاس «${className}» ایجاد شد.`, { type: 'VIEW_SESSIONS' });
+
         ui.renderClassList();
         newClassNameInput.value = '';
         selectedTypeRadio.checked = false;
@@ -613,7 +636,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     backToStudentPageBtn.addEventListener('click', () => {
         state.setSelectedStudentForProfile(null);
-        ui.showPage('student-page');
+
+        // If no session is currently selected, find the most recent valid one.
+        if (!state.selectedSession) {
+            if (state.currentClassroom && state.currentClassroom.sessions.length > 0) {
+                const activeSessions = getActiveItems(state.currentClassroom.sessions)
+                    .filter(s => !s.isCancelled);
+
+                if (activeSessions.length > 0) {
+                    // The most recent session is the last one in the chronological array.
+                    const mostRecentSession = activeSessions[activeSessions.length - 1];
+                    state.setSelectedSession(mostRecentSession);
+                } else {
+                    // Fallback: if there are no valid sessions, just go to the session list page.
+                    ui.renderSessions();
+                    ui.showPage('session-page');
+                    return;
+                }
+            }
+        }
+
+
+        ui.renderStudentPage();
     });
 
     studentSearchInput.addEventListener('input', (e) => {
@@ -735,6 +779,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         state.selectedStudentForProfile.addScore(skill, parseFloat(value), comment);
         state.saveData();
+
+        logManager.addLog(state.currentClassroom.info.name, `نمره ${value} در ${skill} برای «${state.selectedStudentForProfile.identity.name}» ثبت شد.`, {
+            type: 'VIEW_STUDENT_PROFILE',
+            studentId: state.selectedStudentForProfile.identity.studentId
+        });
+
         ui.renderStudentProfilePage();
         ui.showNotification(`✅نمره برای مهارت ${skill} با موفقیت ثبت شد.`);
     });
@@ -751,6 +801,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (content) { // Only add a note if there's text content
                 state.selectedStudentForProfile.addNote(content);
                 state.saveData();
+
+                logManager.addLog(state.currentClassroom.info.name,
+                    `یادداشت جدیدی برای دانش‌آموز «${state.selectedStudentForProfile.identity.name}» ثبت شد.`,
+                    { type: 'VIEW_STUDENT_PROFILE', studentId: state.selectedStudentForProfile.identity.studentId });
+
                 ui.renderStudentNotes(); // This re-renders the notes list on the profile page
             }
         });
@@ -795,6 +850,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = state.moveStudent(studentToMove, sourceClassForMove, destinationClassroom);
 
         if (result.success) {
+
+            logManager.addLog(sourceClassForMove.info.name, `دانش‌آموز «${studentToMove.identity.name}» به کلاس «${destinationClassName}» منتقل شد.`, { type: 'VIEW_SESSIONS' });
+            logManager.addLog(destinationClassName, `دانش‌آموز «${studentToMove.identity.name}» از کلاس «${sourceClassForMove.info.name}» به این کلاس منتقل شد.`, { type: 'VIEW_SESSIONS' });
+
             state.saveData();
             ui.renderSettingsStudentList(); // Refresh the list in the background
             ui.showNotification(`دانش‌آموز «${studentToMove.identity.name}» با موفقیت به کلاس «${destinationClassName}» منتقل شد✅.`);
@@ -1086,16 +1145,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const classroom = state.currentClassroom;
         if (!student || !classroom) return;
 
+        // Capture the old name before any changes
+        const oldName = student.identity.name;
+
         // 1. Configure the modal for renaming
         const modalTitle = document.getElementById('add-note-modal-title');
-        modalTitle.textContent = 'تغییر نام دانش‌آموز';
-        ui.newNoteContent.value = student.identity.name;
-        ui.newNoteContent.rows = 1; // Make textarea look like a single-line input
+        //... (rest of the existing configuration)
 
         // 2. Define what happens when the "Save" button is clicked
         state.setSaveNoteCallback((newName) => {
             const trimmedNewName = newName.trim();
-            if (!trimmedNewName || trimmedNewName === student.identity.name) {
+            if (!trimmedNewName || trimmedNewName === oldName) {
+                // No actual change, do nothing
             } else {
                 const isDuplicate = classroom.students.some(
                     s => !s.isDeleted && s.identity.name.toLowerCase() === trimmedNewName.toLowerCase()
@@ -1106,21 +1167,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     student.identity.name = trimmedNewName;
                     state.saveData();
+
+                    // Add this line:
+                    logManager.addLog(classroom.info.name, `نام دانش‌آموز «${oldName}» به «${trimmedNewName}» تغییر یافت.`, { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
+
                     ui.renderStudentProfilePage();
                     ui.renderStudentStatsList();
                     ui.showNotification(`✅نام دانش‌آموز به «${trimmedNewName}» تغییر یافت.`);
                 }
             }
 
-            // 3. Reset the modal to its default state for adding notes
-            modalTitle.textContent = 'ثبت یادداشت جدید';
-            ui.newNoteContent.rows = 4; // A reasonable default for notes
+            // 3. Reset the modal...
+            //... (rest of the existing code)
         });
 
-        // 4. Open the modal
-        ui.openModal('add-note-modal');
-        ui.newNoteContent.focus();
-        ui.newNoteContent.select(); // Select the text for easy editing
+        // 4. Open the modal...
+        //... (rest of the existing code)
     });
 
 
@@ -1357,14 +1419,21 @@ document.addEventListener('DOMContentLoaded', () => {
     window.backfillExitCounters = backfillExitCounters;
 
 
+    // In src/main.js, replace the entire function
     function handleLogClick(action) {
-        const classroom = state.currentClassroom;
-        if (!action || !classroom) return;
+        if (!action || !action.classroomName) return;
 
-        // Close the modal first
+        const classroom = state.classrooms[action.classroomName];
+        if (!classroom) {
+            ui.showNotification('⚠️ کلاس مربوط به این گزارش یافت نشد.');
+            return;
+        }
+
+        // Set the current class context before navigating
+        state.setCurrentClassroom(classroom);
+
         ui.closeActiveModal();
 
-        // Use a short delay to allow the modal to close gracefully before navigating
         setTimeout(() => {
             switch (action.type) {
                 case 'VIEW_STUDENT_PROFILE': {
@@ -1381,7 +1450,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'VIEW_TRASH':
                     ui.renderTrashPage();
                     ui.showPage('trash-page');
-                    // We could even scroll to the specific section in the future
                     break;
 
                 case 'VIEW_SESSIONS':
@@ -1389,7 +1457,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     ui.showPage('session-page');
                     break;
             }
-        }, 300); // Must match the modal closing animation time
+        }, 300);
     }
 
     document.getElementById('log-list').addEventListener('click', (event) => {

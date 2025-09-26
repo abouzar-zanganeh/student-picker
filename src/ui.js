@@ -333,7 +333,8 @@ export function renderLogModal(classroomName) {
             if (log.action) {
                 messageSpan.classList.add('log-action-link');
                 // Store the action object as a string in a data attribute
-                messageSpan.dataset.action = JSON.stringify(log.action);
+
+                messageSpan.dataset.action = JSON.stringify({ ...log.action, classroomName: log.classroomName });
             }
 
             li.appendChild(timeSpan);
@@ -736,6 +737,9 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
                 }
 
                 state.saveData();
+
+                logManager.addLog(state.currentClassroom.info.name, `یادداشت تکلیف جلسه ${displayNumber} برای دانش‌آموز «${student.identity.name}» ذخیره شد.`, { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
+
                 showNotification("✅یادداشت تکلیف ذخیره شد.");
 
                 // 5. Update the button's visual cue and re-render homework info
@@ -1667,6 +1671,11 @@ export function renderStudentProfilePage() {
                     `آیا از حذف نمره ${score.value} برای مهارت ${score.skill} مطمئن هستید؟`,
                     () => {
                         score.isDeleted = true;
+
+                        logManager.addLog(state.currentClassroom.info.name,
+                            `نمره ${score.value} در ${score.skill} برای «${student.identity.name}» به سطل زباله منتقل شد.`,
+                            { type: 'VIEW_TRASH' });
+
                         state.saveData();
                         renderStudentProfilePage(); // Re-render to hide the deleted item
                         showNotification('✅نمره به سطل زباله منتقل شد.');
@@ -1727,6 +1736,11 @@ export function renderStudentNotes() {
                 `آیا از حذف این یادداشت مطمئن هستید؟`,
                 () => {
                     note.isDeleted = true;
+
+                    logManager.addLog(state.currentClassroom.info.name,
+                        `یادداشت دانش‌آموز «${state.selectedStudentForProfile.identity.name}» به سطل زباله منتقل شد.`,
+                        { type: 'VIEW_TRASH' });
+
                     state.saveData();
                     renderStudentNotes(); // Re-render to hide the deleted item
                     showNotification('✅یادداشت به سطل زباله منتقل شد.');
@@ -1754,6 +1768,14 @@ export function renderStudentNotes() {
             state.setSaveNoteCallback((newText) => {
                 note.content = newText;
                 state.saveData();
+
+                logManager.addLog(state.currentClassroom.info.name,
+                    `یادداشت دانش‌آموز «${state.selectedStudentForProfile.identity.name}» به‌روزرسانی شد.`,
+                    {
+                        type: 'VIEW_STUDENT_PROFILE',
+                        studentId: state.selectedStudentForProfile.identity.studentId
+                    });
+
                 renderStudentNotes();
                 showNotification("✅یادداشت با موفقیت ویرایش شد.");
             });
@@ -1825,6 +1847,9 @@ function createClassActionButtons(classroom) {
         state.setSaveNoteCallback((content) => {
             classroom.note = content;
             state.saveData();
+
+            logManager.addLog(classroom.info.name, `یادداشت کلاس ذخیره شد.`, { type: 'VIEW_SESSIONS' });
+
             renderClassList();
         });
         openModal('add-note-modal');
@@ -1960,6 +1985,11 @@ function createClassListItem(classroom) {
 
                             if (result.success) {
                                 state.saveData();
+
+                                logManager.addLog(trimmedNewName,
+                                    `نام کلاس از «${oldName}» به «${trimmedNewName}» تغییر یافت.`,
+                                    { type: 'VIEW_SESSIONS' });
+
                                 renderClassList();
                                 showNotification(`✅نام کلاس به «${trimmedNewName}» تغییر یافت.`);
                             } else {
@@ -2104,6 +2134,11 @@ export function renderSettingsCategories() {
             showUndoToast(`دسته‌بندی «${category.name}» حذف شد.`);
             //marking the category for trash can
             category.isDeleted = true;
+
+            logManager.addLog(state.currentClassroom.info.name,
+                `دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`,
+                { type: 'VIEW_TRASH' });
+
             state.saveData();
             renderSettingsCategories();
         });
@@ -2192,6 +2227,11 @@ function createSessionActionButtons(session, displaySessionNumber) {
         state.setSaveNoteCallback((content) => {
             session.note = content;
             state.saveData();
+
+            logManager.addLog(state.currentClassroom.info.name,
+                `یادداشت جلسه ${displaySessionNumber} ذخیره شد.`,
+                { type: 'VIEW_SESSIONS' });
+
             renderSessions();
             showNotification("✅یادداشت جلسه ذخیره شد.");
         });
@@ -2213,6 +2253,10 @@ function createSessionActionButtons(session, displaySessionNumber) {
                 () => {
                     state.currentClassroom.endSpecificSession(session.sessionNumber);
                     state.saveData();
+
+                    logManager.addLog(state.currentClassroom.info.name,
+                        `جلسه ${displaySessionNumber} خاتمه یافت.`, { type: 'VIEW_SESSIONS' });
+
                     renderSessions();
 
                     // New: Show a second confirmation for backup
@@ -2341,6 +2385,12 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                 action: () => {
                     state.currentClassroom.markAsMakeup(session.sessionNumber);
                     state.saveData();
+
+                    const logMessage = session.isMakeup
+                        ? `جلسه ${displaySessionNumber} به عنوان جبرانی علامت‌گذاری شد.`
+                        : `جلسه ${displaySessionNumber} از حالت جبرانی خارج شد.`;
+                    logManager.addLog(state.currentClassroom.info.name, logMessage, { type: 'VIEW_SESSIONS' });
+
                     renderSessions();
                 }
             },
@@ -2355,6 +2405,10 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                         () => {
                             showUndoToast(`جلسه ${displayNumText} حذف شد.`);
                             session.isDeleted = true;
+
+                            logManager.addLog(state.currentClassroom.info.name,
+                                `جلسه ${displayNumText} به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+
                             state.saveData();
                             renderSessions();
                         },
@@ -2512,6 +2566,10 @@ export function renderTrashPage() {
             restoreBtn.title = 'بازیابی';
             restoreBtn.addEventListener('click', () => {
                 classroom.isDeleted = false;
+
+                logManager.addLog(classroom.info.name,
+                    `کلاس «${classroom.info.name}» از سطل زباله بازیابی شد.`, { type: 'VIEW_SESSIONS' });
+
                 state.saveData();
                 renderTrashPage();
                 renderClassList();
@@ -2567,6 +2625,10 @@ export function renderTrashPage() {
             restoreBtn.title = 'بازیابی';
             restoreBtn.addEventListener('click', () => {
                 student.isDeleted = false;
+
+                logManager.addLog(classroom.info.name, `دانش‌آموز «${student.identity.name}» بازیابی شد.`,
+                    { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
+
                 state.saveData();
                 renderTrashPage();
                 showNotification(`دانش‌آموز «${student.identity.name}» بازیابی شد.`);
@@ -2623,6 +2685,9 @@ export function renderTrashPage() {
             restoreBtn.title = 'بازیابی';
             restoreBtn.addEventListener('click', () => {
                 session.isDeleted = false;
+
+                logManager.addLog(classroom.info.name, `جلسه ${session.sessionNumber} بازیابی شد.`, { type: 'VIEW_SESSIONS' });
+
                 state.saveData();
                 renderTrashPage();
                 showNotification(`جلسه ${session.sessionNumber} بازیابی شد.`);
@@ -2679,6 +2744,10 @@ export function renderTrashPage() {
             restoreBtn.title = 'بازیابی';
             restoreBtn.addEventListener('click', () => {
                 category.isDeleted = false;
+
+                logManager.addLog(classroom.info.name, `دسته‌بندی «${category.name}» بازیابی شد.`,
+                    { type: 'VIEW_SESSIONS' });
+
                 state.saveData();
                 renderTrashPage();
                 showNotification(`دسته‌بندی «${category.name}» بازیابی شد.`);
@@ -2741,6 +2810,10 @@ export function renderTrashPage() {
             restoreBtn.title = 'بازیابی';
             restoreBtn.addEventListener('click', () => {
                 note.isDeleted = false;
+
+                logManager.addLog(classroom.info.name, `یادداشت دانش‌آموز «${student.identity.name}» بازیابی شد.`,
+                    { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
+
                 state.saveData();
                 renderTrashPage(); // Refresh the trash page
                 showNotification(`یادداشت بازیابی شد.`);
@@ -2814,6 +2887,10 @@ export function renderTrashPage() {
             restoreBtn.title = 'بازیابی';
             restoreBtn.addEventListener('click', () => {
                 score.isDeleted = false;
+
+                logManager.addLog(classroom.info.name, `نمره ${score.value} در ${score.skill} برای «${student.identity.name}» بازیابی شد.`,
+                    { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
+
                 state.saveData();
                 renderTrashPage();
                 showNotification(`توضیح نمره بازیابی شد.`);

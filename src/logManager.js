@@ -44,7 +44,8 @@ export function addLog(classroomName, message, action = null) {
     const logEntry = {
         timestamp: new Date().toISOString(),
         message,
-        action
+        action,
+        classroomName
     };
 
     // Add the new entry to the beginning of the array
