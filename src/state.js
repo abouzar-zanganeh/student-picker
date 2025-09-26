@@ -267,3 +267,24 @@ export function setWinnerHistoryIndex(index) {
 }
 
 export function setSaveNoteCallback(callback) { saveNoteCallback = callback; }
+
+export function permanentlyDeleteStudent(studentToDelete, classroom) {
+    if (!studentToDelete || !classroom) return;
+
+    const studentId = studentToDelete.identity.studentId;
+
+    // 1. Remove the student from the main students array
+    const indexToRemove = classroom.students.findIndex(
+        s => s.identity.studentId === studentId
+    );
+    if (indexToRemove > -1) {
+        classroom.students.splice(indexToRemove, 1);
+    }
+
+    // 2. Remove the student's records from every session in that class
+    classroom.sessions.forEach(session => {
+        if (session.studentRecords[studentId]) {
+            delete session.studentRecords[studentId];
+        }
+    });
+}

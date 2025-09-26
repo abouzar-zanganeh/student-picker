@@ -1,5 +1,5 @@
 import * as state from './state.js';
-import { resetAllStudentCounters, getActiveItems } from './state.js';
+import { resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent } from './state.js';
 import * as ui from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard } from './utils.js';
@@ -306,17 +306,30 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("⚠️لطفاً نام دسته‌بندی را وارد کنید.");
             return;
         }
-        const isDuplicate = state.currentClassroom.categories.some(cat => !cat.isDeleted && cat.name.toLowerCase() === categoryName.toLowerCase());
-        if (isDuplicate) {
-            alert("⚠️این دسته‌بندی از قبل وجود دارد.");
-            return;
+        const existingCategory = state.currentClassroom.categories.find(
+            cat => cat.name.toLowerCase() === categoryName.toLowerCase()
+        );
+
+        if (existingCategory) {
+            if (existingCategory.isDeleted) {
+                // It's a deleted category, so purge it before creating the new one.
+                const indexToRemove = state.currentClassroom.categories.findIndex(c => c === existingCategory);
+                if (indexToRemove > -1) {
+                    state.currentClassroom.categories.splice(indexToRemove, 1);
+                }
+            } else {
+                // It's an active category, so show the error.
+                alert("⚠️این دسته‌بندی از قبل وجود دارد.");
+                return;
+            }
         }
         // Pass the 'isGraded' status to the constructor
         const newCategory = new Category(categoryName, '', isGraded);
         state.currentClassroom.categories.push(newCategory);
         state.saveData();
 
-        logManager.addLog(state.currentClassroom.info.name, `دسته‌بندی جدید «${categoryName}» اضافه شد.`, { type: 'VIEW_SESSIONS' });
+        logManager.addLog(state.currentClassroom.info.name,
+            `دسته‌بندی جدید «${categoryName}» اضافه شد.`, { type: 'VIEW_CLASS_SETTINGS' });
 
         ui.renderSettingsCategories();
 
@@ -385,17 +398,30 @@ document.addEventListener('DOMContentLoaded', () => {
         let onboardingOccurred = false;
         selectedCheckboxes.forEach(checkbox => {
             const name = checkbox.dataset.name;
-            const isDuplicate = state.currentClassroom.students.some(student => student.identity.name.toLowerCase() === name.toLowerCase());
-            if (!isDuplicate) {
-                const newStudent = new Student({ name: name });
-                state.currentClassroom.addStudent(newStudent);
-                // If the class already has sessions, onboard the new student with baseline stats.
-                if (state.currentClassroom.sessions.length > 0) {
-                    onboardNewStudent(newStudent, state.currentClassroom);
-                    onboardingOccurred = true;
+
+            const existingStudent = state.currentClassroom.students.find(
+                student => student.identity.name.toLowerCase() === name.toLowerCase()
+            );
+
+            if (existingStudent) {
+                if (existingStudent.isDeleted) {
+
+                    permanentlyDeleteStudent(existingStudent, state.currentClassroom);
                 }
             } else {
+                // It's an active student, so we skip adding this one.
                 console.log(`دانش‌آموز «${name}» به دلیل تکراری بودن اضافه نشد.`);
+                return; // Skips to the next item in the forEach loop
+            }
+
+
+            // Now, we can safely add the new student.
+            const newStudent = new Student({ name: name });
+            state.currentClassroom.addStudent(newStudent);
+
+            if (state.currentClassroom.sessions.length > 0) {
+                onboardNewStudent(newStudent, state.currentClassroom);
+                onboardingOccurred = true;
             }
         });
         state.saveData();
@@ -449,11 +475,25 @@ document.addEventListener('DOMContentLoaded', () => {
             alert("لطفاً نام دانش‌آموز را وارد کنید.");
             return;
         }
-        const isDuplicate = state.currentClassroom.students.some(student => student.identity.name.toLowerCase() === studentName.toLowerCase());
-        if (isDuplicate) {
-            alert("❌دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.");
-            return;
+
+        const existingStudent = state.currentClassroom.students.find(
+            student => student.identity.name.toLowerCase() === studentName.toLowerCase()
+        );
+
+        if (existingStudent) {
+            if (existingStudent.isDeleted) {
+                // It's a deleted student, so find and remove them permanently.
+                const indexToRemove = state.currentClassroom.students.findIndex(s => s === existingStudent);
+                if (indexToRemove > -1) {
+                    state.currentClassroom.students.splice(indexToRemove, 1);
+                }
+            } else {
+                // It's an active student, so show the error.
+                alert("❌دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.");
+                return;
+            }
         }
+
         const newStudent = new Student({ name: studentName });
         state.currentClassroom.addStudent(newStudent);
         // If the class already has sessions, onboard the new student with baseline stats.
@@ -508,7 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const sessionMap = getSessionDisplayMap(state.currentClassroom);
                     const displayNumber = sessionMap.get(newSession.sessionNumber);
-                    logManager.addLog(state.currentClassform.info.name, `جلسه ${displayNumber} شروع شد.`,
+                    logManager.addLog(state.currentClassroom.info.name, `جلسه ${displayNumber} شروع شد.`,
                         { type: 'VIEW_SESSIONS' });
                 };
                 ui.showCustomConfirm(
@@ -553,8 +593,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         if (state.classrooms[className]) {
-            ui.showNotification("⚠️کلاسی با این نام از قبل وجود دارد.");
-            return;
+            if (state.classrooms[className].isDeleted) {
+                // It's a deleted class, so purge it before creating the new one.
+                delete state.classrooms[className];
+            } else {
+                // It's an active class, so show the error.
+                ui.showNotification("⚠️کلاسی با این نام از قبل وجود دارد.");
+                return;
+            }
         }
         const classType = selectedTypeRadio.value;
         const newClassroom = new Classroom({ name: className, type: classType });
@@ -1182,7 +1228,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 4. Open the modal...
-        //... (rest of the existing code)
+        ui.openModal('add-note-modal');
+        ui.newNoteContent.focus();
+        ui.newNoteContent.select();
     });
 
 
@@ -1455,6 +1503,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'VIEW_SESSIONS':
                     ui.renderSessions();
                     ui.showPage('session-page');
+                    break;
+
+                case 'VIEW_CLASS_NOTE':
+                    ui.showClassNoteModal(classroom);
+                    break;
+
+                case 'VIEW_CLASS_SETTINGS':
+                    ui.showSettingsPage(classroom);
                     break;
             }
         }, 300);

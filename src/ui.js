@@ -1,7 +1,7 @@
 import * as state from './state.js';
-import { getActiveItems, getSessionDisplayMap } from './state.js';
+import { getActiveItems, getSessionDisplayMap, permanentlyDeleteStudent } from './state.js';
 import { detectTextDirection, renderMultiLineText } from './utils.js';
-import { getLogsForClass } from './logManager.js';
+import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
 
 // --- HTML Elements ---
@@ -299,6 +299,27 @@ export function closeActiveModal(onClosed) {
 
         }, 300); // This must match the animation duration
     }
+}
+
+export function showClassNoteModal(classroom) {
+    newNoteContent.value = classroom.note || '';
+    state.setSaveNoteCallback((content) => {
+        classroom.note = content;
+        state.saveData();
+        // We've moved the log call here as well
+        logManager.addLog(classroom.info.name, `یادداشت کلاس ذخیره شد.`, { type: 'VIEW_CLASS_NOTE' });
+        renderClassList();
+    });
+    openModal('add-note-modal');
+    newNoteContent.focus();
+}
+
+export function showSettingsPage(classroom) {
+    state.setCurrentClassroom(classroom);
+    settingsClassNameHeader.textContent = `تنظیمات کلاس: ${classroom.info.name}`;
+    renderSettingsStudentList();
+    renderSettingsCategories();
+    showPage('settings-page');
 }
 
 export function renderLogModal(classroomName) {
@@ -1841,19 +1862,10 @@ function createClassActionButtons(classroom) {
         noteBtn.style.opacity = '0.5';
         noteBtn.style.borderBottom = 'none';
     }
+
     noteBtn.addEventListener('click', (event) => {
         event.stopPropagation();
-        newNoteContent.value = classroom.note || '';
-        state.setSaveNoteCallback((content) => {
-            classroom.note = content;
-            state.saveData();
-
-            logManager.addLog(classroom.info.name, `یادداشت کلاس ذخیره شد.`, { type: 'VIEW_SESSIONS' });
-
-            renderClassList();
-        });
-        openModal('add-note-modal');
-        newNoteContent.focus();
+        showClassNoteModal(classroom);
     });
 
     buttonsContainer.appendChild(noteBtn);
@@ -1945,11 +1957,7 @@ function createClassListItem(classroom) {
                 label: 'تنظیمات کلاس',
                 icon: '⚙️',
                 action: () => {
-                    state.setCurrentClassroom(classroom);
-                    settingsClassNameHeader.textContent = `تنظیمات کلاس: ${state.currentClassroom.info.name}`;
-                    renderSettingsStudentList();
-                    renderSettingsCategories();
-                    showPage('settings-page');
+                    showSettingsPage(classroom);
                 }
             },
 
@@ -1984,11 +1992,13 @@ function createClassListItem(classroom) {
                             const result = state.renameClassroom(oldName, trimmedNewName);
 
                             if (result.success) {
-                                state.saveData();
 
-                                logManager.addLog(trimmedNewName,
-                                    `نام کلاس از «${oldName}» به «${trimmedNewName}» تغییر یافت.`,
-                                    { type: 'VIEW_SESSIONS' });
+                                // First, rename the log history to match the new class name
+                                logManager.renameClassroomLog(oldName, trimmedNewName);
+
+                                // Now, add the log entry for the rename action itself
+                                logManager.addLog(trimmedNewName, `نام کلاس از «${oldName}» به «${trimmedNewName}» تغییر یافت.`, { type: 'VIEW_SESSIONS' });
+                                state.saveData();
 
                                 renderClassList();
                                 showNotification(`✅نام کلاس به «${trimmedNewName}» تغییر یافت.`);
@@ -2583,7 +2593,9 @@ export function renderTrashPage() {
                 showCustomConfirm(
                     `آیا از حذف دائمی کلاس «${classroom.info.name}» مطمئن هستید؟ این عمل غیرقابل بازگشت است.`,
                     () => {
+
                         delete state.classrooms[classroom.info.name];
+
                         state.saveData();
                         renderTrashPage();
                         showNotification(`✅کلاس «${classroom.info.name}» برای همیشه حذف شد.`);
@@ -2641,10 +2653,9 @@ export function renderTrashPage() {
                 showCustomConfirm(
                     `آیا از حذف دائمی دانش‌آموز «${student.identity.name}» مطمئن هستید؟ این عمل غیرقابل بازگشت است.`,
                     () => {
-                        const studentIndex = classroom.students.findIndex(s => s.identity.studentId === student.identity.studentId);
-                        if (studentIndex > -1) {
-                            classroom.students.splice(studentIndex, 1);
-                        }
+
+                        permanentlyDeleteStudent(student, classroom);
+
                         state.saveData();
                         renderTrashPage();
                         showNotification(`دانش‌آموز «${student.identity.name}» برای همیشه حذف شد.`);

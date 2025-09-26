@@ -76,3 +76,18 @@ export function clearAllLogs() {
     localStorage.removeItem(LOG_STORAGE_KEY);
     console.log("All activity logs have been cleared.");
 }
+
+/**
+ * Renames a classroom's log history key.
+ * @param {string} oldName - The original name of the classroom.
+ * @param {string} newName - The new name for the classroom.
+ */
+export function renameClassroomLog(oldName, newName) {
+    const allLogs = getLogs();
+    // Check if a log for the old name exists and there isn't one for the new name
+    if (allLogs[oldName] && !allLogs[newName]) {
+        allLogs[newName] = allLogs[oldName]; // Copy the history to the new key
+        delete allLogs[oldName];             // Remove the old key
+        saveLogs(allLogs);
+    }
+}
