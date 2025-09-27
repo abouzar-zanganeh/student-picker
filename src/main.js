@@ -886,7 +886,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof state.saveNoteCallback === 'function') {
             state.saveNoteCallback(content); // Execute the specific save logic
             ui.closeActiveModal();
-            ui.showNotification('یادداشت برای کلاس ذخیره شد✅');
         }
     });
 

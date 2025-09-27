@@ -33,17 +33,28 @@ export let sourceClassForMove = null;
 export let isDemoMode = false;
 let originalStateBackup = null;
 
+export let trashBin = []; //for trash bin deleted items
+
 
 
 // --- توابع اصلی داده‌ها (Data Functions) ---
 export function saveData() {
-    if (isDemoMode) return; // Add this line
-    localStorage.setItem('teacherAssistantData_v2', JSON.stringify(classrooms));
+    if (isDemoMode) return;
+
+    const appState = {
+        classrooms,
+        trashBin
+    };
+
+    localStorage.setItem('teacherAssistantData_v2', JSON.stringify(appState));
 }
 
 
 export function prepareBackupData() {
-    const dataStr = JSON.stringify(classrooms, null, 2);
+
+    const appState = { classrooms, trashBin };
+    const dataStr = JSON.stringify(appState, null, 2);
+
     const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
     const fileName = `SP-${today}.txt`;
     return new File([dataStr], fileName, { type: 'text/plain' });
@@ -51,9 +62,60 @@ export function prepareBackupData() {
 
 export function loadData() {
     const savedData = localStorage.getItem('teacherAssistantData_v2');
-    if (savedData) {
-        const plainData = JSON.parse(savedData);
+    if (!savedData) return;
+
+    const plainData = JSON.parse(savedData);
+
+    // Check if the data is in the new format {classrooms, trashBin} or the old one.
+    if (plainData.classrooms) {
+        // New format
+        rehydrateData(plainData.classrooms);
+        trashBin = plainData.trashBin || [];
+    } else {
+        // Old format: rehydrate, then migrate old deleted items.
         rehydrateData(plainData);
+        // This runs once to move existing deleted items into the new trashBin
+        migratePreTrashBinDeletions();
+    }
+}
+
+function migratePreTrashBinDeletions() {
+    const migratedTrash = [];
+
+    Object.values(classrooms).forEach(classroom => {
+        // Migrate deleted classes
+        if (classroom.isDeleted) {
+            migratedTrash.push({
+                id: `trash_${Date.now()}_${Math.random()}`,
+                timestamp: classroom.info.creationDate, // Best guess for timestamp
+                type: 'classroom',
+                description: `کلاس «${classroom.info.name}»`,
+                restoreData: { name: classroom.info.name }
+            });
+        } else {
+            // Migrate deleted students
+            classroom.students.forEach(student => {
+                if (student.isDeleted) {
+                    migratedTrash.push({
+                        id: `trash_${Date.now()}_${Math.random()}`,
+                        timestamp: student.identity.studentId.split('_')[1],
+                        type: 'student',
+                        description: `دانش‌آموز «${student.identity.name}»`,
+                        restoreData: { studentId: student.identity.studentId, classroomName: classroom.info.name }
+                    });
+                }
+            });
+            // Migrate other items... (sessions, categories, etc.)
+            // Note: We are simplifying here for the initial migration. A more detailed
+            // migration could be added for other types if needed.
+        }
+    });
+
+    // We only add migrated items if the trashBin is empty to avoid duplication
+    if (trashBin.length === 0 && migratedTrash.length > 0) {
+        trashBin = migratedTrash;
+        console.log(`Migrated ${migratedTrash.length} previously deleted item(s) to the new trash bin.`);
+        saveData(); // Save the newly migrated trashBin
     }
 }
 
@@ -218,6 +280,8 @@ export function setManualSelection(selection) { manualSelection = selection; }
 export function setStudentToMove(student) { studentToMove = student; }
 export function setSourceClassForMove(classroom) { sourceClassForMove = classroom; }
 
+export function setTrashBin(newTrashBin) { trashBin = newTrashBin; }
+
 
 export function resetAllStudentCounters() {
     for (const className in classrooms) {
@@ -295,11 +359,67 @@ export function permanentlyDeleteStudent(studentToDelete, classroom) {
     });
 }
 
+export function permanentlyDeleteSession(classroomName, sessionNumber) {
+    const classroom = classrooms[classroomName];
+    if (!classroom) return;
+    const sessionIndex = classroom.sessions.findIndex(s => s.sessionNumber === sessionNumber);
+    if (sessionIndex > -1) {
+        classroom.sessions.splice(sessionIndex, 1);
+    }
+}
+
+export function permanentlyDeleteCategory(classroomName, categoryId) {
+    const classroom = classrooms[classroomName];
+    if (!classroom) return;
+
+    const categoryIndex = classroom.categories.findIndex(c => c.id === categoryId);
+    if (categoryIndex === -1) return;
+
+    const category = classroom.categories[categoryIndex];
+    const categoryName = category.name;
+    const skillKey = categoryName.toLowerCase();
+
+    // Remove associated data from all students
+    classroom.students.forEach(student => {
+        if (student.categoryCounts) delete student.categoryCounts[categoryName];
+        if (student.categoryIssues) delete student.categoryIssues[categoryName];
+        if (student.logs.scores) delete student.logs.scores[skillKey];
+    });
+
+    // Remove the category object itself
+    classroom.categories.splice(categoryIndex, 1);
+}
+
+export function permanentlyDeleteScore(classroomName, studentId, skill, scoreId) {
+    const classroom = classrooms[classroomName];
+    if (!classroom) return;
+    const student = classroom.students.find(s => s.identity.studentId === studentId);
+    if (!student || !student.logs.scores[skill.toLowerCase()]) return;
+
+    const skillScores = student.logs.scores[skill.toLowerCase()];
+    const scoreIndex = skillScores.findIndex(s => s.id === scoreId);
+    if (scoreIndex > -1) {
+        skillScores.splice(scoreIndex, 1);
+    }
+}
+
+export function permanentlyDeleteNote(classroomName, studentId, noteId) {
+    const classroom = classrooms[classroomName];
+    if (!classroom) return;
+    const student = classroom.students.find(s => s.identity.studentId === studentId);
+    if (!student || !student.profile.notes) return;
+
+    const noteIndex = student.profile.notes.findIndex(n => n.id === noteId);
+    if (noteIndex > -1) {
+        student.profile.notes.splice(noteIndex, 1);
+    }
+}
+
 // Functions to control the Demo Mode
 export function enterDemoMode() {
     // Create a deep copy of the current state to prevent any direct mutation.
     // JSON.stringify turns the live objects into a string, and JSON.parse creates brand new objects from that string.
-    originalStateBackup = JSON.parse(JSON.stringify(classrooms));
+    originalStateBackup = JSON.parse(JSON.stringify({ classrooms, trashBin }));
     isDemoMode = true;
 }
 
