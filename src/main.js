@@ -614,13 +614,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (state.classrooms[className]) {
             if (state.classrooms[className].isDeleted) {
-                // It's a deleted class, so purge it before creating the new one.
-                delete state.classrooms[className];
+                ui.showNotification(`⚠️ کلاسی با این نام در سطل زباله است. ابتدا آن را بازیابی کنید و یا آن را پاک کنید.`);
             } else {
-                // It's an active class, so show the error.
                 ui.showNotification("⚠️کلاسی با این نام از قبل وجود دارد.");
-                return;
             }
+            return; // Stop the function in both cases
         }
         const classType = selectedTypeRadio.value;
         const newClassroom = new Classroom({ name: className, type: classType });

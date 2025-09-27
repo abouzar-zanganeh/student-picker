@@ -2700,18 +2700,25 @@ export function renderTrashPage() {
         restoreBtn.title = 'بازیابی';
         restoreBtn.addEventListener('click', () => {
             let success = false;
+            let errorMessage = null; // For custom error messages
+
+            const r = entry.restoreData; // Shortcut for restoreData
+
             switch (entry.type) {
                 case 'classroom': {
-                    const classroom = state.classrooms[entry.restoreData.name];
-                    if (classroom) {
+                    const classroom = state.classrooms[r.name];
+                    // Conflict check: An active class with the same name already exists.
+                    if (classroom && !classroom.isDeleted) {
+                        errorMessage = `کلاسی با نام «${r.name}» از قبل فعال است.`;
+                    } else if (classroom && classroom.isDeleted) {
                         classroom.isDeleted = false;
                         success = true;
                     }
                     break;
                 }
                 case 'student': {
-                    const classroom = state.classrooms[entry.restoreData.classroomName];
-                    const student = classroom?.students.find(s => s.identity.studentId === entry.restoreData.studentId);
+                    const classroom = state.classrooms[r.classroomName];
+                    const student = classroom?.students.find(s => s.identity.studentId === r.studentId);
                     if (student) {
                         student.isDeleted = false;
                         success = true;
@@ -2719,8 +2726,8 @@ export function renderTrashPage() {
                     break;
                 }
                 case 'session': {
-                    const classroom = state.classrooms[entry.restoreData.classroomName];
-                    const session = classroom?.sessions.find(s => s.sessionNumber === entry.restoreData.sessionNumber);
+                    const classroom = state.classrooms[r.classroomName];
+                    const session = classroom?.sessions.find(s => s.sessionNumber === r.sessionNumber);
                     if (session) {
                         session.isDeleted = false;
                         success = true;
@@ -2728,8 +2735,8 @@ export function renderTrashPage() {
                     break;
                 }
                 case 'category': {
-                    const classroom = state.classrooms[entry.restoreData.classroomName];
-                    const category = classroom?.categories.find(c => c.id === entry.restoreData.categoryId);
+                    const classroom = state.classrooms[r.classroomName];
+                    const category = classroom?.categories.find(c => c.id === r.categoryId);
                     if (category) {
                         category.isDeleted = false;
                         success = true;
@@ -2737,9 +2744,9 @@ export function renderTrashPage() {
                     break;
                 }
                 case 'score': {
-                    const classroom = state.classrooms[entry.restoreData.classroomName];
-                    const student = classroom?.students.find(s => s.identity.studentId === entry.restoreData.studentId);
-                    const score = student?.logs.scores[entry.restoreData.skill.toLowerCase()]?.find(sc => sc.id === entry.restoreData.scoreId);
+                    const classroom = state.classrooms[r.classroomName];
+                    const student = classroom?.students.find(s => s.identity.studentId === r.studentId);
+                    const score = student?.logs.scores[r.skill.toLowerCase()]?.find(sc => sc.id === r.scoreId);
                     if (score) {
                         score.isDeleted = false;
                         success = true;
@@ -2747,9 +2754,9 @@ export function renderTrashPage() {
                     break;
                 }
                 case 'note': {
-                    const classroom = state.classrooms[entry.restoreData.classroomName];
-                    const student = classroom?.students.find(s => s.identity.studentId === entry.restoreData.studentId);
-                    const note = student?.profile.notes.find(n => n.id === entry.restoreData.noteId);
+                    const classroom = state.classrooms[r.classroomName];
+                    const student = classroom?.students.find(s => s.identity.studentId === r.studentId);
+                    const note = student?.profile.notes.find(n => n.id === r.noteId);
                     if (note) {
                         note.isDeleted = false;
                         success = true;
@@ -2762,9 +2769,16 @@ export function renderTrashPage() {
                 state.trashBin.splice(index, 1);
                 state.saveData();
                 renderTrashPage();
+                if (entry.type === 'classroom') {
+                    renderClassList(); // Update the class list if a class was restored
+                }
                 showNotification('✅ آیتم با موفقیت بازیابی شد.');
             } else {
-                showNotification('⚠️ آیتم اصلی برای بازیابی یافت نشد. ممکن است کلاس والد آن حذف شده باشد.');
+                if (errorMessage) {
+                    showNotification(`⚠️ ${errorMessage}`);
+                } else {
+                    showNotification('⚠️ آیتم اصلی برای بازیابی یافت نشد.');
+                }
             }
         });
 
