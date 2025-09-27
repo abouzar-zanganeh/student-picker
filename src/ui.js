@@ -248,6 +248,60 @@ export function showMoveStudentModal(student, sourceClass) {
     openModal('move-student-modal');
 }
 
+export function showRenameStudentModal(student, classroom) {
+    if (!student || !classroom) return;
+
+    const oldName = student.identity.name;
+
+    // 1. Configure the modal for renaming
+    const modalTitle = document.getElementById('add-note-modal-title');
+    modalTitle.textContent = 'تغییر نام دانش‌آموز';
+    newNoteContent.value = oldName;
+    newNoteContent.rows = 1;
+    newNoteContent.dispatchEvent(new Event('input', { bubbles: true })); // Trigger auto-direction
+
+    // 2. Define what happens when the "Save" button is clicked
+    state.setSaveNoteCallback((newName) => {
+        const trimmedNewName = newName.trim();
+
+        if (trimmedNewName && trimmedNewName !== oldName) {
+            // Check for duplicates, excluding the student being renamed
+            const isDuplicate = getActiveItems(classroom.students).some(
+                s => s.identity.studentId !== student.identity.studentId &&
+                    s.identity.name.toLowerCase() === trimmedNewName.toLowerCase()
+            );
+
+            if (isDuplicate) {
+                showNotification('دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.');
+            } else {
+                student.identity.name = trimmedNewName;
+
+                logManager.addLog(classroom.info.name, `نام دانش‌آموز «${oldName}» به «${trimmedNewName}» تغییر یافت.`, { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
+
+                state.saveData();
+
+                // Re-render relevant UI parts to show the new name
+                renderSettingsStudentList();
+                renderStudentStatsList();
+                if (state.selectedStudentForProfile && state.selectedStudentForProfile.identity.studentId === student.identity.studentId) {
+                    renderStudentProfilePage();
+                }
+
+                showNotification(`✅نام دانش‌آموز به «${trimmedNewName}» تغییر یافت.`);
+            }
+        }
+
+        // 3. Reset the modal to its default state for adding notes
+        modalTitle.textContent = 'ثبت یادداشت جدید';
+        newNoteContent.rows = 4;
+    });
+
+    // 4. Open the modal and pre-select the text
+    openModal('add-note-modal');
+    newNoteContent.focus();
+    newNoteContent.select();
+}
+
 export function openModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -2072,10 +2126,26 @@ export function renderSettingsStudentList() {
         nameSpan.textContent = student.identity.name;
         nameSpan.style.flexGrow = '1';
 
+        nameSpan.className = 'student-name-link';
+        nameSpan.addEventListener('click', () => {
+            state.setSelectedStudentForProfile(student);
+            renderStudentProfilePage();
+            showPage('student-profile-page');
+        });
+
         li.appendChild(nameSpan);
 
         li.addEventListener('contextmenu', (event) => {
             const menuItems = [
+
+                {
+                    label: 'تغییر نام',
+                    icon: '✏️',
+                    action: () => {
+                        showRenameStudentModal(student, state.currentClassroom);
+                    }
+                },
+
                 {
                     label: 'انتقال دانش‌آموز',
                     icon: '➡️',

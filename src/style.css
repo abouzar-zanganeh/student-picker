@@ -441,7 +441,9 @@ button:disabled:hover {
 }
 
 #class-list li:hover,
-#session-list li:hover {
+#session-list li:hover,
+#settings-student-list li:hover,
+#category-list li:hover {
     background-color: #e9ecef;
     cursor: pointer;
 }
@@ -2101,6 +2103,11 @@ textarea,
 }
 
 .student-stats-table tbody tr:hover .student-name-link {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.student-name-link:hover {
     color: var(--color-primary);
     text-decoration: underline;
 }

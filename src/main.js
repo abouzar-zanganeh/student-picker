@@ -1204,48 +1204,7 @@ document.addEventListener('DOMContentLoaded', () => {
     profileStudentNameHeader.addEventListener('click', () => {
         const student = state.selectedStudentForProfile;
         const classroom = state.currentClassroom;
-        if (!student || !classroom) return;
-
-        // Capture the old name before any changes
-        const oldName = student.identity.name;
-
-        // 1. Configure the modal for renaming
-        const modalTitle = document.getElementById('add-note-modal-title');
-        //... (rest of the existing configuration)
-
-        // 2. Define what happens when the "Save" button is clicked
-        state.setSaveNoteCallback((newName) => {
-            const trimmedNewName = newName.trim();
-            if (!trimmedNewName || trimmedNewName === oldName) {
-                // No actual change, do nothing
-            } else {
-                const isDuplicate = classroom.students.some(
-                    s => !s.isDeleted && s.identity.name.toLowerCase() === trimmedNewName.toLowerCase()
-                );
-
-                if (isDuplicate) {
-                    ui.showNotification('دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.');
-                } else {
-                    student.identity.name = trimmedNewName;
-                    state.saveData();
-
-                    // Add this line:
-                    logManager.addLog(classroom.info.name, `نام دانش‌آموز «${oldName}» به «${trimmedNewName}» تغییر یافت.`, { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
-
-                    ui.renderStudentProfilePage();
-                    ui.renderStudentStatsList();
-                    ui.showNotification(`✅نام دانش‌آموز به «${trimmedNewName}» تغییر یافت.`);
-                }
-            }
-
-            // 3. Reset the modal...
-            //... (rest of the existing code)
-        });
-
-        // 4. Open the modal...
-        ui.openModal('add-note-modal');
-        ui.newNoteContent.focus();
-        ui.newNoteContent.select();
+        ui.showRenameStudentModal(student, classroom);
     });
 
 
