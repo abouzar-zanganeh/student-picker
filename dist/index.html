@@ -12,11 +12,16 @@
     <meta name="apple-mobile-web-app-title" content="دستیار معلم">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="images/icon-192.png" type="image/png">
-  <script type="module" crossorigin src="/assets/index-qwRWwkCH.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-CqhMkktQ.css">
+  <script type="module" crossorigin src="/assets/index-HajOgHoM.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-B44K2NFj.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body>
+
+    <div id="demo-mode-banner" class="demo-banner">
+        <span>🎭 حالت نمایش (Demo) فعال است. هیچ تغییری ذخیره نخواهد شد.</span>
+        <button id="exit-demo-btn">خروج</button>
+    </div>
 
     <header class="app-header">
         <button id="hamburger-menu-btn" class="btn-icon">☰</button>
@@ -28,6 +33,7 @@
     <div id="side-nav-menu" class="side-nav">
         <a href="javascript:void(0)" id="close-nav-btn" class="close-btn">&times;</a>
         <button id="trash-nav-btn" class="nav-btn">🗑️ سطل زباله</button>
+        <button id="demo-mode-btn" class="nav-btn">🎭 حالت نمایش (Demo)</button>
         <button id="backup-data-btn" class="nav-btn">📤 پشتیبان‌گیری</button>
         <button id="restore-data-btn" class="nav-btn">📥 بازیابی</button>
         <input type="file" id="restore-file-input" class="hidden-input" accept=".json,.txt">
@@ -61,9 +67,8 @@
             <button id="add-class-btn">افزودن</button>
         </div>
         <ul id="class-list" class="list-container"></ul>
+        <p id="app-version" style="text-align: center; font-size: 12px; color: #888; margin-top: 20px;"></p>
     </main>
-
-    <p id="app-version" style="text-align: center; font-size: 12px; color: #888; margin-top: 20px;"></p>
 
     <main id="student-page" class="page">
         <button id="back-to-attendance-btn" class="btn-secondary" style="width: auto; margin-left: 10px;">📋 حضور و
