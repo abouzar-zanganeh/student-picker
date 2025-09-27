@@ -628,6 +628,9 @@ document.addEventListener('DOMContentLoaded', () => {
         logManager.addLog(className, `کلاس «${className}» ایجاد شد.`, { type: 'VIEW_SESSIONS' });
 
         ui.renderClassList();
+
+        ui.showNotification(`✅ کلاس «${className}» با موفقیت ایجاد شد.`);
+
         newClassNameInput.value = '';
         selectedTypeRadio.checked = false;
     });
