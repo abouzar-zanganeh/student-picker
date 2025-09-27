@@ -2023,8 +2023,6 @@ function createClassListItem(classroom) {
                 }
             },
 
-            { isSeparator: true },
-
             {
                 label: 'تغییر نام',
                 icon: '✏️',
@@ -2154,7 +2152,7 @@ export function renderSettingsStudentList() {
                         showMoveStudentModal(student, state.currentClassroom);
                     }
                 },
-                { isSeparator: true },
+
                 {
                     label: 'حذف دانش‌آموز',
                     icon: '🗑️',
