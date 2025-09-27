@@ -3169,7 +3169,9 @@ export function updateDemoModeBanner() {
 
     if (state.isDemoMode) {
         banner.classList.add('visible');
+        document.body.classList.add('demo-mode-active');
     } else {
         banner.classList.remove('visible');
+        document.body.classList.remove('demo-mode-active');
     }
 }

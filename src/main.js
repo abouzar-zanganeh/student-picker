@@ -945,30 +945,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const demoModeBtn = document.getElementById('demo-mode-btn'); // for the demo mode (this and the following event listener)
     demoModeBtn.addEventListener('click', () => {
         if (state.isDemoMode) {
-            state.exitDemoMode();
-            ui.renderClassList();
-            ui.showPage('class-management-page');
+            handleExitDemoMode();
         } else {
-            state.enterDemoMode();
+            closeSideNav();
+            ui.showCustomConfirm(
+                "شما در حال ورود به حالت نمایش (Demo) هستید. در این حالت، هیچ‌کدام از تغییرات شما ذخیره نخواهد شد. آیا ادامه می‌دهید؟",
+                () => {
+                    state.enterDemoMode();
+                    ui.updateDemoModeBanner();
+                    closeSideNav();
+                },
+                { confirmText: 'تایید', confirmClass: 'btn-warning', onCancel: closeSideNav }
+            );
         }
-        ui.updateDemoModeBanner();
-        closeSideNav();
     });
 
     const exitDemoBtn = document.getElementById('exit-demo-btn');
     if (exitDemoBtn) {
         exitDemoBtn.addEventListener('click', () => {
             if (state.isDemoMode) {
-                state.exitDemoMode();
-
-                // Reset the navigation state before re-rendering
-                state.setCurrentClassroom(null);
-                state.setSelectedSession(null);
-                state.setSelectedStudentForProfile(null);
-
-                ui.renderClassList();
-                ui.showPage('class-management-page');
-                ui.updateDemoModeBanner();
+                handleExitDemoMode();
             }
         });
     }
@@ -1228,6 +1224,26 @@ document.addEventListener('DOMContentLoaded', () => {
             // This removes all classes after the animation finishes
             overlay.classList.remove('modal-visible', 'modal-closing');
         }, 300); // This duration must match your CSS animation time
+    }
+
+    function handleExitDemoMode() {
+        ui.showCustomConfirm(
+            "آیا از خروج از حالت نمایش (Demo) مطمئن هستید؟ با خروج، تمام تغییرات آزمایشی شما حذف شده و داده‌های اصلی شما بازیابی خواهند شد.",
+            () => {
+                state.exitDemoMode();
+
+                // Reset the navigation state before re-rendering
+                state.setCurrentClassroom(null);
+                state.setSelectedSession(null);
+                state.setSelectedStudentForProfile(null);
+
+                ui.renderClassList();
+                ui.showPage('class-management-page');
+                ui.updateDemoModeBanner();
+                closeSideNav(); // Ensure nav is closed if exiting from there
+            },
+            { confirmText: 'خروج', confirmClass: 'btn-success' }
+        );
     }
 
     // --- Initialize UI Components ---
