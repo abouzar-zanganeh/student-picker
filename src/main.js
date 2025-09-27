@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initial Load ---
     state.loadData();
+    ui.updateDemoModeBanner();
 
     // Try to restore the state from the URL
     const wasRestored = restoreStateFromURL();
@@ -940,12 +941,58 @@ document.addEventListener('DOMContentLoaded', () => {
         closeSideNav(); // Close the nav menu after clicking
     });
 
+
+    const demoModeBtn = document.getElementById('demo-mode-btn'); // for the demo mode (this and the following event listener)
+    demoModeBtn.addEventListener('click', () => {
+        if (state.isDemoMode) {
+            state.exitDemoMode();
+            ui.renderClassList();
+            ui.showPage('class-management-page');
+        } else {
+            state.enterDemoMode();
+        }
+        ui.updateDemoModeBanner();
+        closeSideNav();
+    });
+
+    const exitDemoBtn = document.getElementById('exit-demo-btn');
+    if (exitDemoBtn) {
+        exitDemoBtn.addEventListener('click', () => {
+            if (state.isDemoMode) {
+                state.exitDemoMode();
+
+                // Reset the navigation state before re-rendering
+                state.setCurrentClassroom(null);
+                state.setSelectedSession(null);
+                state.setSelectedStudentForProfile(null);
+
+                ui.renderClassList();
+                ui.showPage('class-management-page');
+                ui.updateDemoModeBanner();
+            }
+        });
+    }
+
     backupDataBtn.addEventListener('click', () => {
+
+        if (state.isDemoMode) {
+            ui.showNotification("⚠️ پشتیبان‌گیری در حالت نمایش (Demo) غیرفعال است.");
+            closeSideNav();
+            return;
+        }
+
         closeSideNav();
         ui.initiateBackupProcess();
     });
 
     restoreDataBtn.addEventListener('click', () => {
+
+        if (state.isDemoMode) {
+            ui.showNotification("⚠️ بازیابی اطلاعات در حالت نمایش (Demo) غیرفعال است.");
+            closeSideNav();
+            return;
+        }
+
         restoreFileInput.click();
         closeSideNav();
     });

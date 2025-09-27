@@ -25,13 +25,19 @@ export let winnerHistoryIndex = -1; // -1 indicates we're not in history view
 export let saveNoteCallback = null;
 export let manualSelection = null; // To hold a student selected from the stats table
 
+//for moving students
 export let studentToMove = null;
 export let sourceClassForMove = null;
+
+// for Demo Mode
+export let isDemoMode = false;
+let originalStateBackup = null;
 
 
 
 // --- توابع اصلی داده‌ها (Data Functions) ---
 export function saveData() {
+    if (isDemoMode) return; // Add this line
     localStorage.setItem('teacherAssistantData_v2', JSON.stringify(classrooms));
 }
 
@@ -287,4 +293,19 @@ export function permanentlyDeleteStudent(studentToDelete, classroom) {
             delete session.studentRecords[studentId];
         }
     });
+}
+
+// Functions to control the Demo Mode
+export function enterDemoMode() {
+    // Create a deep copy of the current state to prevent any direct mutation.
+    // JSON.stringify turns the live objects into a string, and JSON.parse creates brand new objects from that string.
+    originalStateBackup = JSON.parse(JSON.stringify(classrooms));
+    isDemoMode = true;
+}
+
+export function exitDemoMode() {
+    isDemoMode = false;
+    // Restore the original state by simply re-running the initial data load process.
+    loadData();
+    originalStateBackup = null;
 }

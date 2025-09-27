@@ -2341,6 +2341,11 @@ function createSessionActionButtons(session, displaySessionNumber) {
                     showCustomConfirm(
                         "جلسه با موفقیت خاتمه یافت. آیا مایل به ایجاد فایل پشتیبان هستید؟",
                         () => {
+                            // This logic now runs when the user clicks the "Yes" button.
+                            if (state.isDemoMode) {
+                                showNotification("⚠️ پشتیبان‌گیری در حالت نمایش (Demo) غیرفعال است.");
+                                return; // This stops the function before creating the backup file.
+                            }
                             initiateBackupProcess();
                             showNotification("✅فایل پشتیبان با موفقیت ایجاد شد.");
                         },
@@ -3155,4 +3160,16 @@ function setupAbsenteesCopyButton() {
             showNotification('❌خطا در کپی کردن لیست.');
         });
     });
+}
+
+//for demo mode appearance of banner
+export function updateDemoModeBanner() {
+    const banner = document.getElementById('demo-mode-banner');
+    if (!banner) return;
+
+    if (state.isDemoMode) {
+        banner.classList.add('visible');
+    } else {
+        banner.classList.remove('visible');
+    }
 }
