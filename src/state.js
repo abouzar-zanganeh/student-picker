@@ -233,6 +233,68 @@ export function renameClassroom(oldName, newName) {
     return { success: true };
 }
 
+export function renameCategory(classroom, categoryToRename, newName) {
+    const trimmedNewName = newName.trim();
+    if (!trimmedNewName) {
+        return { success: false, message: 'نام دسته‌بندی نمی‌تواند خالی باشد.' };
+    }
+
+    // 1. Check for duplicates (among non-deleted categories, excluding the one being renamed)
+    const isDuplicate = classroom.categories.some(
+        cat => cat.id !== categoryToRename.id &&
+            !cat.isDeleted &&
+            cat.name.toLowerCase() === trimmedNewName.toLowerCase()
+    );
+
+    if (isDuplicate) {
+        return { success: false, message: 'دسته‌بندی دیگری با این نام وجود دارد.' };
+    }
+
+    const oldName = categoryToRename.name;
+    const oldSkillKey = oldName.toLowerCase();
+    const newSkillKey = trimmedNewName.toLowerCase();
+
+    // 2. Update the category object itself
+    categoryToRename.name = trimmedNewName;
+
+    // 3. Migrate data for all students in the classroom
+    classroom.students.forEach(student => {
+        if (student.categoryCounts && student.categoryCounts[oldName] !== undefined) {
+            student.categoryCounts[trimmedNewName] = student.categoryCounts[oldName];
+            delete student.categoryCounts[oldName];
+        }
+        if (student.categoryIssues && student.categoryIssues[oldName] !== undefined) {
+            student.categoryIssues[trimmedNewName] = student.categoryIssues[oldName];
+            delete student.categoryIssues[oldName];
+        }
+        if (student.logs.scores && student.logs.scores[oldSkillKey]) {
+            student.logs.scores[oldSkillKey].forEach(score => score.skill = trimmedNewName);
+            if (oldSkillKey !== newSkillKey) {
+                student.logs.scores[newSkillKey] = student.logs.scores[oldSkillKey];
+                delete student.logs.scores[oldSkillKey];
+            }
+        }
+    });
+
+    // 4. Migrate data for all sessions
+    classroom.sessions.forEach(session => {
+        if (session.lastWinnerByCategory && session.lastWinnerByCategory[oldName]) {
+            session.lastWinnerByCategory[trimmedNewName] = session.lastWinnerByCategory[oldName];
+            delete session.lastWinnerByCategory[oldName];
+        }
+        if (session.winnerHistory) {
+            session.winnerHistory.forEach(entry => {
+                if (entry.categoryName === oldName) {
+                    entry.categoryName = trimmedNewName;
+                }
+            });
+        }
+    });
+
+
+    return { success: true };
+}
+
 export function moveStudent(studentToMove, sourceClassroom, destinationClassroom) {
     // 1. Check for duplicates in the destination class to prevent conflicts.
     const isDuplicate = getActiveItems(destinationClassroom.students).some(

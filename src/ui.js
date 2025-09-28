@@ -6,6 +6,7 @@ import {
 import { detectTextDirection, renderMultiLineText } from './utils.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
+import { Category } from './models.js';
 
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');
@@ -1533,16 +1534,14 @@ function renderCategoryPills() {
             pill.dataset.tooltip = category.description;
         }
 
+        // --- REGULAR CLICK EVENT ---
         pill.addEventListener('click', () => {
             document.querySelectorAll('#category-selection-container .pill').forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
             state.setSelectedCategory(category);
-
             updateQuickGradeUIForCategory(category);
-
             selectStudentBtnWrapper.classList.remove('disabled-wrapper');
             selectStudentBtn.disabled = false;
-
             const lastWinnerId = state.selectedSession.lastWinnerByCategory[category.name];
             if (lastWinnerId) {
                 const lastWinner = state.currentClassroom.students.find(s => s.identity.studentId === lastWinnerId);
@@ -1561,10 +1560,85 @@ function renderCategoryPills() {
             }
         });
 
+        // --- NEW CONTEXT MENU (RIGHT-CLICK) EVENT ---
+        pill.addEventListener('contextmenu', (event) => {
+            const menuItems = [{
+                label: 'تغییر نام',
+                icon: '✏️',
+                action: () => {
+                    showCategoryModal((newName, newIsGraded) => {
+                        const result = state.renameCategory(state.currentClassroom, category, newName);
+                        if (result.success) {
+                            category.isGradedCategory = newIsGraded;
+                            state.saveData();
+                            logManager.addLog(state.currentClassroom.info.name, `نام دسته‌بندی «${category.name}» به «${newName}» تغییر یافت.`);
+                            renderCategoryPills();
+                            renderStudentStatsList();
+                            showNotification(`✅ نام دسته‌بندی به «${newName}» تغییر یافت.`);
+                        } else {
+                            showNotification(`⚠️ ${result.message}`);
+                        }
+                    }, {
+                        title: 'ویرایش دسته‌بندی',
+                        initialName: category.name,
+                        initialIsGraded: category.isGradedCategory,
+                        saveButtonText: 'ذخیره تغییرات'
+                    });
+                }
+            }, {
+                label: 'حذف دسته‌بندی',
+                icon: '🗑️',
+                className: 'danger',
+                action: () => {
+                    showCustomConfirm(
+                        `آیا از انتقال دسته‌بندی «${category.name}» به سطل زباله مطمئن هستید؟`,
+                        () => {
+                            const trashEntry = {
+                                id: `trash_${Date.now()}_${Math.random()}`,
+                                timestamp: new Date().toISOString(),
+                                type: 'category',
+                                description: `دسته‌بندی «${category.name}» از کلاس «${state.currentClassroom.info.name}»`,
+                                restoreData: {
+                                    categoryId: category.id,
+                                    classroomName: state.currentClassroom.info.name
+                                }
+                            };
+                            state.trashBin.unshift(trashEntry);
+                            if (state.trashBin.length > 50) state.trashBin.pop();
+
+                            //Mark all associated scores as deleted ---
+                            const skillKey = category.name.toLowerCase();
+                            state.currentClassroom.students.forEach(student => {
+                                if (student.logs.scores && student.logs.scores[skillKey]) {
+                                    student.logs.scores[skillKey].forEach(score => {
+                                        score.isDeleted = true;
+                                    });
+                                }
+                            });
+                            //END NEW LOGIC
+
+                            category.isDeleted = true;
+                            logManager.addLog(state.currentClassroom.info.name, `دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`, {
+                                type: 'VIEW_TRASH'
+                            });
+                            state.saveData();
+                            renderCategoryPills();
+                            renderStudentStatsList();
+                            showNotification(`✅ دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`);
+                        }, {
+                        confirmText: 'بله',
+                        confirmClass: 'btn-warning'
+                    }
+                    );
+                }
+            }];
+            openContextMenu(event, menuItems);
+        });
+
         categoryPillsContainer.appendChild(pill);
     });
 
-    // --- New "Add Category" Pill Logic ---
+    // --- "ADD CATEGORY" PILL ---
     const addPill = document.createElement('span');
     addPill.className = 'pill add-category-pill';
     addPill.textContent = '+';
@@ -1572,27 +1646,22 @@ function renderCategoryPills() {
 
     addPill.addEventListener('click', () => {
         showCategoryModal((categoryName, isGraded) => {
-            // Logic to handle saving the new category
             const existingCategory = state.currentClassroom.categories.find(
                 cat => cat.name.toLowerCase() === categoryName.toLowerCase() && !cat.isDeleted
             );
-
             if (existingCategory) {
                 showNotification("⚠️ این دسته‌بندی از قبل وجود دارد.");
                 return;
             }
-
             const newCategory = new Category(categoryName, '', isGraded);
             state.currentClassroom.categories.push(newCategory);
             state.saveData();
-
             logManager.addLog(state.currentClassroom.info.name,
                 `دسته‌بندی جدید «${categoryName}» اضافه شد.`, {
                 type: 'VIEW_CLASS_SETTINGS'
             }
             );
-
-            renderCategoryPills(); // Re-render to show the new pill
+            renderCategoryPills();
             showNotification(`✅ دسته‌بندی «${categoryName}» اضافه شد.`);
         });
     });
@@ -1623,12 +1692,12 @@ function updateQuickGradeUIForCategory(category) {
         quickScoreInput.disabled = false;
         quickNoteTextarea.disabled = false;
         quickGradeSubmitBtn.disabled = false;
-        quickGradeFormWrapper.removeAttribute('data-tooltip');
+        quickGradeFormWrapper.removeAttribute('title');
     } else {
         quickScoreInput.disabled = true;
         quickNoteTextarea.disabled = true;
         quickGradeSubmitBtn.disabled = true;
-        quickGradeFormWrapper.setAttribute('data-tooltip', 'برای این دسته‌بندی قابلیت نمره دهی تعریف نشده است');
+        quickGradeFormWrapper.setAttribute('title', 'برای این دسته‌بندی قابلیت نمره دهی تعریف نشده است');
     }
 }
 

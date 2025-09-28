@@ -2252,7 +2252,7 @@ textarea,
 .add-category-pill {
     font-weight: bold;
     font-size: 20px;
-    padding: 0 15px;
+    padding: 2px 15px;
     /* Adjusts padding for a circular feel */
     line-height: 30px;
     /* Helps vertically center the '+' */
