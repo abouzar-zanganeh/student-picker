@@ -2239,3 +2239,12 @@ textarea,
 }
 
 /* end of Demo Mode */
+
+/* category modal */
+.category-modal-options {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+    justify-content: center;
+}
