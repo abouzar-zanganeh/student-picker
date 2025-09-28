@@ -23,6 +23,9 @@ export let secureConfirmCallback = null;
 export let activeModal = null; // Will hold the ID of the currently open modal
 export let winnerHistoryIndex = -1; // -1 indicates we're not in history view
 export let saveNoteCallback = null;
+
+export let saveCategoryCallback = null;
+
 export let manualSelection = null; // To hold a student selected from the stats table
 
 //for moving students
@@ -257,30 +260,7 @@ export function moveStudent(studentToMove, sourceClassroom, destinationClassroom
 }
 
 
-export function setCurrentClassroom(classroom) { currentClassroom = classroom; }
-export function setLiveSession(session) { liveSession = session; }
-export function setSelectedSession(session) { selectedSession = session; }
-export function setSelectedStudentForProfile(student) { selectedStudentForProfile = student; }
-export function setPreviousState(state) { previousState = state; }
-export function setUndoTimeout(timeout) { undoTimeout = timeout; }
-export function setNamesToImport(names) { namesToImport = names; }
-export function setImportedFileContent(content) { importedFileContent = content; }
-export function setNotificationTimeout(timeout) { notificationTimeout = timeout; }
-export function setSelectedCategory(category) { selectedCategory = category; }
-export function setEasterEggClickCount(count) { easterEggClickCount = count; }
-export function setEasterEggLastClickTime(time) { easterEggLastClickTime = time; }
-export function setResetEasterEggClickCount(count) { resetEasterEggClickCount = count; }
-export function setResetEasterEggLastClickTime(time) { resetEasterEggLastClickTime = time; }
-export function setConfirmCallback(callback) { confirmCallback = callback; }
-export function setCancelCallback(callback) { cancelCallback = callback; }
-export function setSecureConfirmCallback(callback) { secureConfirmCallback = callback; }
-export function setActiveModal(modalId) { activeModal = modalId; }
-export function setManualSelection(selection) { manualSelection = selection; }
 
-export function setStudentToMove(student) { studentToMove = student; }
-export function setSourceClassForMove(classroom) { sourceClassForMove = classroom; }
-
-export function setTrashBin(newTrashBin) { trashBin = newTrashBin; }
 
 
 export function resetAllStudentCounters() {
@@ -429,3 +409,30 @@ export function exitDemoMode() {
     loadData();
     originalStateBackup = null;
 }
+
+export function setCurrentClassroom(classroom) { currentClassroom = classroom; }
+export function setLiveSession(session) { liveSession = session; }
+export function setSelectedSession(session) { selectedSession = session; }
+export function setSelectedStudentForProfile(student) { selectedStudentForProfile = student; }
+export function setPreviousState(state) { previousState = state; }
+export function setUndoTimeout(timeout) { undoTimeout = timeout; }
+export function setNamesToImport(names) { namesToImport = names; }
+export function setImportedFileContent(content) { importedFileContent = content; }
+export function setNotificationTimeout(timeout) { notificationTimeout = timeout; }
+export function setSelectedCategory(category) { selectedCategory = category; }
+export function setEasterEggClickCount(count) { easterEggClickCount = count; }
+export function setEasterEggLastClickTime(time) { easterEggLastClickTime = time; }
+export function setResetEasterEggClickCount(count) { resetEasterEggClickCount = count; }
+export function setResetEasterEggLastClickTime(time) { resetEasterEggLastClickTime = time; }
+export function setConfirmCallback(callback) { confirmCallback = callback; }
+export function setCancelCallback(callback) { cancelCallback = callback; }
+export function setSecureConfirmCallback(callback) { secureConfirmCallback = callback; }
+export function setActiveModal(modalId) { activeModal = modalId; }
+export function setManualSelection(selection) { manualSelection = selection; }
+
+export function setStudentToMove(student) { studentToMove = student; }
+export function setSourceClassForMove(classroom) { sourceClassForMove = classroom; }
+
+export function setTrashBin(newTrashBin) { trashBin = newTrashBin; }
+
+export function setSaveCategoryCallback(callback) { saveCategoryCallback = callback; }

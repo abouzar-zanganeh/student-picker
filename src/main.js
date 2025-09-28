@@ -141,6 +141,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners ---
 
+    categoryModalCancelBtn.addEventListener('click', () => {
+        ui.closeActiveModal();
+        state.setSaveCategoryCallback(null); // Clear the callback on cancel
+    });
+
+    categoryModalSaveBtn.addEventListener('click', () => {
+        const categoryName = ui.newCategoryModalNameInput.value.trim();
+        const isGraded = ui.newCategoryModalIsGradedCheckbox.checked;
+
+        if (typeof state.saveCategoryCallback === 'function') {
+            state.saveCategoryCallback(categoryName, isGraded);
+        }
+    });
+
     window.addEventListener('scroll', ui.closeContextMenu);
 
     // REPLACE the old document click listener with this one

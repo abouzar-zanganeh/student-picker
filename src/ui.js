@@ -96,6 +96,14 @@ const resultDiv = document.getElementById('selected-student-result');
 export const contextMenu = document.getElementById('custom-context-menu');
 export const breadcrumbContainer = document.getElementById('breadcrumb-container');
 
+// for category modal on student page (when adding categories)
+export const categoryModal = document.getElementById('category-modal');
+export const categoryModalTitle = document.getElementById('category-modal-title');
+export const newCategoryModalNameInput = document.getElementById('new-category-modal-name');
+export const newCategoryModalIsGradedCheckbox = document.getElementById('new-category-modal-is-graded');
+export const categoryModalCancelBtn = document.getElementById('category-modal-cancel-btn');
+export const categoryModalSaveBtn = document.getElementById('category-modal-save-btn');
+
 
 
 
