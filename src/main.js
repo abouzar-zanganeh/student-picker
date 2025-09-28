@@ -85,7 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
         studentSearchResultsDiv, studentProfilePage, profileStudentNameHeader,
         backToStudentPageBtn, gradedCategoryPillsContainer, newScoreValueInput,
         newScoreCommentTextarea, addScoreBtn, profileStatsSummaryDiv,
-        profileScoresListUl, isGradedCheckbox, backupOptionsModal, backupDownloadBtn, backupShareBtn, backupOptionsCancelBtn
+        profileScoresListUl, isGradedCheckbox, backupOptionsModal, backupDownloadBtn,
+        backupShareBtn, backupOptionsCancelBtn, categoryModalSaveBtn, categoryModalCancelBtn
     } = ui; // This is a bit of a trick to avoid rewriting all the getElementById calls
     const trashNavBtn = document.getElementById('trash-nav-btn');
 
@@ -1018,12 +1019,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 ui.showCustomConfirm(
                     "آیا از بازیابی اطلاعات مطمئن هستید؟ تمام داده‌های فعلی شما بازنویسی خواهد شد.",
                     () => {
-                        state.rehydrateData(plainData);
+                        // This logic now correctly handles both new and old backup formats
+                        if (plainData.classrooms) {
+                            state.rehydrateData(plainData.classrooms);
+                            state.setTrashBin(plainData.trashBin || []);
+                        } else {
+                            state.rehydrateData(plainData); // For old backups
+                            state.setTrashBin([]);
+                        }
+
                         state.saveData();
                         ui.renderClassList();
                         ui.showPage('class-management-page');
                         ui.showNotification("✅اطلاعات با موفقیت بازیابی شد.");
-
                     },
                     { confirmText: 'بازیابی کن', confirmClass: 'btn-warning' }
                 );

@@ -1520,7 +1520,10 @@ function initializeStudentPageUI() {
 }
 
 function renderCategoryPills() {
+    categoryPillsContainer.innerHTML = ''; // Clear existing pills first
+
     const activeCategories = state.currentClassroom.categories.filter(cat => !cat.isDeleted);
+
     activeCategories.forEach(category => {
         const pill = document.createElement('span');
         pill.className = 'pill';
@@ -1531,9 +1534,7 @@ function renderCategoryPills() {
         }
 
         pill.addEventListener('click', () => {
-
-
-            document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('#category-selection-container .pill').forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
             state.setSelectedCategory(category);
 
@@ -1542,35 +1543,61 @@ function renderCategoryPills() {
             selectStudentBtnWrapper.classList.remove('disabled-wrapper');
             selectStudentBtn.disabled = false;
 
-
-
-            // --- NEW: Display the last winner for this category ---
             const lastWinnerId = state.selectedSession.lastWinnerByCategory[category.name];
             if (lastWinnerId) {
                 const lastWinner = state.currentClassroom.students.find(s => s.identity.studentId === lastWinnerId);
                 if (lastWinner) {
-                    // We call displayWinner with the student and category.
-                    // This sets a manual selection context, bypassing the history index.
                     displayWinner(lastWinner, category.name);
                 }
             } else {
-                // If no last winner for this category, clear the display and reset state.
                 resultDiv.innerHTML = '';
                 state.setManualSelection(null);
                 state.setWinnerHistoryIndex(-1);
-                selectStudentBtn.disabled = false; // Ensure button is enabled
-
-                // Clear any lingering winner highlight from the stats table
+                selectStudentBtn.disabled = false;
                 const previousWinnerRow = document.querySelector('.current-winner-highlight');
                 if (previousWinnerRow) {
                     previousWinnerRow.classList.remove('current-winner-highlight');
                 }
             }
-
         });
 
         categoryPillsContainer.appendChild(pill);
     });
+
+    // --- New "Add Category" Pill Logic ---
+    const addPill = document.createElement('span');
+    addPill.className = 'pill add-category-pill';
+    addPill.textContent = '+';
+    addPill.title = 'افزودن دسته‌بندی جدید';
+
+    addPill.addEventListener('click', () => {
+        showCategoryModal((categoryName, isGraded) => {
+            // Logic to handle saving the new category
+            const existingCategory = state.currentClassroom.categories.find(
+                cat => cat.name.toLowerCase() === categoryName.toLowerCase() && !cat.isDeleted
+            );
+
+            if (existingCategory) {
+                showNotification("⚠️ این دسته‌بندی از قبل وجود دارد.");
+                return;
+            }
+
+            const newCategory = new Category(categoryName, '', isGraded);
+            state.currentClassroom.categories.push(newCategory);
+            state.saveData();
+
+            logManager.addLog(state.currentClassroom.info.name,
+                `دسته‌بندی جدید «${categoryName}» اضافه شد.`, {
+                type: 'VIEW_CLASS_SETTINGS'
+            }
+            );
+
+            renderCategoryPills(); // Re-render to show the new pill
+            showNotification(`✅ دسته‌بندی «${categoryName}» اضافه شد.`);
+        });
+    });
+
+    categoryPillsContainer.appendChild(addPill);
 }
 
 function restoreSessionState() {
