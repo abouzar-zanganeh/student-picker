@@ -227,6 +227,39 @@ export function showSecureConfirm(message, onConfirm) {
     };
 }
 
+export function showCategoryModal(onSave, options = {}) {
+    const {
+        title = 'ایجاد دسته‌بندی جدید',
+        initialName = '',
+        initialIsGraded = false,
+        saveButtonText = 'ذخیره'
+    } = options;
+
+    // 1. Configure the modal's appearance
+    categoryModalTitle.textContent = title;
+    newCategoryModalNameInput.value = initialName;
+    newCategoryModalIsGradedCheckbox.checked = initialIsGraded;
+    categoryModalSaveBtn.textContent = saveButtonText;
+
+    // 2. Set the callback function that will run on save
+    state.setSaveCategoryCallback((categoryName, isGraded) => {
+        // Basic validation before executing the main callback
+        if (!categoryName) {
+            showNotification('⚠️ لطفاً نام دسته‌بندی را وارد کنید.');
+            return;
+        }
+        onSave(categoryName, isGraded);
+        closeActiveModal(); // Close the modal on successful save
+    });
+
+    // 3. Open the modal and focus the input
+    openModal('category-modal');
+    newCategoryModalNameInput.focus();
+    if (initialName) {
+        newCategoryModalNameInput.select();
+    }
+}
+
 export function showMoveStudentModal(student, sourceClass) {
     // Find all other active classes to serve as possible destinations
     const destinationClasses = Object.values(state.classrooms)
@@ -351,6 +384,10 @@ export function closeActiveModal(onClosed) {
             }
             if (activeModalId === 'secure-confirm-modal') {
                 state.setSecureConfirmCallback(null);
+            }
+
+            if (activeModalId === 'category-modal') {
+                state.setSaveCategoryCallback(null);
             }
 
             if (activeModalId === 'add-note-modal') {
