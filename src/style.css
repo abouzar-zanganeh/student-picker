@@ -506,7 +506,6 @@ button:disabled:hover {
 }
 
 .class-type-selection {
-    display: flex;
     align-items: center;
     gap: 15px;
     padding: 0 15px;
