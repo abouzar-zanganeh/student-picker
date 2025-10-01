@@ -169,7 +169,7 @@ export class Session {
 
         // Avoid selecting the same student twice in a row for the same category.
         const lastWinnerId = this.lastWinnerByCategory[categoryName];
-        let candidates = studentList.filter(s => s.identity.studentId !== lastWinnerId);
+        let candidates = studentList.filter(s => s.identity.studentId !== lastWinnerId && !s.isDeleted);
 
         // If filtering leaves no one, it means all students were the last winner.
         // In this case, all students become candidates again.

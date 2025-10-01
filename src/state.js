@@ -310,12 +310,12 @@ export function moveStudent(studentToMove, sourceClassroom, destinationClassroom
     const studentCopy = JSON.parse(JSON.stringify(studentToMove));
     destinationClassroom.addStudent(studentCopy);
 
-    // 3. Mark the original student as deleted in the source class.
+    // 3. Delete the original student in the source class.
     const originalStudent = sourceClassroom.students.find(
         s => s.identity.studentId === studentToMove.identity.studentId
     );
     if (originalStudent) {
-        originalStudent.isDeleted = true;
+        permanentlyDeleteStudent(originalStudent, sourceClassroom);
     }
 
     return { success: true };
