@@ -4,10 +4,11 @@ export function normalizeText(str) {
         return '';
     }
 
-    // Chain of replacements for different character variations
+    // Chain of replacements for character variations and all whitespace/ZWNJ
     return str
         .replace(/ي/g, 'ی') // Arabic Yeh to Persian Yeh
-        .replace(/ك/g, 'ک'); // Arabic Kaf to Persian Kaf
+        .replace(/ك/g, 'ک') // Arabic Kaf to Persian Kaf
+        .replace(/[\s\u200c]/g, ''); // Removes all whitespace (\s) and the zero-width non-joiner (\u200c)
 }
 
 export function detectTextDirection(str) {
