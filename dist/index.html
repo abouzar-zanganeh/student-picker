@@ -12,8 +12,8 @@
     <meta name="apple-mobile-web-app-title" content="دستیار معلم">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="images/icon-192.png" type="image/png">
-  <script type="module" crossorigin src="/assets/index-D1Q8KEXa.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-CLWc9MH_.css">
+  <script type="module" crossorigin src="/assets/index-hfmtIl9t.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-V_rojCZV.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body>
@@ -119,6 +119,10 @@
 
         <ul id="attendance-list" class="list-container">
         </ul>
+        <div id="attendance-mass-actions-container">
+            <button id="mass-comment-btn" class="btn-secondary" disabled>📝 ثبت
+                یادداشت گروهی</button>
+        </div>
         <div class="form-actions">
             <button id="finish-attendance-btn" class="btn-success btn-large">تایید و ادامه</button>
         </div>
@@ -276,6 +280,23 @@
         </div>
     </div>
 
+    <div id="mass-comment-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="mass-comment-modal-title">ثبت یادداشت گروهی تکلیف</h3>
+            <p id="mass-comment-student-count-message"></p>
+            <textarea id="mass-comment-content" placeholder="متن یادداشت گروهی خود را اینجا وارد کنید"></textarea>
+            <div id="append-checkbox-label" class="modal-options">
+                <input type="checkbox" id="mass-comment-append-checkbox">
+                <label for="mass-comment-append-checkbox">به یادداشت‌های قبلی اضافه شود
+                </label>
+            </div>
+            <div class="modal-actions">
+                <button id="mass-comment-cancel-btn" class="btn-secondary">لغو</button>
+                <button id="mass-comment-save-btn" class="btn-success">ذخیره</button>
+            </div>
+        </div>
+    </div>
+
     <div id="secure-confirm-modal" class="modal-overlay">
         <div class="modal-content">
             <p id="secure-confirm-message"></p>
@@ -293,7 +314,7 @@
         <div class="modal-content">
             <h3 id="move-student-modal-title">انتقال دانش‌آموز</h3>
             <p>لطفاً کلاس مقصد را برای انتقال دانش‌آموز انتخاب کنید:</p>
-            <div class="input-group">
+            <div id="input-group-for-student-move" class="input-group">
                 <select id="move-student-class-select"></select>
             </div>
             <div class="modal-actions">
