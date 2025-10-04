@@ -86,7 +86,9 @@ document.addEventListener('DOMContentLoaded', () => {
         backToStudentPageBtn, gradedCategoryPillsContainer, newScoreValueInput,
         newScoreCommentTextarea, addScoreBtn, profileStatsSummaryDiv,
         profileScoresListUl, isGradedCheckbox, backupOptionsModal, backupDownloadBtn,
-        backupShareBtn, backupOptionsCancelBtn, categoryModalSaveBtn, categoryModalCancelBtn
+        backupShareBtn, backupOptionsCancelBtn, categoryModalSaveBtn, categoryModalCancelBtn,
+        massCommentBtn, massCommentCancelBtn, massCommentSaveBtn,
+        massCommentContent, massCommentAppendCheckbox, processMassHomeworkComment
     } = ui; // This is a bit of a trick to avoid rewriting all the getElementById calls
     const trashNavBtn = document.getElementById('trash-nav-btn');
 
@@ -1576,5 +1578,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
     }
 
+    // --- NEW: Mass Comment Event Listeners ---
+    massCommentBtn.addEventListener('click', () => {
+        ui.showMassCommentModal();
+    });
 
+    massCommentCancelBtn.addEventListener('click', () => {
+        ui.closeActiveModal();
+    });
+
+    massCommentSaveBtn.addEventListener('click', () => {
+        const commentText = massCommentContent.value.trim();
+        const append = massCommentAppendCheckbox.checked;
+
+        if (!commentText) {
+            // Confirmation for clearing existing comments
+            if (ui.massCommentAppendCheckbox.style.display === 'flex') {
+                ui.showCustomConfirm(
+                    'کادر یادداشت خالی است. آیا مطمئنید که می‌خواهید یادداشت‌های قبلی دانش‌آموزان انتخاب‌شده را پاک کنید؟',
+                    () => {
+                        ui.closeActiveModal();
+                        ui.processMassHomeworkComment('', false); // Pass empty text to clear
+                    },
+                    { confirmText: 'پاک کردن', confirmClass: 'btn-warning' }
+                );
+            } else {
+                ui.showNotification('⚠️ لطفاً متن یادداشت را وارد کنید.');
+            }
+            return;
+        }
+
+        // Execute the mass update logic
+        ui.closeActiveModal(() => {
+            ui.processMassHomeworkComment(commentText, append);
+        });
+    });
 });

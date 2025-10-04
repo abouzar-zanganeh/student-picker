@@ -105,6 +105,17 @@ export const newCategoryModalIsGradedCheckbox = document.getElementById('new-cat
 export const categoryModalCancelBtn = document.getElementById('category-modal-cancel-btn');
 export const categoryModalSaveBtn = document.getElementById('category-modal-save-btn');
 
+// for mass comment modal
+export const massCommentModal = document.getElementById('mass-comment-modal');
+export const massCommentModalTitle = document.getElementById('mass-comment-modal-title');
+export const massCommentStudentCountMessage = document.getElementById('mass-comment-student-count-message');
+export const massCommentContent = document.getElementById('mass-comment-content');
+export const massCommentAppendCheckbox = document.getElementById('mass-comment-append-checkbox');
+export const massCommentCancelBtn = document.getElementById('mass-comment-cancel-btn');
+export const massCommentSaveBtn = document.getElementById('mass-comment-save-btn');
+export const massCommentBtn = document.getElementById('mass-comment-btn');
+export const attendanceMassActionsContainer = document.getElementById('attendance-mass-actions-container');
+
 
 
 
@@ -391,6 +402,11 @@ export function closeActiveModal(onClosed) {
                 state.setSaveCategoryCallback(null);
             }
 
+            if (activeModalId === 'mass-comment-modal') {
+                // NEW: Clear the content on close for the mass comment modal
+                massCommentContent.value = '';
+            }
+
             if (activeModalId === 'add-note-modal') {
                 state.setSaveNoteCallback(null);
             }
@@ -401,6 +417,145 @@ export function closeActiveModal(onClosed) {
             }
 
         }, 300); // This must match the animation duration
+    }
+}
+
+export function renderMassCommentControls() {
+    // Show the button container only on the attendance page
+    if (document.querySelector('.page.active')?.id !== 'attendance-page') {
+        attendanceMassActionsContainer.style.display = 'none';
+        return;
+    }
+
+    const selectedCount = state.selectedStudentsForMassComment.length;
+
+    //1. Hide the entire container if no students are selected.
+    if (selectedCount < 1) {
+        attendanceMassActionsContainer.style.display = 'none';
+    } else {
+        attendanceMassActionsContainer.style.display = 'block';
+    }
+
+    // 2. Toggle disabled state (requires at least 2 students, or 1 for comment clearing)
+    massCommentBtn.disabled = selectedCount < 1;
+
+    // 3. Update button text
+    massCommentBtn.textContent = `📝 ثبت یادداشت گروهی (${selectedCount} نفر)`;
+}
+
+
+export function showMassCommentModal() {
+    const studentIds = state.selectedStudentsForMassComment;
+    const selectedCount = studentIds.length;
+
+    // 1. Check if *any* selected student has an existing comment.
+    // We only need this flag to decide whether to show the 'Append' checkbox.
+    let hasExistingComments = false;
+
+    if (selectedCount > 0) {
+        hasExistingComments = studentIds.some(id =>
+            state.selectedSession.studentRecords[id]?.homework.comment
+        );
+    }
+
+    // 2. Configure modal appearance
+    massCommentStudentCountMessage.textContent =
+        `یادداشت برای ${selectedCount} دانش‌آموز ثبت خواهد شد.`;
+
+    // The key change: ensure content is always blank for a clean slate.
+    massCommentContent.value = '';
+    massCommentContent.dispatchEvent(new Event('input', { bubbles: true }));
+
+    // Reset the append checkbox and control its visibility based on the flag.
+    massCommentAppendCheckbox.checked = true;
+    const modalOptions = document.querySelector('#mass-comment-modal .modal-options');
+    modalOptions.style.display = hasExistingComments ? 'flex' : 'none';
+
+    // 3. Set callback and open modal
+    openModal('mass-comment-modal');
+    massCommentContent.focus();
+}
+
+/**
+ * Core logic to update homework comments for all selected students.
+ * @param {string} commentText The text to be saved.
+ * @param {boolean} append If true, append to existing comment; otherwise, replace.
+ */
+export function processMassHomeworkComment(commentText, append) {
+    if (!state.currentClassroom || !state.selectedSession) return;
+
+    let studentsUpdatedCount = 0;
+    const studentIds = state.selectedStudentsForMassComment;
+    const session = state.selectedSession;
+
+    studentIds.forEach(studentId => {
+        const record = session.studentRecords[studentId];
+        if (record && record.homework) {
+            const currentComment = record.homework.comment || '';
+            let newComment = commentText;
+
+            if (append && currentComment.length > 0) {
+                // Append the new text after a separator, if current is not empty
+                newComment = currentComment + '\n---' + '\n' + commentText;
+            } else {
+                // Replace or set the new text
+                newComment = commentText;
+            }
+
+            // Update the homework comment
+            record.homework.comment = newComment.trim();
+
+            // Find the student object to handle the accompanying profile note
+            const student = state.currentClassroom.students.find(s => s.identity.studentId === studentId);
+            if (student) {
+                updateStudentProfileNoteForHomework(student, session, newComment.trim());
+            }
+
+            studentsUpdatedCount++;
+        }
+    });
+
+    // Clear the selection after the action is done
+    state.setSelectedStudentsForMassComment([]);
+
+    // Save data and re-render
+    state.saveData();
+    renderAttendancePage(); // Re-render to clear checkboxes and update counts
+
+    logManager.addLog(state.currentClassroom.info.name,
+        `${studentsUpdatedCount} دانش‌آموز به صورت گروهی یادداشت تکلیف گرفتند.`,
+        { type: 'VIEW_SESSIONS' });
+
+    showNotification(`✅ یادداشت برای ${studentsUpdatedCount} دانش‌آموز ثبت شد.`);
+}
+
+
+/**
+ * Logic extracted from attendance page setup to manage the profile note corresponding to a homework comment.
+ * This ensures consistency with the original single-student note behavior.
+ */
+function updateStudentProfileNoteForHomework(student, session, content) {
+    const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
+    const displayNumber = sessionDisplayNumberMap.get(session.sessionNumber);
+    const noteSource = { type: 'fromAttendance', sessionNumber: session.sessionNumber };
+    const notePrefix = `یادداشت مربوط به جلسه ${displayNumber}: `;
+
+    const existingNote = student.profile.notes.find(n =>
+        !n.isDeleted &&
+        n.source &&
+        n.source.type === 'fromAttendance' &&
+        n.source.sessionNumber === noteSource.sessionNumber
+    );
+
+    if (existingNote) {
+        if (content) {
+            existingNote.content = notePrefix + content;
+            existingNote.isDeleted = false; // Restore if it was previously soft-deleted
+        } else {
+            existingNote.isDeleted = true;
+        }
+    } else if (content) {
+        student.addNote(notePrefix + content, noteSource);
     }
 }
 
@@ -749,6 +904,35 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     const li = document.createElement('li');
     li.className = 'attendance-list-item';
 
+    // --- NEW: Checkbox for bulk actions ---
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'mass-comment-checkbox';
+    checkbox.checked = state.selectedStudentsForMassComment.includes(student.identity.studentId);
+
+    checkbox.addEventListener('change', () => {
+        const studentId = student.identity.studentId;
+        const currentSelection = state.selectedStudentsForMassComment;
+
+        if (checkbox.checked) {
+            // Add student ID to the state if checked and not already present
+            if (!currentSelection.includes(studentId)) {
+                currentSelection.push(studentId);
+            }
+        } else {
+            // Remove student ID from the state if unchecked
+            const index = currentSelection.indexOf(studentId);
+            if (index > -1) {
+                currentSelection.splice(index, 1);
+            }
+        }
+        // No need to call a setter, as we modify the live array. Just update the UI controls.
+        renderMassCommentControls();
+    });
+
+    li.appendChild(checkbox);
+    // --- END NEW: Checkbox ---
+
     const homeworkTooltipMap = {
         none: 'بدون تکلیف',
         complete: 'تکلیف کامل',
@@ -837,7 +1021,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
                 const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
                 const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
                 const noteSource = { type: 'fromAttendance', sessionNumber: state.selectedSession.sessionNumber };
-                const notePrefix = `یادداشت حضور-غیاب ${displayNumber}: `;
+                const notePrefix = `یادداشت مربوط به جلسه ${displayNumber}: `;
 
                 // 3. Find if a note from this source already exists in the student's profile
                 const existingNote = student.profile.notes.find(n =>
@@ -936,6 +1120,8 @@ function getRealSessionNumber() {
 export function renderAttendancePage() {
     if (!state.currentClassroom || !state.selectedSession) return;
 
+    state.setSelectedStudentsForMassComment([]);
+
     const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
 
     createAbsenteesSummaryBox();
@@ -948,8 +1134,7 @@ export function renderAttendancePage() {
     headerLi.innerHTML = `
     <span class="header-label-spacer"></span>
     <span class="header-label">تکلیف</span>
-    <span class="header-label">حضور</span>
-`;
+    <span class="header-label">حضور</span>`;
 
     attendanceListUl.appendChild(headerLi);
 
@@ -957,6 +1142,11 @@ export function renderAttendancePage() {
         const li = createAttendanceListItem(student, sessionDisplayNumberMap);
         attendanceListUl.appendChild(li);
     });
+
+    // --- NEW: Render controls and reset selection on page load ---
+    state.setSelectedStudentsForMassComment([]); // Clear selection when re-rendering the list
+    renderMassCommentControls(); // Initialize the button state
+    // --- END NEW ---
 
 
     setupAbsenteesCopyButton();

@@ -38,6 +38,8 @@ let originalStateBackup = null;
 
 export let trashBin = []; //for trash bin deleted items
 
+export let selectedStudentsForMassComment = [];
+
 
 
 // --- توابع اصلی داده‌ها (Data Functions) ---
@@ -498,3 +500,5 @@ export function setSourceClassForMove(classroom) { sourceClassForMove = classroo
 export function setTrashBin(newTrashBin) { trashBin = newTrashBin; }
 
 export function setSaveCategoryCallback(callback) { saveCategoryCallback = callback; }
+
+export function setSelectedStudentsForMassComment(studentIds) { selectedStudentsForMassComment = studentIds; }
