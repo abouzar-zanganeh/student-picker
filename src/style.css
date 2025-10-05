@@ -1156,24 +1156,34 @@ button:disabled:hover {
 /* --- Styles for Attendance List Header --- */
 /* --- Styles for Attendance List Header --- */
 .attendance-list-header {
-    /* This rule removes the list item's default appearance */
-    background: transparent !important;
-    margin-bottom: 5px;
-    padding: 0 12px 8px 12px !important;
-    cursor: default !important;
-    border-bottom: none !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    /* Adds space between search and labels */
 }
 
-
-
-
-.attendance-list-header:hover {
-    background: transparent !important;
-}
-
-.header-label-spacer {
+.attendance-list-header .student-search-container {
     flex-grow: 1;
-    /* This pushes the labels to the right, taking up all extra space */
+    /* Allows search to take up available space */
+    max-width: 50%;
+    /* Prevents it from getting too large */
+}
+
+.inline-search-input {
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-main);
+    box-sizing: border-box;
+}
+
+.header-labels-container {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    /* Prevents labels from shrinking */
 }
 
 .header-label {
@@ -1181,16 +1191,12 @@ button:disabled:hover {
     font-weight: bold;
     color: var(--color-text-muted);
     text-align: center;
-    /* These flex-basis values are set to align the labels above the controls */
     flex-shrink: 0;
-    /* Prevents labels from shrinking */
     flex-basis: 95px;
-    /* Allocates space for the "Homework State" label */
 }
 
 .header-label:last-child {
     flex-basis: 60px;
-    /* Allocates a smaller space for the "Presence State" label */
 }
 
 .attendance-list-item .student-info {
@@ -1753,6 +1759,7 @@ body {
     /* IE 10 and IE 11 */
     user-select: none;
     /* Standard syntax */
+    overflow-y: scroll;
 }
 
 /* 2. Re-enable text selection on specific, useful elements */

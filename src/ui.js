@@ -116,6 +116,8 @@ export const massCommentSaveBtn = document.getElementById('mass-comment-save-btn
 export const massCommentBtn = document.getElementById('mass-comment-btn');
 export const attendanceMassActionsContainer = document.getElementById('attendance-mass-actions-container');
 
+export const attendanceSearchInput = document.createElement('input');
+
 
 
 
@@ -1131,10 +1133,30 @@ export function renderAttendancePage() {
     // Creates and adds the header row
     const headerLi = document.createElement('li');
     headerLi.className = 'attendance-list-header';
-    headerLi.innerHTML = `
-    <span class="header-label-spacer"></span>
+
+    // Configure the search input we created earlier
+    attendanceSearchInput.id = 'attendance-search-input';
+    attendanceSearchInput.type = 'text';
+    attendanceSearchInput.className = 'inline-search-input';
+    attendanceSearchInput.placeholder = 'جستجو...';
+    attendanceSearchInput.value = ''; // Ensure it's clear on re-render
+
+    // Create a container for the search bar to help with alignment
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'student-search-container';
+    searchContainer.appendChild(attendanceSearchInput);
+
+    // Create containers for labels
+    const labelsContainer = document.createElement('div');
+    labelsContainer.className = 'header-labels-container';
+    labelsContainer.innerHTML = `
     <span class="header-label">تکلیف</span>
-    <span class="header-label">حضور</span>`;
+    <span class="header-label">حضور</span>
+`;
+
+    // Add the new elements to the header
+    headerLi.appendChild(searchContainer);
+    headerLi.appendChild(labelsContainer);
 
     attendanceListUl.appendChild(headerLi);
 

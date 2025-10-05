@@ -88,7 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
         profileScoresListUl, isGradedCheckbox, backupOptionsModal, backupDownloadBtn,
         backupShareBtn, backupOptionsCancelBtn, categoryModalSaveBtn, categoryModalCancelBtn,
         massCommentBtn, massCommentCancelBtn, massCommentSaveBtn,
-        massCommentContent, massCommentAppendCheckbox, processMassHomeworkComment
+        massCommentContent, massCommentAppendCheckbox, processMassHomeworkComment,
+        attendanceSearchInput
     } = ui; // This is a bit of a trick to avoid rewriting all the getElementById calls
     const trashNavBtn = document.getElementById('trash-nav-btn');
 
@@ -143,6 +144,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Event Listeners ---
+
+    attendanceSearchInput.addEventListener('input', () => {
+        const lowerCaseSearchTerm = attendanceSearchInput.value.toLowerCase().trim();
+        const keyboardNormalizedTerm = normalizeKeyboard(lowerCaseSearchTerm);
+        const studentListItems = ui.attendanceListUl.querySelectorAll('.attendance-list-item');
+
+        studentListItems.forEach(item => {
+            const nameSpan = item.querySelector('.student-name');
+            if (nameSpan) {
+                const studentName = nameSpan.textContent;
+                const normalizedStudentName = normalizeText(studentName.toLowerCase());
+
+                const matchesOriginal = normalizedStudentName.includes(normalizeText(lowerCaseSearchTerm));
+                const matchesMapped = normalizedStudentName.includes(normalizeText(keyboardNormalizedTerm));
+
+                if (matchesOriginal || matchesMapped) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            }
+        });
+    });
 
     categoryModalCancelBtn.addEventListener('click', () => {
         ui.closeActiveModal();
