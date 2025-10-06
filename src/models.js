@@ -37,6 +37,7 @@ export class Student {
             tags: [],
         };
         this.finalClassActivityScore = null;
+        this.onboardingSession = null;
     }
 
     addScore(skill, value, comment) {
