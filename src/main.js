@@ -1325,23 +1325,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const existingStudents = getActiveItems(classroom.students).filter(s => s.identity.studentId !== newStudent.identity.studentId);
         if (existingStudents.length === 0) return;
 
-        // --- 1. Assign MINIMUM selection counts (New Logic) ---
-        let newTotalSelections = 0;
-        const activeCategories = getActiveItems(classroom.categories);
+        // --- 1. Find the most active student to use as a template ---
+        const templateStudent = existingStudents.reduce((maxStudent, currentStudent) => {
+            return currentStudent.statusCounters.totalSelections > maxStudent.statusCounters.totalSelections ? currentStudent : maxStudent;
+        }, existingStudents[0]);
 
-        activeCategories.forEach(category => {
-            const minCount = Math.min(0, ...existingStudents.map(s => s.categoryCounts[category.name] || 0));
-            newStudent.categoryCounts[category.name] = minCount;
-            newTotalSelections += minCount;
-        });
-        newStudent.statusCounters.totalSelections = newTotalSelections;
+        if (!templateStudent || templateStudent.statusCounters.totalSelections === 0) {
+            return; // No stats to copy, so we exit.
+        }
 
-        // --- 2. Calculate and Apply class performance RATES (Same Logic, New Baseline) ---
+        // --- 2. Copy participation stats from the template student ---
+        newStudent.categoryCounts = JSON.parse(JSON.stringify(templateStudent.categoryCounts));
+        newStudent.statusCounters.totalSelections = templateStudent.statusCounters.totalSelections;
+
+        // --- 3. Calculate absence-related stats based on the class average ---
         const totalClassSelections = existingStudents.reduce((sum, s) => sum + s.statusCounters.totalSelections, 0);
         const totalClassMissedChances = existingStudents.reduce((sum, s) => sum + (s.statusCounters.missedChances || 0), 0);
         const missedChanceRate = totalClassSelections > 0 ? totalClassMissedChances / totalClassSelections : 0;
         newStudent.statusCounters.missedChances = Math.round(newStudent.statusCounters.totalSelections * missedChanceRate);
 
+        const activeCategories = getActiveItems(classroom.categories);
         const categoryIssueRates = {};
         activeCategories.forEach(category => {
             const totalCatSelections = existingStudents.reduce((sum, s) => sum + (s.categoryCounts[category.name] || 0), 0);
@@ -1354,24 +1357,19 @@ document.addEventListener('DOMContentLoaded', () => {
             newStudent.categoryIssues[category.name] = Math.round(studentCatSelections * issueRate);
         });
 
-        // --- 3. Mark as absent and record the onboarding session ---
+        // --- 4. Record the onboarding session number ---
         const pastSessions = getActiveItems(classroom.sessions).filter(s => !s.isCancelled);
-        pastSessions.forEach(session => {
-            session.setAttendance(newStudent.identity.studentId, 'absent');
-        });
-
         if (pastSessions.length > 0) {
             const lastSessionNumber = Math.max(...pastSessions.map(s => s.sessionNumber));
             newStudent.onboardingSession = lastSessionNumber;
         }
 
-        // --- 4. Generate the onboarding note (Updated Logic) ---
+        // --- 5. Generate the updated onboarding note ---
         const noteHeader = '📝 یادداشت خودکار سیستم';
         const sessionCount = pastSessions.length;
-        const reason = `این دانش‌آموز پس از جلسه شماره ${sessionCount} به کلاس اضافه شد. آمار پایه‌ای (حداقل) زیر برای همسان‌سازی اولیه برای او ثبت گردید:`;
+        const reason = `این دانش‌آموز  از جلسه شماره ${sessionCount} به کلاس اضافه شد. آمار مشارکت او بر اساس فعال‌ترین دانش‌آموز و آمار غیبت او بر اساس میانگین کلاس ثبت گردید:`;
 
         const details = [];
-        // Only add non-zero stats to the note for clarity
         if (newStudent.statusCounters.totalSelections > 0) {
             details.push(`کل انتخاب‌ها: ${newStudent.statusCounters.totalSelections}`);
         }

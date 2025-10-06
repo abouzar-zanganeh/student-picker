@@ -2310,3 +2310,15 @@ textarea,
 #attendance-mass-actions-container button {
     width: 100%;
 }
+
+.new-student-badge {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--color-success);
+    background-color: #e6ffed;
+    padding: 4px 10px;
+    border-radius: var(--border-radius-main);
+    margin-top: 5px;
+    /* Adds space below the student's name */
+    border: 1px solid var(--color-success);
+}

@@ -1122,6 +1122,12 @@ function getRealSessionNumber() {
 export function renderAttendancePage() {
     if (!state.currentClassroom || !state.selectedSession) return;
 
+    // --- FIX: Ensure all active students have a record in the current session ---
+    getActiveItems(state.currentClassroom.students).forEach(student => {
+        state.selectedSession.initializeStudentRecord(student.identity.studentId);
+    });
+    // --- END FIX ---
+
     state.setSelectedStudentsForMassComment([]);
 
     const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
@@ -1456,6 +1462,15 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
     nameContainer.appendChild(forwardBtn);
     nameContainer.appendChild(winnerNameEl);
+
+    // Check if the student is new in this specific session
+    if (winner.onboardingSession === state.selectedSession.sessionNumber) {
+        const newStudentBadge = document.createElement('div');
+        newStudentBadge.className = 'new-student-badge';
+        newStudentBadge.textContent = 'دانش آموز جدید';
+        nameContainer.appendChild(newStudentBadge);
+    }
+
     nameContainer.appendChild(backBtn);
     resultDiv.appendChild(nameContainer);
 
