@@ -1322,33 +1322,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     function onboardNewStudent(newStudent, classroom) {
-
         const existingStudents = getActiveItems(classroom.students).filter(s => s.identity.studentId !== newStudent.identity.studentId);
+        if (existingStudents.length === 0) return;
 
-        // If there are no other students, there's nothing to do.
-        if (existingStudents.length === 0) {
-            return;
-        }
-
-        // --- 1. Assign MAX selection counts ---
+        // --- 1. Assign MINIMUM selection counts (New Logic) ---
         let newTotalSelections = 0;
         const activeCategories = getActiveItems(classroom.categories);
 
         activeCategories.forEach(category => {
-            // Find the highest selection count for this category among existing students.
-            const maxCount = Math.max(0, ...existingStudents.map(s => s.categoryCounts[category.name] || 0));
-
-            // Assign this max count to the new student.
-            newStudent.categoryCounts[category.name] = maxCount;
-            newTotalSelections += maxCount;
+            const minCount = Math.min(0, ...existingStudents.map(s => s.categoryCounts[category.name] || 0));
+            newStudent.categoryCounts[category.name] = minCount;
+            newTotalSelections += minCount;
         });
-
         newStudent.statusCounters.totalSelections = newTotalSelections;
 
-        // --- 2. Calculate class performance RATES ---
+        // --- 2. Calculate and Apply class performance RATES (Same Logic, New Baseline) ---
         const totalClassSelections = existingStudents.reduce((sum, s) => sum + s.statusCounters.totalSelections, 0);
         const totalClassMissedChances = existingStudents.reduce((sum, s) => sum + (s.statusCounters.missedChances || 0), 0);
         const missedChanceRate = totalClassSelections > 0 ? totalClassMissedChances / totalClassSelections : 0;
+        newStudent.statusCounters.missedChances = Math.round(newStudent.statusCounters.totalSelections * missedChanceRate);
 
         const categoryIssueRates = {};
         activeCategories.forEach(category => {
@@ -1356,53 +1348,53 @@ document.addEventListener('DOMContentLoaded', () => {
             const totalCatIssues = existingStudents.reduce((sum, s) => sum + (s.categoryIssues[category.name] || 0), 0);
             categoryIssueRates[category.name] = totalCatSelections > 0 ? totalCatIssues / totalCatSelections : 0;
         });
-
-        // --- 3. Apply rates to the new student ---
-        newStudent.statusCounters.missedChances = Math.round(newStudent.statusCounters.totalSelections * missedChanceRate);
-
         activeCategories.forEach(category => {
             const studentCatSelections = newStudent.categoryCounts[category.name] || 0;
             const issueRate = categoryIssueRates[category.name] || 0;
             newStudent.categoryIssues[category.name] = Math.round(studentCatSelections * issueRate);
         });
 
-        // --- 4. Mark student as absent for all past sessions ---
-        const pastSessions = getActiveItems(classroom.sessions).filter(s => !s.isCancelled && s.isFinished);
+        // --- 3. Mark as absent and record the onboarding session ---
+        const pastSessions = getActiveItems(classroom.sessions).filter(s => !s.isCancelled);
         pastSessions.forEach(session => {
             session.setAttendance(newStudent.identity.studentId, 'absent');
         });
 
-        // --- 5. Generate the onboarding note content ---
+        if (pastSessions.length > 0) {
+            const lastSessionNumber = Math.max(...pastSessions.map(s => s.sessionNumber));
+            newStudent.onboardingSession = lastSessionNumber;
+        }
+
+        // --- 4. Generate the onboarding note (Updated Logic) ---
         const noteHeader = '📝 یادداشت خودکار سیستم';
         const sessionCount = pastSessions.length;
-        const reason = `این دانش‌آموز پس از جلسه شماره ${sessionCount} به کلاس اضافه شد. آمار پایه‌ای زیر برای حفظ تعادل الگوریتم انتخاب برای او ثبت گردید:`;
+        const reason = `این دانش‌آموز پس از جلسه شماره ${sessionCount} به کلاس اضافه شد. آمار پایه‌ای (حداقل) زیر برای همسان‌سازی اولیه برای او ثبت گردید:`;
 
         const details = [];
+        // Only add non-zero stats to the note for clarity
         if (newStudent.statusCounters.totalSelections > 0) {
             details.push(`کل انتخاب‌ها: ${newStudent.statusCounters.totalSelections}`);
         }
         if (newStudent.statusCounters.missedChances > 0) {
             details.push(`فرصت‌های از دست رفته: ${newStudent.statusCounters.missedChances}`);
         }
-
         for (const categoryName in newStudent.categoryCounts) {
-            if (newStudent.categoryCounts[categoryName] > 0) {
-                details.push(`انتخاب در «${categoryName}»: ${newStudent.categoryCounts[categoryName]}`);
+            const count = newStudent.categoryCounts[categoryName];
+            if (count > 0) {
+                details.push(`انتخاب در «${categoryName}»: ${count}`);
             }
         }
-
         for (const categoryName in newStudent.categoryIssues) {
-            if (newStudent.categoryIssues[categoryName] > 0) {
-                details.push(`مشکل در «${categoryName}»: ${newStudent.categoryIssues[categoryName]}`);
+            const count = newStudent.categoryIssues[categoryName];
+            if (count > 0) {
+                details.push(`مشکل در «${categoryName}»: ${count}`);
             }
         }
 
-        // --- 6. Add the note to the student's profile ---
         if (details.length > 0) {
             const noteContent = `${noteHeader}\n${reason}\n\n- ${details.join('\n- ')}`;
             newStudent.addNote(noteContent);
         }
-
     }
 
     function showOnboardingNotification(studentCount) {
