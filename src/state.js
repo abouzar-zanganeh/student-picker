@@ -148,6 +148,9 @@ export function rehydrateData(plainClassrooms) {
             studentInstance.finalClassActivityScore = plainStudent.finalClassActivityScore;
             studentInstance.categoryCounts = plainStudent.categoryCounts || {};
             studentInstance.categoryIssues = plainStudent.categoryIssues || {};
+
+            studentInstance.onboardingSession = plainStudent.onboardingSession || null;
+
             return studentInstance;
         });
 

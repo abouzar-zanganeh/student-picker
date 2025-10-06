@@ -479,6 +479,14 @@ document.addEventListener('DOMContentLoaded', () => {
             state.currentClassroom.addStudent(newStudent);
 
             if (state.currentClassroom.sessions.length > 0) {
+
+                // Manually set absence for all finished sessions
+                getActiveItems(state.currentClassroom.sessions)
+                    .filter(s => s.isFinished && !s.isCancelled)
+                    .forEach(session => {
+                        session.setAttendance(newStudent.identity.studentId, 'absent');
+                    });
+
                 onboardNewStudent(newStudent, state.currentClassroom);
                 onboardingOccurred = true;
             }
@@ -554,6 +562,14 @@ document.addEventListener('DOMContentLoaded', () => {
         state.currentClassroom.addStudent(newStudent);
 
         if (state.currentClassroom.sessions.length > 0) {
+
+            // Manually set absence for all finished sessions
+            getActiveItems(state.currentClassroom.sessions)
+                .filter(s => s.isFinished && !s.isCancelled)
+                .forEach(session => {
+                    session.setAttendance(newStudent.identity.studentId, 'absent');
+                });
+
             onboardNewStudent(newStudent, state.currentClassroom);
             showOnboardingNotification(1);
         }
@@ -567,6 +583,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         ui.renderSettingsStudentList();
+        ui.renderStudentStatsList();
         newStudentNameInput.value = '';
         newStudentNameInput.focus();
     });
@@ -1357,17 +1374,20 @@ document.addEventListener('DOMContentLoaded', () => {
             newStudent.categoryIssues[category.name] = Math.round(studentCatSelections * issueRate);
         });
 
-        // --- 4. Record the onboarding session number ---
-        const pastSessions = getActiveItems(classroom.sessions).filter(s => !s.isCancelled);
-        if (pastSessions.length > 0) {
-            const lastSessionNumber = Math.max(...pastSessions.map(s => s.sessionNumber));
-            newStudent.onboardingSession = lastSessionNumber;
+
+        // --- 4. Set the correct onboarding session ---
+        const liveSession = classroom.liveSession;
+        if (liveSession) {
+            newStudent.onboardingSession = liveSession.sessionNumber;
+        } else {
+            newStudent.onboardingSession = classroom.sessions.length + 1;
         }
 
         // --- 5. Generate the updated onboarding note ---
+        const pastSessions = getActiveItems(classroom.sessions).filter(s => s.isFinished && !s.isCancelled);
         const noteHeader = '📝 یادداشت خودکار سیستم';
         const sessionCount = pastSessions.length;
-        const reason = `این دانش‌آموز  از جلسه شماره ${sessionCount} به کلاس اضافه شد. آمار مشارکت او بر اساس فعال‌ترین دانش‌آموز و آمار غیبت او بر اساس میانگین کلاس ثبت گردید:`;
+        const reason = `این دانش‌آموز  از جلسه شماره ${sessionCount} به کلاس اضافه شد. آمار مشارکت او بر اساس فعال‌ترین دانش‌آموز و آمار «فرصت از دست رفته» او بر اساس میانگین کلاس ثبت گردید:`;
 
         const details = [];
         if (newStudent.statusCounters.totalSelections > 0) {
