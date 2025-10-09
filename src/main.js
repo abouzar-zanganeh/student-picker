@@ -1648,10 +1648,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Screen Saver Logic ---
+    // --- Screen Saver Logic (v2) ---
     const screenSaverOverlay = document.getElementById('screen-saver-overlay');
     let inactivityTimer;
-    const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 3 minutes
+    const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 2 minutes
 
     function showScreenSaver() {
         screenSaverOverlay.classList.add('visible');
@@ -1669,12 +1669,27 @@ document.addEventListener('DOMContentLoaded', () => {
         inactivityTimer = setTimeout(showScreenSaver, INACTIVITY_TIMEOUT);
     }
 
-    // --- Event Listeners to Detect User Activity ---
-    ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+    // This function handles the dismissal and robustly stops the event.
+    function handleOverlayInteraction(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        // Using setTimeout places the reset call at the end of the execution queue,
+        // ensuring the browser finishes processing the click before the overlay vanishes.
+        setTimeout(resetInactivityTimer, 0);
+    }
+
+    screenSaverOverlay.addEventListener('click', handleOverlayInteraction);
+    screenSaverOverlay.addEventListener('touchstart', handleOverlayInteraction);
+
+
+    // --- Event Listeners to Detect General User Activity ---
+    // 'click' and 'touchstart' are intentionally left out here.
+    ['mousemove', 'keypress', 'scroll'].forEach(event => {
         window.addEventListener(event, resetInactivityTimer);
     });
 
     // Initial call to start the timer when the app loads
     resetInactivityTimer();
 
+    // End of Screen Saver...
 });
