@@ -1647,4 +1647,34 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.processMassHomeworkComment(commentText, append);
         });
     });
+
+    // --- Screen Saver Logic ---
+    const screenSaverOverlay = document.getElementById('screen-saver-overlay');
+    let inactivityTimer;
+    const INACTIVITY_TIMEOUT = 5000; // 3 minutes
+
+    function showScreenSaver() {
+        screenSaverOverlay.classList.add('visible');
+    }
+
+    function hideScreenSaver() {
+        if (screenSaverOverlay.classList.contains('visible')) {
+            screenSaverOverlay.classList.remove('visible');
+        }
+    }
+
+    function resetInactivityTimer() {
+        hideScreenSaver();
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(showScreenSaver, INACTIVITY_TIMEOUT);
+    }
+
+    // --- Event Listeners to Detect User Activity ---
+    ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+        window.addEventListener(event, resetInactivityTimer);
+    });
+
+    // Initial call to start the timer when the app loads
+    resetInactivityTimer();
+
 });

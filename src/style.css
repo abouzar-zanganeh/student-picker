@@ -2322,3 +2322,46 @@ textarea,
     /* Adds space below the student's name */
     border: 1px solid var(--color-success);
 }
+
+/* --- Screen Saver Styles --- */
+.screen-saver {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    /* Fully black for AMOLED screens */
+    z-index: 9999;
+    display: none;
+    /* Hidden by default */
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    cursor: pointer;
+}
+
+.screen-saver.visible {
+    display: flex;
+    opacity: 1;
+}
+
+.screen-saver-text {
+    font-size: 80px;
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    50% {
+        transform: translate(10px, -20px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+}
