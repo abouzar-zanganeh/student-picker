@@ -1651,7 +1651,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Screen Saver Logic ---
     const screenSaverOverlay = document.getElementById('screen-saver-overlay');
     let inactivityTimer;
-    const INACTIVITY_TIMEOUT = 5000; // 3 minutes
+    const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 3 minutes
 
     function showScreenSaver() {
         screenSaverOverlay.classList.add('visible');
