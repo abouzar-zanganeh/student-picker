@@ -1649,6 +1649,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Screen Saver Logic (v2) ---
+    const appVersionForSaver = import.meta.env.VITE_APP_VERSION;
+    if (appVersionForSaver) {
+        const versionElement = document.getElementById('screen-saver-version');
+        if (versionElement) {
+            versionElement.textContent = `v${appVersionForSaver}`;
+        }
+    }
     const screenSaverOverlay = document.getElementById('screen-saver-overlay');
     let inactivityTimer;
     const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 2 minutes

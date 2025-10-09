@@ -2347,21 +2347,82 @@ textarea,
     opacity: 1;
 }
 
-.screen-saver-text {
-    font-size: 80px;
-    animation: float 6s ease-in-out infinite;
+.screen-saver-content {
+    text-align: center;
 }
 
-@keyframes float {
+.screen-saver-text {
+    font-size: 80px;
+    animation: float-icon 7s ease-in-out infinite;
+}
+
+.screen-saver-app-name {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.85);
+    margin-top: 20px;
+    animation: float-text 6s ease-in-out infinite;
+}
+
+/* version number style */
+.screen-saver-version {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-top: 15px;
+    font-family: monospace;
+    animation: float-version 8s ease-in-out infinite;
+}
+
+/* More complex floating for the icon */
+@keyframes float-icon {
     0% {
         transform: translate(0, 0);
     }
 
+    25% {
+        transform: translate(5px, 10px);
+    }
+
     50% {
-        transform: translate(10px, -20px);
+        transform: translate(-5px, -5px);
+    }
+
+    75% {
+        transform: translate(0, 5px);
     }
 
     100% {
         transform: translate(0, 0);
     }
 }
+
+/* A different, simpler rhythm for the text */
+@keyframes float-text {
+    0% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+/*  animation for the version number */
+@keyframes float-version {
+    0% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(15px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+/* End of Screen Saver Styles */
