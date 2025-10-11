@@ -2359,6 +2359,32 @@ function createClassInfoContainer(classroom) {
 function createClassListItem(classroom) {
     const li = document.createElement('li');
 
+    // --- Checkbox for selection ---
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'mass-selection-checkbox'; // We can style this later if needed
+    checkbox.checked = state.selectedClassIds.includes(classroom.info.name);
+
+    checkbox.addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevents the main list item's click event
+    });
+
+    checkbox.addEventListener('change', () => {
+        const className = classroom.info.name;
+        if (checkbox.checked) {
+            if (!state.selectedClassIds.includes(className)) {
+                state.selectedClassIds.push(className);
+            }
+        } else {
+            const index = state.selectedClassIds.indexOf(className);
+            if (index > -1) {
+                state.selectedClassIds.splice(index, 1);
+            }
+        }
+    });
+
+    li.appendChild(checkbox);
+
     // --- 1. Info Container (Name and Counts) ---
     const infoContainer = createClassInfoContainer(classroom);
     li.appendChild(infoContainer);
