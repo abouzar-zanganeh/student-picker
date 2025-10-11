@@ -40,6 +40,11 @@ export let trashBin = []; //for trash bin deleted items
 
 export let selectedStudentsForMassComment = [];
 
+export let userSettings = {
+    // This object stores the state values for the app settings which can be customized by the user
+    isScreenSaverEnabled: true
+};
+
 
 
 // --- توابع اصلی داده‌ها (Data Functions) ---
@@ -48,7 +53,8 @@ export function saveData() {
 
     const appState = {
         classrooms,
-        trashBin
+        trashBin,
+        userSettings
     };
 
     localStorage.setItem('teacherAssistantData_v2', JSON.stringify(appState));
@@ -76,6 +82,7 @@ export function loadData() {
         // New format
         rehydrateData(plainData.classrooms);
         trashBin = plainData.trashBin || [];
+        userSettings = { ...userSettings, ...plainData.userSettings };
     } else {
         // Old format: rehydrate, then migrate old deleted items.
         rehydrateData(plainData);
@@ -504,4 +511,11 @@ export function setTrashBin(newTrashBin) { trashBin = newTrashBin; }
 
 export function setSaveCategoryCallback(callback) { saveCategoryCallback = callback; }
 
-export function setSelectedStudentsForMassComment(studentIds) { selectedStudentsForMassComment = studentIds; }
+export function setSelectedStudentsForMassComment(studentIds) {
+    selectedStudentsForMassComment = studentIds;
+}
+
+export function setUserSettings(newSettings) {
+    userSettings = { ...userSettings, ...newSettings };
+    saveData();
+}

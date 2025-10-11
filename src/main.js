@@ -987,7 +987,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     hamburgerMenuBtn.addEventListener('click', () => {
-        sideNavMenu.style.width = '250px';
+        sideNavMenu.style.width = '300px';
         overlay.classList.add('modal-visible');
     });
 
@@ -1648,17 +1648,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Screen Saver Logic (v2) ---
-    const appVersionForSaver = import.meta.env.VITE_APP_VERSION;
-    if (appVersionForSaver) {
-        const versionElement = document.getElementById('screen-saver-version');
-        if (versionElement) {
-            versionElement.textContent = `v${appVersionForSaver}`;
-        }
-    }
+    // --- Screen Saver Logic (v3) ---
     const screenSaverOverlay = document.getElementById('screen-saver-overlay');
+    const screenSaverToggle = document.getElementById('screen-saver-toggle');
     let inactivityTimer;
     const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 2 minutes
+
+    const eventTypes = ['mousemove', 'keypress', 'scroll', 'click', 'touchstart'];
 
     function showScreenSaver() {
         screenSaverOverlay.classList.add('visible');
@@ -1676,27 +1672,67 @@ document.addEventListener('DOMContentLoaded', () => {
         inactivityTimer = setTimeout(showScreenSaver, INACTIVITY_TIMEOUT);
     }
 
-    // This function handles the dismissal and robustly stops the event.
     function handleOverlayInteraction(e) {
         e.preventDefault();
         e.stopPropagation();
-        // Using setTimeout places the reset call at the end of the execution queue,
-        // ensuring the browser finishes processing the click before the overlay vanishes.
         setTimeout(resetInactivityTimer, 0);
     }
 
-    screenSaverOverlay.addEventListener('click', handleOverlayInteraction);
-    screenSaverOverlay.addEventListener('touchstart', handleOverlayInteraction);
+    function initializeScreenSaver() {
+        resetInactivityTimer();
+        eventTypes.forEach(event => window.addEventListener(event, resetInactivityTimer));
+        screenSaverOverlay.addEventListener('click', handleOverlayInteraction);
+        screenSaverOverlay.addEventListener('touchstart', handleOverlayInteraction);
 
+        const appVersionForSaver = import.meta.env.VITE_APP_VERSION;
+        if (appVersionForSaver) {
+            const versionElement = document.getElementById('screen-saver-version');
+            if (versionElement) {
+                versionElement.textContent = `v${appVersionForSaver}`;
+            }
+        }
+    }
 
-    // --- Event Listeners to Detect General User Activity ---
-    // 'click' and 'touchstart' are intentionally left out here.
-    ['mousemove', 'keypress', 'scroll'].forEach(event => {
-        window.addEventListener(event, resetInactivityTimer);
+    function deinitializeScreenSaver() {
+        clearTimeout(inactivityTimer);
+        hideScreenSaver();
+        eventTypes.forEach(event => window.removeEventListener(event, resetInactivityTimer));
+        screenSaverOverlay.removeEventListener('click', handleOverlayInteraction);
+        screenSaverOverlay.removeEventListener('touchstart', handleOverlayInteraction);
+    }
+
+    // --- Initialize based on saved settings ---
+    screenSaverToggle.checked = state.userSettings.isScreenSaverEnabled;
+    if (state.userSettings.isScreenSaverEnabled) {
+        initializeScreenSaver();
+    }
+
+    screenSaverToggle.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            // --- ENABLING ---
+            state.setUserSettings({ isScreenSaverEnabled: true });
+            initializeScreenSaver();
+        } else {
+            closeSideNav();
+            // --- DISABLING ---
+            e.preventDefault(); // Stop the checkbox from unchecking immediately
+            ui.showCustomConfirm(
+                "نکته:\nمحافظ صفحه در تلفن های همراه جدید کمک می کند که دستگاه باطری کمتری مصرف کند و به دلیل ثابت ماندن صفحه نمایش در گوشی های قدیمی تر، صفحه نمایش دچار ماندگی رد پیکسل نگردد. آیا مطمئن هستید که می خواهید این ویژگی را غیر فعال کنید؟",
+                () => { // onConfirm
+                    e.target.checked = false; // Uncheck it on confirm
+                    state.setUserSettings({ isScreenSaverEnabled: false });
+                    deinitializeScreenSaver();
+                    ui.showNotification("توصیه می شود زمان خاموش شدن صفحه نمایش گوشی خود را به حداقل دو دقیقه تغییر دهید تا در استفاده های طولانی مدت صفحه نمایش گوشی اصطحلاک کمتری را تجربه کند", 7000);
+                },
+                {
+                    confirmText: 'بله، غیرفعال کن',
+                    cancelText: 'لغو',
+                    onCancel: () => {
+                        e.target.checked = true;
+                    }
+                }
+            );
+        }
     });
-
-    // Initial call to start the timer when the app loads
-    resetInactivityTimer();
-
     // End of Screen Saver...
 });

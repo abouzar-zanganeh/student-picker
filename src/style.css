@@ -2425,4 +2425,25 @@ textarea,
     }
 }
 
+/* --- Side Nav Checkbox --- */
+.checkbox-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.nav-separator {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: 5px 20px;
+}
+
 /* End of Screen Saver Styles */
