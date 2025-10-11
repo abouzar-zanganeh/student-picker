@@ -36,7 +36,9 @@ export let sourceClassForMove = null;
 export let isDemoMode = false;
 let originalStateBackup = null;
 
-export let trashBin = []; //for trash bin deleted items
+export let trashBin = [];
+
+export let selectedClassIds = [];
 
 export let selectedStudentsForMassComment = [];
 
@@ -520,3 +522,4 @@ export function setUserSettings(newSettings) {
     userSettings = { ...userSettings, ...newSettings };
     saveData();
 }
+
