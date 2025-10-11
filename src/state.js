@@ -192,17 +192,18 @@ export function rehydrateData(plainClassrooms) {
             sessionInstance.lastSelectedWinnerId = plainSession.lastSelectedWinnerId;
 
             const plainWinnerHistory = plainSession.winnerHistory || [];
-            sessionInstance.winnerHistory = plainWinnerHistory.map(historyEntry => {
-                // Find the fully rehydrated student instance from the main student list
-                const rehydratedStudent = classroomInstance.students.find(
-                    s => s.identity.studentId === historyEntry.winner.identity.studentId
-                );
-                // Return a new history entry with the proper Student instance
-                return {
-                    winner: rehydratedStudent,
-                    categoryName: historyEntry.categoryName
-                };
-            });
+            sessionInstance.winnerHistory = plainWinnerHistory
+                .filter(historyEntry => historyEntry && historyEntry.winner) // Safely filters out malformed entries
+                .map(historyEntry => {
+                    const rehydratedStudent = classroomInstance.students.find(
+                        s => s.identity.studentId === historyEntry.winner.identity.studentId
+                    );
+                    return {
+                        winner: rehydratedStudent, // This will be undefined if the student was deleted
+                        categoryName: historyEntry.categoryName
+                    };
+                })
+                .filter(hydratedEntry => hydratedEntry.winner); // Now, filter out entries where the student wasn't found
 
             return sessionInstance;
         });
