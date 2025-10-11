@@ -1736,6 +1736,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     // End of Screen Saver...
 
-    window.state = state; // Temporary for debugging, must be commented out as soon as debugging ends
 
+    // Temporary for debugging, must be commented out as soon as debugging ends
+    // window.state = state;
+    // window.ui = ui;
 });
