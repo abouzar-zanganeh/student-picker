@@ -2489,9 +2489,27 @@ function createClassListItem(classroom) {
     return li;
 }
 
+export function renderClassManagementStats() {
+    const statsContainer = document.getElementById('class-management-stats');
+    if (!statsContainer) return;
 
+    const activeClasses = Object.values(state.classrooms).filter(c => !c.isDeleted);
+    const totalClasses = activeClasses.length;
+    const totalStudents = activeClasses.reduce((sum, classroom) => {
+        return sum + getActiveItems(classroom.students).length;
+    }, 0);
+
+    statsContainer.innerHTML = `
+        <span>کل کلاس‌ها: <strong>${totalClasses}</strong></span>
+        <span>|</span>
+        <span>کل دانش‌آموزان: <strong>${totalStudents}</strong></span>
+    `;
+}
 
 export function renderClassList() {
+
+    renderClassManagementStats();
+
     classListUl.innerHTML = '';
 
     // Convert the classrooms object to an array and sort it by creation date
