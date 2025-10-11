@@ -1060,27 +1060,35 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.onload = (e) => {
             try {
                 const plainData = JSON.parse(e.target.result);
-                ui.showCustomConfirm(
-                    "آیا از بازیابی اطلاعات مطمئن هستید؟ تمام داده‌های فعلی شما بازنویسی خواهد شد.",
-                    () => {
-                        // This logic now correctly handles both new and old backup formats
-                        if (plainData.classrooms) {
-                            state.rehydrateData(plainData.classrooms);
-                            state.setTrashBin(plainData.trashBin || []);
-                        } else {
-                            state.rehydrateData(plainData); // For old backups
-                            state.setTrashBin([]);
-                        }
 
-                        state.saveData();
-                        ui.renderClassList();
-                        ui.showPage('class-management-page');
-                        ui.showNotification("✅اطلاعات با موفقیت بازیابی شد.");
-                    },
-                    { confirmText: 'بازیابی کن', confirmClass: 'btn-warning' }
-                );
+                // Check if it's the NEW backup format (with metadata)
+                if (plainData.metadata && plainData.data) {
+                    ui.showRestoreConfirmModal(plainData); // Use our new, advanced modal
+                } else {
+                    // It's the OLD format, so use the original overwrite confirmation
+                    // It's an old backup. But WHICH old backup?
+                    // This checks if it has a `classrooms` property. If so, it uses that.
+                    // Otherwise, it assumes the whole object is the classrooms data (for the oldest format).
+                    const classroomsDataToRestore = plainData.classrooms || plainData;
+                    const trashDataToRestore = plainData.trashBin || [];
+
+                    ui.showCustomConfirm(
+                        "آیا از بازیابی اطلاعات مطمئن هستید؟ تمام داده‌های فعلی شما بازنویسی خواهد شد.",
+                        () => {
+                            state.rehydrateData(classroomsDataToRestore);
+                            state.setTrashBin(trashDataToRestore); // Also restore the trash bin if it exists
+                            state.setUserSettings({ lastRestoreTimestamp: new Date().toISOString() });
+                            state.saveData();
+                            ui.renderClassList();
+                            ui.showPage('class-management-page');
+                            ui.showNotification("✅اطلاعات با موفقیت بازیابی شد.");
+                        },
+                        { confirmText: 'بازیابی کن', confirmClass: 'btn-warning' }
+                    );
+                }
             } catch (error) {
                 ui.showNotification("❌خطا در خواندن فایل. لطفاً فایل پشتیبان معتبر انتخاب کنید.");
+                console.error("Restore error:", error);
             }
         };
         reader.readAsText(file);

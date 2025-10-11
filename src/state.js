@@ -44,12 +44,14 @@ export let selectedStudentsForMassComment = [];
 
 export let userSettings = {
     // This object stores the state values for the app settings which can be customized by the user
-    isScreenSaverEnabled: true
+    isScreenSaverEnabled: true,
+    lastRestoreTimestamp: null
 };
 
 
 
 // --- توابع اصلی داده‌ها (Data Functions) ---
+
 export function saveData() {
     if (isDemoMode) return;
 
@@ -165,12 +167,22 @@ export function rehydrateData(plainClassrooms) {
     for (const className in plainClassrooms) {
         const plainClass = plainClassrooms[className];
 
-        const classroomInstance = new Classroom(plainClass.info);
+        let infoForConstructor;
+        if (plainClass.info) {
+            // New format: The .info object is already correct.
+            infoForConstructor = plainClass.info;
+        } else {
+            // Old format: The name is the key. We create a new info object
+            // by copying the old data and adding the name to it.
+            infoForConstructor = { ...plainClass, name: className };
+        }
+        const classroomInstance = new Classroom(infoForConstructor);
+
         classroomInstance.isDeleted = plainClass.isDeleted;
 
         classroomInstance.note = plainClass.note || '';
 
-        classroomInstance.students = plainClass.students.map(plainStudent => {
+        classroomInstance.students = (plainClass.students || []).map(plainStudent => {
             const studentInstance = new Student(plainStudent.identity);
             studentInstance.isDeleted = plainStudent.isDeleted;
             studentInstance.statusCounters = plainStudent.statusCounters;
@@ -189,7 +201,7 @@ export function rehydrateData(plainClassrooms) {
             return studentInstance;
         });
 
-        classroomInstance.sessions = plainClass.sessions.map(plainSession => {
+        classroomInstance.sessions = (plainClass.sessions || []).map(plainSession => {
             const sessionInstance = new Session(plainSession.sessionNumber);
             sessionInstance.isDeleted = plainSession.isDeleted;
 
@@ -236,7 +248,7 @@ export function rehydrateData(plainClassrooms) {
             return sessionInstance;
         });
 
-        classroomInstance.categories = plainClass.categories.map(plainCategory => {
+        classroomInstance.categories = (plainClass.categories || []).map(plainCategory => {
             const categoryInstance = new Category(plainCategory.name, plainCategory.description, plainCategory.isGradedCategory); categoryInstance.id = plainCategory.id;
             categoryInstance.isDeleted = plainCategory.isDeleted;
             return categoryInstance;
@@ -245,6 +257,50 @@ export function rehydrateData(plainClassrooms) {
 
         classrooms[className] = classroomInstance;
     }
+}
+
+export function processRestore(plainData, isAppendMode) {
+    if (isAppendMode) {
+        // --- APPEND MODE ---
+        const incomingClassrooms = plainData.data.classrooms;
+
+        for (let className in incomingClassrooms) {
+            let newName = className;
+            const classroomData = incomingClassrooms[className];
+
+            // Handle potential name conflicts by renaming the incoming class
+            while (classrooms[newName]) {
+                newName = `${newName} (Restored)`;
+            }
+
+            // If renamed, update the name inside the class object itself
+            if (newName !== className) {
+                classroomData.info.name = newName;
+            }
+
+            classrooms[newName] = classroomData; // Add the new class
+        }
+
+        // Merge and de-duplicate trash bins
+        if (plainData.data.trashBin) {
+            const combinedTrash = [...trashBin, ...plainData.data.trashBin];
+            // Use a Map to easily get unique entries by ID
+            const uniqueTrash = [...new Map(combinedTrash.map(item => [item.id, item])).values()];
+            setTrashBin(uniqueTrash);
+        }
+
+        // Re-run rehydration to convert all plain objects (including new ones) to class instances
+        rehydrateData(classrooms);
+
+    } else {
+        // --- OVERWRITE MODE ---
+        rehydrateData(plainData.data.classrooms);
+        setTrashBin(plainData.data.trashBin || []);
+    }
+
+    // --- Final Steps for both modes ---
+    setUserSettings({ lastRestoreTimestamp: new Date().toISOString() });
+    saveData();
 }
 
 export function renameClassroom(oldName, newName) {

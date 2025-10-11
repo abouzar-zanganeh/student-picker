@@ -189,6 +189,21 @@ export function showRestoreConfirmModal(plainData) {
     const cancelBtn = document.getElementById('restore-confirm-cancel-btn');
     const confirmBtn = document.getElementById('restore-confirm-confirm-btn');
 
+    const warningEl = document.getElementById('restore-modal-warning');
+
+    // Reset warning visibility
+    warningEl.style.display = 'none';
+
+    // Check if the backup is older than the last restore
+    const backupTimestamp = plainData.metadata.createdAt;
+    if (state.userSettings.lastRestoreTimestamp && backupTimestamp < state.userSettings.lastRestoreTimestamp) {
+        const backupDate = new Date(backupTimestamp).toLocaleDateString('fa-IR');
+        const restoreDate = new Date(state.userSettings.lastRestoreTimestamp).toLocaleDateString('fa-IR');
+
+        warningEl.textContent = `⚠️ هشدار: این فایل پشتیبان (${backupDate}) قدیمی‌تر از آخرین بازیابی شما (${restoreDate}) است.`;
+        warningEl.style.display = 'block';
+    }
+
     // --- Prepare the modal content ---
     const classCount = Object.keys(plainData.data.classrooms).length;
     const classWord = classCount === 1 ? 'کلاس' : 'کلاس'; // Handling pluralization
