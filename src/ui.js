@@ -118,7 +118,7 @@ export const attendanceMassActionsContainer = document.getElementById('attendanc
 
 export const attendanceSearchInput = document.createElement('input');
 
-
+export let selectedClassIds = [];
 
 
 export function showUndoToast(message) {
