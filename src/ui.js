@@ -1,4 +1,7 @@
 import * as state from './state.js';
+
+import { processRestore } from './state.js';
+
 import {
     getActiveItems, getSessionDisplayMap, permanentlyDeleteStudent,
     permanentlyDeleteSession, permanentlyDeleteCategory, permanentlyDeleteScore, permanentlyDeleteNote
@@ -118,7 +121,7 @@ export const attendanceMassActionsContainer = document.getElementById('attendanc
 
 export const attendanceSearchInput = document.createElement('input');
 
-export let selectedClassIds = [];
+
 
 
 export function showUndoToast(message) {
@@ -176,6 +179,45 @@ export function showNotification(message, duration = 3000) {
     state.setNotificationTimeout(setTimeout(() => {
         notificationToast.classList.remove('show');
     }, duration));
+}
+
+export function showRestoreConfirmModal(plainData) {
+    // --- Get references to the new modal's elements ---
+    const modal = document.getElementById('restore-confirm-modal');
+    const messageEl = document.getElementById('restore-modal-message');
+    const appendCheckbox = document.getElementById('restore-append-checkbox');
+    const cancelBtn = document.getElementById('restore-confirm-cancel-btn');
+    const confirmBtn = document.getElementById('restore-confirm-confirm-btn');
+
+    // --- Prepare the modal content ---
+    const classCount = Object.keys(plainData.data.classrooms).length;
+    const classWord = classCount === 1 ? 'کلاس' : 'کلاس'; // Handling pluralization
+    messageEl.textContent = `فایل پشتیبان شما حاوی ${classCount} ${classWord} است. لطفاً نحوه بازیابی را مشخص کنید.`;
+    appendCheckbox.checked = true; // Default to append mode
+
+    // --- Define button actions ---
+    const confirmHandler = () => {
+        const isAppendMode = appendCheckbox.checked;
+        state.processRestore(plainData, isAppendMode); // We will create this function next
+
+        // Clean up and provide feedback
+        modal.removeEventListener('click', confirmHandler); // Avoid memory leaks
+        closeActiveModal();
+        renderClassList();
+        showPage('class-management-page');
+        showNotification("✅ اطلاعات با موفقیت بازیابی شد.");
+    };
+
+    const cancelHandler = () => {
+        closeActiveModal();
+    };
+
+    // --- Attach event listeners (only once) ---
+    confirmBtn.onclick = confirmHandler;
+    cancelBtn.onclick = cancelHandler;
+
+    // --- Show the modal ---
+    openModal('restore-confirm-modal');
 }
 
 export function showCustomConfirm(message, onConfirm, options = {}) {
@@ -647,9 +689,9 @@ export function triggerFileDownload(fileObject) {
     URL.revokeObjectURL(url);
 }
 
-export async function initiateBackupProcess() {
+export async function initiateBackupProcess(classNamesToBackup = []) {
     // 1. Get the prepared file object.
-    const fileToShare = state.prepareBackupData();
+    const fileToShare = state.prepareBackupData(classNamesToBackup);
 
     // 2. Check for mobile/share capability.
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
@@ -2362,7 +2404,7 @@ function createClassListItem(classroom) {
     // --- Checkbox for selection ---
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
-    checkbox.className = 'mass-selection-checkbox'; // We can style this later if needed
+    checkbox.className = 'mass-selection-checkbox';
     checkbox.checked = state.selectedClassIds.includes(classroom.info.name);
 
     checkbox.addEventListener('click', (event) => {
@@ -2417,7 +2459,32 @@ function createClassListItem(classroom) {
 
     // --- 4. Add the right-click context menu ---
     li.addEventListener('contextmenu', (event) => {
+
+        // This block defines the backup option and then immediately adjusts it for multi-selection.
+        const backupItem = {
+            label: 'پشتیبان‌گیری از این کلاس',
+            icon: '📤',
+            action: () => {
+                initiateBackupProcess([classroom.info.name]);
+            }
+        };
+
+        const selectedCount = state.selectedClassIds.length;
+        // If more than one class is checked AND the right-clicked class is one of them...
+        if (selectedCount > 1 && state.selectedClassIds.includes(classroom.info.name)) {
+            // ...update the label and the action for the multi-backup case.
+            backupItem.label = `پشتیبان‌گیری از ${selectedCount} کلاس`;
+            backupItem.action = () => {
+                initiateBackupProcess(state.selectedClassIds);
+                state.setSelectedClassIds([]); // Clear the selection
+                renderClassList(); // Re-render to uncheck the boxes
+            };
+        }
+
         const menuItems = [
+
+            backupItem,
+
             {
                 label: 'تنظیمات کلاس',
                 icon: '⚙️',

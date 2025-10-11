@@ -63,13 +63,39 @@ export function saveData() {
 }
 
 
-export function prepareBackupData() {
+export function prepareBackupData(classNames = []) {
+    const dataToBackup = {};
 
-    const appState = { classrooms, trashBin };
+    // If specific class names are provided, filter the main classrooms object.
+    if (classNames.length > 0) {
+        classNames.forEach(name => {
+            if (classrooms[name]) {
+                dataToBackup[name] = classrooms[name];
+            }
+        });
+    } else {
+        // Otherwise, back up all non-deleted classrooms.
+        for (const name in classrooms) {
+            if (!classrooms[name].isDeleted) {
+                dataToBackup[name] = classrooms[name];
+            }
+        }
+    }
+
+    const appState = {
+        metadata: {
+            version: "2.0", // A version for our backup format
+            createdAt: new Date().toISOString()
+        },
+        data: {
+            classrooms: dataToBackup,
+            trashBin // We always include the full trash bin
+        }
+    };
+
     const dataStr = JSON.stringify(appState, null, 2);
-
     const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
-    const fileName = `SP-${today}.txt`;
+    const fileName = `SP-Backup-${today}.txt`;
     return new File([dataStr], fileName, { type: 'text/plain' });
 }
 
@@ -523,3 +549,4 @@ export function setUserSettings(newSettings) {
     saveData();
 }
 
+export function setSelectedClassIds(ids) { selectedClassIds = ids; }

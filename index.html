@@ -329,6 +329,23 @@
         </div>
     </div>
 
+    <div id="restore-confirm-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="restore-modal-title">بازیابی اطلاعات</h3>
+            <p id="restore-modal-message"></p>
+            <p id="restore-modal-warning" style="display: none; color: var(--color-strong-warning); font-weight: bold;">
+            </p>
+            <div class="modal-options" style="margin: 20px 0; justify-content: center;">
+                <input type="checkbox" id="restore-append-checkbox" checked>
+                <label for="restore-append-checkbox">افزودن کلاس‌ها به لیست فعلی</label>
+            </div>
+            <div class="modal-actions">
+                <button id="restore-confirm-cancel-btn" class="btn-secondary">لغو</button>
+                <button id="restore-confirm-confirm-btn" class="btn-warning">بازیابی</button>
+            </div>
+        </div>
+    </div>
+
     <div id="log-modal" class="modal-overlay">
         <div class="modal-content">
             <h3 id="log-modal-title">گزارش فعالیت‌ها</h3>
