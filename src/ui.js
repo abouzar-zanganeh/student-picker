@@ -1809,7 +1809,40 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
     const notesDiv = document.createElement('div');
     notesDiv.className = 'student-details-notes';
-    notesDiv.innerHTML = '<h4>یادداشت‌ها</h4>';
+    // --- NEW: Create a proper header for the notes section ---
+    const notesHeader = document.createElement('div');
+    notesHeader.className = 'history-section-header'; // Reuse existing style for flex layout
+
+    const notesTitle = document.createElement('h4');
+    notesTitle.textContent = 'یادداشت‌ها';
+
+    const addNoteBtn = document.createElement('button');
+    addNoteBtn.className = 'btn-icon';
+    addNoteBtn.innerHTML = '📝';
+    addNoteBtn.title = 'افزودن یادداشت جدید';
+
+    addNoteBtn.addEventListener('click', () => {
+        newNoteContent.value = '';
+        newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
+
+        state.setSaveNoteCallback((content) => {
+            if (content) {
+                winner.addNote(content); // 'winner' is the selected student in this scope
+                state.saveData();
+                displayWinner(); // This refreshes the winner panel to show the new note
+                showNotification('✅ یادداشت با موفقیت ثبت شد.');
+            }
+        });
+
+        openModal('add-note-modal');
+        newNoteContent.focus();
+    });
+
+    notesHeader.appendChild(notesTitle);
+    notesHeader.appendChild(addNoteBtn);
+
+    notesDiv.appendChild(notesHeader);
+    // --- END NEW ---
 
     const notesList = document.createElement('ul');
     notesList.className = 'notes-list';

@@ -5,6 +5,8 @@ import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard } from './utils.js';
 import * as logManager from './logManager.js';
 
+
+
 function restoreStateFromURL() {
     const hash = window.location.hash;
     if (!hash || hash === '#') return false;
@@ -64,6 +66,8 @@ function restoreStateFromURL() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+
+
     // --- HTML Elements (from ui.js, but needed for event listeners) ---
     const {
         globalStudentSearchInput, globalStudentSearchResultsDiv,
