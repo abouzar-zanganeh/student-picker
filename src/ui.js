@@ -1732,7 +1732,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
         const skillScoresSpan = document.createElement('span');
         skillScoresSpan.className = 'skill-scores';
         const skillKey = skill.toLowerCase();
-        const scoresForSkill = studentScores[skillKey];
+        const scoresForSkill = studentScores[skillKey]?.filter(s => !s.isDeleted);
         if (scoresForSkill && scoresForSkill.length > 0) {
             hasAnyScore = true;
             skillScoresSpan.textContent = scoresForSkill.slice(-3).map(s => s.value).join(',');
