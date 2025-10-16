@@ -52,8 +52,8 @@ function restoreStateFromURL() {
             ui.showPage('settings-page');
             break;
         case 'student-profile-page':
-            ui.renderStudentProfilePage();
-            ui.showPage('student-profile-page');
+            ui.showStudentProfile(state.selectedStudentForProfile);
+            ui.showPage('session-page');
             break;
         default:
             // If the pageId is something else (like trash-page, etc.), we don't restore it.
@@ -74,17 +74,15 @@ document.addEventListener('DOMContentLoaded', () => {
         csvCancelBtn, importCsvBtn, csvFileInput, columnMappingPage,
         columnSelectDropdown, confirmColumnBtn, cancelImportBtn, newCategoryNameInput,
         addCategoryBtn, selectStudentBtn, attendancePage, attendanceClassNameHeader,
-        attendanceListUl, finishAttendanceBtn, backToSessionsFromAttendanceBtn,
-        backToAttendanceBtn, classListHeader, studentStatsHeader, hamburgerMenuBtn,
+        attendanceListUl, finishAttendanceBtn,
+        classListHeader, studentStatsHeader, hamburgerMenuBtn,
         sideNavMenu, closeNavBtn, overlay, backupDataBtn, restoreDataBtn,
         restoreFileInput, customConfirmModal, confirmModalMessage,
         confirmModalCancelBtn, confirmModalConfirmBtn, secureConfirmModal,
         secureConfirmMessage, secureConfirmCode, secureConfirmInput,
         secureConfirmCancelBtn, secureConfirmConfirmBtn, addNoteModal,
         newNoteContent, classSaveNoteBtn, cancelNoteBtn, studentSearchInput,
-        studentSearchResultsDiv, studentProfilePage, profileStudentNameHeader,
-        backToStudentPageBtn, gradedCategoryPillsContainer, newScoreValueInput,
-        newScoreCommentTextarea, addScoreBtn, profileStatsSummaryDiv,
+        studentSearchResultsDiv, profileStatsSummaryDiv,
         profileScoresListUl, isGradedCheckbox, backupOptionsModal, backupDownloadBtn,
         backupShareBtn, backupOptionsCancelBtn, categoryModalSaveBtn, categoryModalCancelBtn,
         massCommentBtn, massCommentCancelBtn, massCommentSaveBtn,
@@ -297,13 +295,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.closeActiveModal(state.confirmCallback);
     });
 
-
-    backToAttendanceBtn.addEventListener('click', () => {
-        if (state.currentClassroom && state.selectedSession) {
-            ui.renderAttendancePage();
-            ui.showPage('attendance-page');
-        }
-    });
 
     selectStudentBtn.addEventListener('click', () => {
         if (ui.quickScoreInput.value.trim() !== '' || ui.quickNoteTextarea.value.trim() !== '') {
@@ -621,13 +612,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const displayNumber = sessionMap.get(newSession.sessionNumber);
                     logManager.addLog(state.currentClassroom.info.name, `جلسه ${displayNumber} شروع شد.`, { type: 'VIEW_SESSIONS' });
 
-                    // 3. Navigate to the new page.
-                    if (takeAttendance) {
-                        ui.renderAttendancePage();
-                        ui.showPage('attendance-page');
-                    } else {
-                        ui.renderStudentPage();
-                    }
+                    // 3. Navigate to the tabbed dashboard
+                    ui.renderSessionDashboard();
                 };
                 ui.showCustomConfirm(
                     "آیا تمایل به انجام فرآیند حضور و غیاب دارید؟",
@@ -751,26 +737,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     finishAttendanceBtn.addEventListener('click', () => {
-        ui.renderStudentPage();
+        ui.switchDashboardTab('selector');
     });
 
-    backToSessionsFromAttendanceBtn.addEventListener('click', () => {
-        ui.renderSessions();
-        ui.showPage('session-page');
-    });
 
-    backToStudentPageBtn.addEventListener('click', () => {
-        state.setSelectedStudentForProfile(null); // Clear the selected student in both cases
 
-        if (state.selectedSession) {
-            // If a session is active, go back to the student page for that session.
-            ui.renderStudentPage();
-        } else {
-            // If no session is active (global context), go to the session list for the student's class.
-            ui.renderSessions();
-            ui.showPage('session-page');
-        }
-    });
 
     studentSearchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value;
@@ -869,58 +840,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ui.quickScoreInput.addEventListener('keydown', quickGradeSubmitHandler);
     ui.quickNoteTextarea.addEventListener('keydown', quickGradeSubmitHandler);
-
-    addScoreBtn.addEventListener('click', () => {
-        const activeSkillPill = gradedCategoryPillsContainer.querySelector('.pill.active');
-        if (!activeSkillPill) {
-            ui.showNotification("⚠️لطفاً یک مهارت را برای نمره‌دهی انتخاب کنید.");
-            return;
-        }
-        const skill = activeSkillPill.dataset.skillName;
-        const value = newScoreValueInput.value;
-        const comment = newScoreCommentTextarea.value.trim();
-
-        if (!value) {
-            ui.showNotification("لطفاً مقدار نمره را وارد کنید.");
-            return;
-        }
-
-        state.selectedStudentForProfile.addScore(skill, parseFloat(value), comment);
-        state.saveData();
-
-        logManager.addLog(state.currentClassroom.info.name, `نمره ${value} در ${skill} برای «${state.selectedStudentForProfile.identity.name}» ثبت شد.`, {
-            type: 'VIEW_STUDENT_PROFILE',
-            studentId: state.selectedStudentForProfile.identity.studentId
-        });
-
-        ui.renderStudentProfilePage();
-        ui.showNotification(`✅نمره برای مهارت ${skill} با موفقیت ثبت شد.`);
-    });
-
-    document.getElementById('add-note-btn').addEventListener('click', () => {
-        // Ensure a student is selected before opening the modal
-        if (!state.selectedStudentForProfile) return;
-
-        newNoteContent.value = ''; // Start with a blank slate for a new note
-        newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
-
-        // Set the callback with the specific logic for saving a STUDENT note
-        state.setSaveNoteCallback((content) => {
-            if (content) { // Only add a note if there's text content
-                state.selectedStudentForProfile.addNote(content);
-                state.saveData();
-
-                logManager.addLog(state.currentClassroom.info.name,
-                    `یادداشت جدیدی برای دانش‌آموز «${state.selectedStudentForProfile.identity.name}» ثبت شد.`,
-                    { type: 'VIEW_STUDENT_PROFILE', studentId: state.selectedStudentForProfile.identity.studentId });
-
-                ui.renderStudentNotes(); // This re-renders the notes list on the profile page
-            }
-        });
-
-        ui.openModal('add-note-modal');
-        newNoteContent.focus();
-    });
 
     cancelNoteBtn.addEventListener('click', () => {
         ui.closeActiveModal();
@@ -1083,9 +1002,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('popstate', (event) => {
+        // If a modal is open when the back button is used,
+        // our only job is to close it and stop further action.
         if (state.activeModal) {
-            history.pushState(null, '', location.href);
+            // Call our function and pass 'true' to signify this is a history pop.
+            ui.closeActiveModal(null, true);
+            return; // IMPORTANT: Stop here to prevent page navigation.
         }
+
         ui.closeContextMenu();
         if (event.state) {
             const { pageId, currentClassName, selectedSessionNumber, selectedStudentId } = event.state;
@@ -1098,17 +1022,22 @@ document.addEventListener('DOMContentLoaded', () => {
                     state.setSelectedStudentForProfile(state.currentClassroom.students.find(s => s.identity.studentId === selectedStudentId));
                 }
             }
-            // If navigating to the student page, re-render it completely to show fresh data.
-            if (pageId === 'student-page') {
-                ui.renderStudentPage();
-            } else if (pageId === 'session-page') {
+
+            // This block handles restoring the correct page view from history
+            if (pageId === 'session-page') {
                 ui.renderSessions();
                 ui._internalShowPage(pageId);
-            }
-            else {
+            } else if (pageId === 'student-profile-page') {
+                // When restoring a profile URL, show the modal on top of the session list page.
+                ui.renderSessions(); // Render the page underneath
+                ui.showPage('session-page');
+                ui.showStudentProfile(state.selectedStudentForProfile); // Then open the modal
+            } else {
                 ui._internalShowPage(pageId);
             }
+
         } else {
+            // If there's no state, go back to the home page
             state.setCurrentClassroom(null);
             state.setSelectedSession(null);
             state.setSelectedStudentForProfile(null);
@@ -1324,14 +1253,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.setAutoDirectionOnInput(textarea);
         }
     });
-
-    profileStudentNameHeader.addEventListener('click', () => {
-        const student = state.selectedStudentForProfile;
-        const classroom = state.currentClassroom;
-        ui.showRenameStudentModal(student, classroom);
-    });
-
-
 
     function onboardNewStudent(newStudent, classroom) {
         const existingStudents = getActiveItems(classroom.students).filter(s => s.identity.studentId !== newStudent.identity.studentId);
@@ -1578,9 +1499,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'VIEW_STUDENT_PROFILE': {
                     const student = classroom.students.find(s => s.identity.studentId === action.studentId);
                     if (student) {
-                        state.setSelectedStudentForProfile(student);
-                        ui.renderStudentProfilePage();
-                        ui.showPage('student-profile-page');
+                        ui.showStudentProfile(student);
                     } else {
                         ui.showNotification('⚠️ دانش‌آموز مورد نظر یافت نشد.');
                     }

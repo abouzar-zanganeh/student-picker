@@ -75,12 +75,6 @@
         <p id="app-version" style="text-align: center; font-size: 12px; color: #888; margin-top: 20px;"></p>
     </main>
 
-    <main id="student-page" class="page">
-    </main>
-
-    <main id="attendance-page" class="page">
-    </main>
-
     <main id="settings-page" class="page">
         <h2 id="settings-class-name-header"></h2>
         <button class="back-to-classes-btn">➡️ لیست کلاس‌ها</button>
@@ -160,22 +154,10 @@
 
     <main id="student-profile-page" class="page">
         <h2 id="profile-student-name-header"></h2>
-        <button id="back-to-student-page-btn" class="btn-secondary" style="width: auto;">➡️ صفحه جلسه</button>
+        <button id="back-to-student-page-btn" class="btn-secondary" style="width: auto;">➡️ داشبرد جلسه</button>
         <hr class="separator">
 
         <div class="profile-content-container">
-            <div class="scoring-section">
-                <h3>ثبت نمره جدید</h3>
-                <div id="graded-category-pills-container" class="category-pills">
-                    <!-- Pills for skills will be generated here -->
-                </div>
-                <div class="input-group centered-input-group" style="margin-top: 15px;">
-                    <input type="number" id="new-score-value" placeholder="نمره (مثلا: 85)">
-                </div>
-                <textarea id="new-score-comment" placeholder="توضیحات این نمره (اختیاری)..."
-                    style="margin-top: 10px;"></textarea>
-                <button id="add-score-btn" class="btn-success" style="width: 100%; margin-top: 10px;">ثبت نمره</button>
-            </div>
 
             <div class="history-section">
                 <div class="history-section-header">
@@ -185,15 +167,9 @@
                 <div id="profile-stats-summary" class="stats-summary-box">
                     <!-- Student's general stats will be displayed here -->
                 </div>
-                <h4 style="margin-top: 20px;">تاریخچه نمرات:</h4>
-                <ul id="profile-scores-list" class="list-container">
-                    <!-- Scores history will be listed here -->
-                </ul>
-                <h4 style="margin-top: 20px;">تاریخچه یادداشت‌ها:</h4>
-                <ul id="profile-notes-list" class="list-container">
-                    <!-- Notes history will be listed here -->
-                </ul>
+
             </div>
+
         </div>
     </main>
 
@@ -208,16 +184,16 @@
 
     <main id="session-dashboard-page" class="page">
 
+        <div class="dashboard-header">
+            <button id="back-to-sessions-btn">➡️ لیست جلسات</button>
+        </div>
+
         <div class="dashboard-tabs">
             <button id="selector-tab-btn" class="tab-btn active">انتخابگر</button>
             <button id="attendance-tab-btn" class="tab-btn">حضور و غیاب</button>
         </div>
 
         <div id="selector-pane" class="tab-pane active">
-
-            <button id="back-to-attendance-btn" class="btn-secondary" style="width: auto; margin-left: 10px;">📋 حضور و
-                غیاب</button>
-            <button id="back-to-sessions-btn">➡️ لیست جلسات</button>
 
             <div class="dashboard-container">
                 <div class="action-column">
@@ -253,14 +229,12 @@
                     <div id="student-stats-table-container">
 
                     </div>
-                    </ul>
+
                 </div>
             </div>
         </div>
 
         <div id="attendance-pane" class="tab-pane">
-
-            <button id="back-to-sessions-from-attendance-btn">➡️ لیست جلسات</button>
 
             <ul id="attendance-list" class="list-container">
             </ul>

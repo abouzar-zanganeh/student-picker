@@ -46,8 +46,6 @@ export const selectStudentBtnWrapper = document.getElementById('select-student-b
 export const attendancePage = document.getElementById('attendance-page');
 export const attendanceListUl = document.getElementById('attendance-list');
 export const finishAttendanceBtn = document.getElementById('finish-attendance-btn');
-export const backToSessionsFromAttendanceBtn = document.getElementById('back-to-sessions-from-attendance-btn');
-export const backToAttendanceBtn = document.getElementById('back-to-attendance-btn');
 export const classListHeader = document.querySelector('#class-management-page h2');
 export const studentStatsHeader = document.getElementById('student-stats-header');
 export const hamburgerMenuBtn = document.getElementById('hamburger-menu-btn');
@@ -73,8 +71,6 @@ export const classSaveNoteBtn = document.getElementById('class-save-note-btn');
 export const cancelNoteBtn = document.getElementById('cancel-note-btn');
 export const studentSearchInput = document.getElementById('student-search-input');
 export const studentSearchResultsDiv = document.getElementById('student-search-results');
-export const studentProfilePage = document.getElementById('student-profile-page');
-export const profileStudentNameHeader = document.getElementById('profile-student-name-header');
 export const backToStudentPageBtn = document.getElementById('back-to-student-page-btn');
 export const gradedCategoryPillsContainer = document.getElementById('graded-category-pills-container');
 export const newScoreValueInput = document.getElementById('new-score-value');
@@ -123,6 +119,44 @@ export const attendanceSearchInput = document.createElement('input');
 
 export const sessionDashboardPage = document.getElementById('session-dashboard-page');
 
+
+export function renderSessionDashboard() {
+    if (!state.currentClassroom || !state.selectedSession) {
+        showPage('class-management-page'); // Fallback in case state is invalid
+        return;
+    }
+
+    // This block sets up the content for the "Selector" pane
+    initializeStudentPageUI();
+    renderCategoryPills();
+    renderStudentStatsList();
+
+    // This sets up the content for the "Attendance" pane
+    renderAttendancePage();
+
+    // Now, show the main dashboard page
+    showPage('session-dashboard-page');
+
+    // And finally, activate the tab-switching logic
+    setupDashboardTabs();
+
+    // Restore the last selected category and winner
+    restoreSessionState();
+}
+
+export function switchDashboardTab(tabName) {
+    const selectorTabBtn = document.getElementById('selector-tab-btn');
+    const attendanceTabBtn = document.getElementById('attendance-tab-btn');
+    const selectorPane = document.getElementById('selector-pane');
+    const attendancePane = document.getElementById('attendance-pane');
+
+    const isSelector = tabName === 'selector';
+
+    selectorTabBtn.classList.toggle('active', isSelector);
+    attendanceTabBtn.classList.toggle('active', !isSelector);
+    selectorPane.classList.toggle('active', isSelector);
+    attendancePane.classList.toggle('active', !isSelector);
+}
 
 export function setupDashboardTabs() {
     const selectorTabBtn = document.getElementById('selector-tab-btn');
@@ -420,7 +454,7 @@ export function showRenameStudentModal(student, classroom) {
                 renderSettingsStudentList();
                 renderStudentStatsList();
                 if (state.selectedStudentForProfile && state.selectedStudentForProfile.identity.studentId === student.identity.studentId) {
-                    renderStudentProfilePage();
+                    showStudentProfile(student);
                 }
 
                 showNotification(`✅نام دانش‌آموز به «${trimmedNewName}» تغییر یافت.`);
@@ -444,6 +478,8 @@ export function openModal(modalId) {
         // Prevents opening a new modal if one is already active
         if (state.activeModal) return;
 
+        document.body.classList.add('modal-active');
+
         modal.classList.add('modal-visible');
         state.setActiveModal(modalId);
         // Adds a dummy state to the history to "trap" the back button
@@ -451,7 +487,7 @@ export function openModal(modalId) {
     }
 }
 
-export function closeActiveModal(onClosed) {
+export function closeActiveModal(onClosed, isHistoryPop = false) {
     if (!state.activeModal) return;
 
     const modal = document.getElementById(state.activeModal);
@@ -461,7 +497,10 @@ export function closeActiveModal(onClosed) {
     // This lets our 'popstate' listener (in the next step) know that we are closing the modal
     // intentionally and that it should not spring the "trap".
     state.setActiveModal(null);
-    history.back(); // Programmatically go back to clear the dummy state from the history.
+
+    if (!isHistoryPop) {
+        history.back();
+    }
 
     if (modal) {
         modal.classList.add('modal-closing');
@@ -469,6 +508,8 @@ export function closeActiveModal(onClosed) {
         setTimeout(() => {
             modal.classList.remove('modal-visible');
             modal.classList.remove('modal-closing');
+
+            document.body.classList.remove('modal-active');
 
             if (activeModalId === 'custom-confirm-modal') {
                 state.setConfirmCallback(null);
@@ -1027,9 +1068,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     nameSpan.textContent = student.identity.name;
 
     nameSpan.addEventListener('click', () => {
-        state.setSelectedStudentForProfile(student);
-        renderStudentProfilePage();
-        showPage('student-profile-page');
+        showStudentProfile(student);
     });
 
     const absenceSpan = document.createElement('span');
@@ -1340,9 +1379,7 @@ export function renderStudentStatsList() {
         nameLink.textContent = student.identity.name;
         nameLink.className = 'student-name-link';
         nameLink.addEventListener('click', () => {
-            state.setSelectedStudentForProfile(student);
-            renderStudentProfilePage();
-            showPage('student-profile-page');
+            showStudentProfile(student);
         });
         nameCell.appendChild(nameLink);
         // 2. Loops through our dynamic list of gradable categories to add the rest of the data
@@ -1719,9 +1756,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
     });
 
     profileBtn.addEventListener('click', () => {
-        state.setSelectedStudentForProfile(winner);
-        renderStudentProfilePage();
-        showPage('student-profile-page');
+        showStudentProfile(winner);
     });
 
     buttonContainer.appendChild(absentBtn);
@@ -2003,32 +2038,180 @@ function updateQuickGradeUIForCategory(category) {
     }
 }
 
-export function renderStudentPage() {
 
-    if (!state.currentClassroom || !state.selectedSession) {
-        showPage('class-management-page');
-        return;
-    }
 
-    initializeStudentPageUI();
-    renderCategoryPills();
-    restoreSessionState();
+export function showStudentProfile(student) {
+    state.setSelectedStudentForProfile(student); // Set the student globally
 
-    showPage('student-page');
-    renderStudentStatsList();
+    // --- Always open the MODAL ---
+    const profileModal = document.getElementById('student-profile-modal');
+    const modalHeader = document.getElementById('modal-profile-student-name');
+    const modalContentContainer = document.getElementById('modal-profile-content-container');
+    const modalCloseBtn = document.getElementById('modal-profile-close-btn');
+
+    if (!profileModal || !modalHeader || !modalContentContainer || !modalCloseBtn) return;
+
+    // 1. Set the student's name in the modal header
+    modalHeader.textContent = `پروفایل: ${student.identity.name}`;
+
+    modalHeader.style.cursor = 'pointer';
+    modalHeader.onclick = () => {
+        const currentStudent = state.selectedStudentForProfile;
+        const currentClassroom = state.currentClassroom;
+
+        closeActiveModal(() => {
+            showRenameStudentModal(currentStudent, currentClassroom);
+        });
+    };
+
+    // 2. Clear previous content before rendering
+    modalContentContainer.innerHTML = '';
+
+    // 3. Render all profile sections into the modal
+    renderProfileScoringSection(modalContentContainer);
+    renderHistorySection(modalContentContainer);
+
+    // 4. Set up the close button listener
+    modalCloseBtn.onclick = () => closeActiveModal();
+
+    // 5. Finally, open the modal
+    openModal('student-profile-modal');
 }
 
-export function renderStudentProfilePage() {
+function renderProfileScoringSection(container) {
+    if (!state.selectedStudentForProfile || !state.currentClassroom) return;
+
+    // 1. Create the main wrapper for the scoring section
+    const scoringSection = document.createElement('div');
+    scoringSection.className = 'scoring-section';
+
+    // 2. Create and append the HTML content for the section
+    scoringSection.innerHTML = `
+        <h3>ثبت نمره جدید</h3>
+        <div id="modal-graded-pills" class="category-pills"></div>
+        <div class="input-group centered-input-group" style="margin-top: 15px;">
+            <input type="number" id="modal-new-score-value" placeholder="نمره (مثلا: 85)">
+        </div>
+        <textarea id="modal-new-score-comment" placeholder="توضیحات این نمره (اختیاری)..." style="margin-top: 10px;"></textarea>
+        <button id="modal-add-score-btn" class="btn-success" style="width: 100%; margin-top: 10px;">ثبت نمره</button>
+    `;
+
+    // 3. Populate the graded category pills
+    const pillsContainer = scoringSection.querySelector('#modal-graded-pills');
+    const gradedCategories = getActiveItems(state.currentClassroom.categories).filter(c => c.isGradedCategory);
+
+    gradedCategories.forEach(category => {
+        const pill = document.createElement('span');
+        pill.className = 'pill';
+        pill.textContent = category.name;
+        pill.dataset.skillName = category.name;
+        pill.addEventListener('click', () => {
+            pillsContainer.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+        });
+        pillsContainer.appendChild(pill);
+    });
+
+    // 4. Attach the "Add Score" button's event listener directly
+    const addScoreBtn = scoringSection.querySelector('#modal-add-score-btn');
+    addScoreBtn.addEventListener('click', () => {
+        const activeSkillPill = pillsContainer.querySelector('.pill.active');
+        if (!activeSkillPill) {
+            showNotification("⚠️لطفاً یک مهارت را برای نمره‌دهی انتخاب کنید.");
+            return;
+        }
+        const skill = activeSkillPill.dataset.skillName;
+        const value = scoringSection.querySelector('#modal-new-score-value').value;
+        const comment = scoringSection.querySelector('#modal-new-score-comment').value.trim();
+
+        if (!value) {
+            showNotification("لطفاً مقدار نمره را وارد کنید.");
+            return;
+        }
+
+        state.selectedStudentForProfile.addScore(skill, parseFloat(value), comment);
+        state.saveData();
+
+        logManager.addLog(state.currentClassroom.info.name, `نمره ${value} در ${skill} برای «${state.selectedStudentForProfile.identity.name}» ثبت شد.`, {
+            type: 'VIEW_STUDENT_PROFILE',
+            studentId: state.selectedStudentForProfile.identity.studentId
+        });
+
+        // Re-render the entire profile to show the new score
+        if (state.activeModal === 'student-profile-modal') {
+            showStudentProfile(state.selectedStudentForProfile);
+        } else {
+            showStudentProfile(state.selectedStudentForProfile);
+        }
+
+        showNotification(`✅نمره برای مهارت ${skill} با موفقیت ثبت شد.`);
+    });
+
+    // 5. Finally, append the entire new section to the provided container
+    container.appendChild(scoringSection);
+}
+
+function renderHistorySection(container) {
     if (!state.selectedStudentForProfile) return;
 
-    const student = state.selectedStudentForProfile;
-    profileStudentNameHeader.textContent = `پروفایل: ${student.identity.name}`;
+    // 1. Create the main wrapper and its header
+    const historySection = document.createElement('div');
+    historySection.className = 'history-section';
 
-    if (state.selectedSession) {
-        backToStudentPageBtn.textContent = '➡️ صفحه جلسه';
-    } else {
-        backToStudentPageBtn.textContent = '➡️ لیست جلسات';
-    }
+    const historyHeader = document.createElement('div');
+    historyHeader.className = 'history-section-header';
+
+    const title = document.createElement('h3');
+    title.textContent = 'سوابق دانش‌آموز';
+
+    // 2. Create the "Add Note" button and its listener right here
+    const addNoteBtn = document.createElement('button');
+    addNoteBtn.id = 'profile-add-note-btn'; // Use a unique ID for the profile context
+    addNoteBtn.className = 'btn-icon';
+    addNoteBtn.title = 'افزودن یادداشت جدید';
+    addNoteBtn.innerHTML = '📝';
+    addNoteBtn.addEventListener('click', () => {
+        newNoteContent.value = '';
+        newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
+
+        state.setSaveNoteCallback((content) => {
+            if (content) {
+                state.selectedStudentForProfile.addNote(content);
+                state.saveData();
+                logManager.addLog(state.currentClassroom.info.name, `یادداشت جدیدی برای دانش‌آموز «${state.selectedStudentForProfile.identity.name}» ثبت شد.`, { type: 'VIEW_STUDENT_PROFILE', studentId: state.selectedStudentForProfile.identity.studentId });
+
+                // Re-render the correct view
+                if (state.activeModal === 'student-profile-modal') {
+                    showStudentProfile(state.selectedStudentForProfile);
+                } else {
+                    renderStudentProfilePage();
+                }
+            }
+        });
+
+        openModal('add-note-modal');
+        newNoteContent.focus();
+    });
+
+    historyHeader.appendChild(title);
+    historyHeader.appendChild(addNoteBtn);
+    historySection.appendChild(historyHeader);
+
+    // 3. Call the existing functions to populate the content INSIDE our new section
+    renderProfileContent(historySection);
+    renderScoresHistory(historySection);
+    renderStudentNotes(historySection);
+
+    // 4. Append the complete history section to the main container
+    container.appendChild(historySection);
+}
+
+function renderProfileContent(container) {
+    if (!state.selectedStudentForProfile) return;
+    const student = state.selectedStudentForProfile;
+
+    // Clear the container first
+    container.innerHTML = '';
 
     const absenceCount = state.currentClassroom.sessions.reduce((count, session) => {
         const record = session.studentRecords[student.identity.studentId];
@@ -2037,111 +2220,84 @@ export function renderStudentProfilePage() {
 
     const totalIssues = Object.values(student.categoryIssues || {}).reduce((sum, count) => sum + count, 0);
 
-    profileStatsSummaryDiv.innerHTML = `
-    <p><strong>کل انتخاب:</strong> ${student.statusCounters.totalSelections}</p>
-    <p><strong>غیبت:</strong> ${absenceCount}</p>
-    <p><strong>فرصت از دست رفته:</strong> ${student.statusCounters.missedChances || 0}</p>
-    <p><strong>مشکل:</strong> ${totalIssues}</p>`;
+    // Create a new stats summary div, since we're not using the old hardcoded one
+    const statsSummaryDiv = document.createElement('div');
+    statsSummaryDiv.className = 'stats-summary-box';
+    statsSummaryDiv.innerHTML = `
+        <p><strong>کل انتخاب:</strong> ${student.statusCounters.totalSelections}</p>
+        <p><strong>غیبت:</strong> ${absenceCount}</p>
+        <p><strong>فرصت از دست رفته:</strong> ${student.statusCounters.missedChances || 0}</p>
+        <p><strong>مشکل:</strong> ${totalIssues}</p>
+    `;
+    container.appendChild(statsSummaryDiv);
 
+    // The rest of this function is mostly a copy-paste of the old renderStudentProfilePage,
+    // but adapted to append elements to the 'container' parameter.
 
-
-    // --- Selections Breakdown ---
-
-    // Get all active categories for the classroom
     const activeCategories = getActiveItems(state.currentClassroom.categories);
-
     const selectionsBreakdownContainer = document.createElement('div');
     selectionsBreakdownContainer.className = 'stats-breakdown';
 
-    // We can reuse the activeCategories list from the issues breakdown below
     if (activeCategories.length > 0) {
         activeCategories.forEach(category => {
             const categoryName = category.name;
             const count = student.categoryCounts?.[categoryName] || 0;
-
             const p = document.createElement('p');
             p.className = 'stats-breakdown-item';
             p.innerHTML = `<strong>${categoryName}:</strong> ${count}`;
             selectionsBreakdownContainer.appendChild(p);
         });
-
-        // Find the 'total selections' p tag and insert this breakdown right after it
-        const totalSelectionsP = profileStatsSummaryDiv.querySelector('p:first-child');
+        const totalSelectionsP = statsSummaryDiv.querySelector('p:first-child');
         if (totalSelectionsP) {
             totalSelectionsP.after(selectionsBreakdownContainer);
         }
     }
 
-
     const issuesBreakdownContainer = document.createElement('div');
     issuesBreakdownContainer.className = 'stats-breakdown';
-
-
     if (activeCategories.length > 0) {
         activeCategories.forEach(category => {
             const categoryName = category.name;
-            // Look up the count for this student. Default to 0 if not found.
             const count = student.categoryIssues?.[categoryName] || 0;
-
             const p = document.createElement('p');
             p.className = 'stats-breakdown-item';
             p.innerHTML = `<strong>${categoryName}:</strong> ${count}`;
             issuesBreakdownContainer.appendChild(p);
         });
-
-        profileStatsSummaryDiv.appendChild(issuesBreakdownContainer);
+        statsSummaryDiv.appendChild(issuesBreakdownContainer);
     }
 
-
-    // --- Homework Info ---
     const homeworkInfoP = document.createElement('p');
     const homeworkLabel = document.createElement('strong');
     homeworkLabel.textContent = 'تکالیف ناقص:';
-
     const homeworkValuesSpan = document.createElement('span');
-    homeworkValuesSpan.style.marginRight = '5px'; // Adds a little space after the label
-
-    // Call our reusable function without the prefix
+    homeworkValuesSpan.style.marginRight = '5px';
     const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
     renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkValuesSpan, { includePrefix: false });
-
     homeworkInfoP.appendChild(homeworkLabel);
     homeworkInfoP.appendChild(homeworkValuesSpan);
-    profileStatsSummaryDiv.appendChild(homeworkInfoP);
+    statsSummaryDiv.appendChild(homeworkInfoP);
+}
 
-    // Get only the categories marked as "gradable" and not deleted
-    const gradedCategories = state.currentClassroom.categories.filter(cat => cat.isGradedCategory && !cat.isDeleted);
 
-    gradedCategoryPillsContainer.innerHTML = '';
-    gradedCategories.forEach(category => {
-        const pill = document.createElement('span');
-        pill.className = 'pill';
-        pill.textContent = category.name; // e.g., "Writing"
-        // Use the category name for the data key. The logic for adding scores will use this value.
-        pill.dataset.skillName = category.name;
-        if (category.description) {
-            pill.dataset.tooltip = category.description;
-        }
-        gradedCategoryPillsContainer.appendChild(pill);
-        pill.addEventListener('click', () => {
-            gradedCategoryPillsContainer.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-            newScoreValueInput.focus();
-        });
-    });
 
-    profileScoresListUl.innerHTML = '';
-    const allScores = [];
-    for (const skill in student.logs.scores) {
+export function renderScoresHistory(scoresContainer) {
+    if (!state.selectedStudentForProfile) return;
+    const student = state.selectedStudentForProfile;
 
-        student.logs.scores[skill].forEach(score => {
-            if (!score.isDeleted) {
-                allScores.push(score);
-            }
-        });
-    }
+    // Create the header and list elements
+    const scoresHeader = document.createElement('h4');
+    scoresHeader.textContent = 'تاریخچه نمرات:';
+    scoresHeader.style.marginTop = '20px';
 
-    allScores.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    const profileScoresListUl = document.createElement('ul');
+    profileScoresListUl.className = 'list-container';
+
+    // Flatten all scores from all skills into a single array and sort by date
+    const allScores = Object.values(student.logs.scores || {})
+        .flat()
+        .filter(score => !score.isDeleted)
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     if (allScores.length === 0) {
         profileScoresListUl.innerHTML = '<div class="no-content-message">هنوز نمره‌ای ثبت نشده است.</div>';
@@ -2150,45 +2306,35 @@ export function renderStudentProfilePage() {
             const li = document.createElement('li');
             li.className = 'score-history-item';
 
-            const scoreContent = document.createElement('div');
-            scoreContent.className = 'item-content';
+            const itemContentDiv = document.createElement('div');
+            itemContentDiv.className = 'item-content';
 
-            const scoreInfo = document.createElement('div');
-            scoreInfo.className = 'score-info';
-            scoreInfo.innerHTML = `
-        <span class="score-date">${new Date(score.timestamp).toLocaleDateString('fa-IR')}</span>
-        <span class="score-value">نمره: <strong>${score.value}</strong></span>
-        <span class="score-skill-badge">${score.skill}</span>
-    `;
-            scoreContent.appendChild(scoreInfo);
+            const scoreInfoDiv = document.createElement('div');
+            scoreInfoDiv.className = 'score-info';
+
+            const skillBadge = document.createElement('span');
+            skillBadge.className = 'score-skill-badge';
+            skillBadge.textContent = score.skill;
+
+            const scoreValueSpan = document.createElement('span');
+            scoreValueSpan.className = 'score-value';
+            scoreValueSpan.textContent = `نمره: ${score.value}`;
+
+            const scoreDateSpan = document.createElement('span');
+            scoreDateSpan.className = 'score-date';
+            scoreDateSpan.textContent = new Date(score.timestamp).toLocaleDateString('fa-IR');
+
+            scoreInfoDiv.appendChild(skillBadge);
+            scoreInfoDiv.appendChild(scoreValueSpan);
+            scoreInfoDiv.appendChild(scoreDateSpan);
+
+            itemContentDiv.appendChild(scoreInfoDiv);
 
             if (score.comment) {
-                const fullCommentString = `توضیحات: ${score.comment}`;
-                const blockDirection = detectTextDirection(fullCommentString);
-
-                // --- Start of Re-introduced Logic ---
-                const commentDirection = detectTextDirection(score.comment);
-                const alignmentClass = commentDirection === 'ltr' ? 'comment-ltr' : '';
-                // --- End of Re-introduced Logic ---
-
-                const commentP = document.createElement('p');
-                commentP.className = 'score-comment';
-                commentP.dir = blockDirection;
-                // Re-add the alignmentClass to the <bdi> tag
-                commentP.innerHTML = `<strong>توضیحات:</strong> <div>${renderMultiLineText(score.comment)}</div>`; commentP.addEventListener('click', () => {
-                    newNoteContent.value = score.comment;
-                    newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
-                    state.setSaveNoteCallback((newText) => {
-                        score.comment = newText;
-                        state.saveData();
-                        renderStudentProfilePage();
-                        showNotification('✅ توضیحات نمره ویرایش شد.');
-                    });
-                    openModal('add-note-modal');
-                    newNoteContent.focus();
-                });
-
-                scoreContent.appendChild(commentP);
+                const scoreCommentP = document.createElement('p');
+                scoreCommentP.className = 'score-comment';
+                scoreCommentP.innerHTML = renderMultiLineText(score.comment);
+                itemContentDiv.appendChild(scoreCommentP);
             }
 
             const deleteBtn = document.createElement('button');
@@ -2197,147 +2343,129 @@ export function renderStudentProfilePage() {
             deleteBtn.title = 'حذف این نمره';
             deleteBtn.addEventListener('click', () => {
                 showCustomConfirm(
-                    `آیا از حذف نمره ${score.value} برای مهارت ${score.skill} مطمئن هستید؟`,
+                    `آیا از حذف نمره ${score.value} در مهارت «${score.skill}» مطمئن هستید؟`,
                     () => {
-                        const trashEntry = {
-                            id: `trash_${Date.now()}_${Math.random()}`,
-                            timestamp: new Date().toISOString(),
-                            type: 'score',
-                            description: `نمره ${score.value} (${score.skill}) برای دانش‌آموز «${student.identity.name}»`,
-                            restoreData: { scoreId: score.id, skill: score.skill, studentId: student.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
-                        };
-                        state.trashBin.unshift(trashEntry);
-                        if (state.trashBin.length > 50) state.trashBin.pop();
-
                         score.isDeleted = true;
-                        logManager.addLog(state.currentClassroom.info.name, `نمره ${score.value} در ${score.skill} برای «${student.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
                         state.saveData();
-                        renderStudentProfilePage();
+                        showStudentProfile(student);
                         showNotification('✅ نمره به سطل زباله منتقل شد.');
                     },
                     { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
                 );
             });
 
-            li.appendChild(scoreContent);
+            li.appendChild(itemContentDiv);
             li.appendChild(deleteBtn);
             profileScoresListUl.appendChild(li);
         });
     }
 
-    newScoreValueInput.value = '';
-    newScoreCommentTextarea.value = '';
-    if (gradedCategoryPillsContainer.querySelector('.pill.active')) {
-        gradedCategoryPillsContainer.querySelector('.pill.active').classList.remove('active');
-    }
-    renderStudentNotes();
+    // Append the new elements to the container
+    scoresContainer.appendChild(scoresHeader);
+    scoresContainer.appendChild(profileScoresListUl);
 }
 
-export function renderStudentNotes() {
-    const profileNotesListUl = document.getElementById('profile-notes-list');
-    profileNotesListUl.innerHTML = '';
+export function renderStudentNotes(notesContainer) {
+    // Don't clear the container! Instead, create and append our own elements.
+    if (!state.selectedStudentForProfile) return;
 
-    if (!state.selectedStudentForProfile || !state.selectedStudentForProfile.profile.notes || state.selectedStudentForProfile.profile.notes.length === 0) {
+    const notesHeader = document.createElement('h4');
+    notesHeader.textContent = 'تاریخچه یادداشت‌ها:';
+    notesHeader.style.marginTop = '20px';
+
+    const profileNotesListUl = document.createElement('ul');
+    profileNotesListUl.className = 'list-container';
+
+    if (!state.selectedStudentForProfile.profile.notes || state.selectedStudentForProfile.profile.notes.length === 0) {
         profileNotesListUl.innerHTML = '<div class="no-content-message">هنوز یادداشتی ثبت نشده است.</div>';
-        return;
-    }
+    } else {
+        const sortedNotes = [...state.selectedStudentForProfile.profile.notes]
+            .filter(note => !note.isDeleted)
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
+        sortedNotes.forEach(note => {
+            // ... (The rest of the note creation logic remains exactly the same)
+            const li = document.createElement('li');
+            li.className = 'note-history-item';
 
-    const sortedNotes = [...state.selectedStudentForProfile.profile.notes]
-        .filter(note => !note.isDeleted)
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            const itemContentDiv = document.createElement('div');
+            itemContentDiv.className = 'item-content';
 
-    sortedNotes.forEach(note => {
-        const li = document.createElement('li');
-        li.className = 'note-history-item';
+            const noteInfoDiv = document.createElement('div');
+            noteInfoDiv.className = 'note-info';
 
-        const itemContentDiv = document.createElement('div');
-        itemContentDiv.className = 'item-content';
+            const noteDateSpan = document.createElement('span');
+            noteDateSpan.className = 'note-date';
+            noteDateSpan.textContent = new Date(note.timestamp).toLocaleDateString('fa-IR');
 
-        // --- Build the note header programmatically ---
-        const noteInfoDiv = document.createElement('div');
-        noteInfoDiv.className = 'note-info';
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn-icon delete-item-btn';
+            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.title = 'حذف این یادداشت';
+            deleteBtn.addEventListener('click', () => {
+                showCustomConfirm(
+                    `آیا از حذف این یادداشت مطمئن هستید؟`,
+                    () => {
+                        const trashEntry = {
+                            id: `trash_${Date.now()}_${Math.random()}`,
+                            timestamp: new Date().toISOString(),
+                            type: 'note',
+                            description: `یادداشت برای دانش‌آموز «${state.selectedStudentForProfile.identity.name}»`,
+                            restoreData: { noteId: note.id, studentId: state.selectedStudentForProfile.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
+                        };
+                        state.trashBin.unshift(trashEntry);
+                        if (state.trashBin.length > 50) state.trashBin.pop();
 
-        const noteDateSpan = document.createElement('span');
-        noteDateSpan.className = 'note-date';
-        noteDateSpan.textContent = new Date(note.timestamp).toLocaleDateString('fa-IR');
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn-icon delete-item-btn';
-        deleteBtn.innerHTML = '🗑️';
-        deleteBtn.title = 'حذف این یادداشت';
-        deleteBtn.addEventListener('click', () => {
-            showCustomConfirm(
-                `آیا از حذف این یادداشت مطمئن هستید؟`,
-                () => {
-                    const trashEntry = {
-                        id: `trash_${Date.now()}_${Math.random()}`,
-                        timestamp: new Date().toISOString(),
-                        type: 'note',
-                        description: `یادداشت برای دانش‌آموز «${state.selectedStudentForProfile.identity.name}»`,
-                        restoreData: { noteId: note.id, studentId: state.selectedStudentForProfile.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
-                    };
-                    state.trashBin.unshift(trashEntry);
-                    if (state.trashBin.length > 50) state.trashBin.pop();
-
-                    note.isDeleted = true;
-                    logManager.addLog(state.currentClassroom.info.name, `یادداشت دانش‌آموز «${state.selectedStudentForProfile.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
-                    state.saveData();
-                    renderStudentNotes();
-                    showNotification('✅ یادداشت به سطل زباله منتقل شد.');
-                },
-                { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
-            );
-        });
-
-        // Append date and the button to the info header
-        noteInfoDiv.appendChild(noteDateSpan);
-        noteInfoDiv.appendChild(deleteBtn);
-        // --- End of header build ---
-
-        // --- Create the note content paragraph ---
-        const noteContentP = document.createElement('p');
-        noteContentP.className = 'note-content';
-        noteContentP.innerHTML = renderMultiLineText(note.content);
-
-        noteContentP.addEventListener('click', () => {
-            // 1. Populate the modal with the current note text
-            newNoteContent.value = note.content;
-            newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
-
-            // 2. Set the callback for what "Save" should do
-            state.setSaveNoteCallback((newText) => {
-                note.content = newText;
-                state.saveData();
-
-                logManager.addLog(state.currentClassroom.info.name,
-                    `یادداشت دانش‌آموز «${state.selectedStudentForProfile.identity.name}» به‌روزرسانی شد.`,
-                    {
-                        type: 'VIEW_STUDENT_PROFILE',
-                        studentId: state.selectedStudentForProfile.identity.studentId
-                    });
-
-                renderStudentNotes();
-                showNotification("✅یادداشت با موفقیت ویرایش شد.");
+                        note.isDeleted = true;
+                        logManager.addLog(state.currentClassroom.info.name, `یادداشت دانش‌آموز «${state.selectedStudentForProfile.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+                        state.saveData();
+                        showStudentProfile(state.selectedStudentForProfile);
+                        showNotification('✅ یادداشت به سطل زباله منتقل شد.');
+                    },
+                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
+                );
             });
 
-            // 3. Open the modal
-            openModal('add-note-modal');
-            newNoteContent.focus();
+            noteInfoDiv.appendChild(noteDateSpan);
+            noteInfoDiv.appendChild(deleteBtn);
+
+            const noteContentP = document.createElement('p');
+            noteContentP.className = 'note-content';
+            noteContentP.innerHTML = renderMultiLineText(note.content);
+
+            noteContentP.addEventListener('click', () => {
+                newNoteContent.value = note.content;
+                newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
+
+                state.setSaveNoteCallback((newText) => {
+                    note.content = newText;
+                    state.saveData();
+
+                    logManager.addLog(state.currentClassroom.info.name,
+                        `یادداشت دانش‌آموز «${state.selectedStudentForProfile.identity.name}» به‌روزرسانی شد.`,
+                        {
+                            type: 'VIEW_STUDENT_PROFILE',
+                            studentId: state.selectedStudentForProfile.identity.studentId
+                        });
+
+                    showStudentProfile(state.selectedStudentForProfile);
+                    showNotification("✅یادداشت با موفقیت ویرایش شد.");
+                });
+
+                openModal('add-note-modal');
+                newNoteContent.focus();
+            });
+
+            itemContentDiv.appendChild(noteInfoDiv);
+            itemContentDiv.appendChild(noteContentP);
+            li.appendChild(itemContentDiv);
+            profileNotesListUl.appendChild(li);
         });
+    }
 
-
-        // --- End of content paragraph ---
-
-        // Append the new header and content to the main item container
-        itemContentDiv.appendChild(noteInfoDiv);
-        itemContentDiv.appendChild(noteContentP);
-
-        // Append the main container to the list item
-        li.appendChild(itemContentDiv);
-
-        profileNotesListUl.appendChild(li);
-    });
+    // Append the new elements to the container passed into the function
+    notesContainer.appendChild(notesHeader);
+    notesContainer.appendChild(profileNotesListUl);
 }
 
 export function renderColumnSelector(headers) {
@@ -2671,9 +2799,7 @@ export function renderSettingsStudentList() {
 
         nameSpan.className = 'student-name-link';
         nameSpan.addEventListener('click', () => {
-            state.setSelectedStudentForProfile(student);
-            renderStudentProfilePage();
-            showPage('student-profile-page');
+            showStudentProfile(student);
         });
 
         li.appendChild(nameSpan);
@@ -2961,7 +3087,7 @@ function createSessionInfoContainer(session, displaySessionNumber) {
         infoContainer.style.cursor = 'pointer';
         infoContainer.addEventListener('click', () => {
             state.setSelectedSession(session);
-            renderStudentPage();
+            renderSessionDashboard();
         });
     }
     // comment for test
@@ -3109,9 +3235,7 @@ export function renderSearchResults(filteredStudents) {
             const studentDiv = document.createElement('div');
             studentDiv.textContent = student.identity.name;
             studentDiv.addEventListener('click', () => {
-                state.setSelectedStudentForProfile(student);
-                renderStudentProfilePage();
-                showPage('student-profile-page');
+                showStudentProfile(student);
                 studentSearchResultsDiv.style.display = 'none';
                 studentSearchInput.value = '';
             });
@@ -3154,9 +3278,7 @@ export function renderGlobalSearchResults(results) {
             // 1. The main container now navigates to the student profile.
             resultDiv.addEventListener('click', () => {
                 state.setCurrentClassroom(result.classroom);
-                state.setSelectedStudentForProfile(result.student);
-                renderStudentProfilePage();
-                showPage('student-profile-page');
+                showStudentProfile(result.student);
                 globalStudentSearchResultsDiv.style.display = 'none';
                 globalStudentSearchInput.value = '';
             });
@@ -3477,3 +3599,5 @@ export function updateDemoModeBanner() {
         document.body.classList.remove('demo-mode-active');
     }
 }
+
+
