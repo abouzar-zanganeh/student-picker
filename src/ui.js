@@ -2981,6 +2981,11 @@ export function _internalShowPage(pageId) {
 
     // This part for the header can remain separate as it's a unique case
     if (pageId === 'class-management-page') {
+
+        state.setCurrentClassroom(null);
+        state.setSelectedSession(null);
+        state.setSelectedStudentForProfile(null);
+
         renderClassList();
         appHeader.style.display = 'flex';
     } else {
