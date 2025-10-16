@@ -2121,8 +2121,10 @@ function renderProfileScoringSection(container) {
             return;
         }
         const skill = activeSkillPill.dataset.skillName;
-        const value = scoringSection.querySelector('#modal-new-score-value').value;
-        const comment = scoringSection.querySelector('#modal-new-score-comment').value.trim();
+        const scoreInput = scoringSection.querySelector('#modal-new-score-value');
+        const commentTextarea = scoringSection.querySelector('#modal-new-score-comment');
+        const value = scoreInput.value;
+        const comment = commentTextarea.value.trim();
 
         if (!value) {
             showNotification("لطفاً مقدار نمره را وارد کنید.");
@@ -2137,14 +2139,24 @@ function renderProfileScoringSection(container) {
             studentId: state.selectedStudentForProfile.identity.studentId
         });
 
-        // Re-render the entire profile to show the new score
-        if (state.activeModal === 'student-profile-modal') {
-            showStudentProfile(state.selectedStudentForProfile);
-        } else {
-            showStudentProfile(state.selectedStudentForProfile);
-        }
+        // --- NEW LOGIC ---
+        // 1. Refresh the background page
+        renderStudentStatsList();
+        displayWinner();
 
-        showNotification(`✅نمره برای مهارت ${skill} با موفقیت ثبت شد.`);
+        // 2. Clear inputs for the next entry
+        scoreInput.value = '';
+        commentTextarea.value = '';
+
+        // 3. Refresh the history section within the modal
+        const modalContentContainer = document.getElementById('modal-profile-content-container');
+        const oldHistorySection = modalContentContainer.querySelector('.history-section');
+        if (oldHistorySection) {
+            oldHistorySection.remove();
+        }
+        renderHistorySection(modalContentContainer);
+
+        showNotification(`✅ نمره برای مهارت ${skill} با موفقیت ثبت شد.`);
     });
 
     // 5. Finally, append the entire new section to the provided container
@@ -2164,40 +2176,54 @@ function renderHistorySection(container) {
     const title = document.createElement('h3');
     title.textContent = 'سوابق دانش‌آموز';
 
-    // 2. Create the "Add Note" button and its listener right here
+    // 2. Create the "Add Note" button and its listener
     const addNoteBtn = document.createElement('button');
-    addNoteBtn.id = 'profile-add-note-btn'; // Use a unique ID for the profile context
     addNoteBtn.className = 'btn-icon';
     addNoteBtn.title = 'افزودن یادداشت جدید';
     addNoteBtn.innerHTML = '📝';
     addNoteBtn.addEventListener('click', () => {
-        newNoteContent.value = '';
+        newNoteContent.value = ''; // Clear modal for a new note
         newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
         state.setSaveNoteCallback((content) => {
             if (content) {
                 state.selectedStudentForProfile.addNote(content);
                 state.saveData();
+
                 logManager.addLog(state.currentClassroom.info.name, `یادداشت جدیدی برای دانش‌آموز «${state.selectedStudentForProfile.identity.name}» ثبت شد.`, { type: 'VIEW_STUDENT_PROFILE', studentId: state.selectedStudentForProfile.identity.studentId });
 
-                // Re-render the correct view
-                if (state.activeModal === 'student-profile-modal') {
-                    showStudentProfile(state.selectedStudentForProfile);
-                } else {
-                    renderStudentProfilePage();
+                // --- NEW LOGIC ---
+                // 1. Refresh the winner panel in the background to update the recent notes list
+                displayWinner();
+
+                // 2. Refresh the content of the current profile modal to show the new note
+                const modalContentContainer = document.getElementById('modal-profile-content-container');
+                if (modalContentContainer) {
+                    // Find and remove only the old history section
+                    const oldHistorySection = modalContentContainer.querySelector('.history-section');
+                    if (oldHistorySection) {
+                        oldHistorySection.remove();
+                    }
+                    // Re-render the history section with the new note
+                    renderHistorySection(modalContentContainer);
                 }
+
+                showNotification('✅ یادداشت با موفقیت ثبت شد.');
             }
         });
 
-        openModal('add-note-modal');
-        newNoteContent.focus();
+        // Close the current profile modal, and THEN open the note modal.
+        closeActiveModal(() => {
+            openModal('add-note-modal');
+            newNoteContent.focus();
+        });
     });
 
     historyHeader.appendChild(title);
     historyHeader.appendChild(addNoteBtn);
     historySection.appendChild(historyHeader);
 
-    // 3. Call the existing functions to populate the content INSIDE our new section
+    // 3. Call the other functions to populate the content
     renderProfileContent(historySection);
     renderScoresHistory(historySection);
     renderStudentNotes(historySection);
@@ -2209,9 +2235,6 @@ function renderHistorySection(container) {
 function renderProfileContent(container) {
     if (!state.selectedStudentForProfile) return;
     const student = state.selectedStudentForProfile;
-
-    // Clear the container first
-    container.innerHTML = '';
 
     const absenceCount = state.currentClassroom.sessions.reduce((count, session) => {
         const record = session.studentRecords[student.identity.studentId];
