@@ -2003,6 +2003,12 @@ export function renderStudentProfilePage() {
     const student = state.selectedStudentForProfile;
     profileStudentNameHeader.textContent = `پروفایل: ${student.identity.name}`;
 
+    if (state.selectedSession) {
+        backToStudentPageBtn.textContent = '➡️ صفحه جلسه';
+    } else {
+        backToStudentPageBtn.textContent = '➡️ لیست جلسات';
+    }
+
     const absenceCount = state.currentClassroom.sessions.reduce((count, session) => {
         const record = session.studentRecords[student.identity.studentId];
         return count + (record && record.attendance === 'absent' ? 1 : 0);

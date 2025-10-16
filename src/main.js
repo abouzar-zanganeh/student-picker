@@ -760,29 +760,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     backToStudentPageBtn.addEventListener('click', () => {
-        state.setSelectedStudentForProfile(null);
+        state.setSelectedStudentForProfile(null); // Clear the selected student in both cases
 
-        // If no session is currently selected, find the most recent valid one.
-        if (!state.selectedSession) {
-            if (state.currentClassroom && state.currentClassroom.sessions.length > 0) {
-                const activeSessions = getActiveItems(state.currentClassroom.sessions)
-                    .filter(s => !s.isCancelled);
-
-                if (activeSessions.length > 0) {
-                    // The most recent session is the last one in the chronological array.
-                    const mostRecentSession = activeSessions[activeSessions.length - 1];
-                    state.setSelectedSession(mostRecentSession);
-                } else {
-                    // Fallback: if there are no valid sessions, just go to the session list page.
-                    ui.renderSessions();
-                    ui.showPage('session-page');
-                    return;
-                }
-            }
+        if (state.selectedSession) {
+            // If a session is active, go back to the student page for that session.
+            ui.renderStudentPage();
+        } else {
+            // If no session is active (global context), go to the session list for the student's class.
+            ui.renderSessions();
+            ui.showPage('session-page');
         }
-
-
-        ui.renderStudentPage();
     });
 
     studentSearchInput.addEventListener('input', (e) => {
