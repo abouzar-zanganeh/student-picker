@@ -121,8 +121,29 @@ export const attendanceMassActionsContainer = document.getElementById('attendanc
 
 export const attendanceSearchInput = document.createElement('input');
 
+export const sessionDashboardPage = document.getElementById('session-dashboard-page');
 
 
+export function setupDashboardTabs() {
+    const selectorTabBtn = document.getElementById('selector-tab-btn');
+    const attendanceTabBtn = document.getElementById('attendance-tab-btn');
+    const selectorPane = document.getElementById('selector-pane');
+    const attendancePane = document.getElementById('attendance-pane');
+
+    selectorTabBtn.addEventListener('click', () => {
+        selectorTabBtn.classList.add('active');
+        attendanceTabBtn.classList.remove('active');
+        selectorPane.classList.add('active');
+        attendancePane.classList.remove('active');
+    });
+
+    attendanceTabBtn.addEventListener('click', () => {
+        attendanceTabBtn.classList.add('active');
+        selectorTabBtn.classList.remove('active');
+        attendancePane.classList.add('active');
+        selectorPane.classList.remove('active');
+    });
+}
 
 export function showUndoToast(message) {
 
