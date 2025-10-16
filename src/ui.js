@@ -1882,10 +1882,7 @@ function renderCategoryPills() {
                                 timestamp: new Date().toISOString(),
                                 type: 'category',
                                 description: `دسته‌بندی «${category.name}» از کلاس «${state.currentClassroom.info.name}»`,
-                                restoreData: {
-                                    categoryId: category.id,
-                                    classroomName: state.currentClassroom.info.name
-                                }
+                                restoreData: { categoryId: category.id, classId: state.currentClassroom.info.scheduleCode }
                             };
                             state.trashBin.unshift(trashEntry);
                             if (state.trashBin.length > 50) state.trashBin.pop();
@@ -2180,7 +2177,7 @@ export function renderStudentProfilePage() {
                             timestamp: new Date().toISOString(),
                             type: 'score',
                             description: `نمره ${score.value} (${score.skill}) برای دانش‌آموز «${student.identity.name}»`,
-                            restoreData: { scoreId: score.id, skill: score.skill, studentId: student.identity.studentId, classroomName: state.currentClassroom.info.name }
+                            restoreData: { scoreId: score.id, skill: score.skill, studentId: student.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
                         };
                         state.trashBin.unshift(trashEntry);
                         if (state.trashBin.length > 50) state.trashBin.pop();
@@ -2251,7 +2248,7 @@ export function renderStudentNotes() {
                         timestamp: new Date().toISOString(),
                         type: 'note',
                         description: `یادداشت برای دانش‌آموز «${state.selectedStudentForProfile.identity.name}»`,
-                        restoreData: { noteId: note.id, studentId: state.selectedStudentForProfile.identity.studentId, classroomName: state.currentClassroom.info.name }
+                        restoreData: { noteId: note.id, studentId: state.selectedStudentForProfile.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
                     };
                     state.trashBin.unshift(trashEntry);
                     if (state.trashBin.length > 50) state.trashBin.pop();
@@ -2687,7 +2684,7 @@ export function renderSettingsStudentList() {
                                     timestamp: new Date().toISOString(),
                                     type: 'student',
                                     description: `دانش‌آموز «${student.identity.name}» از کلاس «${state.currentClassroom.info.name}»`,
-                                    restoreData: { studentId: student.identity.studentId, classroomName: state.currentClassroom.info.name }
+                                    restoreData: { studentId: student.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
                                 };
                                 state.trashBin.unshift(trashEntry);
                                 if (state.trashBin.length > 50) state.trashBin.pop();
@@ -2744,7 +2741,7 @@ export function renderSettingsCategories() {
                         timestamp: new Date().toISOString(),
                         type: 'category',
                         description: `دسته‌بندی «${category.name}» از کلاس «${state.currentClassroom.info.name}»`,
-                        restoreData: { categoryId: category.id, classroomName: state.currentClassroom.info.name }
+                        restoreData: { categoryId: category.id, classId: state.currentClassroom.info.scheduleCode }
                     };
                     state.trashBin.unshift(trashEntry);
                     if (state.trashBin.length > 50) state.trashBin.pop();
@@ -3029,7 +3026,7 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                                 timestamp: new Date().toISOString(),
                                 type: 'session',
                                 description: `جلسه ${displayNumText} از کلاس «${state.currentClassroom.info.name}»`,
-                                restoreData: { sessionNumber: session.sessionNumber, classroomName: state.currentClassroom.info.name }
+                                restoreData: { sessionNumber: session.sessionNumber, classId: state.currentClassroom.info.scheduleCode }
                             };
                             state.trashBin.unshift(trashEntry);
                             if (state.trashBin.length > 50) state.trashBin.pop();
@@ -3211,7 +3208,7 @@ export function renderTrashPage() {
                     break;
                 }
                 case 'student': {
-                    const classroom = state.classrooms[r.classroomName];
+                    const classroom = Object.values(state.classrooms).find(c => c.info.scheduleCode === r.classId);
                     const student = classroom?.students.find(s => s.identity.studentId === r.studentId);
                     if (student) {
                         student.isDeleted = false;
@@ -3220,7 +3217,7 @@ export function renderTrashPage() {
                     break;
                 }
                 case 'session': {
-                    const classroom = state.classrooms[r.classroomName];
+                    const classroom = Object.values(state.classrooms).find(c => c.info.scheduleCode === r.classId);
                     const session = classroom?.sessions.find(s => s.sessionNumber === r.sessionNumber);
                     if (session) {
                         session.isDeleted = false;
@@ -3229,7 +3226,7 @@ export function renderTrashPage() {
                     break;
                 }
                 case 'category': {
-                    const classroom = state.classrooms[r.classroomName];
+                    const classroom = Object.values(state.classrooms).find(c => c.info.scheduleCode === r.classId);
                     const category = classroom?.categories.find(c => c.id === r.categoryId);
                     if (category) {
                         category.isDeleted = false;
@@ -3238,7 +3235,7 @@ export function renderTrashPage() {
                     break;
                 }
                 case 'score': {
-                    const classroom = state.classrooms[r.classroomName];
+                    const classroom = Object.values(state.classrooms).find(c => c.info.scheduleCode === r.classId);
                     const student = classroom?.students.find(s => s.identity.studentId === r.studentId);
                     const score = student?.logs.scores[r.skill.toLowerCase()]?.find(sc => sc.id === r.scoreId);
                     if (score) {
@@ -3248,7 +3245,7 @@ export function renderTrashPage() {
                     break;
                 }
                 case 'note': {
-                    const classroom = state.classrooms[r.classroomName];
+                    const classroom = Object.values(state.classrooms).find(c => c.info.scheduleCode === r.classId);
                     const student = classroom?.students.find(s => s.identity.studentId === r.studentId);
                     const note = student?.profile.notes.find(n => n.id === r.noteId);
                     if (note) {
