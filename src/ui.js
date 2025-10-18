@@ -120,9 +120,9 @@ export const attendanceSearchInput = document.createElement('input');
 export const sessionDashboardPage = document.getElementById('session-dashboard-page');
 
 
-export function renderSessionDashboard() {
+export function renderSessionDashboard(initialTab = 'selector') {
     if (!state.currentClassroom || !state.selectedSession) {
-        showPage('class-management-page'); // Fallback in case state is invalid
+        showPage('class-management-page');
         return;
     }
 
@@ -139,6 +139,10 @@ export function renderSessionDashboard() {
 
     // And finally, activate the tab-switching logic
     setupDashboardTabs();
+
+    // --- NEW: Switch to the correct initial tab ---
+    switchDashboardTab(initialTab);
+    // --- END NEW ---
 
     // Restore the last selected category and winner
     restoreSessionState();

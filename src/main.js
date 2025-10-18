@@ -617,7 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     logManager.addLog(state.currentClassroom.info.name, `جلسه ${displayNumber} شروع شد.`, { type: 'VIEW_SESSIONS' });
 
                     // 3. Navigate to the tabbed dashboard
-                    ui.renderSessionDashboard();
+                    ui.renderSessionDashboard(takeAttendance ? 'attendance' : 'selector');
                 };
                 ui.showCustomConfirm(
                     "آیا تمایل به انجام فرآیند حضور و غیاب دارید؟",
