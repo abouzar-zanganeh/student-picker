@@ -12,8 +12,8 @@
     <meta name="apple-mobile-web-app-title" content="دستیار معلم">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="images/icon-192.png" type="image/png">
-  <script type="module" crossorigin src="/assets/index-D8pPR8Cr.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-CYeBywG0.css">
+  <script type="module" crossorigin src="/assets/index-D2hgGAPU.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-vPg3vZvD.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body>
@@ -74,65 +74,6 @@
         </div>
         <ul id="class-list" class="list-container"></ul>
         <p id="app-version" style="text-align: center; font-size: 12px; color: #888; margin-top: 20px;"></p>
-    </main>
-
-    <main id="student-page" class="page">
-        <button id="back-to-attendance-btn" class="btn-secondary" style="width: auto; margin-left: 10px;">📋 حضور و
-            غیاب</button>
-        <button id="back-to-sessions-btn">➡️ لیست جلسات</button>
-
-        <div class="dashboard-container">
-            <div class="action-column">
-                <div class="action-column-header">
-                    <h3>🎲 انتخابگر هوشمند</h3>
-                    <div class="student-search-container animated-search-container">
-                        <input type="text" id="student-search-input" class="animated-search-input"
-                            placeholder="جستجو در این کلاس">
-                        <span class="search-icon">🔍</span>
-                        <div id="student-search-results" class="search-results-dropdown"></div>
-                    </div>
-                </div>
-
-                <div id="category-selection-container" class="category-pills">
-                </div>
-
-                <div id="quick-grade-form-wrapper">
-                    <input type="number" id="quick-score-input" placeholder="نمره">
-                    <textarea id="quick-note-textarea" placeholder="یادداشت (اختیاری)..."></textarea>
-                    <button id="quick-grade-submit-btn">ثبت</button>
-                </div>
-
-                <div id="select-student-btn-wrapper">
-                    <button id="select-student-btn" class="btn-success btn-large">نفر بعدی</button>
-                </div>
-
-                <div id="selected-student-result" class="result-display">
-                </div>
-            </div>
-
-            <div class="info-column">
-                <h3 id="student-stats-header" class="section-title">آمار عملکرد</h3>
-                <div id="student-stats-table-container">
-
-                </div>
-                </ul>
-            </div>
-        </div>
-    </main>
-
-    <main id="attendance-page" class="page">
-        <button id="back-to-sessions-from-attendance-btn">➡️ لیست جلسات</button>
-
-        <ul id="attendance-list" class="list-container">
-        </ul>
-        <div id="attendance-mass-actions-container">
-            <button id="mass-comment-btn" class="btn-secondary" disabled>📝 ثبت
-                یادداشت گروهی</button>
-        </div>
-        <div class="form-actions">
-            <button id="finish-attendance-btn" class="btn-success btn-large">تایید و ادامه</button>
-        </div>
-        <div id="absentees-summary-container"></div>
     </main>
 
     <main id="settings-page" class="page">
@@ -214,22 +155,10 @@
 
     <main id="student-profile-page" class="page">
         <h2 id="profile-student-name-header"></h2>
-        <button id="back-to-student-page-btn" class="btn-secondary" style="width: auto;">➡️ صفحه جلسه</button>
+        <button id="back-to-student-page-btn" class="btn-secondary" style="width: auto;">➡️ داشبرد جلسه</button>
         <hr class="separator">
 
         <div class="profile-content-container">
-            <div class="scoring-section">
-                <h3>ثبت نمره جدید</h3>
-                <div id="graded-category-pills-container" class="category-pills">
-                    <!-- Pills for skills will be generated here -->
-                </div>
-                <div class="input-group centered-input-group" style="margin-top: 15px;">
-                    <input type="number" id="new-score-value" placeholder="نمره (مثلا: 85)">
-                </div>
-                <textarea id="new-score-comment" placeholder="توضیحات این نمره (اختیاری)..."
-                    style="margin-top: 10px;"></textarea>
-                <button id="add-score-btn" class="btn-success" style="width: 100%; margin-top: 10px;">ثبت نمره</button>
-            </div>
 
             <div class="history-section">
                 <div class="history-section-header">
@@ -239,15 +168,9 @@
                 <div id="profile-stats-summary" class="stats-summary-box">
                     <!-- Student's general stats will be displayed here -->
                 </div>
-                <h4 style="margin-top: 20px;">تاریخچه نمرات:</h4>
-                <ul id="profile-scores-list" class="list-container">
-                    <!-- Scores history will be listed here -->
-                </ul>
-                <h4 style="margin-top: 20px;">تاریخچه یادداشت‌ها:</h4>
-                <ul id="profile-notes-list" class="list-container">
-                    <!-- Notes history will be listed here -->
-                </ul>
+
             </div>
+
         </div>
     </main>
 
@@ -258,6 +181,74 @@
         <hr class="separator">
         <ul id="trashed-items-list" class="list-container">
         </ul>
+    </main>
+
+    <main id="session-dashboard-page" class="page">
+
+        <div class="dashboard-header">
+            <button id="back-to-sessions-btn">➡️ لیست جلسات</button>
+        </div>
+
+        <div class="dashboard-tabs">
+            <button id="selector-tab-btn" class="tab-btn active">انتخابگر</button>
+            <button id="attendance-tab-btn" class="tab-btn">حضور و غیاب</button>
+        </div>
+
+        <div id="selector-pane" class="tab-pane active">
+
+            <div class="dashboard-container">
+                <div class="action-column">
+                    <div class="action-column-header">
+                        <h3>🎲 انتخابگر هوشمند</h3>
+                        <div class="student-search-container animated-search-container">
+                            <input type="text" id="student-search-input" class="animated-search-input"
+                                placeholder="جستجو در این کلاس">
+                            <span class="search-icon">🔍</span>
+                            <div id="student-search-results" class="search-results-dropdown"></div>
+                        </div>
+                    </div>
+
+                    <div id="category-selection-container" class="category-pills">
+                    </div>
+
+                    <div id="quick-grade-form-wrapper">
+                        <input type="number" id="quick-score-input" placeholder="نمره">
+                        <textarea id="quick-note-textarea" placeholder="یادداشت (اختیاری)..."></textarea>
+                        <button id="quick-grade-submit-btn">ثبت</button>
+                    </div>
+
+                    <div id="select-student-btn-wrapper">
+                        <button id="select-student-btn" class="btn-success btn-large">نفر بعدی</button>
+                    </div>
+
+                    <div id="selected-student-result" class="result-display">
+                    </div>
+                </div>
+
+                <div class="info-column">
+                    <h3 id="student-stats-header" class="section-title">آمار عملکرد</h3>
+                    <div id="student-stats-table-container">
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div id="attendance-pane" class="tab-pane">
+
+            <ul id="attendance-list" class="list-container">
+            </ul>
+            <div id="attendance-mass-actions-container">
+                <button id="mass-comment-btn" class="btn-secondary" disabled>📝 ثبت
+                    یادداشت گروهی</button>
+            </div>
+            <div class="form-actions">
+                <button id="finish-attendance-btn" class="btn-success btn-large">تایید و ادامه</button>
+            </div>
+            <div id="absentees-summary-container"></div>
+        </div>
+
     </main>
 
     <div id="undo-toast" class="toast-base undo-toast">
@@ -354,6 +345,17 @@
             </ul>
             <div class="modal-actions">
                 <button id="log-modal-close-btn" class="btn-secondary">بستن</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="student-profile-modal" class="modal-overlay">
+        <div class="modal-content profile-modal-content">
+            <div class="profile-modal-header">
+                <h2 id="modal-profile-student-name"></h2>
+                <button id="modal-profile-close-btn" class="close-btn">&times;</button>
+            </div>
+            <div id="modal-profile-content-container" class="profile-content-container">
             </div>
         </div>
     </div>
