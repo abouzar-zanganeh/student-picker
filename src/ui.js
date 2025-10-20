@@ -2059,6 +2059,9 @@ function renderCategoryPills() {
 
 function restoreSessionState() {
     if (state.selectedSession.lastUsedCategoryId) {
+
+        if (state.selectedSession.isFinished) return;
+
         const lastCategoryPill = categoryPillsContainer.querySelector(`.pill[data-category-id="${state.selectedSession.lastUsedCategoryId}"]`);
         if (lastCategoryPill) {
             lastCategoryPill.click();
