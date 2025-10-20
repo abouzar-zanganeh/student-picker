@@ -490,11 +490,29 @@ export function permanentlyDeleteStudent(studentToDelete, classroom) {
         classroom.students.splice(indexToRemove, 1);
     }
 
-    // 2. Remove the student's records from every session in that class
+    // 2. Remove the student's records and all references from every session
     classroom.sessions.forEach(session => {
+        // Remove from studentRecords
         if (session.studentRecords[studentId]) {
             delete session.studentRecords[studentId];
         }
+
+        // Remove from lastWinnerByCategory
+        for (const categoryName in session.lastWinnerByCategory) {
+            if (session.lastWinnerByCategory[categoryName] === studentId) {
+                delete session.lastWinnerByCategory[categoryName];
+            }
+        }
+
+        // Clear lastSelectedWinnerId if it matches
+        if (session.lastSelectedWinnerId === studentId) {
+            session.lastSelectedWinnerId = null;
+        }
+
+        // Filter them out of the winnerHistory
+        session.winnerHistory = session.winnerHistory.filter(
+            entry => entry.winner && entry.winner.identity.studentId !== studentId
+        );
     });
 }
 
@@ -503,6 +521,24 @@ export function permanentlyDeleteSession(classroomName, sessionNumber) {
     if (!classroom) return;
     const sessionIndex = classroom.sessions.findIndex(s => s.sessionNumber === sessionNumber);
     if (sessionIndex > -1) {
+
+        // Clean up references to this session in all students
+        classroom.students.forEach(student => {
+            // Remove any notes sourced from this session
+            if (student.profile.notes && student.profile.notes.length > 0) {
+                student.profile.notes = student.profile.notes.filter(note =>
+                    !note.source ||
+                    note.source.type !== 'fromAttendance' ||
+                    note.source.sessionNumber !== sessionNumber
+                );
+            }
+
+            // Reset onboarding session if it matches
+            if (student.onboardingSession === sessionNumber) {
+                student.onboardingSession = null;
+            }
+        });
+
         classroom.sessions.splice(sessionIndex, 1);
     }
 }
@@ -523,6 +559,19 @@ export function permanentlyDeleteCategory(classroomName, categoryId) {
         if (student.categoryCounts) delete student.categoryCounts[categoryName];
         if (student.categoryIssues) delete student.categoryIssues[categoryName];
         if (student.logs.scores) delete student.logs.scores[skillKey];
+    });
+
+    // Remove from session histories
+    classroom.sessions.forEach(session => {
+        // Remove from lastWinnerByCategory
+        if (session.lastWinnerByCategory[categoryName]) {
+            delete session.lastWinnerByCategory[categoryName];
+        }
+
+        // Filter out of the winnerHistory
+        session.winnerHistory = session.winnerHistory.filter(
+            entry => entry.categoryName !== categoryName
+        );
     });
 
     // Remove the category object itself
