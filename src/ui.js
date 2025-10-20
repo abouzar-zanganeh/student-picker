@@ -845,13 +845,18 @@ export function openContextMenu(event, menuItems) {
         // 1. Make the menu visible so we can measure it
         menu.classList.add('visible');
 
-        // 2. Get dimensions
+        // 2. Get dimensions of menu, window, and body
         const { offsetWidth: menuWidth, offsetHeight: menuHeight } = menu;
-        const { innerWidth: windowWidth, innerHeight: windowHeight } = window;
+        const { innerHeight: windowHeight } = window;
+        const bodyRect = document.body.getBoundingClientRect();
 
         // 3. Calculate and apply centered coordinates
+        // Center vertically relative to the viewport
         menu.style.top = `${(windowHeight - menuHeight) / 2}px`;
-        menu.style.left = `${(windowWidth - menuWidth) / 2}px`;
+
+        // Center horizontally relative to the BODY's actual position
+        const bodyCenter = bodyRect.left + (bodyRect.width / 2);
+        menu.style.left = `${bodyCenter - (menuWidth / 2)}px`;
 
     }, 50); // A small delay for a smooth effect
 }
