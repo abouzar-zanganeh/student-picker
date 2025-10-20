@@ -96,6 +96,8 @@ const resultDiv = document.getElementById('selected-student-result');
 export const contextMenu = document.getElementById('custom-context-menu');
 export const breadcrumbContainer = document.getElementById('breadcrumb-container');
 
+let contextMenuTarget = null; // Tracks the LI element that was right-clicked
+
 // for category modal on student page (when adding categories)
 export const categoryModal = document.getElementById('category-modal');
 export const categoryModalTitle = document.getElementById('category-modal-title');
@@ -802,16 +804,22 @@ export async function initiateBackupProcess(classNamesToBackup = []) {
 export function openContextMenu(event, menuItems) {
     event.preventDefault();
 
-    // Start by closing any existing menu. This will trigger the fade-out.
+    // Start by closing any existing menu and clearing any old target
     closeContextMenu();
 
-    // Use a timeout to allow the close transition to begin before we re-open.
+    // NEW: Find and highlight the target LI
+    contextMenuTarget = event.target.closest('li');
+    if (contextMenuTarget) {
+        contextMenuTarget.classList.add('context-menu-target');
+    }
+
+    // Use a timeout to allow the close transition to begin
     setTimeout(() => {
         const menu = contextMenu;
         const ul = menu.querySelector('ul');
-        ul.innerHTML = ''; // Clear out items from any previous menu.
+        ul.innerHTML = ''; // Clear out items
 
-        // Dynamically create and add the new menu items.
+        // Dynamically create and add the new menu items
         menuItems.forEach(item => {
             const li = document.createElement('li');
 
@@ -827,36 +835,36 @@ export function openContextMenu(event, menuItems) {
                 }
                 li.addEventListener('click', () => {
                     item.action();
-                    closeContextMenu();
+                    closeContextMenu(); // This will now also remove the highlight
                 });
             }
             ul.appendChild(li);
         });
 
-        // --- Positioning Logic ---
-        const { clientX, clientY } = event;
-        const { innerWidth: windowWidth, innerHeight: windowHeight } = window;
-
-        // Position and show the menu. This will now trigger the fade-in.
-        menu.style.top = `${clientY}px`;
-        menu.style.left = `${clientX}px`;
+        // --- NEW: Positioning Logic ---
+        // 1. Make the menu visible so we can measure it
         menu.classList.add('visible');
 
-        // --- Edge Collision Detection ---
+        // 2. Get dimensions
         const { offsetWidth: menuWidth, offsetHeight: menuHeight } = menu;
+        const { innerWidth: windowWidth, innerHeight: windowHeight } = window;
 
-        if (clientX + menuWidth > windowWidth) {
-            menu.style.left = `${windowWidth - menuWidth - 5}px`;
-        }
-        if (clientY + menuHeight > windowHeight) {
-            menu.style.top = `${windowHeight - menuHeight - 5}px`;
-        }
-    }, 50); // A small delay like 50ms is enough for a smooth effect
+        // 3. Calculate and apply centered coordinates
+        menu.style.top = `${(windowHeight - menuHeight) / 2}px`;
+        menu.style.left = `${(windowWidth - menuWidth) / 2}px`;
+
+    }, 50); // A small delay for a smooth effect
 }
 
 export function closeContextMenu() {
     if (contextMenu.classList.contains('visible')) {
         contextMenu.classList.remove('visible');
+    }
+
+    // NEW: Remove highlight from the target item
+    if (contextMenuTarget) {
+        contextMenuTarget.classList.remove('context-menu-target');
+        contextMenuTarget = null; // Reset the tracker
     }
 }
 
@@ -2767,6 +2775,21 @@ function createClassListItem(classroom) {
         }
 
         const menuItems = [
+
+            {
+                label: classListUl.classList.contains('selection-mode-active') ? 'لغو انتخاب' : 'انتخاب چند کلاس',
+                icon: '✔️',
+                action: () => {
+                    const wasSelectionMode = classListUl.classList.contains('selection-mode-active');
+                    classListUl.classList.toggle('selection-mode-active');
+
+                    // If we are turning selection mode OFF
+                    if (wasSelectionMode) {
+                        state.setSelectedClassIds([]); // Clear the array
+                        renderClassList(); // Re-render to uncheck all boxes
+                    }
+                }
+            },
 
             backupItem,
 

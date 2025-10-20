@@ -297,6 +297,12 @@ button:disabled:hover {
     border-bottom-right-radius: var(--border-radius-main);
 }
 
+/* Highlight for the item being right-clicked */
+.list-container li.context-menu-target {
+    background-color: #e0eafc;
+    /* A light blue highlight */
+}
+
 .preview-item {
     display: flex;
     align-items: center;
@@ -2562,4 +2568,16 @@ textarea,
 /* --- Utility for Modal Scroll Lock --- */
 body.modal-active {
     overflow: hidden;
+}
+
+/* --- Styles for Classrooms Selection Mode when the checkboxes appear next to class names --- */
+.mass-selection-checkbox {
+    display: none;
+    margin-left: 10px;
+    /* Add some spacing */
+}
+
+#class-list.selection-mode-active .mass-selection-checkbox {
+    display: inline-block;
+    /* Show checkbox in selection mode */
 }
