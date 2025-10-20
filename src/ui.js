@@ -2402,16 +2402,40 @@ export function renderScoresHistory(scoresContainer) {
             deleteBtn.innerHTML = '🗑️';
             deleteBtn.title = 'حذف این نمره';
             deleteBtn.addEventListener('click', () => {
-                showCustomConfirm(
-                    `آیا از حذف نمره ${score.value} در مهارت «${score.skill}» مطمئن هستید؟`,
-                    () => {
-                        score.isDeleted = true;
-                        state.saveData();
-                        showStudentProfile(student);
-                        showNotification('✅ نمره به سطل زباله منتقل شد.');
-                    },
-                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
-                );
+                closeActiveModal(() => {
+                    showCustomConfirm(
+                        `آیا از انتقال نمره ${score.value} در مهارت «${score.skill}» به سطل زباله مطمئن هستید؟`,
+                        () => {
+                            // NEW: This logic now sends the item to the trash bin
+                            const trashEntry = {
+                                id: `trash_${Date.now()}_${Math.random()}`,
+                                timestamp: new Date().toISOString(),
+                                type: 'score',
+                                description: `نمره ${score.value} (${score.skill}) برای «${student.identity.name}»`,
+                                restoreData: { scoreId: score.id, skill: score.skill, studentId: student.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
+                            };
+                            state.trashBin.unshift(trashEntry);
+                            if (state.trashBin.length > 50) state.trashBin.pop();
+
+                            score.isDeleted = true; // Mark as deleted
+                            state.saveData();
+
+                            logManager.addLog(state.currentClassroom.info.name, `نمره ${score.value} (${score.skill}) دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+
+                            // Re-open the profile modal to see the change
+                            showStudentProfile(student);
+                            showNotification('✅ نمره به سطل زباله منتقل شد.');
+                        },
+                        {
+                            confirmText: 'تایید انتقال',
+                            confirmClass: 'btn-warning',
+                            // NEW: If user cancels, re-open the profile modal
+                            onCancel: () => {
+                                showStudentProfile(student);
+                            }
+                        }
+                    );
+                });
             });
 
             li.appendChild(itemContentDiv);
@@ -2463,27 +2487,39 @@ export function renderStudentNotes(notesContainer) {
             deleteBtn.innerHTML = '🗑️';
             deleteBtn.title = 'حذف این یادداشت';
             deleteBtn.addEventListener('click', () => {
-                showCustomConfirm(
-                    `آیا از حذف این یادداشت مطمئن هستید؟`,
-                    () => {
-                        const trashEntry = {
-                            id: `trash_${Date.now()}_${Math.random()}`,
-                            timestamp: new Date().toISOString(),
-                            type: 'note',
-                            description: `یادداشت برای دانش‌آموز «${state.selectedStudentForProfile.identity.name}»`,
-                            restoreData: { noteId: note.id, studentId: state.selectedStudentForProfile.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
-                        };
-                        state.trashBin.unshift(trashEntry);
-                        if (state.trashBin.length > 50) state.trashBin.pop();
+                // This is the "close-then-open" fix
+                closeActiveModal(() => {
+                    showCustomConfirm(
+                        `آیا از انتقال این یادداشت به سطل زباله مطمئن هستید؟`,
+                        () => {
+                            const trashEntry = {
+                                id: `trash_${Date.now()}_${Math.random()}`,
+                                timestamp: new Date().toISOString(),
+                                type: 'note',
+                                description: `یادداشت برای دانش‌آموز «${state.selectedStudentForProfile.identity.name}»`,
+                                restoreData: { noteId: note.id, studentId: state.selectedStudentForProfile.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
+                            };
+                            state.trashBin.unshift(trashEntry);
+                            if (state.trashBin.length > 50) state.trashBin.pop();
 
-                        note.isDeleted = true;
-                        logManager.addLog(state.currentClassroom.info.name, `یادداشت دانش‌آموز «${state.selectedStudentForProfile.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
-                        state.saveData();
-                        showStudentProfile(state.selectedStudentForProfile);
-                        showNotification('✅ یادداشت به سطل زباله منتقل شد.');
-                    },
-                    { confirmText: 'تایید حذف', confirmClass: 'btn-warning' }
-                );
+                            note.isDeleted = true;
+                            logManager.addLog(state.currentClassroom.info.name, `یادداشت دانش‌آموز «${state.selectedStudentForProfile.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+                            state.saveData();
+
+                            // Re-open the profile modal to see the change
+                            showStudentProfile(state.selectedStudentForProfile);
+                            showNotification('✅ یادداشت به سطل زباله منتقل شد.');
+                        },
+                        {
+                            confirmText: 'تایید انتقال',
+                            confirmClass: 'btn-warning',
+                            // NEW: If user cancels, re-open the profile modal
+                            onCancel: () => {
+                                showStudentProfile(state.selectedStudentForProfile);
+                            }
+                        }
+                    );
+                });
             });
 
             noteInfoDiv.appendChild(noteDateSpan);
@@ -3494,17 +3530,49 @@ export function renderTrashPage() {
         permanentDeleteBtn.title = 'حذف دائمی';
         permanentDeleteBtn.addEventListener('click', () => {
             showCustomConfirm(
-                `آیا از حذف دائمی این آیتم مطمئن هستید؟ این عمل غیرقابل بازگشت است.`,
+                `آیا از حذف دائمی این آیتم مطمئن هستید؟ این عمل غیرقابل بازgشت است.`,
                 () => {
                     const r = entry.restoreData;
+
+                    // Helper function to find the classroom by its unique scheduleCode (classId)
+                    const findClass = (classId) => Object.values(state.classrooms).find(c => c.info.scheduleCode === classId);
+
+                    let classroom; // Declare classroom variable here
+
                     switch (entry.type) {
-                        case 'classroom': delete state.classrooms[r.name]; break;
-                        case 'student': permanentlyDeleteStudent({ identity: { studentId: r.studentId } }, state.classrooms[r.classroomName]); break;
-                        case 'session': permanentlyDeleteSession(r.classroomName, r.sessionNumber); break;
-                        case 'category': permanentlyDeleteCategory(r.classroomName, r.categoryId); break;
-                        case 'score': permanentlyDeleteScore(r.classroomName, r.studentId, r.skill, r.scoreId); break;
-                        case 'note': permanentlyDeleteNote(r.classroomName, r.studentId, r.noteId); break;
+                        case 'classroom':
+                            delete state.classrooms[r.name];
+                            break;
+                        case 'student':
+                            classroom = findClass(r.classId);
+                            permanentlyDeleteStudent({ identity: { studentId: r.studentId } }, classroom);
+                            break;
+                        case 'session':
+                            classroom = findClass(r.classId);
+                            if (classroom) {
+                                permanentlyDeleteSession(classroom.info.name, r.sessionNumber);
+                            }
+                            break;
+                        case 'category':
+                            classroom = findClass(r.classId);
+                            if (classroom) {
+                                permanentlyDeleteCategory(classroom.info.name, r.categoryId);
+                            }
+                            break;
+                        case 'score':
+                            classroom = findClass(r.classId);
+                            if (classroom) {
+                                permanentlyDeleteScore(classroom.info.name, r.studentId, r.skill, r.scoreId);
+                            }
+                            break;
+                        case 'note':
+                            classroom = findClass(r.classId);
+                            if (classroom) {
+                                permanentlyDeleteNote(classroom.info.name, r.studentId, r.noteId);
+                            }
+                            break;
                     }
+
                     state.trashBin.splice(index, 1);
                     state.saveData();
                     renderTrashPage();
