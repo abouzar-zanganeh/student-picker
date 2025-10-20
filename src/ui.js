@@ -1989,7 +1989,21 @@ function renderCategoryPills() {
                                     });
                                 }
                             });
-                            //END NEW LOGIC
+
+                            // --- Check if the deleted category was the active one ---
+                            if (state.selectedCategory && state.selectedCategory.id === category.id) {
+                                state.setSelectedCategory(null); // Clear the state
+                                resultDiv.innerHTML = ''; // Clear the winner display
+                                updateQuickGradeUIForCategory(null); // Disable the quick-grade form
+                                selectStudentBtnWrapper.classList.add('disabled-wrapper'); // Disable the main select button
+                                selectStudentBtn.disabled = true;
+
+                                // Clear the winner highlight from the stats table
+                                const previousWinnerRow = document.querySelector('.current-winner-highlight');
+                                if (previousWinnerRow) {
+                                    previousWinnerRow.classList.remove('current-winner-highlight');
+                                }
+                            }
 
                             category.isDeleted = true;
                             logManager.addLog(state.currentClassroom.info.name, `دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`, {
@@ -2060,18 +2074,23 @@ function restoreSessionState() {
 }
 
 function updateQuickGradeUIForCategory(category) {
-    if (!category) return; // Do nothing if no category is provided
-
-    if (category.isGradedCategory) {
+    if (category && category.isGradedCategory) {
         quickScoreInput.disabled = false;
         quickNoteTextarea.disabled = false;
         quickGradeSubmitBtn.disabled = false;
         quickGradeFormWrapper.removeAttribute('title');
     } else {
+        // This block now handles both non-gradable and null/undefined categories.
         quickScoreInput.disabled = true;
         quickNoteTextarea.disabled = true;
         quickGradeSubmitBtn.disabled = true;
-        quickGradeFormWrapper.setAttribute('title', 'برای این دسته‌بندی قابلیت نمره دهی تعریف نشده است');
+
+        // Set the correct tooltip based on the reason for disabling.
+        if (category) { // It's a non-gradable category
+            quickGradeFormWrapper.setAttribute('title', 'برای این دسته‌بندی قابلیت نمره دهی تعریف نشده است');
+        } else { // No category is selected
+            quickGradeFormWrapper.setAttribute('title', 'ابتدا یک دسته‌بندی را انتخاب کنید');
+        }
     }
 }
 
