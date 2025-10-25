@@ -1794,7 +1794,6 @@ export function handleUndoLastSelection(student, categoryName) {
     ui.showCustomConfirm(
         `آیا از لغو انتخاب «${student.identity.name}» برای «${categoryName}» مطمئن هستید؟ آمار این انتخاب بازگردانی خواهد شد.`,
         () => {
-            // --- Step 5: Core Undo Logic ---
             const history = state.selectedSession.winnerHistory;
 
             // 1. Pop the last winner off the history stack

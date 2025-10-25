@@ -1531,6 +1531,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
     if (correspondingCategory) {
         // Update the application state to the historical category
         state.setSelectedCategory(correspondingCategory);
+        updateSelectButtonText(correspondingCategory);
 
         // Update the UI to show the correct active pill
         const allPills = document.querySelectorAll('#category-selection-container .pill');
@@ -1960,6 +1961,9 @@ export function setAutoDirectionOnInput(inputElement) {
 
 function initializeStudentPageUI() {
 
+    updateSelectButtonText(null);
+
+
 
     // Set header and clear containers
     categoryPillsContainer.innerHTML = '';
@@ -2000,6 +2004,7 @@ function renderCategoryPills() {
                 document.querySelectorAll('#category-selection-container .pill').forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
                 state.setSelectedCategory(category);
+                updateSelectButtonText(category);
                 updateQuickGradeUIForCategory(category);
                 selectStudentBtnWrapper.classList.remove('disabled-wrapper');
                 selectStudentBtn.disabled = state.selectedSession.isFinished;
@@ -2164,6 +2169,14 @@ function restoreSessionState() {
         state.setWinnerHistoryIndex(state.selectedSession.winnerHistory.length - 1);
         // Call displayWinner to show them
         displayWinner();
+    }
+}
+
+function updateSelectButtonText(category) {
+    if (category) {
+        selectStudentBtn.textContent = `نفر بعدی در ${category.name}`;
+    } else {
+        selectStudentBtn.textContent = 'نفر بعدی';
     }
 }
 
