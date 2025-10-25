@@ -2474,6 +2474,34 @@ export function renderScoresHistory(scoresContainer) {
                 const scoreCommentP = document.createElement('p');
                 scoreCommentP.className = 'score-comment';
                 scoreCommentP.innerHTML = renderMultiLineText(score.comment);
+
+                scoreCommentP.addEventListener('click', () => {
+                    // 1. Set up the note modal with the score's comment
+                    newNoteContent.value = score.comment;
+                    newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
+
+                    // 2. Define what "Save" does
+                    state.setSaveNoteCallback((newText) => {
+                        score.comment = newText;
+                        state.saveData();
+
+                        logManager.addLog(state.currentClassroom.info.name,
+                            `توضیحات نمره ${score.value} (${score.skill}) برای دانش‌آموز «${student.identity.name}» به‌روزرسانی شد.`, {
+                            type: 'VIEW_STUDENT_PROFILE',
+                            studentId: student.identity.studentId
+                        });
+
+                        showStudentProfile(student); // Re-open profile modal
+                        showNotification("✅ توضیحات نمره با موفقیت ویرایش شد.");
+                    });
+
+                    // 3. Close the profile modal, THEN open the note modal
+                    closeActiveModal(() => {
+                        openModal('add-note-modal');
+                        newNoteContent.focus();
+                    });
+                });
+
                 itemContentDiv.appendChild(scoreCommentP);
             }
 
