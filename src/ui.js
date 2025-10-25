@@ -510,6 +510,9 @@ export function closeActiveModal(onClosed, isHistoryPop = false) {
     // This lets our 'popstate' listener (in the next step) know that we are closing the modal
     // intentionally and that it should not spring the "trap".
     state.setActiveModal(null);
+    if (activeModalId === 'student-profile-modal') {
+        state.setSelectedStudentForProfile(null);
+    }
 
     if (!isHistoryPop) {
         history.back();
@@ -544,6 +547,8 @@ export function closeActiveModal(onClosed, isHistoryPop = false) {
             if (activeModalId === 'add-note-modal') {
                 state.setSaveNoteCallback(null);
             }
+
+
 
             // Run the callback function after everything is done
             if (typeof onClosed === 'function') {
