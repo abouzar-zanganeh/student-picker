@@ -3087,7 +3087,8 @@ export function _internalShowPage(pageId) {
     renderBreadcrumbs();
 }
 
-export function showPage(pageId) {
+export function showPage(pageId, options = {}) { // <--- MODIFIED
+    const { tab } = options; // <--- ADDED
     const historyState = {
         pageId,
         currentClassName: state.currentClassroom ? state.currentClassroom.info.name : null,
