@@ -1752,10 +1752,101 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         }
     });
+
+
+
+
     // End of Screen Saver...
 
 
     // Temporary for debugging, must be commented out as soon as debugging ends
     // window.state = state;
     // window.ui = ui;
+
 });
+
+export function handleUndoLastSelection(student, categoryName) {
+    // --- Safety Checks (Step 4) ---
+
+    // 1. Check if we are in a valid state
+    if (!state.selectedSession || state.selectedSession.isFinished) {
+        ui.showNotification("⚠️ امکان لغو انتخاب در جلسه خاتمه یافته وجود ندارد.");
+        return;
+    }
+
+    // 2. Check if we are viewing the MOST RECENT winner.
+    // We use winnerHistoryIndex to know if the user is browsing past winners.
+    const history = state.selectedSession.winnerHistory;
+    const isLastWinner = state.winnerHistoryIndex === history.length - 1;
+
+    if (!isLastWinner || history.length === 0) {
+        ui.showNotification("⚠️ فقط آخرین انتخاب قابل لغو است.");
+        return;
+    }
+
+    // 3. Final check to be extra sure the student matches
+    if (history[history.length - 1].winner.identity.studentId !== student.identity.studentId) {
+        console.error("Undo mismatch!"); // Safety check for us
+        return;
+    }
+
+    // --- Confirmation ---
+    ui.showCustomConfirm(
+        `آیا از لغو انتخاب «${student.identity.name}» برای «${categoryName}» مطمئن هستید؟ آمار این انتخاب بازگردانی خواهد شد.`,
+        () => {
+            // --- Step 5: Core Undo Logic ---
+            const history = state.selectedSession.winnerHistory;
+
+            // 1. Pop the last winner off the history stack
+            const undoneEntry = history.pop();
+            if (!undoneEntry) return; // Should never happen, but good to check
+
+            const student = undoneEntry.winner;
+            const categoryName = undoneEntry.categoryName;
+            const studentId = student.identity.studentId;
+
+            // 2. Decrement student's global stats
+            student.statusCounters.totalSelections = Math.max(0, student.statusCounters.totalSelections - 1);
+            if (student.categoryCounts[categoryName]) {
+                student.categoryCounts[categoryName] = Math.max(0, student.categoryCounts[categoryName] - 1);
+            }
+
+            // 3. Decrement session-specific stats
+            const record = state.selectedSession.studentRecords[studentId];
+            if (record && record.selections[categoryName]) {
+                record.selections[categoryName] = Math.max(0, record.selections[categoryName] - 1);
+            }
+
+            // 4. Find the *new* last winner for this category
+            let newLastWinnerId = null;
+            // We iterate backward through the *remaining* history
+            for (let i = history.length - 1; i >= 0; i--) {
+                if (history[i].categoryName === categoryName) {
+                    newLastWinnerId = history[i].winner.identity.studentId;
+                    break; // Found it
+                }
+            }
+
+            if (newLastWinnerId) {
+                state.selectedSession.lastWinnerByCategory[categoryName] = newLastWinnerId;
+            } else {
+                // No one else was selected for this category in the history
+                delete state.selectedSession.lastWinnerByCategory[categoryName];
+            }
+
+            // --- Step 6: Refresh UI ---
+
+            // 5. Update the history index to point to the new last item
+            state.setWinnerHistoryIndex(history.length - 1);
+
+            // 6. Re-render the stats table and winner display
+            ui.renderStudentStatsList();
+            ui.displayWinner(); // This will now show the new last winner (or nothing if history is empty)
+
+            // 7. Save and notify
+            state.saveData();
+            ui.showNotification(`✅ انتخاب «${student.identity.name}» لغو شد.`);
+        },
+        { confirmText: 'لغو انتخاب', confirmClass: 'btn-warning' }
+    );
+}

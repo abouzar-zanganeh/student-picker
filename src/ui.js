@@ -10,6 +10,7 @@ import { detectTextDirection, renderMultiLineText } from './utils.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
 import { Category } from './models.js';
+import { handleUndoLastSelection } from './main.js';
 
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');
@@ -95,6 +96,8 @@ const categoryPillsContainer = document.getElementById('category-selection-conta
 const resultDiv = document.getElementById('selected-student-result');
 export const contextMenu = document.getElementById('custom-context-menu');
 export const breadcrumbContainer = document.getElementById('breadcrumb-container');
+
+let winnerRemovalLongPressTimer = null;
 
 let contextMenuTarget = null; // Tracks the LI element that was right-clicked
 
@@ -1581,6 +1584,40 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
         winnerNameEl.style.color = 'var(--color-strong-warning)';
         winnerNameEl.title = 'این دانش‌آموز در زمان انتخاب خارج از کلاس بود';
     }
+
+    // --- Long Press Listeners for Undoing Selection ---
+    const longPressDuration = 1000; // 1 second
+
+    const startPress = (e) => {
+        // Prevent default text selection or context menu on mobile
+        e.preventDefault();
+
+        // Start a timer
+        winnerRemovalLongPressTimer = setTimeout(() => {
+            // If the timer finishes, the press was long.
+            handleUndoLastSelection(winner, categoryName);
+            winnerRemovalLongPressTimer = null; // Clear the timer
+        }, longPressDuration);
+    };
+
+    const cancelPress = () => {
+        // If the user lets go or moves their finger away, clear the timer
+        if (winnerRemovalLongPressTimer) {
+            clearTimeout(winnerRemovalLongPressTimer);
+            winnerRemovalLongPressTimer = null;
+        }
+    };
+
+    // Mouse events for desktop
+    winnerNameEl.addEventListener('mousedown', startPress);
+    winnerNameEl.addEventListener('mouseup', cancelPress);
+    winnerNameEl.addEventListener('mouseout', cancelPress);
+
+    // Touch events for mobile
+    winnerNameEl.addEventListener('touchstart', startPress);
+    winnerNameEl.addEventListener('touchend', cancelPress);
+    winnerNameEl.addEventListener('touchcancel', cancelPress);
+    // --- End Long Press ---
 
     const forwardBtn = document.createElement('button');
     forwardBtn.className = 'btn-icon';
