@@ -1637,149 +1637,166 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
     profileBtn.textContent = 'پروفایل';
     profileBtn.className = 'status-button profile-btn';
 
-    absentBtn.addEventListener('click', () => {
-        const isCurrentlyActive = absentBtn.classList.contains('active');
+    if (state.selectedSession.isFinished) {
+        absentBtn.disabled = true;
+    } else {
 
-        if (exitBtn.classList.contains('active')) {
-            exitBtn.classList.remove('active');
-            studentRecord.wasOutOfClass = false;
-            winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
-            winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
-        }
+        absentBtn.addEventListener('click', () => {
+            const isCurrentlyActive = absentBtn.classList.contains('active');
 
-        if (!isCurrentlyActive) {
-            if (issueBtn.classList.contains('active')) {
-                issueBtn.classList.remove('active');
-                studentRecord.hadIssue = false;
-                winner.statusCounters.otherIssues = Math.max(0, winner.statusCounters.otherIssues - 1);
+            if (exitBtn.classList.contains('active')) {
+                exitBtn.classList.remove('active');
+                studentRecord.wasOutOfClass = false;
+                winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
                 winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
             }
-            absentBtn.classList.add('active');
-            state.selectedSession.setAttendance(winner.identity.studentId, 'absent');
-            winner.statusCounters.missedChances++;
 
-            // Update UI Immediately
-            winnerNameEl.style.textDecoration = 'line-through';
-            winnerNameEl.style.opacity = '0.6';
-            winnerNameEl.style.color = 'var(--color-secondary)'; // Set text color to gray
-            winnerNameEl.title = '';
-        } else {
-            absentBtn.classList.remove('active');
-            state.selectedSession.setAttendance(winner.identity.studentId, 'present');
-            winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+            if (!isCurrentlyActive) {
+                if (issueBtn.classList.contains('active')) {
+                    issueBtn.classList.remove('active');
+                    studentRecord.hadIssue = false;
+                    winner.statusCounters.otherIssues = Math.max(0, winner.statusCounters.otherIssues - 1);
+                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+                }
+                absentBtn.classList.add('active');
+                state.selectedSession.setAttendance(winner.identity.studentId, 'absent');
+                winner.statusCounters.missedChances++;
 
-            // Revert UI Immediately
-            winnerNameEl.style.textDecoration = '';
-            winnerNameEl.style.opacity = '';
-            winnerNameEl.style.color = ''; // Revert text color
-        }
-        renderStudentStatsList();
-        state.saveData();
-    });
-
-    issueBtn.addEventListener('click', () => {
-        const isCurrentlyActive = issueBtn.classList.contains('active');
-
-        if (exitBtn.classList.contains('active')) {
-            exitBtn.classList.remove('active');
-            studentRecord.wasOutOfClass = false;
-            winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
-            winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
-        }
-
-        if (!isCurrentlyActive) {
-            if (absentBtn.classList.contains('active')) {
+                // Update UI Immediately
+                winnerNameEl.style.textDecoration = 'line-through';
+                winnerNameEl.style.opacity = '0.6';
+                winnerNameEl.style.color = 'var(--color-secondary)'; // Set text color to gray
+                winnerNameEl.title = '';
+            } else {
                 absentBtn.classList.remove('active');
                 state.selectedSession.setAttendance(winner.identity.studentId, 'present');
                 winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+
+                // Revert UI Immediately
+                winnerNameEl.style.textDecoration = '';
+                winnerNameEl.style.opacity = '';
+                winnerNameEl.style.color = ''; // Revert text color
             }
-            issueBtn.classList.add('active');
-            studentRecord.hadIssue = true;
+            renderStudentStatsList();
+            state.saveData();
+        });
+    }
 
-            const categoryName = state.selectedCategory.name;
-            winner.categoryIssues[categoryName] = (winner.categoryIssues[categoryName] || 0) + 1;
+    if (state.selectedSession.isFinished) {
+        issueBtn.disabled = true;
+    } else {
+        issueBtn.addEventListener('click', () => {
+            const isCurrentlyActive = issueBtn.classList.contains('active');
 
-            winner.statusCounters.missedChances++;
-
-            // --- First, clear any potential 'absent' styling ---
-            winnerNameEl.style.textDecoration = '';
-            winnerNameEl.style.opacity = '';
-            // ----------------------------------------------------
-
-            // Now, apply the 'issue' styling
-            winnerNameEl.style.color = 'var(--color-warning)';
-            winnerNameEl.title = 'این دانش‌آموز در انتخاب قبلی با مشکل مواجه شده بود';
-
-        } else {
-            issueBtn.classList.remove('active');
-            studentRecord.hadIssue = false;
-
-            const categoryName = state.selectedCategory.name;
-            if (winner.categoryIssues[categoryName]) { winner.categoryIssues[categoryName] = Math.max(0, winner.categoryIssues[categoryName] - 1); }
-
-            winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
-
-            // --- ADDED ---
-            winnerNameEl.style.color = ''; // Reverts to default color
-            winnerNameEl.title = '';      // Removes the tooltip
-            // -------------
-        }
-        renderStudentStatsList();
-        state.saveData();
-    });
-
-    exitBtn.addEventListener('click', () => {
-        const isCurrentlyActive = exitBtn.classList.contains('active');
-
-        if (!isCurrentlyActive) {
-            // Deactivate other mutually exclusive buttons first
-            if (absentBtn.classList.contains('active')) {
-                absentBtn.classList.remove('active');
-                state.selectedSession.setAttendance(winner.identity.studentId, 'present');
+            if (exitBtn.classList.contains('active')) {
+                exitBtn.classList.remove('active');
+                studentRecord.wasOutOfClass = false;
+                winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
                 winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
             }
-            if (issueBtn.classList.contains('active')) {
+
+            if (!isCurrentlyActive) {
+                if (absentBtn.classList.contains('active')) {
+                    absentBtn.classList.remove('active');
+                    state.selectedSession.setAttendance(winner.identity.studentId, 'present');
+                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+                }
+                issueBtn.classList.add('active');
+                studentRecord.hadIssue = true;
+
+                const categoryName = state.selectedCategory.name;
+                winner.categoryIssues[categoryName] = (winner.categoryIssues[categoryName] || 0) + 1;
+
+                winner.statusCounters.missedChances++;
+
+                // --- First, clear any potential 'absent' styling ---
+                winnerNameEl.style.textDecoration = '';
+                winnerNameEl.style.opacity = '';
+                // ----------------------------------------------------
+
+                // Now, apply the 'issue' styling
+                winnerNameEl.style.color = 'var(--color-warning)';
+                winnerNameEl.title = 'این دانش‌آموز در انتخاب قبلی با مشکل مواجه شده بود';
+
+            } else {
                 issueBtn.classList.remove('active');
                 studentRecord.hadIssue = false;
+
                 const categoryName = state.selectedCategory.name;
                 if (winner.categoryIssues[categoryName]) { winner.categoryIssues[categoryName] = Math.max(0, winner.categoryIssues[categoryName] - 1); }
+
                 winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+
+                // --- ADDED ---
+                winnerNameEl.style.color = ''; // Reverts to default color
+                winnerNameEl.title = '';      // Removes the tooltip
+                // -------------
             }
+            renderStudentStatsList();
+            state.saveData();
+        });
+    }
 
-            exitBtn.classList.add('active');
-            studentRecord.wasOutOfClass = true;
+    if (state.selectedSession.isFinished) {
+        exitBtn.disabled = true;
+    } else {
+        exitBtn.addEventListener('click', () => {
+            const isCurrentlyActive = exitBtn.classList.contains('active');
 
-            // Increment both the specific counter and the missed chance counter
-            winner.statusCounters.outOfClassCount = (winner.statusCounters.outOfClassCount || 0) + 1;
-            winner.statusCounters.missedChances++;
+            if (!isCurrentlyActive) {
+                // Deactivate other mutually exclusive buttons first
+                if (absentBtn.classList.contains('active')) {
+                    absentBtn.classList.remove('active');
+                    state.selectedSession.setAttendance(winner.identity.studentId, 'present');
+                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+                }
+                if (issueBtn.classList.contains('active')) {
+                    issueBtn.classList.remove('active');
+                    studentRecord.hadIssue = false;
+                    const categoryName = state.selectedCategory.name;
+                    if (winner.categoryIssues[categoryName]) { winner.categoryIssues[categoryName] = Math.max(0, winner.categoryIssues[categoryName] - 1); }
+                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+                }
 
-            // Reset any potential 'absent' styling first
-            winnerNameEl.style.textDecoration = '';
-            winnerNameEl.style.opacity = '';
+                exitBtn.classList.add('active');
+                studentRecord.wasOutOfClass = true;
 
-            // Visual cue for the winner's name
-            winnerNameEl.style.color = 'var(--color-strong-warning)';
-            winnerNameEl.title = 'این دانش‌آموز در زمان انتخاب خارج از کلاس بود';
+                // Increment both the specific counter and the missed chance counter
+                winner.statusCounters.outOfClassCount = (winner.statusCounters.outOfClassCount || 0) + 1;
+                winner.statusCounters.missedChances++;
 
-        } else {
-            exitBtn.classList.remove('active');
-            studentRecord.wasOutOfClass = false;
+                // Reset any potential 'absent' styling first
+                winnerNameEl.style.textDecoration = '';
+                winnerNameEl.style.opacity = '';
 
-            // Decrement both counters
-            winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
-            winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+                // Visual cue for the winner's name
+                winnerNameEl.style.color = 'var(--color-strong-warning)';
+                winnerNameEl.title = 'این دانش‌آموز در زمان انتخاب خارج از کلاس بود';
 
-            // Remove the visual cue
-            winnerNameEl.style.color = '';
-            winnerNameEl.title = '';
-        }
-        renderStudentStatsList();
-        state.saveData();
-    });
+            } else {
+                exitBtn.classList.remove('active');
+                studentRecord.wasOutOfClass = false;
 
-    profileBtn.addEventListener('click', () => {
-        showStudentProfile(winner);
-    });
+                // Decrement both counters
+                winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
+                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+
+                // Remove the visual cue
+                winnerNameEl.style.color = '';
+                winnerNameEl.title = '';
+            }
+            renderStudentStatsList();
+            state.saveData();
+        });
+    }
+
+    if (state.selectedSession.isFinished) {
+        profileBtn.disabled = true;
+    } else {
+        profileBtn.addEventListener('click', () => {
+            showStudentProfile(winner);
+        });
+    }
 
     buttonContainer.appendChild(absentBtn);
     buttonContainer.appendChild(exitBtn);
@@ -1843,22 +1860,26 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
     addNoteBtn.innerHTML = '📝';
     addNoteBtn.title = 'افزودن یادداشت جدید';
 
-    addNoteBtn.addEventListener('click', () => {
-        newNoteContent.value = '';
-        newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
+    if (state.selectedSession.isFinished) {
+        addNoteBtn.disabled = true;
+    } else {
+        addNoteBtn.addEventListener('click', () => {
+            newNoteContent.value = '';
+            newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
-        state.setSaveNoteCallback((content) => {
-            if (content) {
-                winner.addNote(content); // 'winner' is the selected student in this scope
-                state.saveData();
-                displayWinner(); // This refreshes the winner panel to show the new note
-                showNotification('✅ یادداشت با موفقیت ثبت شد.');
-            }
+            state.setSaveNoteCallback((content) => {
+                if (content) {
+                    winner.addNote(content); // 'winner' is the selected student in this scope
+                    state.saveData();
+                    displayWinner(); // This refreshes the winner panel to show the new note
+                    showNotification('✅ یادداشت با موفقیت ثبت شد.');
+                }
+            });
+
+            openModal('add-note-modal');
+            newNoteContent.focus();
         });
-
-        openModal('add-note-modal');
-        newNoteContent.focus();
-    });
+    }
 
     notesHeader.appendChild(notesTitle);
     notesHeader.appendChild(addNoteBtn);
@@ -1930,116 +1951,122 @@ function renderCategoryPills() {
         }
 
         // --- REGULAR CLICK EVENT ---
-        pill.addEventListener('click', () => {
-            document.querySelectorAll('#category-selection-container .pill').forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-            state.setSelectedCategory(category);
-            updateQuickGradeUIForCategory(category);
-            selectStudentBtnWrapper.classList.remove('disabled-wrapper');
-            selectStudentBtn.disabled = false;
-            const lastWinnerId = state.selectedSession.lastWinnerByCategory[category.name];
-            if (lastWinnerId) {
-                const lastWinner = state.currentClassroom.students.find(s => s.identity.studentId === lastWinnerId);
-                if (lastWinner) {
-                    displayWinner(lastWinner, category.name);
+        if (state.selectedSession.isFinished) {
+            pill.classList.add('disabled');
+        } else {
+            pill.addEventListener('click', () => {
+                document.querySelectorAll('#category-selection-container .pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                state.setSelectedCategory(category);
+                updateQuickGradeUIForCategory(category);
+                selectStudentBtnWrapper.classList.remove('disabled-wrapper');
+                selectStudentBtn.disabled = state.selectedSession.isFinished;
+                const lastWinnerId = state.selectedSession.lastWinnerByCategory[category.name];
+                if (lastWinnerId) {
+                    const lastWinner = state.currentClassroom.students.find(s => s.identity.studentId === lastWinnerId);
+                    if (lastWinner) {
+                        displayWinner(lastWinner, category.name);
+                    }
+                } else {
+                    resultDiv.innerHTML = '';
+                    state.setManualSelection(null);
+                    state.setWinnerHistoryIndex(-1);
+                    selectStudentBtn.disabled = false;
+                    const previousWinnerRow = document.querySelector('.current-winner-highlight');
+                    if (previousWinnerRow) {
+                        previousWinnerRow.classList.remove('current-winner-highlight');
+                    }
                 }
-            } else {
-                resultDiv.innerHTML = '';
-                state.setManualSelection(null);
-                state.setWinnerHistoryIndex(-1);
-                selectStudentBtn.disabled = false;
-                const previousWinnerRow = document.querySelector('.current-winner-highlight');
-                if (previousWinnerRow) {
-                    previousWinnerRow.classList.remove('current-winner-highlight');
-                }
-            }
-        });
+            });
+        }
 
         // --- NEW CONTEXT MENU (RIGHT-CLICK) EVENT ---
-        pill.addEventListener('contextmenu', (event) => {
-            const menuItems = [{
-                label: 'تغییر نام',
-                icon: '✏️',
-                action: () => {
-                    showCategoryModal((newName, newIsGraded) => {
-                        const result = state.renameCategory(state.currentClassroom, category, newName);
-                        if (result.success) {
-                            category.isGradedCategory = newIsGraded;
-                            state.saveData();
-                            logManager.addLog(state.currentClassroom.info.name, `نام دسته‌بندی «${category.name}» به «${newName}» تغییر یافت.`);
-                            renderCategoryPills();
-                            renderStudentStatsList();
-                            showNotification(`✅ نام دسته‌بندی به «${newName}» تغییر یافت.`);
-                        } else {
-                            showNotification(`⚠️ ${result.message}`);
-                        }
-                    }, {
-                        title: 'ویرایش دسته‌بندی',
-                        initialName: category.name,
-                        initialIsGraded: category.isGradedCategory,
-                        saveButtonText: 'ذخیره تغییرات'
-                    });
-                }
-            }, {
-                label: 'حذف دسته‌بندی',
-                icon: '🗑️',
-                className: 'danger',
-                action: () => {
-                    showCustomConfirm(
-                        `آیا از انتقال دسته‌بندی «${category.name}» به سطل زباله مطمئن هستید؟`,
-                        () => {
-                            const trashEntry = {
-                                id: `trash_${Date.now()}_${Math.random()}`,
-                                timestamp: new Date().toISOString(),
-                                type: 'category',
-                                description: `دسته‌بندی «${category.name}» از کلاس «${state.currentClassroom.info.name}»`,
-                                restoreData: { categoryId: category.id, classId: state.currentClassroom.info.scheduleCode }
-                            };
-                            state.trashBin.unshift(trashEntry);
-                            if (state.trashBin.length > 50) state.trashBin.pop();
-
-                            //Mark all associated scores as deleted ---
-                            const skillKey = category.name.toLowerCase();
-                            state.currentClassroom.students.forEach(student => {
-                                if (student.logs.scores && student.logs.scores[skillKey]) {
-                                    student.logs.scores[skillKey].forEach(score => {
-                                        score.isDeleted = true;
-                                    });
-                                }
-                            });
-
-                            // --- Check if the deleted category was the active one ---
-                            if (state.selectedCategory && state.selectedCategory.id === category.id) {
-                                state.setSelectedCategory(null); // Clear the state
-                                resultDiv.innerHTML = ''; // Clear the winner display
-                                updateQuickGradeUIForCategory(null); // Disable the quick-grade form
-                                selectStudentBtnWrapper.classList.add('disabled-wrapper'); // Disable the main select button
-                                selectStudentBtn.disabled = true;
-
-                                // Clear the winner highlight from the stats table
-                                const previousWinnerRow = document.querySelector('.current-winner-highlight');
-                                if (previousWinnerRow) {
-                                    previousWinnerRow.classList.remove('current-winner-highlight');
-                                }
+        if (!state.selectedSession.isFinished) {
+            pill.addEventListener('contextmenu', (event) => {
+                const menuItems = [{
+                    label: 'تغییر نام',
+                    icon: '✏️',
+                    action: () => {
+                        showCategoryModal((newName, newIsGraded) => {
+                            const result = state.renameCategory(state.currentClassroom, category, newName);
+                            if (result.success) {
+                                category.isGradedCategory = newIsGraded;
+                                state.saveData();
+                                logManager.addLog(state.currentClassroom.info.name, `نام دسته‌بندی «${category.name}» به «${newName}» تغییر یافت.`);
+                                renderCategoryPills();
+                                renderStudentStatsList();
+                                showNotification(`✅ نام دسته‌بندی به «${newName}» تغییر یافت.`);
+                            } else {
+                                showNotification(`⚠️ ${result.message}`);
                             }
-
-                            category.isDeleted = true;
-                            logManager.addLog(state.currentClassroom.info.name, `دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`, {
-                                type: 'VIEW_TRASH'
-                            });
-                            state.saveData();
-                            renderCategoryPills();
-                            renderStudentStatsList();
-                            showNotification(`✅ دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`);
                         }, {
-                        confirmText: 'بله',
-                        confirmClass: 'btn-warning'
+                            title: 'ویرایش دسته‌بندی',
+                            initialName: category.name,
+                            initialIsGraded: category.isGradedCategory,
+                            saveButtonText: 'ذخیره تغییرات'
+                        });
                     }
-                    );
-                }
-            }];
-            openContextMenu(event, menuItems);
-        });
+                }, {
+                    label: 'حذف دسته‌بندی',
+                    icon: '🗑️',
+                    className: 'danger',
+                    action: () => {
+                        showCustomConfirm(
+                            `آیا از انتقال دسته‌بندی «${category.name}» به سطل زباله مطمئن هستید؟`,
+                            () => {
+                                const trashEntry = {
+                                    id: `trash_${Date.now()}_${Math.random()}`,
+                                    timestamp: new Date().toISOString(),
+                                    type: 'category',
+                                    description: `دسته‌بندی «${category.name}» از کلاس «${state.currentClassroom.info.name}»`,
+                                    restoreData: { categoryId: category.id, classId: state.currentClassroom.info.scheduleCode }
+                                };
+                                state.trashBin.unshift(trashEntry);
+                                if (state.trashBin.length > 50) state.trashBin.pop();
+
+                                //Mark all associated scores as deleted ---
+                                const skillKey = category.name.toLowerCase();
+                                state.currentClassroom.students.forEach(student => {
+                                    if (student.logs.scores && student.logs.scores[skillKey]) {
+                                        student.logs.scores[skillKey].forEach(score => {
+                                            score.isDeleted = true;
+                                        });
+                                    }
+                                });
+
+                                // --- Check if the deleted category was the active one ---
+                                if (state.selectedCategory && state.selectedCategory.id === category.id) {
+                                    state.setSelectedCategory(null); // Clear the state
+                                    resultDiv.innerHTML = ''; // Clear the winner display
+                                    updateQuickGradeUIForCategory(null); // Disable the quick-grade form
+                                    selectStudentBtnWrapper.classList.add('disabled-wrapper'); // Disable the main select button
+                                    selectStudentBtn.disabled = true;
+
+                                    // Clear the winner highlight from the stats table
+                                    const previousWinnerRow = document.querySelector('.current-winner-highlight');
+                                    if (previousWinnerRow) {
+                                        previousWinnerRow.classList.remove('current-winner-highlight');
+                                    }
+                                }
+
+                                category.isDeleted = true;
+                                logManager.addLog(state.currentClassroom.info.name, `دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`, {
+                                    type: 'VIEW_TRASH'
+                                });
+                                state.saveData();
+                                renderCategoryPills();
+                                renderStudentStatsList();
+                                showNotification(`✅ دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`);
+                            }, {
+                            confirmText: 'بله',
+                            confirmClass: 'btn-warning'
+                        }
+                        );
+                    }
+                }];
+                openContextMenu(event, menuItems);
+            });
+        }
 
         categoryPillsContainer.appendChild(pill);
     });
@@ -2050,27 +2077,31 @@ function renderCategoryPills() {
     addPill.textContent = '+';
     addPill.title = 'افزودن دسته‌بندی جدید';
 
-    addPill.addEventListener('click', () => {
-        showCategoryModal((categoryName, isGraded) => {
-            const existingCategory = state.currentClassroom.categories.find(
-                cat => cat.name.toLowerCase() === categoryName.toLowerCase() && !cat.isDeleted
-            );
-            if (existingCategory) {
-                showNotification("⚠️ این دسته‌بندی از قبل وجود دارد.");
-                return;
-            }
-            const newCategory = new Category(categoryName, '', isGraded);
-            state.currentClassroom.categories.push(newCategory);
-            state.saveData();
-            logManager.addLog(state.currentClassroom.info.name,
-                `دسته‌بندی جدید «${categoryName}» اضافه شد.`, {
-                type: 'VIEW_CLASS_SETTINGS'
-            }
-            );
-            renderCategoryPills();
-            showNotification(`✅ دسته‌بندی «${categoryName}» اضافه شد.`);
+    if (!state.selectedSession.isFinished) {
+        addPill.addEventListener('click', () => {
+            showCategoryModal((categoryName, isGraded) => {
+                const existingCategory = state.currentClassroom.categories.find(
+                    cat => cat.name.toLowerCase() === categoryName.toLowerCase() && !cat.isDeleted
+                );
+                if (existingCategory) {
+                    showNotification("⚠️ این دسته‌بندی از قبل وجود دارد.");
+                    return;
+                }
+                const newCategory = new Category(categoryName, '', isGraded);
+                state.currentClassroom.categories.push(newCategory);
+                state.saveData();
+                logManager.addLog(state.currentClassroom.info.name,
+                    `دسته‌بندی جدید «${categoryName}» اضافه شد.`, {
+                    type: 'VIEW_CLASS_SETTINGS'
+                }
+                );
+                renderCategoryPills();
+                showNotification(`✅ دسته‌بندی «${categoryName}» اضافه شد.`);
+            });
         });
-    });
+    } else {
+        addPill.classList.add('disabled');
+    }
 
     categoryPillsContainer.appendChild(addPill);
 }
@@ -2095,6 +2126,15 @@ function restoreSessionState() {
 }
 
 function updateQuickGradeUIForCategory(category) {
+
+    if (state.selectedSession.isFinished) {
+        quickScoreInput.disabled = true;
+        quickNoteTextarea.disabled = true;
+        quickGradeSubmitBtn.disabled = true;
+        quickGradeFormWrapper.setAttribute('title', 'جلسه خاتمه یافته است');
+        return;
+    }
+
     if (category && category.isGradedCategory) {
         quickScoreInput.disabled = false;
         quickNoteTextarea.disabled = false;

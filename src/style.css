@@ -793,6 +793,17 @@ button:disabled:hover {
     border-color: var(--color-primary-hover);
 }
 
+.pill.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #f0f0f0;
+}
+
+.pill.disabled:hover {
+    background-color: #f0f0f0;
+    transform: none;
+}
+
 /* استایل Tooltip */
 [data-tooltip]::after {
     content: attr(data-tooltip);
