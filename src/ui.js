@@ -2656,8 +2656,11 @@ export function renderStudentNotes(notesContainer) {
                     showNotification("✅یادداشت با موفقیت ویرایش شد.");
                 });
 
-                openModal('add-note-modal');
-                newNoteContent.focus();
+                // Close the profile modal, THEN open the note modal
+                closeActiveModal(() => {
+                    openModal('add-note-modal');
+                    newNoteContent.focus();
+                });
             });
 
             itemContentDiv.appendChild(noteInfoDiv);
