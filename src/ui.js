@@ -139,7 +139,7 @@ export function renderSessionDashboard(initialTab = 'selector') {
     renderAttendancePage();
 
     // Now, show the main dashboard page
-    showPage('session-dashboard-page');
+    showPage('session-dashboard-page', { tab: initialTab });
 
     // And finally, activate the tab-switching logic
     setupDashboardTabs();
@@ -177,6 +177,7 @@ export function setupDashboardTabs() {
         attendanceTabBtn.classList.remove('active');
         selectorPane.classList.add('active');
         attendancePane.classList.remove('active');
+        showPage('session-dashboard-page', { tab: 'selector' });
     });
 
     attendanceTabBtn.addEventListener('click', () => {
@@ -184,6 +185,7 @@ export function setupDashboardTabs() {
         selectorTabBtn.classList.remove('active');
         attendancePane.classList.add('active');
         selectorPane.classList.remove('active');
+        showPage('session-dashboard-page', { tab: 'attendance' });
     });
 }
 
@@ -3098,8 +3100,7 @@ export function showPage(pageId, options = {}) {
 
     // Build a new URL with query parameters to store the context
     let hash = `#${pageId}`;
-    const params = new URLSearchParams();
-
+    const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
     if (state.currentClassroom) {
         params.set('class', state.currentClassroom.info.name);
     }
@@ -3108,9 +3109,10 @@ export function showPage(pageId, options = {}) {
     }
     if (state.selectedStudentForProfile) {
         params.set('student', state.selectedStudentForProfile.identity.studentId);
-        if (pageId === 'session-dashboard-page' && tab) {
-            params.set('tab', tab);
-        }
+    }
+
+    if (pageId === 'session-dashboard-page' && tab) {
+        params.set('tab', tab);
     }
 
     const paramsString = params.toString();

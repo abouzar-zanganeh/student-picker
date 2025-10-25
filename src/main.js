@@ -19,6 +19,8 @@ function restoreStateFromURL() {
     const sessionNumber = parseInt(params.get('session'), 10);
     const studentId = params.get('student');
 
+    const tab = params.get('tab') || 'selector'; // Default to 'selector' if not specified
+
     if (className && state.classrooms[className]) {
         state.setCurrentClassroom(state.classrooms[className]);
 
@@ -40,13 +42,13 @@ function restoreStateFromURL() {
             ui.renderSessions();
             ui.showPage('session-page');
             break;
-        case 'student-page':
-            ui.renderStudentPage(); // This function also calls showPage
+        case 'session-dashboard-page':
+            // Determine the correct tab to show.
+            const effectiveTab = (pageId === 'attendance-page') ? 'attendance' : tab;
+
+            ui.renderSessionDashboard(effectiveTab);
             break;
-        case 'attendance-page':
-            ui.renderAttendancePage();
-            ui.showPage('attendance-page');
-            break;
+
         case 'settings-page':
             ui.settingsClassNameHeader.textContent = `تنظیمات کلاس: ${state.currentClassroom.info.name}`;
             ui.renderSettingsStudentList();
@@ -54,8 +56,10 @@ function restoreStateFromURL() {
             ui.showPage('settings-page');
             break;
         case 'student-profile-page':
+            // Render the dashboard underneath, using the 'tab' from URL
+            ui.renderSessionDashboard(tab);
+            // Then, show the profile modal on top
             ui.showStudentProfile(state.selectedStudentForProfile);
-            ui.showPage('session-page');
             break;
         default:
             // If the pageId is something else (like trash-page, etc.), we don't restore it.
