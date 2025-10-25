@@ -3087,8 +3087,8 @@ export function _internalShowPage(pageId) {
     renderBreadcrumbs();
 }
 
-export function showPage(pageId, options = {}) { // <--- MODIFIED
-    const { tab } = options; // <--- ADDED
+export function showPage(pageId, options = {}) {
+    const { tab } = options;
     const historyState = {
         pageId,
         currentClassName: state.currentClassroom ? state.currentClassroom.info.name : null,
@@ -3108,6 +3108,9 @@ export function showPage(pageId, options = {}) { // <--- MODIFIED
     }
     if (state.selectedStudentForProfile) {
         params.set('student', state.selectedStudentForProfile.identity.studentId);
+        if (pageId === 'session-dashboard-page' && tab) {
+            params.set('tab', tab);
+        }
     }
 
     const paramsString = params.toString();
