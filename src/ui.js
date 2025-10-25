@@ -121,6 +121,8 @@ export const attendanceSearchInput = document.createElement('input');
 
 export const sessionDashboardPage = document.getElementById('session-dashboard-page');
 
+export const attendancePane = document.getElementById('attendance-pane');
+
 
 export function renderSessionDashboard(initialTab = 'selector') {
     if (!state.currentClassroom || !state.selectedSession) {
@@ -154,7 +156,7 @@ export function switchDashboardTab(tabName) {
     const selectorTabBtn = document.getElementById('selector-tab-btn');
     const attendanceTabBtn = document.getElementById('attendance-tab-btn');
     const selectorPane = document.getElementById('selector-pane');
-    const attendancePane = document.getElementById('attendance-pane');
+
 
     const isSelector = tabName === 'selector';
 
@@ -168,7 +170,7 @@ export function setupDashboardTabs() {
     const selectorTabBtn = document.getElementById('selector-tab-btn');
     const attendanceTabBtn = document.getElementById('attendance-tab-btn');
     const selectorPane = document.getElementById('selector-pane');
-    const attendancePane = document.getElementById('attendance-pane');
+
 
     selectorTabBtn.addEventListener('click', () => {
         selectorTabBtn.classList.add('active');
@@ -549,7 +551,8 @@ export function closeActiveModal(onClosed, isHistoryPop = false) {
 
 export function renderMassCommentControls() {
     // Show the button container only on the attendance page
-    if (document.querySelector('.page.active')?.id !== 'attendance-page') {
+
+    if (!attendancePane || !attendancePane.classList.contains('active')) {
         attendanceMassActionsContainer.style.display = 'none';
         return;
     }
