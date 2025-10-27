@@ -1792,7 +1792,7 @@ export function handleUndoLastSelection(student, categoryName) {
 
     // --- Confirmation ---
     ui.showCustomConfirm(
-        `آیا از لغو انتخاب «${student.identity.name}» برای «${categoryName}» مطمئن هستید؟ آمار این انتخاب بازگردانی خواهد شد.`,
+        `آیا از حذف انتخاب «${student.identity.name}» برای «${categoryName}» مطمئن هستید؟ آمار این انتخاب بازگردانی خواهد شد.`,
         () => {
             const history = state.selectedSession.winnerHistory;
 
@@ -1846,6 +1846,6 @@ export function handleUndoLastSelection(student, categoryName) {
             state.saveData();
             ui.showNotification(`✅ انتخاب «${student.identity.name}» لغو شد.`);
         },
-        { confirmText: 'لغو انتخاب', confirmClass: 'btn-warning' }
+        { confirmText: 'بله', confirmClass: 'btn-warning' }
     );
 }
