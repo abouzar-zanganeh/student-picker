@@ -2725,7 +2725,7 @@ export function renderStudentNotes(notesContainer) {
         });
     }
 
-    // Append the new elements to the container passed into the function
+    // Append the new elements to the container passed into the function.
     notesContainer.appendChild(notesHeader);
     notesContainer.appendChild(profileNotesListUl);
 }
