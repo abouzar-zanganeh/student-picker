@@ -1,4 +1,4 @@
-import { Classroom, Student, Session, Category, Homework } from './models.js';
+import { Classroom, Student, Session, Category, Homework, Note } from './models.js';
 
 
 // --- وضعیت کلی برنامه (Global State) ---
@@ -393,7 +393,7 @@ export function renameCategory(classroom, categoryToRename, newName) {
 }
 
 export function moveStudent(studentToMove, sourceClassroom, destinationClassroom) {
-    // 1. Check for duplicates in the destination class to prevent conflicts.
+    // 1. Check for duplicates in the destination class.
     const isDuplicate = getActiveItems(destinationClassroom.students).some(
         s => s.identity.name.toLowerCase() === studentToMove.identity.name.toLowerCase()
     );
@@ -402,17 +402,95 @@ export function moveStudent(studentToMove, sourceClassroom, destinationClassroom
         return { success: false, message: `دانش‌آموزی با نام «${studentToMove.identity.name}» از قبل در کلاس «${destinationClassroom.info.name}» وجود دارد.` };
     }
 
-    // 2. Add the student to the new class.
-    // We use a deep copy to ensure the original and new student are separate objects.
+    // 2. Create a deep copy of the student object to move.
     const studentCopy = JSON.parse(JSON.stringify(studentToMove));
+
+    // 3. Manually copy session records
+    const sessionRecordsToMove = new Map();
+    sourceClassroom.sessions.forEach(session => {
+        const record = session.studentRecords[studentToMove.identity.studentId];
+        if (record) {
+            // We must deep copy the record as well!
+            sessionRecordsToMove.set(session.sessionNumber, JSON.parse(JSON.stringify(record)));
+        }
+    });
+
+    // 4. Add the student copy to the destination class.
     destinationClassroom.addStudent(studentCopy);
 
-    // 3. Delete the original student in the source class.
+    // --- NEW: 5. Add an automated note to the student's profile ---
+    try {
+        // Find the latest active session in the destination class
+        const activeSessions = getActiveItems(destinationClassroom.sessions)
+            .filter(s => !s.isCancelled)
+            .sort((a, b) => b.sessionNumber - a.sessionNumber); // Sort descending
+        const latestActiveSession = activeSessions.length > 0 ? activeSessions[0] : null;
+
+        let displaySessionNumber = "؟";
+        let noteSource = { type: 'system', description: 'Student Move' }; // Default source
+
+        if (latestActiveSession) {
+            const sessionDisplayMap = getSessionDisplayMap(destinationClassroom);
+            displaySessionNumber = sessionDisplayMap.get(latestActiveSession.sessionNumber) || latestActiveSession.sessionNumber; // Fallback
+            // Source the note from the session it's referencing
+            noteSource = { type: 'fromSession', sessionNumber: latestActiveSession.sessionNumber };
+        }
+
+        const moveDate = new Date().toLocaleDateString('fa-IR');
+        const sourceClassName = sourceClassroom.info.name;
+        const noteContent = `این دانش آموز در جلسه ${displaySessionNumber} و در تاریخ ${moveDate} از کلاس «${sourceClassName}» به این کلاس انتقال پیدا کرد`;
+
+        // We imported 'Note' at the top of the file for this
+        const newNote = new Note(noteContent, noteSource);
+
+        // Ensure the profile and notes array exist on the copied object
+        if (!studentCopy.profile) {
+            studentCopy.profile = {};
+        }
+        if (!studentCopy.profile.notes) {
+            studentCopy.profile.notes = [];
+        }
+
+        studentCopy.profile.notes.push(newNote);
+
+    } catch (error) {
+        console.error("Failed to add automated move note:", error);
+    }
+    // --- END NEW ---
+
+    // 6. Merge the copied session records into the destination class's sessions.
+    if (sessionRecordsToMove.size > 0) {
+        destinationClassroom.sessions.forEach(destSession => {
+            // Find a session in the destination class with the same sessionNumber
+            const recordToCopy = sessionRecordsToMove.get(destSession.sessionNumber);
+            if (recordToCopy && !destSession.isDeleted && !destSession.isCancelled) {
+                // Add the student's record to the matching active session in the new class.
+                destSession.studentRecords[studentCopy.identity.studentId] = recordToCopy;
+            }
+        });
+    }
+
+    // 7. Create a trash bin entry for the "move" action ---
+    const trashEntry = {
+        id: `trash_${Date.now()}_${Math.random()}`,
+        timestamp: new Date().toISOString(),
+        type: 'student',
+        // Description now clarifies it was a move
+        description: `(انتقال) دانش‌آموز «${studentToMove.identity.name}» از کلاس «${sourceClassroom.info.name}»`,
+        restoreData: {
+            studentId: studentToMove.identity.studentId,
+            classId: sourceClassroom.info.scheduleCode // Use the unique ID
+        }
+    };
+    trashBin.unshift(trashEntry); // Add to the start of the trash bin
+    if (trashBin.length > 50) trashBin.pop(); // Keep the list at 50 items
+
+    // 8. Mark the original student as deleted (soft delete)
     const originalStudent = sourceClassroom.students.find(
         s => s.identity.studentId === studentToMove.identity.studentId
     );
     if (originalStudent) {
-        permanentlyDeleteStudent(originalStudent, sourceClassroom);
+        originalStudent.isDeleted = true;
     }
 
     return { success: true };
