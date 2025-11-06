@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         globalStudentSearchInput, globalStudentSearchResultsDiv,
         newClassNameInput, addClassBtn, classListUl, undoBtn,
         settingsPage, settingsClassNameHeader, settingsStudentListUl, categoryListUl,
-        backToSessionsBtn, newStudentNameInput, addStudentBtn, pasteArea,
+        newStudentNameInput, addStudentBtn, pasteArea,
         processPasteBtn, csvPreviewPage, csvPreviewList, csvConfirmBtn,
         csvCancelBtn, importCsvBtn, csvFileInput, columnMappingPage,
         columnSelectDropdown, confirmColumnBtn, cancelImportBtn, newCategoryNameInput,
@@ -587,11 +587,6 @@ document.addEventListener('DOMContentLoaded', () => {
         newStudentNameInput.focus();
     });
 
-    backToSessionsBtn.addEventListener('click', () => {
-        ui.renderSessions();
-        ui.showPage('session-page');
-    });
-
     document.getElementById('new-session-btn').addEventListener('click', () => {
         if (state.currentClassroom) {
             const unfinishedSession = state.currentClassroom.sessions.find(session => !session.isFinished && !session.isCancelled && !session.isDeleted);
@@ -724,9 +719,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.renderGlobalSearchResults(allResults);
     });
 
-
-
-
     newClassNameInput.addEventListener('keyup', (event) => {
         if (event.key === 'Enter') {
             addClassBtn.click();
@@ -735,21 +727,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     undoBtn.addEventListener('click', ui.handleUndo);
 
-    document.querySelectorAll('.back-to-classes-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            state.setCurrentClassroom(null);
-            state.setSelectedSession(null);
-            state.setLiveSession(null);
-            ui.showPage('class-management-page');
-        });
-    });
-
     finishAttendanceBtn.addEventListener('click', () => {
         ui.switchDashboardTab('selector');
     });
-
-
-
 
     studentSearchInput.addEventListener('input', (e) => {
         const searchTerm = e.target.value;
@@ -783,8 +763,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.renderSearchResults(studentSearchInput.value);
         }
     });
-
-
 
     ui.quickGradeSubmitBtn.addEventListener('click', () => {
         const scoreValue = ui.quickScoreInput.value;
@@ -1159,8 +1137,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 's':
                     if (document.getElementById('session-page').classList.contains('active')) {
                         history.back();
-                    } else {
-                        backToSessionsBtn.click();
                     }
                     break;
 
