@@ -1249,6 +1249,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         // Update UI
         updateButtonUI(newStatus);
         renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
+        renderStudentStatsList();
         renderAbsenteesSummary();
     });
 

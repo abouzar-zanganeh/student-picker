@@ -813,7 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.quickScoreInput.value = '';
             ui.quickNoteTextarea.value = '';
             // Refresh the winner display to show the new score/note instantly
-            ui.displayWinner(student, category.name);
+            ui.displayWinner();
         }
     });
 
