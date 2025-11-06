@@ -833,12 +833,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     classSaveNoteBtn.addEventListener('click', () => {
         const content = newNoteContent.value.trim();
-        // Check if a save function has been set in the state
-        if (typeof state.saveNoteCallback === 'function') {
-            state.saveNoteCallback(content); // Execute the specific save logic
+        const callback = state.saveNoteCallback; // Get the callback
 
-            ui.closeActiveModal();
-        }
+        // Pass the callback to closeActiveModal.
+        // This ensures the modal closes *before* the callback runs.
+        ui.closeActiveModal(() => {
+            if (typeof callback === 'function') {
+                callback(content); // Execute the saved logic
+            }
+        });
     });
 
     const moveStudentConfirmBtn = document.getElementById('move-student-confirm-btn');
