@@ -795,10 +795,12 @@ export async function initiateBackupProcess(classNamesToBackup = []) {
         try {
             // 3. Use the file with the Web Share API.
             await navigator.share({
-                title: 'پشتیبان دستیار معلم',
+                title: fileToShare.name, // Use the file's actual name as the title
                 text: 'فایل پشتیبان داده‌های برنامه',
                 files: [fileToShare],
             });
+            console.log('the code reached the change');
+
         } catch (error) {
             if (error.name !== 'AbortError') {
                 console.error('Error sharing file:', error);
