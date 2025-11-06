@@ -2356,34 +2356,23 @@ function renderHistorySection(container) {
     addNoteBtn.title = 'افزودن یادداشت جدید';
     addNoteBtn.innerHTML = '📝';
     addNoteBtn.addEventListener('click', () => {
+        const studentForNote = state.selectedStudentForProfile; // <-- CAPTURE STUDENT
+
         newNoteContent.value = ''; // Clear modal for a new note
         newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
         state.setSaveNoteCallback((content) => {
             if (content) {
-                state.selectedStudentForProfile.addNote(content);
+                studentForNote.addNote(content); // <-- USE CAPTURED STUDENT
                 state.saveData();
 
-                logManager.addLog(state.currentClassroom.info.name, `یادداشت جدیدی برای دانش‌آموز «${state.selectedStudentForProfile.identity.name}» ثبت شد.`, { type: 'VIEW_STUDENT_PROFILE', studentId: state.selectedStudentForProfile.identity.studentId });
+                logManager.addLog(state.currentClassroom.info.name, `یادداشت جدیدی برای دانش‌آموز «${studentForNote.identity.name}» ثبت شد.`, { type: 'VIEW_STUDENT_PROFILE', studentId: studentForNote.identity.studentId });
 
-                // --- NEW LOGIC ---
-                // 1. Refresh the winner panel in the background to update the recent notes list
-                displayWinner();
-
-                // 2. Refresh the content of the current profile modal to show the new note
-                const modalContentContainer = document.getElementById('modal-profile-content-container');
-                if (modalContentContainer) {
-                    // Find and remove only the old history section
-                    const oldHistorySection = modalContentContainer.querySelector('.history-section');
-                    if (oldHistorySection) {
-                        oldHistorySection.remove();
-                    }
-                    // Re-render the history section with the new note
-                    renderHistorySection(modalContentContainer);
-                }
-
+                displayWinner(); // Refresh background panel
                 showNotification('✅ یادداشت با موفقیت ثبت شد.');
             }
+            // After note modal closes (from main.js), re-open profile
+            showStudentProfile(studentForNote); // <-- RE-OPEN PROFILE
         });
 
         // Close the current profile modal, and THEN open the note modal.
@@ -2652,6 +2641,9 @@ export function renderStudentNotes(notesContainer) {
             deleteBtn.innerHTML = '🗑️';
             deleteBtn.title = 'حذف این یادداشت';
             deleteBtn.addEventListener('click', () => {
+
+                const studentForNote = state.selectedStudentForProfile; // <-- CAPTURE STUDENT
+
                 // This is the "close-then-open" fix
                 closeActiveModal(() => {
                     showCustomConfirm(
@@ -2661,18 +2653,18 @@ export function renderStudentNotes(notesContainer) {
                                 id: `trash_${Date.now()}_${Math.random()}`,
                                 timestamp: new Date().toISOString(),
                                 type: 'note',
-                                description: `یادداشت برای دانش‌آموز «${state.selectedStudentForProfile.identity.name}»`,
-                                restoreData: { noteId: note.id, studentId: state.selectedStudentForProfile.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
+                                description: `یادداشت برای دانش‌آموز «${studentForNote.identity.name}»`,
+                                restoreData: { noteId: note.id, studentId: studentForNote.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
                             };
                             state.trashBin.unshift(trashEntry);
                             if (state.trashBin.length > 50) state.trashBin.pop();
 
                             note.isDeleted = true;
-                            logManager.addLog(state.currentClassroom.info.name, `یادداشت دانش‌آموز «${state.selectedStudentForProfile.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+                            logManager.addLog(state.currentClassroom.info.name, `یادداشت دانش‌آموز «${studentForNote.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
                             state.saveData();
 
                             // Re-open the profile modal to see the change
-                            showStudentProfile(state.selectedStudentForProfile);
+                            showStudentProfile(studentForNote);
                             showNotification('✅ یادداشت به سطل زباله منتقل شد.');
                         },
                         {
@@ -2680,7 +2672,7 @@ export function renderStudentNotes(notesContainer) {
                             confirmClass: 'btn-warning',
                             // NEW: If user cancels, re-open the profile modal
                             onCancel: () => {
-                                showStudentProfile(state.selectedStudentForProfile);
+                                showStudentProfile(studentForNote);
                             }
                         }
                     );
@@ -2695,6 +2687,7 @@ export function renderStudentNotes(notesContainer) {
             noteContentP.innerHTML = renderMultiLineText(note.content);
 
             noteContentP.addEventListener('click', () => {
+                const studentForNote = state.selectedStudentForProfile; // <-- CAPTURE STUDENT
                 newNoteContent.value = note.content;
                 newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
@@ -2703,13 +2696,13 @@ export function renderStudentNotes(notesContainer) {
                     state.saveData();
 
                     logManager.addLog(state.currentClassroom.info.name,
-                        `یادداشت دانش‌آموز «${state.selectedStudentForProfile.identity.name}» به‌روزرسانی شد.`,
+                        `یادداشت دانش‌آموز «${studentForNote.identity.name}» به‌روزرسانی شد.`,
                         {
                             type: 'VIEW_STUDENT_PROFILE',
-                            studentId: state.selectedStudentForProfile.identity.studentId
+                            studentId: studentForNote.identity.studentId
                         });
 
-                    showStudentProfile(state.selectedStudentForProfile);
+                    showStudentProfile(studentForNote);
                     showNotification("✅یادداشت با موفقیت ویرایش شد.");
                 });
 

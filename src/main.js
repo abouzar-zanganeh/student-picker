@@ -836,7 +836,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Check if a save function has been set in the state
         if (typeof state.saveNoteCallback === 'function') {
             state.saveNoteCallback(content); // Execute the specific save logic
-            ui.renderAttendancePage();
+
             ui.closeActiveModal();
         }
     });
