@@ -1598,8 +1598,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
     const longPressDuration = 1000; // 1 second
 
     const startPress = (e) => {
-        // Prevent default text selection or context menu on mobile
-        e.preventDefault();
+
 
         // Start a timer
         winnerRemovalLongPressTimer = setTimeout(() => {
@@ -1624,6 +1623,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
     // Touch events for mobile
     winnerNameEl.addEventListener('touchstart', startPress);
+    winnerNameEl.addEventListener('touchmove', cancelPress);
     winnerNameEl.addEventListener('touchend', cancelPress);
     winnerNameEl.addEventListener('touchcancel', cancelPress);
     // --- End Long Press ---
