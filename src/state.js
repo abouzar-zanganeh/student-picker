@@ -161,6 +161,26 @@ function migratePreTrashBinDeletions() {
     }
 }
 
+// تابع کمکی برای تبدیل آبجکت ساده دانش‌آموز به نمونه کلاس
+function _rehydrateStudent(plainStudent) {
+    const studentInstance = new Student(plainStudent.identity);
+    studentInstance.isDeleted = plainStudent.isDeleted;
+    studentInstance.statusCounters = plainStudent.statusCounters;
+    studentInstance.logs = plainStudent.logs;
+    // اطمینان از اینکه ساختار scores درست است
+    if (!studentInstance.logs.scores) {
+        studentInstance.logs.scores = {};
+    }
+    studentInstance.profile = plainStudent.profile;
+    studentInstance.finalClassActivityScore = plainStudent.finalClassActivityScore;
+    studentInstance.categoryCounts = plainStudent.categoryCounts || {};
+    studentInstance.categoryIssues = plainStudent.categoryIssues || {};
+
+    studentInstance.onboardingSession = plainStudent.onboardingSession || null;
+
+    return studentInstance;
+}
+
 // تابع کلیدی برای تبدیل داده‌های ساده به نمونه‌های کلاس
 export function rehydrateData(plainClassrooms) {
     classrooms = {};
@@ -182,24 +202,7 @@ export function rehydrateData(plainClassrooms) {
 
         classroomInstance.note = plainClass.note || '';
 
-        classroomInstance.students = (plainClass.students || []).map(plainStudent => {
-            const studentInstance = new Student(plainStudent.identity);
-            studentInstance.isDeleted = plainStudent.isDeleted;
-            studentInstance.statusCounters = plainStudent.statusCounters;
-            studentInstance.logs = plainStudent.logs;
-            // اطمینان از اینکه ساختار scores درست است
-            if (!studentInstance.logs.scores) {
-                studentInstance.logs.scores = {};
-            }
-            studentInstance.profile = plainStudent.profile;
-            studentInstance.finalClassActivityScore = plainStudent.finalClassActivityScore;
-            studentInstance.categoryCounts = plainStudent.categoryCounts || {};
-            studentInstance.categoryIssues = plainStudent.categoryIssues || {};
-
-            studentInstance.onboardingSession = plainStudent.onboardingSession || null;
-
-            return studentInstance;
-        });
+        classroomInstance.students = (plainClass.students || []).map(_rehydrateStudent);
 
         classroomInstance.sessions = (plainClass.sessions || []).map(plainSession => {
             const sessionInstance = new Session(plainSession.sessionNumber);
@@ -404,6 +407,7 @@ export function moveStudent(studentToMove, sourceClassroom, destinationClassroom
 
     // 2. Create a deep copy of the student object to move.
     const studentCopy = JSON.parse(JSON.stringify(studentToMove));
+    const rehydratedStudent = _rehydrateStudent(studentCopy);
 
     // 3. Manually copy session records
     const sessionRecordsToMove = new Map();
@@ -416,23 +420,21 @@ export function moveStudent(studentToMove, sourceClassroom, destinationClassroom
     });
 
     // 4. Add the student copy to the destination class.
-    destinationClassroom.addStudent(studentCopy);
+    destinationClassroom.addStudent(rehydratedStudent);
 
-    // --- NEW: 5. Add an automated note to the student's profile ---
+    // --- 5. Add an automated note using the class method ---
     try {
-        // Find the latest active session in the destination class
         const activeSessions = getActiveItems(destinationClassroom.sessions)
             .filter(s => !s.isCancelled)
-            .sort((a, b) => b.sessionNumber - a.sessionNumber); // Sort descending
+            .sort((a, b) => b.sessionNumber - a.sessionNumber);
         const latestActiveSession = activeSessions.length > 0 ? activeSessions[0] : null;
 
         let displaySessionNumber = "؟";
-        let noteSource = { type: 'system', description: 'Student Move' }; // Default source
+        let noteSource = { type: 'system', description: 'Student Move' };
 
         if (latestActiveSession) {
             const sessionDisplayMap = getSessionDisplayMap(destinationClassroom);
-            displaySessionNumber = sessionDisplayMap.get(latestActiveSession.sessionNumber) || latestActiveSession.sessionNumber; // Fallback
-            // Source the note from the session it's referencing
+            displaySessionNumber = sessionDisplayMap.get(latestActiveSession.sessionNumber) || latestActiveSession.sessionNumber;
             noteSource = { type: 'fromSession', sessionNumber: latestActiveSession.sessionNumber };
         }
 
@@ -440,23 +442,13 @@ export function moveStudent(studentToMove, sourceClassroom, destinationClassroom
         const sourceClassName = sourceClassroom.info.name;
         const noteContent = `این دانش آموز در جلسه ${displaySessionNumber} و در تاریخ ${moveDate} از کلاس «${sourceClassName}» به این کلاس انتقال پیدا کرد`;
 
-        // We imported 'Note' at the top of the file for this
-        const newNote = new Note(noteContent, noteSource);
-
-        // Ensure the profile and notes array exist on the copied object
-        if (!studentCopy.profile) {
-            studentCopy.profile = {};
-        }
-        if (!studentCopy.profile.notes) {
-            studentCopy.profile.notes = [];
-        }
-
-        studentCopy.profile.notes.push(newNote);
+        // This is the fix: We call the real .addNote() method on our live instance
+        rehydratedStudent.addNote(noteContent, noteSource);
 
     } catch (error) {
         console.error("Failed to add automated move note:", error);
     }
-    // --- END NEW ---
+    // --- END ---
 
     // 6. Merge the copied session records into the destination class's sessions.
     if (sessionRecordsToMove.size > 0) {
@@ -465,7 +457,7 @@ export function moveStudent(studentToMove, sourceClassroom, destinationClassroom
             const recordToCopy = sessionRecordsToMove.get(destSession.sessionNumber);
             if (recordToCopy && !destSession.isDeleted && !destSession.isCancelled) {
                 // Add the student's record to the matching active session in the new class.
-                destSession.studentRecords[studentCopy.identity.studentId] = recordToCopy;
+                destSession.studentRecords[rehydratedStudent.identity.studentId] = recordToCopy;
             }
         });
     }
