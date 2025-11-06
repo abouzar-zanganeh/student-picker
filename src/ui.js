@@ -510,9 +510,11 @@ export function closeActiveModal(onClosed, isHistoryPop = false) {
     // This lets our 'popstate' listener (in the next step) know that we are closing the modal
     // intentionally and that it should not spring the "trap".
     state.setActiveModal(null);
+
     if (activeModalId === 'student-profile-modal') {
         state.setSelectedStudentForProfile(null);
     }
+
 
     if (!isHistoryPop) {
         history.back();
@@ -3223,18 +3225,34 @@ export function showPage(pageId, options = {}) {
     // Build a new URL with query parameters to store the context
     let hash = `#${pageId}`;
     const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
+
+    //  CLASSROOM LOGIC ---
     if (state.currentClassroom) {
         params.set('class', state.currentClassroom.info.name);
-    }
-    if (state.selectedSession) {
-        params.set('session', state.selectedSession.sessionNumber);
-    }
-    if (state.selectedStudentForProfile) {
-        params.set('student', state.selectedStudentForProfile.identity.studentId);
+    } else {
+        params.delete('class');
     }
 
+    //  SESSION LOGIC ---
+    if (state.selectedSession) {
+        params.set('session', state.selectedSession.sessionNumber);
+    } else {
+        params.delete('session');
+    }
+
+    //  STUDENT LOGIC ---
+    if (state.selectedStudentForProfile) {
+        params.set('student', state.selectedStudentForProfile.identity.studentId);
+    } else {
+        params.delete('student');
+    }
+
+    // --- TAB LOGIC ---
     if (pageId === 'session-dashboard-page' && tab) {
         params.set('tab', tab);
+    } else if (pageId !== 'session-dashboard-page') {
+        // Clean up tab param if we're not on the dashboard
+        params.delete('tab');
     }
 
     const paramsString = params.toString();
