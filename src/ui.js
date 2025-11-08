@@ -469,6 +469,8 @@ export function showRenameStudentModal(student, classroom) {
                 // Re-render relevant UI parts to show the new name
                 renderSettingsStudentList();
                 renderStudentStatsList();
+                renderAttendancePage();
+                displayWinner();
                 if (state.selectedStudentForProfile && state.selectedStudentForProfile.identity.studentId === student.identity.studentId) {
                     showStudentProfile(student);
                 }
