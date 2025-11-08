@@ -466,10 +466,22 @@ button:disabled:hover {
     -webkit-tap-highlight-color: transparent;
 }
 
+#select-student-btn-wrapper,
+#select-student-btn-wrapper.disabled-wrapper {
+    position: sticky;
+    top: 48px;
+    /* This is the height of the sticky tabs */
+    z-index: 999;
+
+    background-color: var(--color-surface);
+    padding: 15px 20px;
+    margin-left: -20px;
+    margin-right: -20px;
+}
+
 /* استایل‌های مربوط به غیرفعال کردن دکمه با Tooltip */
 #select-student-btn-wrapper.disabled-wrapper {
     cursor: not-allowed;
-    position: relative;
 }
 
 #select-student-btn-wrapper.disabled-wrapper>button {
@@ -2480,6 +2492,11 @@ textarea,
     display: flex;
     border-bottom: 2px solid var(--color-border);
     margin-bottom: 20px;
+
+    position: sticky;
+    top: 0;
+    background-color: var(--color-background);
+    z-index: 1000;
 }
 
 .tab-btn {

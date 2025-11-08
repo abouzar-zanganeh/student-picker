@@ -1,6 +1,7 @@
 import * as state from './state.js';
 import { resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent, getSessionDisplayMap } from './state.js';
 import * as ui from './ui.js';
+import { switchDashboardTab } from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard } from './utils.js';
 import * as logManager from './logManager.js';
@@ -147,6 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 150);
         });
     }
+
 
 
     // --- Event Listeners ---
@@ -1227,6 +1229,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeAnimatedSearch('.global-search-container .animated-search-container', ui.renderGlobalSearchResults);
     initializeAnimatedSearch('.action-column-header .animated-search-container', ui.renderSearchResults);
 
+    setupSwipeNavigation();
+
     // --- Apply Auto-Direction to Textareas ---
     const textareasToMonitor = [
         ui.newNoteContent,          // Main note modal
@@ -1827,4 +1831,51 @@ export function handleUndoLastSelection(student, categoryName) {
         },
         { confirmText: 'بله', confirmClass: 'btn-warning' }
     );
+}
+
+function setupSwipeNavigation() {
+    const dashboardPage = document.getElementById('session-dashboard-page');
+    if (!dashboardPage) return;
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    dashboardPage.addEventListener('touchstart', (event) => {
+        // We only care about the first touch point
+        touchStartX = event.changedTouches[0].screenX;
+    }, { passive: true }); // passive: true improves scroll performance
+
+    dashboardPage.addEventListener('touchend', (event) => {
+        touchEndX = event.changedTouches[0].screenX;
+        handleSwipe();
+    });
+
+    function handleSwipe() {
+        const minSwipeDistance = 50; // Minimum pixels for a valid swipe
+        const swipeDistance = touchStartX - touchEndX;
+        const absoluteSwipeDistance = Math.abs(swipeDistance);
+
+        // 1. Check if a valid horizontal swipe occurred
+        if (absoluteSwipeDistance > minSwipeDistance) {
+
+            // 2. Check which tab is currently active
+            const selectorTabBtn = document.getElementById('selector-tab-btn');
+            const isSelectorTabActive = selectorTabBtn.classList.contains('active');
+
+            // 3. Toggle to the *other* tab
+            if (isSelectorTabActive) {
+                // If Selector is active, switch to Attendance
+                ui.showPage('session-dashboard-page', { tab: 'attendance' });
+                switchDashboardTab('attendance');
+            } else {
+                // Otherwise (Attendance must be active), switch to Selector
+                ui.showPage('session-dashboard-page', { tab: 'selector' });
+                switchDashboardTab('selector');
+            }
+        }
+
+        // Reset for the next touch
+        touchStartX = 0;
+        touchEndX = 0;
+    }
 }
