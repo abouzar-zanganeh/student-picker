@@ -176,6 +176,8 @@ export function setupDashboardTabs() {
 
 
     selectorTabBtn.addEventListener('click', () => {
+        renderStudentStatsList();
+        displayWinner();
         selectorTabBtn.classList.add('active');
         attendanceTabBtn.classList.remove('active');
         selectorPane.classList.add('active');
@@ -184,6 +186,7 @@ export function setupDashboardTabs() {
     });
 
     attendanceTabBtn.addEventListener('click', () => {
+        renderAttendancePage();
         attendanceTabBtn.classList.add('active');
         selectorTabBtn.classList.remove('active');
         attendancePane.classList.add('active');
