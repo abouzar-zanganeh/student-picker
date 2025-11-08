@@ -2423,6 +2423,9 @@ function renderProfileContent(container) {
     `;
     container.appendChild(statsSummaryDiv);
 
+    const totalSelectionsP = statsSummaryDiv.querySelector('p:nth-child(1)'); // کل انتخاب
+    const totalIssuesP = statsSummaryDiv.querySelector('p:nth-child(4)');     // مشکل
+
     // The rest of this function is mostly a copy-paste of the old renderStudentProfilePage,
     // but adapted to append elements to the 'container' parameter.
 
@@ -2432,13 +2435,7 @@ function renderProfileContent(container) {
 
     if (activeCategories.length > 0) {
 
-        const selectionsToggle = document.createElement('h4');
-        selectionsToggle.className = 'breakdown-toggle';
-        selectionsToggle.textContent = '▼ جزئیات انتخاب‌ها';
-        selectionsToggle.onclick = () => {
-            selectionsBreakdownContainer.classList.toggle('open');
-            selectionsToggle.textContent = selectionsBreakdownContainer.classList.contains('open') ? '▲ جزئیات انتخاب‌ها' : '▼ جزئیات انتخاب‌ها';
-        };
+
 
         activeCategories.forEach(category => {
             const categoryName = category.name;
@@ -2448,9 +2445,16 @@ function renderProfileContent(container) {
             p.innerHTML = `<strong>${categoryName}:</strong> ${count}`;
             selectionsBreakdownContainer.appendChild(p);
         });
+
         const totalSelectionsP = statsSummaryDiv.querySelector('p:first-child');
+
         if (totalSelectionsP) {
-            totalSelectionsP.after(selectionsToggle, selectionsBreakdownContainer);
+            totalSelectionsP.classList.add('collapsible-toggle');
+            totalSelectionsP.onclick = () => {
+                selectionsBreakdownContainer.classList.toggle('open');
+                totalSelectionsP.classList.toggle('open'); // Toggles the triangle
+            };
+            totalSelectionsP.after(selectionsBreakdownContainer);
         }
     }
 
@@ -2458,13 +2462,7 @@ function renderProfileContent(container) {
     issuesBreakdownContainer.className = 'stats-breakdown';
     if (activeCategories.length > 0) {
 
-        const issuesToggle = document.createElement('h4');
-        issuesToggle.className = 'breakdown-toggle';
-        issuesToggle.textContent = '▼ جزئیات مشکل‌ها';
-        issuesToggle.onclick = () => {
-            issuesBreakdownContainer.classList.toggle('open');
-            issuesToggle.textContent = issuesBreakdownContainer.classList.contains('open') ? '▲ جزئیات مشکل‌ها' : '▼ جزئیات مشکل‌ها';
-        };
+
 
         activeCategories.forEach(category => {
             const categoryName = category.name;
@@ -2475,8 +2473,14 @@ function renderProfileContent(container) {
             issuesBreakdownContainer.appendChild(p);
         });
 
-        statsSummaryDiv.appendChild(issuesToggle);
-        statsSummaryDiv.appendChild(issuesBreakdownContainer);
+        if (totalIssuesP) {
+            totalIssuesP.classList.add('collapsible-toggle');
+            totalIssuesP.onclick = () => {
+                issuesBreakdownContainer.classList.toggle('open');
+                totalIssuesP.classList.toggle('open'); // Toggles the triangle
+            };
+            statsSummaryDiv.appendChild(issuesBreakdownContainer);
+        }
     }
 
     const homeworkInfoP = document.createElement('p');

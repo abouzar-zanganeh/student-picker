@@ -2197,14 +2197,29 @@ textarea,
     margin-top: 10px;
 }
 
-.breakdown-toggle {
-    font-size: 16px;
-    color: var(--color-primary);
+.stats-summary-box p.collapsible-toggle {
     cursor: pointer;
-    margin-top: 15px;
-    margin-bottom: 0;
-    padding-bottom: 5px;
     user-select: none;
+    position: relative;
+    /* For positioning the triangle */
+    padding-right: 20px;
+    /* Make space for the triangle */
+}
+
+.stats-summary-box p.collapsible-toggle::before {
+    content: '▼';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    color: var(--color-primary);
+    transition: transform 0.3s ease;
+}
+
+.stats-summary-box p.collapsible-toggle.open::before {
+    transform: translateY(-50%) rotate(180deg);
+    /* Flip triangle up */
 }
 
 .stats-breakdown .stats-breakdown-item {
