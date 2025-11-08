@@ -2431,6 +2431,15 @@ function renderProfileContent(container) {
     selectionsBreakdownContainer.className = 'stats-breakdown';
 
     if (activeCategories.length > 0) {
+
+        const selectionsToggle = document.createElement('h4');
+        selectionsToggle.className = 'breakdown-toggle';
+        selectionsToggle.textContent = '▼ جزئیات انتخاب‌ها';
+        selectionsToggle.onclick = () => {
+            selectionsBreakdownContainer.classList.toggle('open');
+            selectionsToggle.textContent = selectionsBreakdownContainer.classList.contains('open') ? '▲ جزئیات انتخاب‌ها' : '▼ جزئیات انتخاب‌ها';
+        };
+
         activeCategories.forEach(category => {
             const categoryName = category.name;
             const count = student.categoryCounts?.[categoryName] || 0;
@@ -2441,13 +2450,22 @@ function renderProfileContent(container) {
         });
         const totalSelectionsP = statsSummaryDiv.querySelector('p:first-child');
         if (totalSelectionsP) {
-            totalSelectionsP.after(selectionsBreakdownContainer);
+            totalSelectionsP.after(selectionsToggle, selectionsBreakdownContainer);
         }
     }
 
     const issuesBreakdownContainer = document.createElement('div');
     issuesBreakdownContainer.className = 'stats-breakdown';
     if (activeCategories.length > 0) {
+
+        const issuesToggle = document.createElement('h4');
+        issuesToggle.className = 'breakdown-toggle';
+        issuesToggle.textContent = '▼ جزئیات مشکل‌ها';
+        issuesToggle.onclick = () => {
+            issuesBreakdownContainer.classList.toggle('open');
+            issuesToggle.textContent = issuesBreakdownContainer.classList.contains('open') ? '▲ جزئیات مشکل‌ها' : '▼ جزئیات مشکل‌ها';
+        };
+
         activeCategories.forEach(category => {
             const categoryName = category.name;
             const count = student.categoryIssues?.[categoryName] || 0;
@@ -2456,6 +2474,8 @@ function renderProfileContent(container) {
             p.innerHTML = `<strong>${categoryName}:</strong> ${count}`;
             issuesBreakdownContainer.appendChild(p);
         });
+
+        statsSummaryDiv.appendChild(issuesToggle);
         statsSummaryDiv.appendChild(issuesBreakdownContainer);
     }
 

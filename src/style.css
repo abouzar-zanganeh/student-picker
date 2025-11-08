@@ -2179,10 +2179,32 @@ textarea,
 
 /* Category issues and category counts on the profile page */
 .stats-breakdown {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid #e0e0e0;
+    /* Collapsed by default */
+    max-height: 0;
+    overflow: hidden;
+    padding-top: 0;
+    margin-top: 0;
     padding-right: 15px;
+    border-top: 1px solid #e0e0e0;
+    transition: all 0.3s ease-in-out;
+}
+
+.stats-breakdown.open {
+    /* Expanded state */
+    max-height: 1000px;
+    /* Large value to allow for content */
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+.breakdown-toggle {
+    font-size: 16px;
+    color: var(--color-primary);
+    cursor: pointer;
+    margin-top: 15px;
+    margin-bottom: 0;
+    padding-bottom: 5px;
+    user-select: none;
 }
 
 .stats-breakdown .stats-breakdown-item {
