@@ -355,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.selectedSession.lastUsedCategoryId = state.selectedCategory.id;
             state.selectedSession.lastSelectedWinnerId = winner.identity.studentId;
             ui.renderStudentStatsList();
-            ui.displayWinner();
+            setTimeout(() => ui.displayWinner(), 0);
             state.saveData();
         } else {
             ui.showNotification("❌دانش‌آموز واجد شرایطی برای انتخاب یافت نشد.");
