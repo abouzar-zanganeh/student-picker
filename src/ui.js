@@ -1731,6 +1731,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
                 winnerNameEl.style.color = ''; // Revert text color
             }
             renderStudentStatsList();
+            setTimeout(() => displayWinner(winner, categoryName), 0);
             state.saveData();
         });
     }
@@ -1786,6 +1787,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
                 // -------------
             }
             renderStudentStatsList();
+            setTimeout(() => displayWinner(winner, categoryName), 0);
             state.saveData();
         });
     }
@@ -1833,6 +1835,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
                 winnerNameEl.title = '';
             }
             renderStudentStatsList();
+            setTimeout(() => displayWinner(winner, categoryName), 0);
             state.saveData();
         });
     }
