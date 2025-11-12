@@ -1814,9 +1814,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
                 exitBtn.classList.add('active');
                 studentRecord.wasOutOfClass = true;
 
-                // Increment both the specific counter and the missed chance counter
-                winner.statusCounters.outOfClassCount = (winner.statusCounters.outOfClassCount || 0) + 1;
-                winner.statusCounters.missedChances++;
+
 
                 // Reset any potential 'absent' styling first
                 winnerNameEl.style.textDecoration = '';
@@ -1829,10 +1827,6 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
             } else {
                 exitBtn.classList.remove('active');
                 studentRecord.wasOutOfClass = false;
-
-                // Decrement both counters
-                winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
-                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
 
                 // Remove the visual cue
                 winnerNameEl.style.color = '';

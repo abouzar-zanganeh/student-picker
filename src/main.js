@@ -328,6 +328,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             }
 
+            if (studentRecord && studentRecord.wasOutOfClass) {
+                winner.statusCounters.outOfClassCount = (winner.statusCounters.outOfClassCount || 0) + 1;
+                winner.statusCounters.missedChances++;
+            }
+
 
             // --- New History Logic ---
             const historyEntry = {
