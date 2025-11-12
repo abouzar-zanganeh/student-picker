@@ -1082,7 +1082,6 @@ button:disabled:hover {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
 }
 
 .history-section-header h3 {

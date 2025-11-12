@@ -1865,18 +1865,24 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
     const scoresList = document.createElement('ul');
     scoresList.className = 'scores-list';
 
-    const skills = ['Reading', 'Writing', 'Speaking', 'Listening'];
+    // Get all *active* graded categories from the state
+    const gradedCategories = state.currentClassroom.categories.filter(
+        cat => cat.isGradedCategory && !cat.isDeleted
+    );
     let hasAnyScore = false;
     const studentScores = winner.logs.scores || {};
 
-    skills.forEach(skill => {
+    gradedCategories.forEach(category => {
+        const categoryName = category.name; // e.g., "Reading"
+        const skillKey = categoryName.toLowerCase(); // e.g., "reading"
+
         const li = document.createElement('li');
         const skillNameSpan = document.createElement('span');
         skillNameSpan.className = 'skill-name';
-        skillNameSpan.textContent = `${skill}:`;
+        skillNameSpan.textContent = `${categoryName}:`;
         const skillScoresSpan = document.createElement('span');
         skillScoresSpan.className = 'skill-scores';
-        const skillKey = skill.toLowerCase();
+
         const scoresForSkill = studentScores[skillKey]?.filter(s => !s.isDeleted);
         if (scoresForSkill && scoresForSkill.length > 0) {
             hasAnyScore = true;
@@ -1889,7 +1895,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
         scoresList.appendChild(li);
     });
 
-    if (!hasAnyScore && Object.keys(studentScores).length === 0) {
+    if (!hasAnyScore) {
         scoresList.innerHTML = `<div class="no-content-message">هنوز نمره‌ای ثبت نشده است.</div>`;
     }
 
