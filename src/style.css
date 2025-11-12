@@ -1942,6 +1942,10 @@ textarea,
 /* -------------------- Styles for Student Stats Table ------------------------ */
 #student-stats-table-container {
     overflow-x: auto;
+
+    overflow-y: auto;
+    max-height: 60vh;
+
     /* Enables horizontal scrolling */
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-main);
