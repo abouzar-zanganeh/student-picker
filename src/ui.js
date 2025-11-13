@@ -3095,23 +3095,28 @@ export function renderClassManagementStats() {
         return sum + getActiveItems(classroom.students).length;
     }, 0);
 
-    // --- NEW LOGIC START ---
+    // --- MODIFIED LOGIC START ---
     let backupDateHtml = '';
     if (state.userSettings.lastBackupTimestamp) {
         const backupDate = new Date(state.userSettings.lastBackupTimestamp).toLocaleDateString('fa-IR');
+        // We create a separate div for the backup date. Note the separator is gone.
         backupDateHtml = `
-            <span>|</span>
-            <span>آخرین پشتیبان: <strong>${backupDate}</strong></span>
+            <div class="stats-row backup-stat">
+                <span>آخرین پشتیبان: <strong>${backupDate}</strong></span>
+            </div>
         `;
     }
-    // --- NEW LOGIC END ---
 
+    // We wrap the main stats in their own div
     statsContainer.innerHTML = `
-        <span>کل کلاس‌ها: <strong>${totalClasses}</strong></span>
-        <span>|</span>
-        <span>کل دانش‌آموزان: <strong>${totalStudents}</strong></span>
+        <div class="stats-row main-stats">
+            <span>کل کلاس‌ها: <strong>${totalClasses}</strong></span>
+            <span>|</span>
+            <span>کل دانش‌آموزان: <strong>${totalStudents}</strong></span>
+        </div>
         ${backupDateHtml} 
     `;
+    // --- MODIFIED LOGIC END ---
 }
 
 export function renderClassList() {

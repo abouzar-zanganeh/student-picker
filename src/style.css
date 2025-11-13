@@ -2527,6 +2527,31 @@ textarea,
     font-size: 14px;
 }
 
+@media screen and (max-width: 400px) {
+    .class-stats-summary {
+        flex-direction: column;
+        /* This stacks the .stats-row divs */
+        gap: 5px;
+        align-items: center;
+        /* This centers the .stats-row divs */
+    }
+
+    /* This rule styles the first row (classes/students) */
+    .class-stats-summary .main-stats {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        /* Re-adds the horizontal gap for this line only */
+    }
+
+    /* This rule just ensures the backup date is also centered */
+    .class-stats-summary .backup-stat {
+        display: flex;
+        justify-content: center;
+    }
+}
+
 /* --- Styles for Session Dashboard Tabs --- */
 .dashboard-tabs {
     display: flex;
