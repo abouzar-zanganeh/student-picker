@@ -107,7 +107,7 @@ export async function prepareBackupData(classNames = []) {
         },
         data: {
             classrooms: dataToBackup,
-            trashBin // We always include the full trash bin
+            trashBin // We always include the full trash bin.
         }
     };
 
