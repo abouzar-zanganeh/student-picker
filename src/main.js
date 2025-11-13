@@ -404,6 +404,53 @@ document.addEventListener('DOMContentLoaded', () => {
         isGradedCheckbox.checked = false;
     });
 
+    // --- EVENT LISTENERS FOR CLASS TYPE ---
+    const classTypeSettingRadios = document.querySelectorAll('#settings-page input[name="class-type-setting"]');
+
+    classTypeSettingRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+            if (!state.currentClassroom) return;
+
+            const newType = radio.value;
+            const oldType = state.currentClassroom.info.type || 'in-person';
+
+            // If the type hasn't actually changed, do nothing.
+            if (newType === oldType) return;
+
+            const typeText = (type) => type === 'online' ? 'آنلاین' : 'حضوری';
+            const oldTypeText = typeText(oldType);
+            const newTypeText = typeText(newType);
+
+            // Show confirmation modal
+            ui.showCustomConfirm(
+                `آیا از تغییر نوع کلاس از «${oldTypeText}» به «${newTypeText}» مطمئن هستید؟`,
+                () => {
+                    // --- ON CONFIRM ---
+                    // This is the original logic
+                    state.currentClassroom.info.type = newType;
+                    state.saveData();
+
+                    logManager.addLog(state.currentClassroom.info.name, `نوع کلاس به «${newTypeText}» تغییر یافت.`, { type: 'VIEW_CLASS_SETTINGS' });
+                    ui.renderClassList();
+                    ui.showNotification(`✅ نوع کلاس به «${newTypeText}» تغییر یافت.`);
+                },
+                {
+                    confirmText: 'بله',
+                    confirmClass: 'btn-warning',
+                    onCancel: () => {
+                        // --- ON CANCEL ---
+                        // Revert the radio button check to the old value
+                        const oldRadio = document.querySelector(`#settings-page input[name="class-type-setting"][value="${oldType}"]`);
+                        if (oldRadio) {
+                            oldRadio.checked = true;
+                        }
+                    }
+                }
+            );
+        });
+    });
+    // --- END EVENT LISTENERS ---
+
     newCategoryNameInput.addEventListener('keyup', (event) => {
         if (event.key === 'Enter') {
             addCategoryBtn.click();

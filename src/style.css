@@ -524,6 +524,7 @@ button:disabled:hover {
 }
 
 .class-type-selection {
+    display: flex;
     align-items: center;
     gap: 15px;
     padding: 0 15px;
@@ -2673,4 +2674,32 @@ body.modal-active {
 #class-list.selection-mode-active .mass-selection-checkbox {
     display: inline-block;
     /* Show checkbox in selection mode */
+}
+
+
+/* Modifier to remove the border from the reused class */
+.class-type-selection.no-border {
+    border: none;
+    padding: 0;
+}
+
+@media screen and (max-width: 480px) {
+    .composite-input {
+        flex-direction: column;
+    }
+
+    /* 1. Hide the radio buttons by default on mobile */
+    .class-type-selection {
+        display: none;
+    }
+
+    /* 2. Show them (as a flex container) when the parent is focused */
+    .composite-input:focus-within .class-type-selection {
+        display: flex;
+        border-right: none;
+        border-top: 1px solid var(--color-border);
+        justify-content: center;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
 }

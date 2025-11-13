@@ -725,6 +725,7 @@ export function showSettingsPage(classroom) {
     settingsClassNameHeader.textContent = `تنظیمات کلاس: ${classroom.info.name}`;
     renderSettingsStudentList();
     renderSettingsCategories();
+    renderSettingsOther();
     showPage('settings-page');
 }
 
@@ -3280,6 +3281,17 @@ export function renderSettingsCategories() {
         li.appendChild(deleteBtn);
         categoryListUl.appendChild(li);
     });
+}
+
+export function renderSettingsOther() {
+    if (!state.currentClassroom) return;
+
+    // Select the correct radio button based on the saved class type
+    const classType = state.currentClassroom.info.type || 'in-person'; // Default to in-person
+    const radioToSelect = document.querySelector(`#settings-page input[name="class-type-setting"][value="${classType}"]`);
+    if (radioToSelect) {
+        radioToSelect.checked = true;
+    }
 }
 
 export function _internalShowPage(pageId) {

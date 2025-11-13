@@ -57,6 +57,7 @@
         </div>
         <div class="input-group">
             <div class="composite-input">
+                <input type="text" id="new-class-name" placeholder="نام کلاس جدید...">
                 <div class="class-type-selection">
                     <label>
                         <input type="radio" name="class-type" value="in-person">
@@ -67,7 +68,6 @@
                         <span>آنلاین</span>
                     </label>
                 </div>
-                <input type="text" id="new-class-name" placeholder="نام کلاس جدید...">
             </div>
             <button id="add-class-btn">افزودن</button>
         </div>
@@ -111,6 +111,23 @@
             <button id="add-category-btn">افزودن</button>
         </div>
         <ul id="category-list" class="list-container"></ul>
+
+        <h3 class="section-title">تنظیمات دیگر</h3>
+        <ul class="list-container">
+            <li>
+                <span>نوع کلاس</span>
+                <div class="class-type-selection no-border">
+                    <label>
+                        <input type="radio" name="class-type-setting" value="in-person">
+                        <span>حضوری</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="class-type-setting" value="online">
+                        <span>آنلاین</span>
+                    </label>
+                </div>
+            </li>
+        </ul>
 
         <h3 class="section-title">لیست فعلی دانش‌آموزان</h3>
         <ul id="settings-student-list" class="list-container"></ul>
