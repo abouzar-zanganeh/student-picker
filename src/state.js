@@ -1,5 +1,5 @@
 import { Classroom, Student, Session, Category, Homework, Note } from './models.js';
-
+import JSZip from 'jszip';
 
 // --- وضعیت کلی برنامه (Global State) ---
 export let classrooms = {}; // آبجکتی برای نگهداری تمام کلاس‌ها بر اساس نام آنها
@@ -65,7 +65,21 @@ export function saveData() {
 }
 
 
-export function prepareBackupData(classNames = []) {
+// Helper function to convert a Blob to a Base64 string
+function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = reject;
+        reader.onload = () => {
+            // The result is a "data URL" (e.g., data:application/octet-stream;base64,U...).
+            // We just want the Base64 part, so we split at the comma.
+            resolve(reader.result.split(',')[1]);
+        };
+        reader.readAsDataURL(blob);
+    });
+}
+
+export async function prepareBackupData(classNames = []) {
     const dataToBackup = {};
 
     // If specific class names are provided, filter the main classrooms object.
@@ -86,7 +100,8 @@ export function prepareBackupData(classNames = []) {
 
     const appState = {
         metadata: {
-            version: "2.0", // A version for our backup format
+            // New version to mark it as Base64. This is crucial for restoring.
+            version: "2.0-b64",
             createdAt: new Date().toISOString()
         },
         data: {
@@ -95,10 +110,37 @@ export function prepareBackupData(classNames = []) {
         }
     };
 
-    const dataStr = JSON.stringify(appState, null, 2);
+    const dataStr = JSON.stringify(appState);
     const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
+
+    // We are creating a .txt file
     const fileName = `SP-Backup-${today}.txt`;
-    return new File([dataStr], fileName, { type: 'text/plain' });
+
+    try {
+        const zip = new JSZip();
+        zip.file("backup.json", dataStr); // Add the data as a file inside the zip
+
+        // 1. Generate the binary compressed blob
+        const compressedBlob = await zip.generateAsync({
+            type: "blob",
+            compression: "DEFLATE",
+            compressionOptions: {
+                level: 9 // Max compression
+            }
+        });
+
+        // 2. Convert that binary blob to a Base64 string
+        const base64String = await blobToBase64(compressedBlob);
+
+        // 3. Create a new file from that *string*
+        return new File([base64String], fileName, {
+            type: "text/plain" // Share as a plain text file
+        });
+
+    } catch (error) {
+        console.error("Error creating base64 backup file:", error);
+        return null; // Return null on failure
+    }
 }
 
 export function loadData() {

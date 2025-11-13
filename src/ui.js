@@ -793,31 +793,53 @@ export function triggerFileDownload(fileObject) {
 }
 
 export async function initiateBackupProcess(classNamesToBackup = []) {
-    // 1. Get the prepared file object.
-    const fileToShare = state.prepareBackupData(classNamesToBackup);
+    // 1. Await the file creation. This is the async part.
+    const fileToShare = await state.prepareBackupData(classNamesToBackup);
+
+    // 1b. Check if file creation succeeded
+    if (!fileToShare) {
+        showNotification("❌ خطا در ایجاد فایل پشتیبان.");
+        return;
+    }
 
     // 2. Check for mobile/share capability.
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice && navigator.share && navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
-        try {
-            // 3. Use the file with the Web Share API.
-            await navigator.share({
-                title: fileToShare.name, // Use the file's actual name as the title
-                text: 'فایل پشتیبان داده‌های برنامه',
-                files: [fileToShare],
-            });
-            console.log('the code reached the change');
 
-        } catch (error) {
-            if (error.name !== 'AbortError') {
-                console.error('Error sharing file:', error);
-                // 4a. If sharing fails, fall back to a direct download.
-                triggerFileDownload(fileToShare);
-                showNotification("⚠️اشتراک‌گذاری با خطا مواجه شد. فایل در حال دانلود است.");
+        // 3. Show a confirmation modal. The 'onConfirm' callback will contain
+        //    the share logic, running it from a *new* user click.
+        showCustomConfirm(
+            "فایل پشتیبان شما آماده است. آیا مایل به اشتراک‌گذاری آن هستید؟",
+            () => {
+                // 4. This code now runs *directly* from the "Yes" click.
+                try {
+                    navigator.share({
+                        title: fileToShare.name,
+                        text: 'فایل پشتیبان داده‌های برنامه',
+                        files: [fileToShare],
+                    })
+                        .catch((error) => {
+                            if (error.name !== 'AbortError') {
+                                console.error('Error sharing file:', error);
+                                // Fallback to download if sharing fails
+                                triggerFileDownload(fileToShare);
+                                showNotification("⚠️اشتراک‌گذاری با خطا مواجه شد. فایل در حال دانلود است.");
+                            }
+                        });
+                } catch (error) {
+                    console.error('Error during sharing process:', error);
+                    triggerFileDownload(fileToShare);
+                    showNotification("⚠️خطا در فرآیند اشتراک‌گذاری. فایل در حال دانلود است.");
+                }
+            },
+            {
+                confirmText: 'بله، اشتراک‌گذاری',
+                cancelText: 'خیر',
+                confirmClass: 'btn-success'
             }
-        }
+        );
     } else {
-        // 4b. On desktop, trigger the download directly.
+        // 4b. On desktop, just trigger the download directly.
         triggerFileDownload(fileToShare);
         showNotification("✅پشتیبان‌گیری با موفقیت انجام شد.");
     }
