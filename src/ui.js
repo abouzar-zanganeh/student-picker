@@ -3095,11 +3095,18 @@ export function renderClassManagementStats() {
         return sum + getActiveItems(classroom.students).length;
     }, 0);
 
-    // --- MODIFIED LOGIC START ---
     let backupDateHtml = '';
     if (state.userSettings.lastBackupTimestamp) {
-        const backupDate = new Date(state.userSettings.lastBackupTimestamp).toLocaleDateString('fa-IR');
-        // We create a separate div for the backup date. Note the separator is gone.
+        // Updated formatting to include weekday and time
+        const backupDate = new Date(state.userSettings.lastBackupTimestamp).toLocaleString('fa-IR', {
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            weekday: 'long',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
         backupDateHtml = `
             <div class="stats-row backup-stat">
                 <span>آخرین پشتیبان: <strong>${backupDate}</strong></span>
@@ -3107,7 +3114,6 @@ export function renderClassManagementStats() {
         `;
     }
 
-    // We wrap the main stats in their own div
     statsContainer.innerHTML = `
         <div class="stats-row main-stats">
             <span>کل کلاس‌ها: <strong>${totalClasses}</strong></span>
@@ -3116,7 +3122,6 @@ export function renderClassManagementStats() {
         </div>
         ${backupDateHtml} 
     `;
-    // --- MODIFIED LOGIC END ---
 }
 
 export function renderClassList() {
