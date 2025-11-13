@@ -790,6 +790,9 @@ export function triggerFileDownload(fileObject) {
     // This cleans up by removing the link and revoking the temporary URL.
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+
+    state.setLastBackupTimestamp();
+    renderClassManagementStats();
 }
 
 export async function initiateBackupProcess(classNamesToBackup = []) {
@@ -818,6 +821,10 @@ export async function initiateBackupProcess(classNamesToBackup = []) {
                         text: 'فایل پشتیبان داده‌های برنامه',
                         files: [fileToShare],
                     })
+                        .then(() => {
+                            state.setLastBackupTimestamp();
+                            renderClassManagementStats();
+                        })
                         .catch((error) => {
                             if (error.name !== 'AbortError') {
                                 console.error('Error sharing file:', error);
@@ -833,7 +840,7 @@ export async function initiateBackupProcess(classNamesToBackup = []) {
                 }
             },
             {
-                confirmText: 'بله، اشتراک‌گذاری',
+                confirmText: 'بله',
                 cancelText: 'خیر',
                 confirmClass: 'btn-success'
             }
@@ -3088,10 +3095,22 @@ export function renderClassManagementStats() {
         return sum + getActiveItems(classroom.students).length;
     }, 0);
 
+    // --- NEW LOGIC START ---
+    let backupDateHtml = '';
+    if (state.userSettings.lastBackupTimestamp) {
+        const backupDate = new Date(state.userSettings.lastBackupTimestamp).toLocaleDateString('fa-IR');
+        backupDateHtml = `
+            <span>|</span>
+            <span>آخرین پشتیبان: <strong>${backupDate}</strong></span>
+        `;
+    }
+    // --- NEW LOGIC END ---
+
     statsContainer.innerHTML = `
         <span>کل کلاس‌ها: <strong>${totalClasses}</strong></span>
         <span>|</span>
         <span>کل دانش‌آموزان: <strong>${totalStudents}</strong></span>
+        ${backupDateHtml} 
     `;
 }
 

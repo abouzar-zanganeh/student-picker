@@ -45,7 +45,8 @@ export let selectedStudentsForMassComment = [];
 export let userSettings = {
     // This object stores the state values for the app settings which can be customized by the user
     isScreenSaverEnabled: true,
-    lastRestoreTimestamp: null
+    lastRestoreTimestamp: null,
+    lastBackupTimestamp: null,
 };
 
 
@@ -150,7 +151,7 @@ export function loadData() {
     const plainData = JSON.parse(savedData);
 
     // Check if the data is in the new format {classrooms, trashBin} or the old one.
-    if (plainData.classrooms) {
+    if (plainData.classrooms !== undefined && plainData.trashBin !== undefined) {
         // New format
         rehydrateData(plainData.classrooms);
         trashBin = plainData.trashBin || [];
@@ -767,3 +768,8 @@ export function setUserSettings(newSettings) {
 }
 
 export function setSelectedClassIds(ids) { selectedClassIds = ids; }
+
+export function setLastBackupTimestamp() {
+    userSettings.lastBackupTimestamp = new Date().toISOString();
+    saveData();
+}
