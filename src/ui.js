@@ -791,8 +791,18 @@ export function triggerFileDownload(fileObject) {
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 
-    state.setLastBackupTimestamp();
-    renderClassManagementStats();
+    // --- CHANGED: Ask for confirmation instead of auto-updating ---
+    setTimeout(() => {
+        showCustomConfirm(
+            "آیا فایل پشتیبان با موفقیت ذخیره شد؟",
+            () => {
+                state.setLastBackupTimestamp();
+                renderClassManagementStats();
+                showNotification("✅ تاریخ پشتیبان ثبت شد.");
+            },
+            { confirmText: 'بله، ذخیره شد', cancelText: 'خیر', confirmClass: 'btn-success' }
+        );
+    }, 500);
 }
 
 export async function initiateBackupProcess(classNamesToBackup = []) {
@@ -822,17 +832,17 @@ export async function initiateBackupProcess(classNamesToBackup = []) {
                         files: [fileToShare],
                     })
                         .then(() => {
-                            state.setLastBackupTimestamp();
-                            renderClassManagementStats();
+                            // --- CHANGED: Ask for confirmation here too ---
+                            showCustomConfirm(
+                                "آیا فایل پشتیبان با موفقیت ارسال/ذخیره شد؟",
+                                () => {
+                                    state.setLastBackupTimestamp();
+                                    renderClassManagementStats();
+                                    showNotification("✅ تاریخ پشتیبان ثبت شد.");
+                                },
+                                { confirmText: 'بله', cancelText: 'خیر', confirmClass: 'btn-success' }
+                            );
                         })
-                        .catch((error) => {
-                            if (error.name !== 'AbortError') {
-                                console.error('Error sharing file:', error);
-                                // Fallback to download if sharing fails
-                                triggerFileDownload(fileToShare);
-                                showNotification("⚠️اشتراک‌گذاری با خطا مواجه شد. فایل در حال دانلود است.");
-                            }
-                        });
                 } catch (error) {
                     console.error('Error during sharing process:', error);
                     triggerFileDownload(fileToShare);
