@@ -2705,3 +2705,30 @@ body.modal-active {
         padding-bottom: 10px;
     }
 }
+
+/* --- Page Header Bar (Breadcrumbs + Settings) --- */
+.page-header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    /* Reserve height to prevent layout jump when button appears */
+    min-height: 30px;
+}
+
+/* Make breadcrumbs take up available space */
+.breadcrumb-container {
+    flex-grow: 1;
+    margin-bottom: 0;
+    /* Parent now handles margin */
+}
+
+/* Style the new settings button */
+#header-settings-btn {
+    flex-shrink: 0;
+    /* Prevent button from shrinking */
+    font-size: 18px;
+    /* Make icon larger */
+    visibility: hidden;
+    /* Will be shown by ui.js */
+}

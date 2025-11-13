@@ -941,6 +941,24 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.classList.add('modal-visible');
     });
 
+    hamburgerMenuBtn.addEventListener('click', () => {
+        sideNavMenu.style.width = '300px';
+        overlay.classList.add('modal-visible');
+    });
+
+    // --- NEW HEADER SETTINGS BUTTON LISTENER ---
+    const headerSettingsBtn = document.getElementById('header-settings-btn');
+    if (headerSettingsBtn) {
+        headerSettingsBtn.addEventListener('click', () => {
+            if (state.currentClassroom) {
+                ui.showSettingsPage(state.currentClassroom);
+            }
+        });
+    }
+    // --- END NEW LISTENER ---
+
+    closeNavBtn.addEventListener('click', closeSideNav);
+
     closeNavBtn.addEventListener('click', closeSideNav);
     overlay.addEventListener('click', closeSideNav);
 

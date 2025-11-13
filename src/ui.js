@@ -938,6 +938,10 @@ export function closeContextMenu() {
 export function renderBreadcrumbs() {
     breadcrumbContainer.innerHTML = ''; // Clear previous breadcrumbs
 
+    // Get the new settings button
+    const headerSettingsBtn = document.getElementById('header-settings-btn');
+    if (!headerSettingsBtn) return; // Safety check
+
     const path = []; // This array will hold the parts of our breadcrumb trail
 
     // --- Home Link (Always the first part) ---
@@ -965,6 +969,14 @@ export function renderBreadcrumbs() {
 
         const activePage = document.querySelector('.page.active')?.id;
 
+        // --- NEW LOGIC: Control settings button visibility ---
+        if (activePage === 'session-page') {
+            headerSettingsBtn.style.visibility = 'visible';
+        } else {
+            headerSettingsBtn.style.visibility = 'hidden';
+        }
+        // --- END NEW LOGIC ---
+
         if (activePage === 'settings-page') {
             path.push({ label: 'تنظیمات' });
         } else if (state.selectedSession) {
@@ -974,18 +986,25 @@ export function renderBreadcrumbs() {
                 label: `جلسه ${displayNumber}`,
                 handler: () => {
                     state.setSelectedStudentForProfile(null);
-                    showPage('student-page');
+                    renderSessionDashboard('selector');
                 }
             });
 
-            // Check for deeper pages within a session
-            const activePage = document.querySelector('.page.active')?.id;
             if (state.selectedStudentForProfile) {
                 path.push({ label: `پروفایل: ${state.selectedStudentForProfile.identity.name}` });
-            } else if (activePage === 'attendance-page') {
-                path.push({ label: 'حضور و غیاب' });
+            } else if (activePage === 'session-dashboard-page') {
+                // Check which tab is active
+                const isAttendance = document.getElementById('attendance-tab-btn').classList.contains('active');
+                if (isAttendance) {
+                    path.push({ label: 'حضور و غیاب' });
+                } else {
+                    path.push({ label: 'انتخابگر' });
+                }
             }
         }
+    } else {
+        // We're on the main class list page
+        headerSettingsBtn.style.visibility = 'hidden';
     }
 
     // --- Render the path to HTML ---
@@ -1001,7 +1020,6 @@ export function renderBreadcrumbs() {
         item.textContent = part.label;
         item.className = 'breadcrumb-item';
 
-        // If it's the last item or has no handler, make it inactive
         if (index === path.length - 1 || !part.handler) {
             item.classList.add('active');
         } else {
@@ -1010,7 +1028,6 @@ export function renderBreadcrumbs() {
 
         breadcrumbContainer.appendChild(item);
 
-        // Add separator if it's not the last item
         if (index < path.length - 1) {
             const separator = document.createElement('span');
             separator.className = 'breadcrumb-separator';
