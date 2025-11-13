@@ -112,10 +112,29 @@ export async function prepareBackupData(classNames = []) {
     };
 
     const dataStr = JSON.stringify(appState);
-    const today = new Date().toLocaleDateString('fa-IR-u-nu-latn').replace(/\//g, '-');
 
-    // We are creating a .txt file
-    const fileName = `SP-Backup-${today}.txt`;
+    // --- FILENAME LOGIC START ---
+    const now = new Date();
+    // Extract Persian date parts
+    const parts = new Intl.DateTimeFormat('fa-IR-u-nu-latn', {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    }).formatToParts(now).reduce((acc, part) => {
+        acc[part.type] = part.value;
+        return acc;
+    }, {});
+
+    // Slice the year to get the last 2 digits (e.g., "1404" -> "04")
+    const shortYear = parts.year.slice(-2);
+
+    // Construct filename: SP_04-8-22_22-45.txt
+    // Note: We use '-' for time because ':' is invalid in Windows filenames.
+    const fileName = `SP_${shortYear}-${parts.month}-${parts.day}_${parts.hour}-${parts.minute}.txt`;
+    // --- FILENAME LOGIC END ---
 
     try {
         const zip = new JSZip();
