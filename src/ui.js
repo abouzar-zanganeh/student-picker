@@ -857,7 +857,7 @@ export function openContextMenu(event, menuItems) {
                 }
                 li.addEventListener('click', () => {
                     item.action();
-                    closeContextMenu(); // This will now also remove the highlight
+                    closeContextMenu(); // This will now also remove the highlight.
                 });
             }
             ul.appendChild(li);
