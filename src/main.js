@@ -5,6 +5,7 @@ import { switchDashboardTab } from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard } from './utils.js';
 import * as logManager from './logManager.js';
+import JSZip from 'jszip';
 
 
 
@@ -959,18 +960,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const plainData = JSON.parse(e.target.result);
 
-                // Check if it's the NEW backup format (with metadata)
+        // Make the onload function ASYNC to handle unzipping
+        reader.onload = async (e) => {
+            const fileContent = e.target.result;
+
+            try {
+                // --- TRY BLOCK: Assumes it's an OLD, plain-text JSON file ---
+                const plainData = JSON.parse(fileContent);
+
+                // Check if it's the NEW metadata format (but uncompressed)
                 if (plainData.metadata && plainData.data) {
-                    ui.showRestoreConfirmModal(plainData); // Use our new, advanced modal
+                    // This will handle v2.0 backups that were not Base64
+                    ui.showRestoreConfirmModal(plainData);
                 } else {
-                    // It's the OLD format, so use the original overwrite confirmation
-                    // It's an old backup. But WHICH old backup?
-                    // This checks if it has a `classrooms` property. If so, it uses that.
-                    // Otherwise, it assumes the whole object is the classrooms data (for the oldest format).
+                    // This handles v1.0 backups (the raw classrooms object)
                     const classroomsDataToRestore = plainData.classrooms || plainData;
                     const trashDataToRestore = plainData.trashBin || [];
 
@@ -978,7 +982,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         "آیا از بازیابی اطلاعات مطمئن هستید؟ تمام داده‌های فعلی شما بازنویسی خواهد شد.",
                         () => {
                             state.rehydrateData(classroomsDataToRestore);
-                            state.setTrashBin(trashDataToRestore); // Also restore the trash bin if it exists
+                            state.setTrashBin(trashDataToRestore);
                             state.setUserSettings({ lastRestoreTimestamp: new Date().toISOString() });
                             state.saveData();
                             ui.renderClassList();
@@ -988,11 +992,46 @@ document.addEventListener('DOMContentLoaded', () => {
                         { confirmText: 'بازیابی کن', confirmClass: 'btn-warning' }
                     );
                 }
-            } catch (error) {
-                ui.showNotification("❌خطا در خواندن فایل. لطفاً فایل پشتیبان معتبر انتخاب کنید.");
-                console.error("Restore error:", error);
+
+            } catch (jsonError) {
+                // --- CATCH BLOCK: Assumes it's a NEW, Base64-compressed file ---
+                // The JSON.parse failed, so it's not a plain JSON file.
+                // Let's try to decompress it as a Base64 zip.
+                try {
+                    const zip = new JSZip();
+
+                    // 1. Load the Base64 string (the fileContent)
+                    const unzipped = await zip.loadAsync(fileContent, { base64: true });
+
+                    // 2. Find the backup.json file inside
+                    const backupFile = unzipped.file("backup.json");
+                    if (!backupFile) {
+                        throw new Error("فایل backup.json در فایل پشتیبان یافت نشد.");
+                    }
+
+                    // 3. Read the content of backup.json as text
+                    const jsonString = await backupFile.async("string");
+
+                    // 4. Parse that text into our data object
+                    const plainData = JSON.parse(jsonString);
+
+                    // 5. Check if it's our new "2.0-b64" format
+                    if (plainData.metadata && plainData.metadata.version === "2.0-b64") {
+                        // Success! Show the restore modal
+                        ui.showRestoreConfirmModal(plainData);
+                    } else {
+                        throw new Error("فایل پشتیبان معتبر نیست (نسخه نامشخص).");
+                    }
+
+                } catch (zipError) {
+                    // This catches errors from zipping or Base64 decoding
+                    ui.showNotification("❌خطا در خواندن فایل. لطفاً فایل پشتیبان معتبر انتخاب کنید.");
+                    console.error("Restore error (zip/base64):", zipError);
+                }
             }
         };
+
+        // We must read the file as text for BOTH old JSON and new Base64
         reader.readAsText(file);
         event.target.value = null; // Reset input
     });
