@@ -2684,17 +2684,19 @@ body.modal-active {
 }
 
 @media screen and (max-width: 480px) {
-    .composite-input {
+
+    /* This rule only applies to the Add Class form */
+    #class-management-page .composite-input {
         flex-direction: column;
     }
 
-    /* 1. Hide the radio buttons by default on mobile */
-    .class-type-selection {
+    /* 1. Hide the radio buttons ONLY on the Add Class form */
+    #class-management-page .class-type-selection {
         display: none;
     }
 
-    /* 2. Show them (as a flex container) when the parent is focused */
-    .composite-input:focus-within .class-type-selection {
+    /* 2. Show them (as a flex container) when the parent is focused ONLY on the Add Class form */
+    #class-management-page .composite-input:focus-within .class-type-selection {
         display: flex;
         border-right: none;
         border-top: 1px solid var(--color-border);
