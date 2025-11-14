@@ -2309,6 +2309,117 @@ export function showStudentProfile(student) {
     // 2. Clear previous content before rendering
     modalContentContainer.innerHTML = '';
 
+
+
+    // Create a container for all action buttons
+    const actionButtonsContainer = document.createElement('div');
+    actionButtonsContainer.className = 'profile-header-actions'; // New CSS class
+
+    // --- Move Student Button ---
+    const moveStudentBtn = document.createElement('button');
+    moveStudentBtn.className = 'btn-icon btn-icon-label';
+    moveStudentBtn.title = 'انتقال دانش‌آموز';
+    moveStudentBtn.innerHTML = '<span>➡️</span><span>انتقال</span>';
+    moveStudentBtn.addEventListener('click', () => {
+        const studentToMove = state.selectedStudentForProfile;
+        const sourceClass = state.currentClassroom;
+
+        // Close the profile modal first, then open the move modal
+        closeActiveModal(() => {
+            showMoveStudentModal(studentToMove, sourceClass);
+        });
+    });
+
+    // --- Delete Student Button ---
+    const deleteStudentBtn = document.createElement('button');
+    deleteStudentBtn.className = 'btn-icon btn-icon-label';
+    deleteStudentBtn.title = 'حذف دانش‌آموز';
+    deleteStudentBtn.innerHTML = '<span>🗑️</span><span>حذف</span>';
+    deleteStudentBtn.style.color = 'var(--color-strong-warning)'; // Make it red
+    deleteStudentBtn.addEventListener('click', () => {
+        const studentToDelete = state.selectedStudentForProfile;
+        const currentClass = state.currentClassroom;
+
+        // Close the profile modal first, then show the confirm modal
+        closeActiveModal(() => {
+            showCustomConfirm(
+                `آیا از انتقال دانش‌آموز «${studentToDelete.identity.name}» به سطل زباله مطمئن هستید؟`,
+                () => {
+                    // This is the same logic from the settings page
+                    const trashEntry = {
+                        id: `trash_${Date.now()}_${Math.random()}`,
+                        timestamp: new Date().toISOString(),
+                        type: 'student',
+                        description: `دانش‌آMوز «${studentToDelete.identity.name}» از کلاس «${currentClass.info.name}»`,
+                        restoreData: { studentId: studentToDelete.identity.studentId, classId: currentClass.info.scheduleCode }
+                    };
+                    state.trashBin.unshift(trashEntry);
+                    if (state.trashBin.length > 50) state.trashBin.pop();
+
+                    studentToDelete.isDeleted = true;
+                    logManager.addLog(currentClass.info.name, `دانش‌آموز «${studentToDelete.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+                    state.saveData();
+
+                    // Refresh the UI in the background
+                    renderSettingsStudentList();
+                    renderStudentStatsList();
+                    renderAttendancePage();
+
+                    showNotification(`✅ دانش‌آموز «${studentToDelete.identity.name}» به سطل زباله منتقل شد.`);
+                },
+                {
+                    confirmText: 'بله',
+                    confirmClass: 'btn-warning',
+                    isDelete: true,
+                    // If they cancel, re-open the profile
+                    onCancel: () => {
+                        showStudentProfile(studentToDelete);
+                    }
+                }
+            );
+        });
+    });
+
+    // 2. Create the "Add Note" button and its listener
+    const addNoteBtn = document.createElement('button');
+    addNoteBtn.className = 'btn-icon btn-icon-label';
+    addNoteBtn.title = 'افزودن یادداشت جدید';
+    addNoteBtn.innerHTML = '<span>📝</span><span>یادداشت</span>';
+    addNoteBtn.addEventListener('click', () => {
+        const studentForNote = state.selectedStudentForProfile; // <-- CAPTURE STUDENT
+
+        newNoteContent.value = ''; // Clear modal for a new note
+        newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
+
+        state.setSaveNoteCallback((content) => {
+            if (content) {
+                studentForNote.addNote(content); // <-- USE CAPTURED STUDENT
+                state.saveData();
+
+                logManager.addLog(state.currentClassroom.info.name, `یادداشت جدیدی برای دانش‌آموز «${studentForNote.identity.name}» ثبت شد.`, { type: 'VIEW_STUDENT_PROFILE', studentId: studentForNote.identity.studentId });
+
+                displayWinner(); // Refresh background panel
+                showNotification('✅ یادداشت با موفقیت ثبت شد.');
+            }
+            // After note modal closes (from main.js), re-open profile
+            showStudentProfile(studentForNote); // <-- RE-OPEN PROFILE
+        });
+
+        // Close the current profile modal, and THEN open the note modal.
+        closeActiveModal(() => {
+            openModal('add-note-modal');
+            newNoteContent.focus();
+        });
+    });
+
+    // Add all buttons to the new container
+    actionButtonsContainer.appendChild(moveStudentBtn);
+    actionButtonsContainer.appendChild(deleteStudentBtn);
+    actionButtonsContainer.appendChild(addNoteBtn); // Add note button last
+
+    modalContentContainer.appendChild(actionButtonsContainer);
+
+
     // 3. Render all profile sections into the modal
     renderProfileScoringSection(modalContentContainer);
     renderHistorySection(modalContentContainer);
@@ -2418,115 +2529,11 @@ function renderHistorySection(container) {
     const title = document.createElement('h3');
     title.textContent = 'سوابق دانش‌آموز';
 
-    // Create a container for all action buttons
-    const actionButtonsContainer = document.createElement('div');
-    actionButtonsContainer.className = 'profile-header-actions'; // New CSS class
 
-    // --- Move Student Button ---
-    const moveStudentBtn = document.createElement('button');
-    moveStudentBtn.className = 'btn-icon btn-icon-label';
-    moveStudentBtn.title = 'انتقال دانش‌آموز';
-    moveStudentBtn.innerHTML = '<span>➡️</span><span>انتقال</span>';
-    moveStudentBtn.addEventListener('click', () => {
-        const studentToMove = state.selectedStudentForProfile;
-        const sourceClass = state.currentClassroom;
-
-        // Close the profile modal first, then open the move modal
-        closeActiveModal(() => {
-            showMoveStudentModal(studentToMove, sourceClass);
-        });
-    });
-
-    // --- Delete Student Button ---
-    const deleteStudentBtn = document.createElement('button');
-    deleteStudentBtn.className = 'btn-icon btn-icon-label';
-    deleteStudentBtn.title = 'حذف دانش‌آموز';
-    deleteStudentBtn.innerHTML = '<span>🗑️</span><span>حذف</span>';
-    deleteStudentBtn.style.color = 'var(--color-strong-warning)'; // Make it red
-    deleteStudentBtn.addEventListener('click', () => {
-        const studentToDelete = state.selectedStudentForProfile;
-        const currentClass = state.currentClassroom;
-
-        // Close the profile modal first, then show the confirm modal
-        closeActiveModal(() => {
-            showCustomConfirm(
-                `آیا از انتقال دانش‌آموز «${studentToDelete.identity.name}» به سطل زباله مطمئن هستید؟`,
-                () => {
-                    // This is the same logic from the settings page
-                    const trashEntry = {
-                        id: `trash_${Date.now()}_${Math.random()}`,
-                        timestamp: new Date().toISOString(),
-                        type: 'student',
-                        description: `دانش‌آMوز «${studentToDelete.identity.name}» از کلاس «${currentClass.info.name}»`,
-                        restoreData: { studentId: studentToDelete.identity.studentId, classId: currentClass.info.scheduleCode }
-                    };
-                    state.trashBin.unshift(trashEntry);
-                    if (state.trashBin.length > 50) state.trashBin.pop();
-
-                    studentToDelete.isDeleted = true;
-                    logManager.addLog(currentClass.info.name, `دانش‌آموز «${studentToDelete.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
-                    state.saveData();
-
-                    // Refresh the UI in the background
-                    renderSettingsStudentList();
-                    renderStudentStatsList();
-                    renderAttendancePage();
-
-                    showNotification(`✅ دانش‌آموز «${studentToDelete.identity.name}» به سطل زباله منتقل شد.`);
-                },
-                {
-                    confirmText: 'بله',
-                    confirmClass: 'btn-warning',
-                    isDelete: true,
-                    // If they cancel, re-open the profile
-                    onCancel: () => {
-                        showStudentProfile(studentToDelete);
-                    }
-                }
-            );
-        });
-    });
-
-    // 2. Create the "Add Note" button and its listener
-    const addNoteBtn = document.createElement('button');
-    addNoteBtn.className = 'btn-icon btn-icon-label';
-    addNoteBtn.title = 'افزودن یادداشت جدید';
-    addNoteBtn.innerHTML = '<span>📝</span><span>یادداشت</span>';
-    addNoteBtn.addEventListener('click', () => {
-        const studentForNote = state.selectedStudentForProfile; // <-- CAPTURE STUDENT
-
-        newNoteContent.value = ''; // Clear modal for a new note
-        newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
-
-        state.setSaveNoteCallback((content) => {
-            if (content) {
-                studentForNote.addNote(content); // <-- USE CAPTURED STUDENT
-                state.saveData();
-
-                logManager.addLog(state.currentClassroom.info.name, `یادداشت جدیدی برای دانش‌آموز «${studentForNote.identity.name}» ثبت شد.`, { type: 'VIEW_STUDENT_PROFILE', studentId: studentForNote.identity.studentId });
-
-                displayWinner(); // Refresh background panel
-                showNotification('✅ یادداشت با موفقیت ثبت شد.');
-            }
-            // After note modal closes (from main.js), re-open profile
-            showStudentProfile(studentForNote); // <-- RE-OPEN PROFILE
-        });
-
-        // Close the current profile modal, and THEN open the note modal.
-        closeActiveModal(() => {
-            openModal('add-note-modal');
-            newNoteContent.focus();
-        });
-    });
-
-    // Add all buttons to the new container
-    actionButtonsContainer.appendChild(moveStudentBtn);
-    actionButtonsContainer.appendChild(deleteStudentBtn);
-    actionButtonsContainer.appendChild(addNoteBtn); // Add note button last
 
     // Add the title and the button container to the header
     historyHeader.appendChild(title);
-    historyHeader.appendChild(actionButtonsContainer);
+
     historySection.appendChild(historyHeader);
 
     // 3. Call the other functions to populate the content
