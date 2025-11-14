@@ -926,7 +926,9 @@ document.addEventListener('DOMContentLoaded', () => {
             logManager.addLog(destinationClassName, `دانش‌آموز «${studentToMove.identity.name}» از کلاس «${sourceClassForMove.info.name}» به این کلاس منتقل شد.`, { type: 'VIEW_SESSIONS' });
 
             state.saveData();
-            ui.renderSettingsStudentList(); // Refresh the list in the background
+            ui.renderSettingsStudentList();
+            ui.renderStudentStatsList();
+            ui.renderAttendancePage();
             ui.showNotification(`دانش‌آموز «${studentToMove.identity.name}» با موفقیت به کلاس «${destinationClassName}» منتقل شد✅.`);
         } else {
             ui.showNotification(result.message, 'error');

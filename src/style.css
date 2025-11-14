@@ -2732,3 +2732,10 @@ body.modal-active {
     visibility: hidden;
     /* Will be shown by ui.js */
 }
+
+/* --- Styles for Profile Modal Header Buttons --- */
+.profile-header-actions {
+    display: flex;
+    gap: 5px;
+    /* Adds a small space between buttons */
+}
