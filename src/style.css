@@ -2739,3 +2739,48 @@ body.modal-active {
     gap: 5px;
     /* Adds a small space between buttons */
 }
+
+/* --- Styles for Icon + Label Buttons --- */
+/* First used in the profile modal for the icons of moving, deleting and add-note */
+.btn-icon-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    /* Smaller font for the label */
+    padding: 3px 8px;
+    /* Give it some padding */
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-main);
+    background-color: #f8f9fa;
+    /* Light background */
+    color: var(--color-text-dark);
+    /* Dark text */
+}
+
+/* Adjust icon size within the new button */
+.btn-icon-label span:first-child {
+    font-size: 16px;
+    line-height: 1;
+    /* Helps with vertical alignment */
+}
+
+/* Override the default btn-icon hover transform */
+.btn-icon-label:hover {
+    transform: none;
+    /* Remove the scale(1.2) */
+    background-color: #e9ecef;
+    /* Standard hover */
+    color: var(--color-text-dark);
+}
+
+/* Specific color for the delete button's text */
+.btn-icon-label[title="حذف دانش‌آموز"] {
+    color: var(--color-strong-warning);
+    border-color: #f5c6cb;
+}
+
+.btn-icon-label[title="حذف دانش‌آموز"]:hover {
+    background-color: #f8d7da;
+    color: var(--color-strong-warning);
+}

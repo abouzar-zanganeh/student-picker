@@ -2424,9 +2424,9 @@ function renderHistorySection(container) {
 
     // --- Move Student Button ---
     const moveStudentBtn = document.createElement('button');
-    moveStudentBtn.className = 'btn-icon';
+    moveStudentBtn.className = 'btn-icon btn-icon-label';
     moveStudentBtn.title = 'انتقال دانش‌آموز';
-    moveStudentBtn.innerHTML = '➡️';
+    moveStudentBtn.innerHTML = '<span>➡️</span><span>انتقال</span>';
     moveStudentBtn.addEventListener('click', () => {
         const studentToMove = state.selectedStudentForProfile;
         const sourceClass = state.currentClassroom;
@@ -2439,9 +2439,9 @@ function renderHistorySection(container) {
 
     // --- Delete Student Button ---
     const deleteStudentBtn = document.createElement('button');
-    deleteStudentBtn.className = 'btn-icon';
+    deleteStudentBtn.className = 'btn-icon btn-icon-label';
     deleteStudentBtn.title = 'حذف دانش‌آموز';
-    deleteStudentBtn.innerHTML = '🗑️';
+    deleteStudentBtn.innerHTML = '<span>🗑️</span><span>حذف</span>';
     deleteStudentBtn.style.color = 'var(--color-strong-warning)'; // Make it red
     deleteStudentBtn.addEventListener('click', () => {
         const studentToDelete = state.selectedStudentForProfile;
@@ -2489,9 +2489,9 @@ function renderHistorySection(container) {
 
     // 2. Create the "Add Note" button and its listener
     const addNoteBtn = document.createElement('button');
-    addNoteBtn.className = 'btn-icon';
+    addNoteBtn.className = 'btn-icon btn-icon-label';
     addNoteBtn.title = 'افزودن یادداشت جدید';
-    addNoteBtn.innerHTML = '📝';
+    addNoteBtn.innerHTML = '<span>📝</span><span>یادداشت</span>';
     addNoteBtn.addEventListener('click', () => {
         const studentForNote = state.selectedStudentForProfile; // <-- CAPTURE STUDENT
 
