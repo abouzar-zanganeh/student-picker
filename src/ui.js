@@ -3769,38 +3769,59 @@ export function renderGlobalSearchResults(results) {
             const resultDiv = document.createElement('div');
             resultDiv.className = 'global-search-result';
 
-            const studentNameSpan = document.createElement('span');
-            studentNameSpan.className = 'student-name';
-            studentNameSpan.textContent = result.student.identity.name;
+            if (result.type === 'student') {
+                // --- This is the logic for rendering a STUDENT ---
+                const studentNameSpan = document.createElement('span');
+                studentNameSpan.className = 'student-name';
+                studentNameSpan.textContent = result.student.identity.name;
 
-            const classNameSpan = document.createElement('span');
-            classNameSpan.className = 'class-name';
-            classNameSpan.textContent = `کلاس: ${result.classroom.info.name}`;
+                const classNameSpan = document.createElement('span');
+                classNameSpan.className = 'class-name';
+                classNameSpan.textContent = `کلاس: ${result.classroom.info.name}`;
 
-            // --- REVISED LOGIC ---
+                // 1. The main container navigates to the student profile.
+                resultDiv.addEventListener('click', () => {
+                    state.setCurrentClassroom(result.classroom);
+                    showStudentProfile(result.student);
+                    globalStudentSearchResultsDiv.style.display = 'none';
+                    globalStudentSearchInput.value = '';
+                });
 
-            // 1. The main container now navigates to the student profile.
-            resultDiv.addEventListener('click', () => {
-                state.setCurrentClassroom(result.classroom);
-                showStudentProfile(result.student);
-                globalStudentSearchResultsDiv.style.display = 'none';
-                globalStudentSearchInput.value = '';
-            });
+                // 2. The class name is a separate action that stops the parent click.
+                classNameSpan.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    state.setCurrentClassroom(result.classroom);
+                    state.setSelectedSession(null);
+                    state.setLiveSession(result.classroom.liveSession);
+                    renderSessions();
+                    showPage('session-page');
+                    globalStudentSearchResultsDiv.style.display = 'none';
+                    globalStudentSearchInput.value = '';
+                });
 
-            // 2. The class name is a separate action that stops the parent click.
-            classNameSpan.addEventListener('click', (event) => {
-                event.stopPropagation(); // This is crucial to prevent both actions from firing.
-                state.setCurrentClassroom(result.classroom);
-                state.setSelectedSession(null);
-                state.setLiveSession(result.classroom.liveSession);
-                renderSessions();
-                showPage('session-page');
-                globalStudentSearchResultsDiv.style.display = 'none';
-                globalStudentSearchInput.value = '';
-            });
+                resultDiv.appendChild(studentNameSpan);
+                resultDiv.appendChild(classNameSpan);
 
-            resultDiv.appendChild(studentNameSpan);
-            resultDiv.appendChild(classNameSpan);
+            } else if (result.type === 'classroom') {
+                // --- This is the NEW logic for rendering a CLASSROOM ---
+                const classNameSpan = document.createElement('span');
+                classNameSpan.className = 'student-name'; // Use same style as student name for prominence
+                classNameSpan.textContent = `[کلاس] ${result.classroom.info.name}`;
+
+                // The whole item just navigates to the session page
+                resultDiv.addEventListener('click', () => {
+                    state.setCurrentClassroom(result.classroom);
+                    state.setSelectedSession(null);
+                    state.setLiveSession(result.classroom.liveSession);
+                    renderSessions();
+                    showPage('session-page');
+                    globalStudentSearchResultsDiv.style.display = 'none';
+                    globalStudentSearchInput.value = '';
+                });
+
+                resultDiv.appendChild(classNameSpan);
+            }
+
             globalStudentSearchResultsDiv.appendChild(resultDiv);
         });
         globalStudentSearchResultsDiv.style.display = 'block';

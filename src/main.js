@@ -750,24 +750,37 @@ document.addEventListener('DOMContentLoaded', () => {
         const keyboardNormalizedTerm = normalizeKeyboard(lowerCaseSearchTerm);
 
         const allResults = [];
+
+        // --- NEW: Search for classrooms first ---
+        for (const className in state.classrooms) {
+            const classroom = state.classrooms[className];
+            if (classroom.isDeleted) continue;
+
+            const normalizedClassName = normalizeText(className.toLowerCase());
+            const matchesOriginal = normalizedClassName.includes(normalizeText(lowerCaseSearchTerm));
+            const matchesMapped = normalizedClassName.includes(normalizeText(keyboardNormalizedTerm));
+
+            if (matchesOriginal || matchesMapped) {
+                allResults.push({ type: 'classroom', classroom: classroom });
+            }
+        }
+        // --- End of new part ---
+
+        // --- Existing student search (now modified) ---
         for (const className in state.classrooms) {
             const classroom = state.classrooms[className];
             if (classroom.isDeleted) continue;
 
             const foundStudents = getActiveItems(classroom.students).filter(student => {
                 const normalizedStudentName = normalizeText(student.identity.name.toLowerCase());
-
-                // Check if student name includes the term as typed
                 const matchesOriginal = normalizedStudentName.includes(normalizeText(lowerCaseSearchTerm));
-
-                // Check if student name includes the keyboard-mapped term
                 const matchesMapped = normalizedStudentName.includes(normalizeText(keyboardNormalizedTerm));
-
                 return matchesOriginal || matchesMapped;
             });
 
             foundStudents.forEach(student => {
-                allResults.push({ student, classroom });
+                // Add the 'type' property to the result
+                allResults.push({ type: 'student', student, classroom });
             });
         }
 
