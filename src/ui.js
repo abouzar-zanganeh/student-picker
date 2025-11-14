@@ -1610,6 +1610,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
         // Update the quick grade form to match the new active category
         updateQuickGradeUIForCategory(correspondingCategory);
+        updateCategoryColumnHighlight(correspondingCategory.name);
     }
     // --- END NEW ---
 
@@ -2076,6 +2077,7 @@ function renderCategoryPills() {
                 state.setSelectedCategory(category);
                 updateSelectButtonText(category);
                 updateQuickGradeUIForCategory(category);
+                updateCategoryColumnHighlight(category.name);
                 selectStudentBtnWrapper.classList.remove('disabled-wrapper');
                 selectStudentBtn.disabled = state.selectedSession.isFinished;
                 const lastWinnerId = state.selectedSession.lastWinnerByCategory[category.name];
@@ -2156,6 +2158,7 @@ function renderCategoryPills() {
                                     state.setSelectedCategory(null); // Clear the state
                                     resultDiv.innerHTML = ''; // Clear the winner display
                                     updateQuickGradeUIForCategory(null); // Disable the quick-grade form
+                                    updateCategoryColumnHighlight(null); // to clear the highlight
                                     selectStudentBtnWrapper.classList.add('disabled-wrapper'); // Disable the main select button
                                     selectStudentBtn.disabled = true;
 
@@ -2278,6 +2281,43 @@ function updateQuickGradeUIForCategory(category) {
             quickGradeFormWrapper.setAttribute('title', 'ابتدا یک دسته‌بندی را انتخاب کنید');
         }
     }
+}
+
+function updateCategoryColumnHighlight(categoryName) {
+    const table = document.querySelector('.student-stats-table');
+    if (!table) return;
+
+    // --- 1. Clear all previous highlights ---
+    const highlightedCells = table.querySelectorAll('.current-category-highlight');
+    highlightedCells.forEach(cell => {
+        cell.classList.remove('current-category-highlight');
+    });
+
+    if (!categoryName) return; // Stop here if we're just clearing
+
+    // --- 2. Find the header index for the new category ---
+    let categoryIndex = -1;
+    const headers = table.querySelectorAll('thead th');
+    headers.forEach((th, index) => {
+        // We check .textContent.trim() to find the matching header name
+        if (th.textContent.trim() === categoryName) {
+            categoryIndex = index;
+        }
+    });
+
+    if (categoryIndex === -1) return; // Category not found in table (e.g., "Grammar")
+
+    // --- 3. Highlight the header ---
+    headers[categoryIndex].classList.add('current-category-highlight');
+
+    // --- 4. Highlight all cells in that column ---
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        const cell = row.cells[categoryIndex];
+        if (cell) {
+            cell.classList.add('current-category-highlight');
+        }
+    });
 }
 
 

@@ -2784,3 +2784,27 @@ body.modal-active {
     background-color: #f8d7da;
     color: var(--color-strong-warning);
 }
+
+/* --- Styles for Highlighting the Current Category Column --- */
+.student-stats-table th.current-category-highlight,
+.student-stats-table td.current-category-highlight {
+    background-color: #e6ffed;
+    /* The same light green as the winner row */
+}
+
+/* Ensure the sticky header/cell also gets the color */
+.student-stats-table th:first-child.current-category-highlight,
+.student-stats-table td:first-child.current-category-highlight {
+    background-color: #e6ffed;
+}
+
+/* Darker hover for the highlighted column */
+.student-stats-table tbody tr:hover th.current-category-highlight,
+.student-stats-table tbody tr:hover td.current-category-highlight {
+    background-color: #d1f7e0;
+}
+
+/* Ensure the sticky cell matches on hover */
+.student-stats-table tbody tr:hover td:first-child.current-category-highlight {
+    background-color: #d1f7e0;
+}
