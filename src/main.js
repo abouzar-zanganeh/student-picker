@@ -1994,7 +1994,7 @@ function setupSwipeNavigation() {
     });
 
     function handleSwipe() {
-        const minSwipeDistance = 100; // Minimum pixels for a valid swipe
+        const minSwipeDistance = 150; // Minimum pixels for a valid swipe
         const swipeDistance = touchStartX - touchEndX;
         const absoluteSwipeDistance = Math.abs(swipeDistance);
 
