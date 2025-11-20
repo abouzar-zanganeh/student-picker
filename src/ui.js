@@ -3619,7 +3619,7 @@ function createSessionInfoContainer(session, displaySessionNumber) {
     badgesContainer.appendChild(dayBadge);
 
     if (session.isCancelled) {
-        sessionText.textContent = `✅جلسه لغو شده - تاریخ: ${sessionDate}`;
+        sessionText.textContent = `لغو شده - تاریخ: ${sessionDate}`;
         infoContainer.style.cursor = 'default';
         const cancelledBadge = document.createElement('span');
         cancelledBadge.className = 'type-badge cancelled-badge';
