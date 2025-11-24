@@ -2993,3 +2993,55 @@ body.modal-active {
     color: #fd7e14;
     font-weight: bold;
 }
+
+/* --- Responsive Adjustments for Wider Screens (Laptops/Tablets) --- */
+@media screen and (min-width: 600px) {
+    .attendance-list-item {
+        flex-direction: row;
+        /* Switch main container to horizontal line */
+        flex-wrap: wrap;
+        /* Allow the stats row to wrap to the next line */
+        align-items: center;
+        /* Vertically center the name and buttons */
+    }
+
+    /* 1. Name Section: Grows to fill empty space */
+    .att-row-1 {
+        flex: 1 1 auto;
+        /* Grow to push buttons to the left */
+        border-bottom: none;
+        /* Remove the divider line */
+        padding-right: 15px;
+        /* Add some padding on the right */
+        padding-bottom: 12px;
+        /* Match button padding */
+    }
+
+    /* 2. Buttons Section: Sits on the Left (in RTL) */
+    .att-row-2 {
+        flex: 0 0 auto;
+        /* Do not grow, just fit contents */
+        border-bottom: none;
+        /* Remove divider */
+        justify-content: flex-end;
+        /* Align buttons nicely */
+        padding-left: 15px;
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    /* 3. Stats Section: Forces a new line below */
+    .att-row-3 {
+        flex-basis: 100%;
+        /* Force this element to take full width (breaking to new line) */
+        width: 100%;
+        order: 3;
+        /* Ensure it stays at the bottom */
+        margin-top: 0;
+        /* Reset margins */
+        background-color: #f8f9fa;
+        /* Keep the distinct background */
+        border-radius: 0 0 var(--border-radius-main) var(--border-radius-main);
+        /* Round bottom corners */
+    }
+}
