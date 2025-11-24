@@ -3090,6 +3090,31 @@ function createClassListItem(classroom) {
     typeBadge.title = 'نوع کلاس';
     badgesContainer.appendChild(typeBadge);
 
+    // --- Schedule Status Check ---
+    const scheduleStatus = getClassScheduleStatus(classroom);
+
+    if (scheduleStatus.type === 'incomplete') {
+        const incompleteBadge = document.createElement('span');
+        // Reusing 'cancelled-badge' style for a red warning look
+        incompleteBadge.className = 'type-badge cancelled-badge';
+        incompleteBadge.textContent = 'زمان‌بندی ناقص';
+        incompleteBadge.style.cursor = 'pointer';
+        incompleteBadge.title = 'برای تکمیل زمان‌بندی کلیک کنید';
+
+        incompleteBadge.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent opening the class
+            showCustomConfirm(
+                "زمان‌بندی این کلاس کامل نیست. برای نمایش صحیح در لیست، لطفاً روزها و ساعت برگزاری را مشخص کنید.",
+                () => {
+                    showSettingsPage(classroom);
+                },
+                { confirmText: 'تنظیمات', confirmClass: 'btn-primary' }
+            );
+        });
+
+        badgesContainer.appendChild(incompleteBadge);
+    }
+
     li.appendChild(badgesContainer);
 
     // --- 3. Action Buttons ---
@@ -3281,13 +3306,27 @@ export function renderClassList() {
 
     classListUl.innerHTML = '';
 
-    // Convert the classrooms object to an array and sort it by creation date
-    const sortedClasses = Object.values(state.classrooms)
-        .sort((a, b) => new Date(a.info.creationDate) - new Date(b.info.creationDate));
+    // Convert to array and Apply the new Time-Based Sorting
+    const sortedClasses = Object.values(state.classrooms).sort((a, b) => {
+        const statusA = getClassScheduleStatus(a);
+        const statusB = getClassScheduleStatus(b);
 
-    // Now, iterate over the sorted array instead of the original object
+        // 1. Primary Sort: By Status Rank (Active < Upcoming < Incomplete < Unscheduled)
+        if (statusA.sortIndex !== statusB.sortIndex) {
+            return statusA.sortIndex - statusB.sortIndex;
+        }
+
+        // 2. Secondary Sort for "Upcoming": Who starts sooner?
+        if (statusA.type === 'upcoming') {
+            return statusA.nextTimestamp - statusB.nextTimestamp;
+        }
+
+        // 3. Fallback Sort: Creation Date (for Incomplete/Unscheduled/Active ties)
+        return new Date(a.info.creationDate) - new Date(b.info.creationDate);
+    });
+
     sortedClasses.forEach(classroom => {
-        if (classroom.isDeleted) return; // Use return instead of continue in forEach
+        if (classroom.isDeleted) return;
 
         const li = createClassListItem(classroom);
         classListUl.appendChild(li);

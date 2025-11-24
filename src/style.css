@@ -2896,3 +2896,10 @@ body.modal-active {
     border: 1px solid var(--color-warning-hover);
     color: var(--color-warning-hover);
 }
+
+/* 5. Incomplete/Cancelled Badge in Class List: Red Outline */
+#class-list .type-badge.cancelled-badge {
+    border: 1px solid var(--color-strong-warning);
+    color: var(--color-strong-warning);
+    font-weight: bold;
+}
