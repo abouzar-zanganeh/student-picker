@@ -3387,7 +3387,7 @@ export function renderSettingsCategories() {
         if (category.isGradedCategory) {
             const gradedBadge = document.createElement('span');
             gradedBadge.className = 'category-badge';
-            gradedBadge.textContent = 'قابل نمره‌دهی';
+            gradedBadge.textContent = 'نمره‌دار';
             nameAndBadgeContainer.appendChild(gradedBadge);
         }
         const deleteBtn = document.createElement('button');
