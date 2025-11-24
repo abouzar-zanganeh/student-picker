@@ -1,12 +1,21 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 import { readFileSync } from 'fs';
+import { execSync } from 'child_process';
 
+// Calculate the commit count
+const commitCount = execSync('git rev-list --count HEAD').toString().trim();
+
+// Read package.json for the version
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
 
 export default defineConfig({
     define: {
-        'import.meta.env.VITE_APP_VERSION': JSON.stringify(packageJson.version)
+        // Your existing Semantic Version
+        'import.meta.env.VITE_APP_VERSION': JSON.stringify(packageJson.version),
+
+        // The new Build Count (Git commits)
+        '__APP_BUILD_COUNT__': JSON.stringify(commitCount)
     },
     server: {
         https: {
@@ -17,7 +26,6 @@ export default defineConfig({
     },
     plugins: [
         VitePWA({
-
             registerType: 'autoUpdate',
             manifest: {
                 name: 'دستیار هوشمند معلم',

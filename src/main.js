@@ -1491,10 +1491,15 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // Display app version
+    // Display app version and build count
     const appVersion = import.meta.env.VITE_APP_VERSION;
+
+    // Check if the build count exists (injected by Vite)
+    const buildCount = typeof __APP_BUILD_COUNT__ !== 'undefined' ? __APP_BUILD_COUNT__ : '';
+
     if (appVersion) {
-        document.getElementById('app-version').textContent = `نسخه ${appVersion}`;
+        const buildText = buildCount ? ` (ساخت ${buildCount})` : '';
+        document.getElementById('app-version').textContent = `نسخه ${appVersion}${buildText}`;
     }
 
     // --- Temporary Universal Utility Function ---
