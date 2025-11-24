@@ -3633,45 +3633,37 @@ export function showPage(pageId, options = {}) {
 function createSessionActionButtons(session, displaySessionNumber) {
     const buttonsContainer = document.createElement('div');
     buttonsContainer.className = 'list-item-buttons';
+    // Add gap to separate the button from the note icon
+    buttonsContainer.style.gap = '10px';
 
-    // --- Add the note Button ---
+    // --- 1. Define Note Button ---
     const noteBtn = document.createElement('button');
     noteBtn.className = 'btn-icon';
     noteBtn.innerHTML = '📝';
-    noteBtn.title = 'افزودن/ویرایش یادداشت جلسه';
-    noteBtn.style.borderBottom = 'solid';
+    noteBtn.title = 'ویرایش یادداشت جلسه';
 
+    // Logic: Hide if empty
     if (!session.note) {
-        noteBtn.style.opacity = '0.5';
-        noteBtn.style.borderBottom = 'none';
-
+        noteBtn.style.display = 'none';
     }
 
     noteBtn.addEventListener('click', (event) => {
         event.stopPropagation();
-        newNoteContent.value = session.note || '';
-        state.setSaveNoteCallback((content) => {
-            session.note = content;
-            state.saveData();
-
-            logManager.addLog(state.currentClassroom.info.name,
-                `یادداشت جلسه ${displaySessionNumber} ذخیره شد.`,
-                { type: 'VIEW_SESSIONS' });
-
-            renderSessions();
-            showNotification("✅یادداشت جلسه ذخیره شد.");
-        });
-        openModal('add-note-modal');
-        newNoteContent.focus();
+        showSessionNoteModal(session, displaySessionNumber);
     });
 
-    buttonsContainer.appendChild(noteBtn);
-
+    // --- 2. Define & Append End Session Button (Priority 1: Rightmost) ---
     if (!session.isFinished && !session.isCancelled) {
         const endSessionBtn = document.createElement('button');
-        endSessionBtn.className = 'btn-icon';
-        endSessionBtn.innerHTML = '✅';
-        endSessionBtn.title = 'خاتمه جلسه';
+        // Use btn-success for green background, text content instead of icon
+        endSessionBtn.className = 'btn-success';
+        endSessionBtn.textContent = 'پایان جلسه';
+
+        // Inline styles to make it fit nicely in the list row
+        endSessionBtn.style.fontSize = '12px';
+        endSessionBtn.style.padding = '4px 10px';
+        endSessionBtn.style.whiteSpace = 'nowrap';
+
         endSessionBtn.addEventListener('click', (event) => {
             event.stopPropagation();
             showCustomConfirm(
@@ -3685,14 +3677,12 @@ function createSessionActionButtons(session, displaySessionNumber) {
 
                     renderSessions();
 
-                    // New: Show a second confirmation for backup
                     showCustomConfirm(
                         "جلسه با موفقیت خاتمه یافت. آیا مایل به ایجاد فایل پشتیبان هستید؟",
                         () => {
-                            // This logic now runs when the user clicks the "Yes" button.
                             if (state.isDemoMode) {
                                 showNotification("⚠️ پشتیبان‌گیری در حالت نمایش (Demo) غیرفعال است.");
-                                return; // This stops the function before creating the backup file.
+                                return;
                             }
                             initiateBackupProcess();
                             showNotification("✅فایل پشتیبان با موفقیت ایجاد شد.");
@@ -3706,8 +3696,12 @@ function createSessionActionButtons(session, displaySessionNumber) {
                 }
             );
         });
+        // Append End Button FIRST so it sits on the RIGHT edge
         buttonsContainer.appendChild(endSessionBtn);
     }
+
+    // --- 3. Append Note Button (Priority 2: Left of End Button) ---
+    buttonsContainer.appendChild(noteBtn);
 
     return buttonsContainer;
 }
@@ -3787,6 +3781,14 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
     li.addEventListener('contextmenu', (event) => {
         const menuItems = [
             {
+                label: 'یادداشت جلسه',
+                icon: '📝',
+                action: () => {
+                    showSessionNoteModal(session, displaySessionNumber);
+                }
+            },
+
+            {
                 label: session.isCancelled ? 'بازگردانی جلسه' : 'لغو جلسه',
                 icon: '❌',
                 action: () => {
@@ -3808,6 +3810,7 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                     }, { confirmText: actionText, confirmClass: 'btn-warning' });
                 }
             },
+
             {
                 label: 'تغییر وضعیت جبرانی',
                 icon: '🔄',
