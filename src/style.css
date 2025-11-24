@@ -1759,14 +1759,14 @@ input[type=number] {
 
 /* These two rules styles the warning badge of an unfinished session on the class management page */
 .has-unfinished-session {
-    border-right: 4px solid var(--color-warning);
+    border-right: 4px solid var(--color-strong-warning);
     padding-right: 8px;
     /* Adjusts padding to make space for the border */
 }
 
 .warning-badge {
-    background-color: var(--color-warning);
-    color: var(--color-text-dark);
+    background-color: var(--color-strong-warning);
+    color: var(--color-text-light);
     padding: 4px 10px;
     margin-right: 10px;
     border-radius: var(--border-radius-main);
