@@ -1482,6 +1482,7 @@ export function renderStudentStatsList() {
         // 2. Loops through our dynamic list of gradable categories to add the rest of the data
         gradedCategoryHeaders.forEach(categoryName => {
             const cell = row.insertCell();
+            cell.style.direction = 'ltr';
             // The key in categoryCounts is the exact category name (e.g., "Listening")
             const skillKey = categoryName.toLowerCase();
             const scoresForSkill = student.logs.scores[skillKey]?.filter(s => !s.isDeleted) || [];
@@ -1489,7 +1490,7 @@ export function renderStudentStatsList() {
             if (scoresForSkill.length > 0) {
                 scoresForSkill.forEach((score, index) => {
                     const scoreSpan = document.createElement('span');
-                    scoreSpan.textContent = score.value;
+                    scoreSpan.textContent = score.value + (score.comment ? '\'' : '');
                     scoreSpan.style.position = 'relative'; // This provides the context for the tooltip.
 
                     if (score.comment) {
@@ -1944,7 +1945,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
         const scoresForSkill = studentScores[skillKey]?.filter(s => !s.isDeleted);
         if (scoresForSkill && scoresForSkill.length > 0) {
             hasAnyScore = true;
-            skillScoresSpan.textContent = scoresForSkill.slice(-3).map(s => s.value).join(',');
+            skillScoresSpan.textContent = scoresForSkill.slice(-3).map(s => s.value + (s.comment ? '\'' : '')).join(' , ');
         } else {
             skillScoresSpan.textContent = 'none';
         }
