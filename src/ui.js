@@ -3006,9 +3006,10 @@ function createClassInfoContainer(classroom) {
     classNameSpan.classList.add('class-name-display');
     nameContainer.appendChild(classNameSpan);
 
-    // Stats Row (Student and Session Counts)
+    // Stats Row (Student and Session Counts + Days)
     const studentCount = getActiveItems(classroom.students).length;
     const sessionCount = getActiveItems(classroom.sessions).filter(session => session.isFinished).length;
+    const scheduleDaysText = formatClassDays(classroom.info.scheduleDays);
 
     const statsRowDiv = document.createElement('div');
     statsRowDiv.classList.add('class-stats-row');
@@ -3022,6 +3023,14 @@ function createClassInfoContainer(classroom) {
     sessionCountSpan.textContent = `${sessionCount} جلسه`;
     sessionCountSpan.classList.add('session-count-badge');
     statsRowDiv.appendChild(sessionCountSpan);
+
+    //Add Days Badge if schedule exists
+    if (scheduleDaysText) {
+        const daysSpan = document.createElement('span');
+        daysSpan.textContent = scheduleDaysText;
+        daysSpan.classList.add('schedule-days-badge'); // New class for potential styling
+        statsRowDiv.appendChild(daysSpan);
+    }
 
     nameContainer.appendChild(statsRowDiv);
 
@@ -3113,6 +3122,31 @@ function createClassListItem(classroom) {
         });
 
         badgesContainer.appendChild(incompleteBadge);
+    }
+    else {
+        // Only check for conflicts if the schedule is NOT incomplete
+        const conflictName = findScheduleConflict(classroom, state.classrooms);
+
+        if (conflictName) {
+            const conflictBadge = document.createElement('span');
+            conflictBadge.className = 'type-badge conflict-badge';
+            conflictBadge.textContent = 'تداخل زمانی';
+            conflictBadge.style.cursor = 'pointer';
+            conflictBadge.title = `تداخل با کلاس: ${conflictName}`;
+
+            conflictBadge.addEventListener('click', (e) => {
+                e.stopPropagation();
+                showCustomConfirm(
+                    `زمان برگزاری این کلاس با کلاس «${conflictName}» تداخل دارد. لطفاً زمان‌بندی را بررسی کنید.`,
+                    () => {
+                        showSettingsPage(classroom);
+                    },
+                    { confirmText: 'تنظیمات', confirmClass: 'btn-primary' }
+                );
+            });
+
+            badgesContainer.appendChild(conflictBadge);
+        }
     }
 
     li.appendChild(badgesContainer);
@@ -4332,4 +4366,26 @@ function findScheduleConflict(currentClass, allClasses) {
     }
 
     return null; // No conflicts found
+}
+
+function formatClassDays(dayIndices) {
+    if (!dayIndices || dayIndices.length === 0) return '';
+
+    const dayMap = {
+        6: 'شنبه',
+        0: '۱شنبه',
+        1: '۲شنبه',
+        2: '۳شنبه',
+        3: '۴شنبه',
+        4: '۵شنبه',
+        5: 'جمعه'
+    };
+
+    // Sort days based on Persian week: Sat(6) is first, then Sun(0), etc.
+    const sortedIndices = [...dayIndices].sort((a, b) => {
+        const persianOrder = { 6: 0, 0: 1, 1: 2, 2: 3, 3: 4, 4: 5, 5: 6 };
+        return persianOrder[a] - persianOrder[b];
+    });
+
+    return sortedIndices.map(i => dayMap[i]).join('، ');
 }

@@ -1327,14 +1327,13 @@ button:disabled:hover {
 }
 
 /* Style for the separator */
-.student-count-badge::after {
+/* Generic separator for all items in the stats row except the last one */
+.class-stats-row>span:not(:last-child)::after {
     content: '|';
-    /* The separator character */
-    margin-left: 1px;
+    margin-left: 8px;
     margin-right: 8px;
-    /* Space after the separator */
     color: var(--color-secondary);
-    /* Muted color for the separator */
+    opacity: 0.5;
 }
 
 /* Style for the session count badge */
@@ -2901,5 +2900,13 @@ body.modal-active {
 #class-list .type-badge.cancelled-badge {
     border: 1px solid var(--color-strong-warning);
     color: var(--color-strong-warning);
+    font-weight: bold;
+}
+
+/* 6. Conflict Badge: Orange Outline */
+#class-list .type-badge.conflict-badge {
+    border: 1px solid #fd7e14;
+    /* Orange color */
+    color: #fd7e14;
     font-weight: bold;
 }
