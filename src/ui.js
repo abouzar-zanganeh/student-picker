@@ -3079,11 +3079,19 @@ function createClassListItem(classroom) {
     const infoContainer = createClassInfoContainer(classroom);
     li.appendChild(infoContainer);
 
-    // --- 2. Badges Container ---
+    // --- 3. Left Column Wrapper (Holds Badges & Buttons Vertically) ---
+    const leftColumnWrapper = document.createElement('div');
+    leftColumnWrapper.style.display = 'flex';
+    leftColumnWrapper.style.flexDirection = 'column';
+    leftColumnWrapper.style.gap = '5px';
+    leftColumnWrapper.style.alignItems = 'flex-end'; // Aligns contents to the left (in RTL)
+    leftColumnWrapper.style.marginLeft = '10px'; // Adds some breathing room from the text
+
+    // A. Badges Container
     const badgesContainer = document.createElement('div');
     badgesContainer.className = 'list-item-badges';
 
-    // 'Unfinished Session' Badge
+    // 1. Unfinished Session Badge
     if (classroom.liveSession && !classroom.liveSession.isCancelled && !classroom.liveSession.isDeleted) {
         const warningBadge = document.createElement('span');
         warningBadge.className = 'warning-badge';
@@ -3092,69 +3100,60 @@ function createClassListItem(classroom) {
         li.classList.add('has-unfinished-session');
     }
 
-    // 'Class Type' Badge
+    // 2. Class Type Badge
     const typeBadge = document.createElement('span');
     typeBadge.className = `type-badge ${classroom.info.type}`;
     typeBadge.textContent = classroom.info.type === 'online' ? 'آنلاین' : 'حضوری';
     typeBadge.title = 'نوع کلاس';
     badgesContainer.appendChild(typeBadge);
 
-    // --- Schedule Status Check ---
+    // 3. Schedule Status Badge
     const scheduleStatus = getClassScheduleStatus(classroom);
 
     if (scheduleStatus.type === 'incomplete') {
         const incompleteBadge = document.createElement('span');
-        // Reusing 'cancelled-badge' style for a red warning look
         incompleteBadge.className = 'type-badge cancelled-badge';
-        incompleteBadge.textContent = 'نقص';
+        incompleteBadge.textContent = 'زمان‌بندی ناقص';
         incompleteBadge.style.cursor = 'pointer';
         incompleteBadge.title = 'برای تکمیل زمان‌بندی کلیک کنید';
-
         incompleteBadge.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent opening the class
+            e.stopPropagation();
             showCustomConfirm(
                 "زمان‌بندی این کلاس کامل نیست. برای نمایش صحیح در لیست، لطفاً روزها و ساعت برگزاری را مشخص کنید.",
-                () => {
-                    showSettingsPage(classroom);
-                },
+                () => { showSettingsPage(classroom); },
                 { confirmText: 'تنظیمات', confirmClass: 'btn-primary' }
             );
         });
-
         badgesContainer.appendChild(incompleteBadge);
-    }
-    else {
-        // Only check for conflicts if the schedule is NOT incomplete
+    } else {
         const conflictName = findScheduleConflict(classroom, state.classrooms);
-
         if (conflictName) {
             const conflictBadge = document.createElement('span');
             conflictBadge.className = 'type-badge conflict-badge';
             conflictBadge.textContent = 'تداخل زمانی';
             conflictBadge.style.cursor = 'pointer';
             conflictBadge.title = `تداخل با کلاس: ${conflictName}`;
-
             conflictBadge.addEventListener('click', (e) => {
                 e.stopPropagation();
                 showCustomConfirm(
                     `زمان برگزاری این کلاس با کلاس «${conflictName}» تداخل دارد. لطفاً زمان‌بندی را بررسی کنید.`,
-                    () => {
-                        showSettingsPage(classroom);
-                    },
+                    () => { showSettingsPage(classroom); },
                     { confirmText: 'تنظیمات', confirmClass: 'btn-primary' }
                 );
             });
-
             badgesContainer.appendChild(conflictBadge);
         }
     }
 
+    // Add Badges to Wrapper
+    leftColumnWrapper.appendChild(badgesContainer);
 
-    // --- 3. Action Buttons ---
+    // B. Action Buttons (Note Button) - Appended UNDER badges
     const buttonsContainer = createClassActionButtons(classroom);
-    li.appendChild(buttonsContainer);
+    leftColumnWrapper.appendChild(buttonsContainer);
 
-    li.appendChild(badgesContainer);
+    // Add the entire wrapper to the list item
+    li.appendChild(leftColumnWrapper);
 
     // --- 4. Add the right-click context menu ---
     li.addEventListener('contextmenu', (event) => {
