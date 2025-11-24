@@ -2808,3 +2808,59 @@ body.modal-active {
 .student-stats-table tbody tr:hover td:first-child.current-category-highlight {
     background-color: #d1f7e0;
 }
+
+/* --- Session List Hierarchy Improvements --- */
+
+/* 1. Make the Session Title (Number + Date) the primary focus */
+.session-list-title {
+    font-size: 16px;
+    font-weight: 700;
+    /* Bold */
+    color: var(--color-text-dark);
+    display: block;
+    margin-bottom: 2px;
+}
+
+/* 2. Make all badges in the session list smaller and subtle */
+#session-list .type-badge {
+    font-size: 11px;
+    /* Smaller font */
+    padding: 2px 6px;
+    /* Smaller padding */
+    font-weight: normal;
+    /* Remove bold weight */
+    opacity: 0.9;
+}
+
+/* 3. Specific style for Day Badge: "Outline" style to reduce visual weight */
+#session-list .day-badge {
+    background-color: transparent;
+    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+}
+
+/* 4. Specific style for Finished Badge: Outline style */
+#session-list .finished-badge {
+    background-color: transparent;
+    border: 1px solid var(--color-secondary);
+    color: var(--color-secondary);
+}
+
+/* 5. Cancelled Badge: Red Outline, Bold Text */
+#session-list .cancelled-badge {
+    background-color: transparent;
+    border: 1px solid var(--color-strong-warning);
+    color: var(--color-strong-warning);
+    font-weight: 700;
+    /* Bold to stand out more than Day/Finished */
+}
+
+/* 6. Makeup Badge: Orange/Gold Outline, Bold Text */
+#session-list .makeup-badge {
+    background-color: transparent;
+    border: 1px solid var(--color-warning-hover);
+    /* Using hover color for better contrast */
+    color: var(--color-warning-hover);
+    font-weight: 700;
+    /* Bold to stand out more than Day/Finished */
+}

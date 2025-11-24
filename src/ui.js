@@ -3605,6 +3605,7 @@ function createSessionInfoContainer(session, displaySessionNumber) {
 
     const sessionDate = new Date(session.startTime).toLocaleDateString('fa-IR');
     const sessionText = document.createElement('span');
+    sessionText.className = 'session-list-title';
 
     const badgesContainer = document.createElement('div');
     badgesContainer.style.display = 'flex';
@@ -3640,17 +3641,14 @@ function createSessionInfoContainer(session, displaySessionNumber) {
 
     if (session.isFinished) {
         const finishedBadge = document.createElement('span');
-        finishedBadge.className = 'type-badge';
+        finishedBadge.className = 'type-badge finished-badge';
         finishedBadge.textContent = 'خاتمه یافته';
-        finishedBadge.style.backgroundColor = 'var(--color-secondary)';
         badgesContainer.appendChild(finishedBadge);
     }
     if (session.isMakeup) {
         const makeupBadge = document.createElement('span');
-        makeupBadge.className = 'type-badge';
+        makeupBadge.className = 'type-badge makeup-badge';
         makeupBadge.textContent = 'جبرانی';
-        makeupBadge.style.backgroundColor = 'var(--color-warning)';
-        makeupBadge.style.color = 'var(--color-text-dark)';
         badgesContainer.appendChild(makeupBadge);
     }
     infoContainer.appendChild(badgesContainer);
