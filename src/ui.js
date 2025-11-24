@@ -2414,7 +2414,7 @@ export function showStudentProfile(student) {
                         id: `trash_${Date.now()}_${Math.random()}`,
                         timestamp: new Date().toISOString(),
                         type: 'student',
-                        description: `دانش‌آMوز «${studentToDelete.identity.name}» از کلاس «${currentClass.info.name}»`,
+                        description: `دانش‌آموز «${studentToDelete.identity.name}» از کلاس «${currentClass.info.name}»`,
                         restoreData: { studentId: studentToDelete.identity.studentId, classId: currentClass.info.scheduleCode }
                     };
                     state.trashBin.unshift(trashEntry);
