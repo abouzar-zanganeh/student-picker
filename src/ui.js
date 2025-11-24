@@ -4295,3 +4295,41 @@ function getClassScheduleStatus(classroom) {
     // Fallback (Should rarely happen if hasDays is true)
     return { type: 'upcoming', sortIndex: 1, nextTimestamp: 9999999999999 };
 }
+
+function findScheduleConflict(currentClass, allClasses) {
+    const { scheduleDays, scheduleStartTime, scheduleEndTime } = currentClass.info;
+
+    // Safety check: If current class is incomplete, we don't check for conflicts
+    if (!scheduleDays || !scheduleDays.length || !scheduleStartTime || !scheduleEndTime) return null;
+
+    const [currentStartH, currentStartM] = scheduleStartTime.split(':').map(Number);
+    const [currentEndH, currentEndM] = scheduleEndTime.split(':').map(Number);
+    const currentStartVal = currentStartH * 60 + currentStartM;
+    const currentEndVal = currentEndH * 60 + currentEndM;
+
+    for (const otherClass of Object.values(allClasses)) {
+        // Skip self, deleted classes, or same name
+        if (otherClass === currentClass || otherClass.isDeleted || otherClass.info.name === currentClass.info.name) continue;
+
+        const otherInfo = otherClass.info;
+        // Skip incomplete other classes
+        if (!otherInfo.scheduleDays || !otherInfo.scheduleDays.length || !otherInfo.scheduleStartTime || !otherInfo.scheduleEndTime) continue;
+
+        // Check for Day Overlap
+        const daysOverlap = scheduleDays.some(day => otherInfo.scheduleDays.includes(day));
+        if (!daysOverlap) continue;
+
+        // Check for Time Overlap
+        const [otherStartH, otherStartM] = otherInfo.scheduleStartTime.split(':').map(Number);
+        const [otherEndH, otherEndM] = otherInfo.scheduleEndTime.split(':').map(Number);
+        const otherStartVal = otherStartH * 60 + otherStartM;
+        const otherEndVal = otherEndH * 60 + otherEndM;
+
+        // Overlap Logic: (StartA < EndB) and (EndA > StartB)
+        if (currentStartVal < otherEndVal && currentEndVal > otherStartVal) {
+            return otherClass.info.name; // Return the name of the first conflicting class
+        }
+    }
+
+    return null; // No conflicts found
+}
