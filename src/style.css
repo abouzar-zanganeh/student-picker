@@ -2864,3 +2864,35 @@ body.modal-active {
     font-weight: 700;
     /* Bold to stand out more than Day/Finished */
 }
+
+/* --- Class List Hierarchy Improvements --- */
+
+/* 1. Make the Class Name the primary focus */
+.class-name-display {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-dark);
+    display: block;
+    margin-bottom: 4px;
+}
+
+/* 2. Base style for badges in class list: Smaller, Transparent */
+#class-list .type-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    font-weight: normal;
+    background-color: transparent !important;
+    /* Override default solid colors */
+}
+
+/* 3. Online Badge: Blue Outline */
+#class-list .type-badge.online {
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* 4. In-Person Badge: Darker Yellow/Gold Outline for readability */
+#class-list .type-badge.in-person {
+    border: 1px solid var(--color-warning-hover);
+    color: var(--color-warning-hover);
+}
