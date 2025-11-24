@@ -449,6 +449,36 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         });
     });
+
+    // --- EVENT LISTENERS FOR SCHEDULE SETTINGS ---
+    const scheduleDayCheckboxes = document.querySelectorAll('input[name="schedule-day"]');
+    const scheduleStartTimeInput = document.getElementById('settings-schedule-start');
+    const scheduleEndTimeInput = document.getElementById('settings-schedule-end');
+
+    scheduleDayCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', () => {
+            if (!state.currentClassroom) return;
+
+            // Create an array of selected days (e.g., [6, 0])
+            const selectedDays = Array.from(scheduleDayCheckboxes)
+                .filter(cb => cb.checked)
+                .map(cb => parseInt(cb.value));
+
+            state.currentClassroom.info.scheduleDays = selectedDays;
+            state.saveData();
+        });
+    });
+
+    const handleTimeChange = () => {
+        if (!state.currentClassroom) return;
+        state.currentClassroom.info.scheduleStartTime = scheduleStartTimeInput.value;
+        state.currentClassroom.info.scheduleEndTime = scheduleEndTimeInput.value;
+        state.saveData();
+    };
+
+    scheduleStartTimeInput.addEventListener('change', handleTimeChange);
+    scheduleEndTimeInput.addEventListener('change', handleTimeChange);
+
     // --- END EVENT LISTENERS ---
 
     newCategoryNameInput.addEventListener('keyup', (event) => {

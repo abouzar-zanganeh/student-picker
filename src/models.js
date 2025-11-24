@@ -253,13 +253,18 @@ export class Classroom {
     constructor(info) {
         this.info = {
             name: info.name || 'NotNamed',
-            scheduleCode: info.scheduleCode || `code_${new Date().getTime()}`,
             teacherName: info.teacherName || null,
             type: info.type || 'in-person',
             term: info.term || null,
             scheduleText: info.scheduleText || null,
             level: info.level || null,
-            creationDate: info.creationDate ? new Date(info.creationDate) : new Date()
+            creationDate: info.creationDate ? new Date(info.creationDate) : new Date(),
+
+            // Scheduling Data
+            scheduleCode: info.scheduleCode || `code_${new Date().getTime()}`,
+            scheduleDays: info.scheduleDays || [], // 0=Sunday, 1=Monday, ..., 6=Saturday
+            scheduleStartTime: info.scheduleStartTime || null,
+            scheduleEndTime: info.scheduleEndTime || null,
         };
         this.students = [];
         this.sessions = [];

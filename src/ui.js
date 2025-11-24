@@ -3432,6 +3432,17 @@ export function renderSettingsOther() {
     if (radioToSelect) {
         radioToSelect.checked = true;
     }
+
+    // Populate Schedule Days
+    const scheduleDays = state.currentClassroom.info.scheduleDays || [];
+    document.querySelectorAll('input[name="schedule-day"]').forEach(checkbox => {
+        // We parse int because we stored them as numbers [6, 0, 1...]
+        checkbox.checked = scheduleDays.includes(parseInt(checkbox.value));
+    });
+
+    // Populate Schedule Times
+    document.getElementById('settings-schedule-start').value = state.currentClassroom.info.scheduleStartTime || '';
+    document.getElementById('settings-schedule-end').value = state.currentClassroom.info.scheduleEndTime || '';
 }
 
 export function _internalShowPage(pageId) {

@@ -133,6 +133,33 @@
             </li>
         </ul>
 
+        <h3 class="section-title">زمان‌بندی کلاس</h3>
+        <ul class="list-container">
+            <li>
+                <div style="display: flex; flex-direction: column; width: 100%; gap: 15px;">
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+                        <label><input type="checkbox" name="schedule-day" value="6"> شنبه</label>
+                        <label><input type="checkbox" name="schedule-day" value="0"> ۱شنبه</label>
+                        <label><input type="checkbox" name="schedule-day" value="1"> ۲شنبه</label>
+                        <label><input type="checkbox" name="schedule-day" value="2"> ۳شنبه</label>
+                        <label><input type="checkbox" name="schedule-day" value="3"> ۴شنبه</label>
+                        <label><input type="checkbox" name="schedule-day" value="4"> ۵شنبه</label>
+                        <label><input type="checkbox" name="schedule-day" value="5"> جمعه</label>
+                    </div>
+                    <div style="display: flex; gap: 20px; justify-content: center; align-items: center;">
+                        <label>
+                            شروع:
+                            <input type="time" id="settings-schedule-start">
+                        </label>
+                        <label>
+                            پایان:
+                            <input type="time" id="settings-schedule-end">
+                        </label>
+                    </div>
+                </div>
+            </li>
+        </ul>
+
         <h3 class="section-title">لیست فعلی دانش‌آموزان</h3>
         <ul id="settings-student-list" class="list-container"></ul>
     </main>
