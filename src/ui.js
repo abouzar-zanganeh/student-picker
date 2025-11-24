@@ -1144,34 +1144,82 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     const li = document.createElement('li');
     li.className = 'attendance-list-item';
 
-    // --- NEW: Checkbox for bulk actions ---
+    // --- PREPARE ELEMENTS FOR ROW 3 (Required for Row 2 listeners) ---
+    const absenceSpan = document.createElement('span');
+    absenceSpan.className = 'absence-info';
+
+    const homeworkInfoSpan = document.createElement('span');
+    homeworkInfoSpan.className = 'homework-info';
+
+    // --- ROW 1: Checkbox + Student Name ---
+    const row1 = document.createElement('div');
+    row1.className = 'att-row-1';
+
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.className = 'mass-comment-checkbox';
     checkbox.checked = state.selectedStudentsForMassComment.includes(student.identity.studentId);
-
     checkbox.addEventListener('change', () => {
         const studentId = student.identity.studentId;
         const currentSelection = state.selectedStudentsForMassComment;
-
         if (checkbox.checked) {
-            // Add student ID to the state if checked and not already present
-            if (!currentSelection.includes(studentId)) {
-                currentSelection.push(studentId);
-            }
+            if (!currentSelection.includes(studentId)) currentSelection.push(studentId);
         } else {
-            // Remove student ID from the state if unchecked
             const index = currentSelection.indexOf(studentId);
-            if (index > -1) {
-                currentSelection.splice(index, 1);
-            }
+            if (index > -1) currentSelection.splice(index, 1);
         }
-        // No need to call a setter, as we modify the live array. Just update the UI controls.
         renderMassCommentControls();
     });
 
-    li.appendChild(checkbox);
-    // --- END NEW: Checkbox ---
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'student-name';
+    nameSpan.textContent = student.identity.name;
+    nameSpan.addEventListener('click', () => {
+        showStudentProfile(student);
+    });
+
+    row1.appendChild(checkbox);
+    row1.appendChild(nameSpan);
+
+
+    // --- ROW 2: Action Buttons (Centered Group) ---
+    const row2 = document.createElement('div');
+    row2.className = 'att-row-2';
+
+    // 1. Attendance Toggle (Rightmost in your sketch)
+    const attendanceToggleBtn = document.createElement('button');
+    const currentStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
+
+    const updateButtonUI = (status) => {
+        if (status === 'present') {
+            attendanceToggleBtn.textContent = 'حاضر';
+            attendanceToggleBtn.className = 'attendance-status-btn present active';
+        } else {
+            attendanceToggleBtn.textContent = 'غایب';
+            attendanceToggleBtn.className = 'attendance-status-btn absent active';
+        }
+    };
+    updateButtonUI(currentStatus);
+
+    attendanceToggleBtn.addEventListener('click', () => {
+        const oldStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
+        const newStatus = oldStatus === 'present' ? 'absent' : 'present';
+
+        state.selectedSession.setAttendance(student.identity.studentId, newStatus);
+        if (newStatus === 'absent') {
+            state.selectedSession.studentRecords[student.identity.studentId].hadIssue = false;
+        }
+        state.saveData();
+
+        updateButtonUI(newStatus);
+        renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
+        renderStudentStatsList();
+        renderAbsenteesSummary();
+    });
+
+    // 2. Homework Controls Wrapper
+    const homeworkControls = document.createElement('div');
+    homeworkControls.className = 'homework-controls';
 
     const homeworkTooltipMap = {
         none: 'بدون تکلیف',
@@ -1179,36 +1227,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         incomplete: 'تکلیف ناقص'
     };
 
-    const infoDiv = document.createElement('div');
-    infoDiv.className = 'student-info';
-
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'student-name';
-    nameSpan.textContent = student.identity.name;
-
-    nameSpan.addEventListener('click', () => {
-        showStudentProfile(student);
-    });
-
-    const absenceSpan = document.createElement('span');
-    absenceSpan.className = 'absence-info';
-
-    const homeworkInfoSpan = document.createElement('span');
-    homeworkInfoSpan.className = 'homework-info';
-
-    renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
-
-    renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
-
-    infoDiv.appendChild(nameSpan);
-    infoDiv.appendChild(absenceSpan);
-    infoDiv.appendChild(homeworkInfoSpan);
-
-
-    // Homework related controls
-    const homeworkControls = document.createElement('div');
-    homeworkControls.className = 'homework-controls';
-
+    // HW Status Button
     const homeworkBtn = document.createElement('button');
     const homeworkStatus = state.selectedSession.studentRecords[student.identity.studentId]?.homework.status || 'none';
     homeworkBtn.className = `homework-status-btn ${homeworkStatus}`;
@@ -1223,16 +1242,14 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         const nextStatus = statusCycle[homework.status];
         homeworkBtn.title = homeworkTooltipMap[nextStatus];
 
-
-        // Update the data
         state.selectedSession.setHomeworkStatus(student.identity.studentId, nextStatus);
         state.saveData();
 
-        // Update the UI
         homeworkBtn.className = `homework-status-btn ${nextStatus}`;
         renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
     });
 
+    // HW Note Button
     const homeworkNoteBtn = document.createElement('button');
     homeworkNoteBtn.className = 'btn-icon';
     homeworkNoteBtn.innerHTML = '📝';
@@ -1244,106 +1261,66 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
 
     homeworkNoteBtn.addEventListener('click', () => {
         const homework = state.selectedSession.studentRecords[student.identity.studentId].homework;
-
-        // Populate the modal with the existing comment
         newNoteContent.value = homework.comment || '';
-        newNoteContent.dispatchEvent(new Event('input', { bubbles: true })); // Trigger auto-direction
+        newNoteContent.dispatchEvent(new Event('input', {
+            bubbles: true
+        }));
 
-        // Define what "Save" does for this specific context
-        state.setSaveNoteCallback(
-            (content) => {
-                // 1. Save the comment to the session's homework record
-                homework.comment = content;
+        state.setSaveNoteCallback((content) => {
+            homework.comment = content;
 
-                // 2. Prepare variables for creating/finding the profile note
-                const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
-                const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
-                const noteSource = { type: 'fromAttendance', sessionNumber: state.selectedSession.sessionNumber };
-                const notePrefix = `یادداشت مربوط به جلسه ${displayNumber}: `;
+            // Note update logic matching original...
+            const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
+            const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
+            const noteSource = { type: 'fromAttendance', sessionNumber: state.selectedSession.sessionNumber };
+            const notePrefix = `یادداشت مربوط به جلسه ${displayNumber}: `;
 
-                // 3. Find if a note from this source already exists in the student's profile
-                const existingNote = student.profile.notes.find(n =>
-                    !n.isDeleted && // Important: Only check non-deleted notes
-                    n.source &&
-                    n.source.type === 'fromAttendance' &&
-                    n.source.sessionNumber === noteSource.sessionNumber
-                );
+            const existingNote = student.profile.notes.find(n => !n.isDeleted && n.source && n.source.type === 'fromAttendance' && n.source.sessionNumber === noteSource.sessionNumber);
 
-                // 4. Intelligently update or create the note
-                if (existingNote) {
-                    if (content) {
-                        // If there's new content, update the existing note
-                        existingNote.content = notePrefix + content;
-                    } else {
-                        // If content is cleared, soft-delete the existing note
-                        existingNote.isDeleted = true;
-                    }
-                } else if (content) {
-                    // If no note exists and there's new content, add a new one
-                    student.addNote(notePrefix + content, noteSource);
-                }
+            if (existingNote) {
+                if (content) existingNote.content = notePrefix + content;
+                else existingNote.isDeleted = true;
+            } else if (content) {
+                student.addNote(notePrefix + content, noteSource);
+            }
 
-                state.saveData();
-
-                logManager.addLog(state.currentClassroom.info.name, `یادداشت تکلیف جلسه ${displayNumber} برای دانش‌آموز «${student.identity.name}» ذخیره شد.`, { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
-
-                showNotification("✅یادداشت تکلیف ذخیره شد.");
-
-                // 5. Update the button's visual cue and re-render homework info
-                homeworkNoteBtn.style.opacity = content ? '1' : '0.3';
-                renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
+            state.saveData();
+            logManager.addLog(state.currentClassroom.info.name, `یادداشت تکلیف جلسه ${displayNumber} برای دانش‌آموز «${student.identity.name}» ذخیره شد.`, {
+                type: 'VIEW_STUDENT_PROFILE',
+                studentId: student.identity.studentId
             });
+            showNotification("✅یادداشت تکلیف ذخیره شد.");
+            homeworkNoteBtn.style.opacity = content ? '1' : '0.3';
+            renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
+        });
 
         openModal('add-note-modal');
         newNoteContent.focus();
     });
 
+    // Append Buttons to Row 2
+    // Order based on sketch: Attendance (Right) -> Note -> Status (Left)
+    row2.appendChild(attendanceToggleBtn);
+    homeworkControls.appendChild(homeworkNoteBtn); // Note first (to appear right of status)
     homeworkControls.appendChild(homeworkBtn);
-    homeworkControls.appendChild(homeworkNoteBtn);
-    // End of Homework related..
+    row2.appendChild(homeworkControls);
 
 
-    const attendanceToggleBtn = document.createElement('button');
-    const currentStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
+    // --- ROW 3: Info Stats (Absence + Homework) ---
+    const row3 = document.createElement('div');
+    row3.className = 'att-row-3';
 
-    // Function to update button appearance
-    const updateButtonUI = (status) => {
-        if (status === 'present') {
-            attendanceToggleBtn.textContent = 'حاضر';
-            attendanceToggleBtn.className = 'attendance-status-btn present active';
-        } else {
-            attendanceToggleBtn.textContent = 'غایب';
-            attendanceToggleBtn.className = 'attendance-status-btn absent active';
-        }
-    };
+    // Populate initial text
+    renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
+    renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
 
-    // Set initial state
-    updateButtonUI(currentStatus);
+    row3.appendChild(absenceSpan); // Right side
+    row3.appendChild(homeworkInfoSpan); // Left side
 
-    // Add toggle logic
-    attendanceToggleBtn.addEventListener('click', () => {
-        const oldStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
-        const newStatus = oldStatus === 'present' ? 'absent' : 'present';
-
-        state.selectedSession.setAttendance(student.identity.studentId, newStatus);
-
-        if (newStatus === 'absent') {
-            state.selectedSession.studentRecords[student.identity.studentId].hadIssue = false;
-        }
-
-        state.saveData();
-
-        // Update UI
-        updateButtonUI(newStatus);
-        renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
-        renderStudentStatsList();
-        renderAbsenteesSummary();
-    });
-
-    // Final assembly of the list item
-    li.appendChild(infoDiv);
-    li.appendChild(homeworkControls);
-    li.appendChild(attendanceToggleBtn);
+    // --- ASSEMBLE CARD ---
+    li.appendChild(row1);
+    li.appendChild(row2);
+    li.appendChild(row3);
 
     return li;
 }
