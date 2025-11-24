@@ -1777,6 +1777,18 @@ input[type=number] {
 .list-item-badges {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    /* Allow badges to stack vertically */
+    gap: 5px;
+    /* Consistent vertical and horizontal spacing */
+    justify-content: flex-end;
+    /* Keep badges aligned towards the action buttons */
+}
+
+/* Remove margins from badges inside the list so 'gap' handles the spacing cleanly */
+.list-item-badges .type-badge,
+.list-item-badges .warning-badge {
+    margin: 0 !important;
 }
 
 /* 1. Disable text selection globally for a cleaner app-like feel */
