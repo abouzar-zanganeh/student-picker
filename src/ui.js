@@ -2976,11 +2976,11 @@ function createClassActionButtons(classroom) {
     const noteBtn = document.createElement('button');
     noteBtn.className = 'btn-icon';
     noteBtn.innerHTML = '📝';
-    noteBtn.title = 'افزودن/ویرایش یادداشت کلاس';
-    noteBtn.style.borderBottom = 'solid';
+    noteBtn.title = 'ویرایش یادداشت کلاس';
+
+    // Logic: Only show the button if a note exists
     if (!classroom.note) {
-        noteBtn.style.opacity = '0.5';
-        noteBtn.style.borderBottom = 'none';
+        noteBtn.style.display = 'none';
     }
 
     noteBtn.addEventListener('click', (event) => {
@@ -3106,7 +3106,7 @@ function createClassListItem(classroom) {
         const incompleteBadge = document.createElement('span');
         // Reusing 'cancelled-badge' style for a red warning look
         incompleteBadge.className = 'type-badge cancelled-badge';
-        incompleteBadge.textContent = 'زمان‌بندی ناقص';
+        incompleteBadge.textContent = 'نقص';
         incompleteBadge.style.cursor = 'pointer';
         incompleteBadge.title = 'برای تکمیل زمان‌بندی کلیک کنید';
 
@@ -3149,11 +3149,12 @@ function createClassListItem(classroom) {
         }
     }
 
-    li.appendChild(badgesContainer);
 
     // --- 3. Action Buttons ---
     const buttonsContainer = createClassActionButtons(classroom);
     li.appendChild(buttonsContainer);
+
+    li.appendChild(badgesContainer);
 
     // --- 4. Add the right-click context menu ---
     li.addEventListener('contextmenu', (event) => {
@@ -3197,6 +3198,14 @@ function createClassListItem(classroom) {
             },
 
             backupItem,
+
+            {
+                label: 'یادداشت کلاس',
+                icon: '📝',
+                action: () => {
+                    showClassNoteModal(classroom);
+                }
+            },
 
             {
                 label: 'تنظیمات کلاس',
