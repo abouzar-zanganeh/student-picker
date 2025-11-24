@@ -720,6 +720,29 @@ export function showClassNoteModal(classroom) {
     newNoteContent.focus();
 }
 
+export function showSessionNoteModal(session, displaySessionNumber) {
+    // 1. Pre-fill the modal with existing note (or empty)
+    newNoteContent.value = session.note || '';
+    newNoteContent.dispatchEvent(new Event('input', { bubbles: true })); // Trigger auto-direction
+
+    // 2. Define what happens on "Save"
+    state.setSaveNoteCallback((content) => {
+        session.note = content;
+        state.saveData();
+
+        logManager.addLog(state.currentClassroom.info.name,
+            `یادداشت جلسه ${displaySessionNumber} ذخیره شد.`,
+            { type: 'VIEW_SESSIONS' });
+
+        renderSessions();
+        showNotification("✅یادداشت جلسه ذخیره شد.");
+    });
+
+    // 3. Open the modal
+    openModal('add-note-modal');
+    newNoteContent.focus();
+}
+
 export function showSettingsPage(classroom) {
     state.setCurrentClassroom(classroom);
     settingsClassNameHeader.textContent = `تنظیمات کلاس: ${classroom.info.name}`;
