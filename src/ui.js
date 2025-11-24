@@ -4207,4 +4207,52 @@ export function updateDemoModeBanner() {
     }
 }
 
+function getClassScheduleStatus(classroom) {
+    const { scheduleDays, scheduleStartTime, scheduleEndTime } = classroom.info;
+    const hasDays = scheduleDays && scheduleDays.length > 0;
+    const hasTime = scheduleStartTime && scheduleEndTime;
 
+    // Priority 4: Unscheduled (No data at all)
+    if (!hasDays && !hasTime) return { type: 'unscheduled', sortIndex: 3 };
+
+    // Priority 3: Incomplete (Missing days OR time)
+    if (!hasDays || !hasTime) return { type: 'incomplete', sortIndex: 2 };
+
+    // Priority 1 & 2: Scheduled
+    const now = new Date();
+    const currentDay = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+    const currentTime = now.getHours() * 60 + now.getMinutes(); // Minutes since midnight
+
+    const [startH, startM] = scheduleStartTime.split(':').map(Number);
+    const [endH, endM] = scheduleEndTime.split(':').map(Number);
+    const startTimeVal = startH * 60 + startM;
+    const endTimeVal = endH * 60 + endM;
+
+    // Check if Active NOW
+    // Logic: Is today a class day? AND Is current time between start and end?
+    if (scheduleDays.includes(currentDay)) {
+        if (currentTime >= startTimeVal && currentTime < endTimeVal) {
+            return { type: 'active', sortIndex: 0 };
+        }
+    }
+
+    // Calculate Next Occurrence for "Upcoming" sorting
+    // We look ahead up to 7 days to find the next class
+    for (let i = 0; i <= 7; i++) {
+        const checkDay = (currentDay + i) % 7;
+
+        if (scheduleDays.includes(checkDay)) {
+            // If it's today (i=0), we only care if the class hasn't started yet
+            if (i === 0 && currentTime >= startTimeVal) continue;
+
+            // Found the next class slot
+            const targetDate = new Date(now);
+            targetDate.setDate(now.getDate() + i);
+            targetDate.setHours(startH, startM, 0, 0);
+            return { type: 'upcoming', sortIndex: 1, nextTimestamp: targetDate.getTime() };
+        }
+    }
+
+    // Fallback (Should rarely happen if hasDays is true)
+    return { type: 'upcoming', sortIndex: 1, nextTimestamp: 9999999999999 };
+}
