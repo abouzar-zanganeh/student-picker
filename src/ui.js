@@ -126,6 +126,33 @@ export const sessionDashboardPage = document.getElementById('session-dashboard-p
 
 export const attendancePane = document.getElementById('attendance-pane');
 
+// Helper for handling Long Press events
+export function setupLongPress(element, callback) {
+    let timer;
+    const longPressDuration = 800; // 800ms to trigger
+
+    const start = (e) => {
+        // Prevent default only if necessary? No, keep it simple for now.
+        timer = setTimeout(() => {
+            if (navigator.vibrate) navigator.vibrate(50); // Haptic feedback
+            callback(e);
+        }, longPressDuration);
+    };
+
+    const cancel = () => {
+        clearTimeout(timer);
+    };
+
+    // Support both Touch and Mouse
+    element.addEventListener('touchstart', start, { passive: true });
+    element.addEventListener('touchend', cancel);
+    element.addEventListener('touchmove', cancel);
+
+    element.addEventListener('mousedown', start);
+    element.addEventListener('mouseup', cancel);
+    element.addEventListener('mouseleave', cancel);
+}
+
 
 export function renderSessionDashboard(initialTab = 'selector') {
     if (!state.currentClassroom || !state.selectedSession) {
@@ -1151,14 +1178,24 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     const homeworkInfoSpan = document.createElement('span');
     homeworkInfoSpan.className = 'homework-info';
 
+
     // --- ROW 1: Checkbox + Student Name ---
     const row1 = document.createElement('div');
     row1.className = 'att-row-1';
 
+    // FLAG: Tracks if the interaction was a long press
+    let longPressOccurred = false;
+
+    // Reset flag on any new interaction start
+    row1.addEventListener('mousedown', () => longPressOccurred = false);
+    row1.addEventListener('touchstart', () => longPressOccurred = false, { passive: true });
+
+    // 1. Define Checkbox
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.className = 'mass-comment-checkbox';
     checkbox.checked = state.selectedStudentsForMassComment.includes(student.identity.studentId);
+
     checkbox.addEventListener('change', () => {
         const studentId = student.identity.studentId;
         const currentSelection = state.selectedStudentsForMassComment;
@@ -1169,13 +1206,48 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
             if (index > -1) currentSelection.splice(index, 1);
         }
         renderMassCommentControls();
+
+        // Optional: Exit selection mode if last item unchecked
+        const list = document.getElementById('attendance-list');
+        if (currentSelection.length === 0 && list.classList.contains('selection-mode-active')) {
+            list.classList.remove('selection-mode-active');
+        }
     });
 
+    // 2. Define Name
     const nameSpan = document.createElement('span');
     nameSpan.className = 'student-name';
     nameSpan.textContent = student.identity.name;
-    nameSpan.addEventListener('click', () => {
+
+    // Normal Click: Profile (Blocked if long press occurred)
+    nameSpan.addEventListener('click', (e) => {
+        if (longPressOccurred) {
+            // It was a long press, so consume this click and do nothing
+            e.stopPropagation();
+            e.preventDefault();
+            longPressOccurred = false; // Reset
+            return;
+        }
         showStudentProfile(student);
+    });
+
+    // 3. Attach Long Press to the ROW
+    setupLongPress(row1, (e) => {
+        // Set the flag!
+        longPressOccurred = true;
+
+        const list = document.getElementById('attendance-list');
+
+        // Activate Selection Mode
+        if (!list.classList.contains('selection-mode-active')) {
+            list.classList.add('selection-mode-active');
+        }
+
+        // Automatically check THIS student
+        if (!checkbox.checked) {
+            checkbox.checked = true;
+            checkbox.dispatchEvent(new Event('change'));
+        }
     });
 
     row1.appendChild(checkbox);
