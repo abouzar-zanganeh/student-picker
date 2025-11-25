@@ -1258,8 +1258,14 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     const row2 = document.createElement('div');
     row2.className = 'att-row-2';
 
-    // 1. Attendance Toggle (Rightmost in your sketch)
+    // 1. Attendance Toggle (Rightmost)
     const attendanceToggleBtn = document.createElement('button');
+    let attLongPress = false; // Flag to prevent click after long press
+
+    // Reset flag on touch/mouse down
+    attendanceToggleBtn.addEventListener('mousedown', () => attLongPress = false);
+    attendanceToggleBtn.addEventListener('touchstart', () => attLongPress = false, { passive: true });
+
     const currentStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
 
     const updateButtonUI = (status) => {
@@ -1273,7 +1279,10 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     };
     updateButtonUI(currentStatus);
 
-    attendanceToggleBtn.addEventListener('click', () => {
+    // Normal Click
+    attendanceToggleBtn.addEventListener('click', (e) => {
+        if (attLongPress) { e.stopPropagation(); return; } // Block if long press occurred
+
         const oldStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
         const newStatus = oldStatus === 'present' ? 'absent' : 'present';
 
@@ -1289,6 +1298,29 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         renderAbsenteesSummary();
     });
 
+    // Long Press (Mass Action)
+    setupLongPress(attendanceToggleBtn, () => {
+        attLongPress = true;
+        const targetStatus = currentStatus === 'present' ? 'absent' : 'present';
+        const targetLabel = targetStatus === 'present' ? 'حاضر' : 'غایب';
+
+        showCustomConfirm(
+            `آیا مطمئن هستید که می‌خواهید وضعیت حضور تمام دانش‌آموزان را به «${targetLabel}» تغییر دهید؟`,
+            () => {
+                getActiveItems(state.currentClassroom.students).forEach(s => {
+                    state.selectedSession.setAttendance(s.identity.studentId, targetStatus);
+                    if (targetStatus === 'absent') {
+                        state.selectedSession.studentRecords[s.identity.studentId].hadIssue = false;
+                    }
+                });
+                state.saveData();
+                renderAttendancePage(); // Re-render whole list
+                showNotification(`✅ وضعیت تمام دانش‌آموزان به «${targetLabel}» تغییر یافت.`);
+            },
+            { confirmText: 'بله، اعمال کن', confirmClass: 'btn-warning' }
+        );
+    });
+
     // 2. Homework Controls Wrapper
     const homeworkControls = document.createElement('div');
     homeworkControls.className = 'homework-controls';
@@ -1301,47 +1333,79 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
 
     // HW Status Button
     const homeworkBtn = document.createElement('button');
+    let hwStatusLongPress = false;
+
+    homeworkBtn.addEventListener('mousedown', () => hwStatusLongPress = false);
+    homeworkBtn.addEventListener('touchstart', () => hwStatusLongPress = false, { passive: true });
+
     const homeworkStatus = state.selectedSession.studentRecords[student.identity.studentId]?.homework.status || 'none';
     homeworkBtn.className = `homework-status-btn ${homeworkStatus}`;
     homeworkBtn.title = homeworkTooltipMap[homeworkStatus];
-    homeworkBtn.addEventListener('click', () => {
+
+    // Normal Click
+    homeworkBtn.addEventListener('click', (e) => {
+        if (hwStatusLongPress) { e.stopPropagation(); return; }
+
         const homework = state.selectedSession.studentRecords[student.identity.studentId].homework;
-        const statusCycle = {
-            'none': 'incomplete',
-            'incomplete': 'complete',
-            'complete': 'none'
-        };
+        const statusCycle = { 'none': 'incomplete', 'incomplete': 'complete', 'complete': 'none' };
         const nextStatus = statusCycle[homework.status];
-        homeworkBtn.title = homeworkTooltipMap[nextStatus];
 
         state.selectedSession.setHomeworkStatus(student.identity.studentId, nextStatus);
         state.saveData();
 
         homeworkBtn.className = `homework-status-btn ${nextStatus}`;
+        homeworkBtn.title = homeworkTooltipMap[nextStatus];
         renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
+    });
+
+    // Long Press (Mass Action)
+    setupLongPress(homeworkBtn, () => {
+        hwStatusLongPress = true;
+        const statusCycle = { 'none': 'incomplete', 'incomplete': 'complete', 'complete': 'none' };
+        const targetStatus = statusCycle[homeworkStatus];
+        const targetLabel = homeworkTooltipMap[targetStatus];
+
+        showCustomConfirm(
+            `آیا از تغییر وضعیت تکلیف تمام دانش‌آموزان به «${targetLabel}» مطمئن هستید؟`,
+            () => {
+                getActiveItems(state.currentClassroom.students).forEach(s => {
+                    state.selectedSession.setHomeworkStatus(s.identity.studentId, targetStatus);
+                });
+                state.saveData();
+                renderAttendancePage();
+                showNotification(`✅ وضعیت تکلیف همه به «${targetLabel}» تغییر یافت.`);
+            },
+            { confirmText: 'بله', confirmClass: 'btn-warning' }
+        );
     });
 
     // HW Note Button
     const homeworkNoteBtn = document.createElement('button');
+    let hwNoteLongPress = false;
+
+    homeworkNoteBtn.addEventListener('mousedown', () => hwNoteLongPress = false);
+    homeworkNoteBtn.addEventListener('touchstart', () => hwNoteLongPress = false, { passive: true });
+
     homeworkNoteBtn.className = 'btn-icon';
     homeworkNoteBtn.innerHTML = '📝';
     homeworkNoteBtn.title = 'افزودن یادداشت برای تکلیف';
-    const homeworkComment = state.selectedSession.studentRecords[student.identity.studentId]?.homework.comment;
-    if (!homeworkComment) {
-        homeworkNoteBtn.style.opacity = '0.3';
-    }
 
-    homeworkNoteBtn.addEventListener('click', () => {
+    const homeworkComment = state.selectedSession.studentRecords[student.identity.studentId]?.homework.comment;
+    if (!homeworkComment) homeworkNoteBtn.style.opacity = '0.3';
+
+    // Normal Click
+    homeworkNoteBtn.addEventListener('click', (e) => {
+        if (hwNoteLongPress) { e.stopPropagation(); return; }
+
+        // ... (Existing logic for single note) ...
         const homework = state.selectedSession.studentRecords[student.identity.studentId].homework;
         newNoteContent.value = homework.comment || '';
-        newNoteContent.dispatchEvent(new Event('input', {
-            bubbles: true
-        }));
+        newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
         state.setSaveNoteCallback((content) => {
             homework.comment = content;
 
-            // Note update logic matching original...
+            // Logic to sync with profile note
             const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
             const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
             const noteSource = { type: 'fromAttendance', sessionNumber: state.selectedSession.sessionNumber };
@@ -1357,10 +1421,6 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
             }
 
             state.saveData();
-            logManager.addLog(state.currentClassroom.info.name, `یادداشت تکلیف جلسه ${displayNumber} برای دانش‌آموز «${student.identity.name}» ذخیره شد.`, {
-                type: 'VIEW_STUDENT_PROFILE',
-                studentId: student.identity.studentId
-            });
             showNotification("✅یادداشت تکلیف ذخیره شد.");
             homeworkNoteBtn.style.opacity = content ? '1' : '0.3';
             renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
@@ -1370,10 +1430,23 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         newNoteContent.focus();
     });
 
+    // Long Press (Mass Note)
+    setupLongPress(homeworkNoteBtn, () => {
+        hwNoteLongPress = true;
+        showCustomConfirm(
+            "آیا می‌خواهید برای **تمام** دانش‌آموزان کلاس یادداشت تکلیف ثبت کنید؟",
+            () => {
+                const allStudentIds = getActiveItems(state.currentClassroom.students).map(s => s.identity.studentId);
+                state.setSelectedStudentsForMassComment(allStudentIds);
+                showMassCommentModal();
+            },
+            { confirmText: 'بله', confirmClass: 'btn-primary' }
+        );
+    });
+
     // Append Buttons to Row 2
-    // Order based on sketch: Attendance (Right) -> Note -> Status (Left)
     row2.appendChild(attendanceToggleBtn);
-    homeworkControls.appendChild(homeworkNoteBtn); // Note first (to appear right of status)
+    homeworkControls.appendChild(homeworkNoteBtn);
     homeworkControls.appendChild(homeworkBtn);
     row2.appendChild(homeworkControls);
 
