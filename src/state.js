@@ -1,6 +1,7 @@
 import { Classroom, Student, Session, Category, Homework, Note } from './models.js';
 import JSZip from 'jszip';
-import LZString from 'lz-string'; // [!code ++] New Import
+import LZString from 'lz-string';
+import CompressionWorker from './compression.worker.js?worker';
 
 // --- وضعیت کلی برنامه (Global State) ---
 export let classrooms = {}; // آبجکتی برای نگهداری تمام کلاس‌ها بر اساس نام آنها
@@ -56,46 +57,54 @@ export let userSettings = {
 
 let saveTimer = null;
 
+const compressionWorker = new CompressionWorker();
+
+compressionWorker.onmessage = (e) => {
+    const compressed = e.data;
+    try {
+        localStorage.setItem('teacherAssistantData_v2', compressed);
+        console.log("Background save complete.");
+    } catch (err) {
+        console.error("Background storage failed:", err);
+    }
+};
+
+compressionWorker.onerror = (err) => {
+    console.error("❌ Worker Communication Error:", err.message, err);
+};
+
 export function saveData(immediate = false) {
     if (isDemoMode) return;
 
-    // 1. Define the heavy lifting function
-    const performSave = () => {
-        const appState = {
-            classrooms,
-            trashBin,
-            userSettings
-        };
-
-        const jsonString = JSON.stringify(appState);
-        const compressed = LZString.compressToUTF16(jsonString);
-
-        try {
-            localStorage.setItem('teacherAssistantData_v2', compressed);
-            console.log("Data saved and compressed."); // Optional: to see when it happens
-        } catch (e) {
-            console.error("Storage failed:", e);
-            if (e.name === 'QuotaExceededError') {
-                alert("⚠️ حافظه مرورگر پر شده است! لطفاً پشتیبان بگیرید و حافظه را پاک کنید.");
-            }
-        }
+    // 1. Prepare data (Fast, in-memory)
+    const appState = {
+        classrooms,
+        trashBin,
+        userSettings
     };
+    const jsonString = JSON.stringify(appState);
 
-    // 2. Logic: Immediate vs Debounced
+    // 2. Immediate Save (Synchronous - Blocks UI, but safe for closing tab)
     if (immediate) {
-        // Force save immediately (e.g., when closing the tab)
         if (saveTimer) clearTimeout(saveTimer);
-        performSave();
-    } else {
-        // Cancel the previous pending save
-        if (saveTimer) clearTimeout(saveTimer);
-
-        // Schedule a new save in 2 seconds
-        saveTimer = setTimeout(() => {
-            performSave();
-            saveTimer = null;
-        }, 2000);
+        try {
+            const compressed = LZString.compressToUTF16(jsonString);
+            localStorage.setItem('teacherAssistantData_v2', compressed);
+            console.log("Immediate save complete.");
+        } catch (e) {
+            console.error("Immediate save failed:", e);
+        }
+        return;
     }
+
+    // 3. Background Save (Asynchronous - Zero Lag)
+    if (saveTimer) clearTimeout(saveTimer);
+
+    saveTimer = setTimeout(() => {
+        // Send data to the worker. The UI stays free.
+        compressionWorker.postMessage(jsonString);
+        saveTimer = null;
+    }, 500);
 }
 
 
