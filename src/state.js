@@ -1,5 +1,6 @@
 import { Classroom, Student, Session, Category, Homework, Note } from './models.js';
 import JSZip from 'jszip';
+import LZString from 'lz-string'; // [!code ++] New Import
 
 // --- وضعیت کلی برنامه (Global State) ---
 export let classrooms = {}; // آبجکتی برای نگهداری تمام کلاس‌ها بر اساس نام آنها
@@ -53,16 +54,48 @@ export let userSettings = {
 
 // --- توابع اصلی داده‌ها (Data Functions) ---
 
-export function saveData() {
+let saveTimer = null;
+
+export function saveData(immediate = false) {
     if (isDemoMode) return;
 
-    const appState = {
-        classrooms,
-        trashBin,
-        userSettings
+    // 1. Define the heavy lifting function
+    const performSave = () => {
+        const appState = {
+            classrooms,
+            trashBin,
+            userSettings
+        };
+
+        const jsonString = JSON.stringify(appState);
+        const compressed = LZString.compressToUTF16(jsonString);
+
+        try {
+            localStorage.setItem('teacherAssistantData_v2', compressed);
+            console.log("Data saved and compressed."); // Optional: to see when it happens
+        } catch (e) {
+            console.error("Storage failed:", e);
+            if (e.name === 'QuotaExceededError') {
+                alert("⚠️ حافظه مرورگر پر شده است! لطفاً پشتیبان بگیرید و حافظه را پاک کنید.");
+            }
+        }
     };
 
-    localStorage.setItem('teacherAssistantData_v2', JSON.stringify(appState));
+    // 2. Logic: Immediate vs Debounced
+    if (immediate) {
+        // Force save immediately (e.g., when closing the tab)
+        if (saveTimer) clearTimeout(saveTimer);
+        performSave();
+    } else {
+        // Cancel the previous pending save
+        if (saveTimer) clearTimeout(saveTimer);
+
+        // Schedule a new save in 2 seconds
+        saveTimer = setTimeout(() => {
+            performSave();
+            saveTimer = null;
+        }, 2000);
+    }
 }
 
 
@@ -167,18 +200,32 @@ export function loadData() {
     const savedData = localStorage.getItem('teacherAssistantData_v2');
     if (!savedData) return;
 
-    const plainData = JSON.parse(savedData);
+    let plainData;
 
-    // Check if the data is in the new format {classrooms, trashBin} or the old one.
+    try {
+        // 1. Try to decompress first
+        const decompressed = LZString.decompressFromUTF16(savedData);
+
+        // If decompressed is null/empty, it means the data wasn't compressed (it's old JSON)
+        if (decompressed) {
+            plainData = JSON.parse(decompressed);
+        } else {
+            // Fallback: It's legacy uncompressed JSON
+            plainData = JSON.parse(savedData);
+        }
+    } catch (err) {
+        // Double safety net: if decompression crashes, try parsing raw
+        console.log("Migration: Parsing legacy uncompressed data...");
+        plainData = JSON.parse(savedData);
+    }
+
+    // The rest of your loading logic remains exactly the same...
     if (plainData.classrooms !== undefined && plainData.trashBin !== undefined) {
-        // New format
         rehydrateData(plainData.classrooms);
         trashBin = plainData.trashBin || [];
         userSettings = { ...userSettings, ...plainData.userSettings };
     } else {
-        // Old format: rehydrate, then migrate old deleted items.
         rehydrateData(plainData);
-        // This runs once to move existing deleted items into the new trashBin
         migratePreTrashBinDeletions();
     }
 }
