@@ -2123,12 +2123,36 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
         skillScoresSpan.className = 'skill-scores';
 
         const scoresForSkill = studentScores[skillKey]?.filter(s => !s.isDeleted);
+
         if (scoresForSkill && scoresForSkill.length > 0) {
             hasAnyScore = true;
-            skillScoresSpan.textContent = scoresForSkill.slice(-3).map(s => s.value + (s.comment ? '\'' : '')).join(' , ');
+            // Get the last 3 scores
+            const recentScores = scoresForSkill.slice(-3);
+
+            // Loop through them to create individual elements
+            recentScores.forEach((score, index) => {
+                const scoreItem = document.createElement('span');
+                scoreItem.textContent = score.value + (score.comment ? '\'' : '');
+
+                // If there is a comment, attach the tooltip
+                if (score.comment) {
+                    scoreItem.dataset.tooltip = score.comment;
+                    scoreItem.style.position = 'relative'; // Crucial: makes the tooltip appear above THIS number
+                    scoreItem.style.cursor = 'help'; // Visual cue that it's hoverable
+                    scoreItem.classList.add('tooltip-container'); // Reuse existing class if needed
+                }
+
+                skillScoresSpan.appendChild(scoreItem);
+
+                // Add comma separator if it's not the last item
+                if (index < recentScores.length - 1) {
+                    skillScoresSpan.appendChild(document.createTextNode(' , '));
+                }
+            });
         } else {
             skillScoresSpan.textContent = 'none';
         }
+
         li.appendChild(skillNameSpan);
         li.appendChild(skillScoresSpan);
         scoresList.appendChild(li);
