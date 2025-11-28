@@ -1935,7 +1935,16 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
                 winnerNameEl.style.color = ''; // Revert text color
             }
             renderStudentStatsList();
-            setTimeout(() => displayWinner(winner, categoryName), 0);
+
+            setTimeout(() => {
+                // Check if we are in history mode (index != -1) or manual mode
+                if (state.winnerHistoryIndex !== -1) {
+                    displayWinner(); // Refresh using history index (keeps arrows)
+                } else {
+                    displayWinner(winner, categoryName); // Refresh using manual selection (no arrows)
+                }
+            }, 0);
+
             state.saveData();
         });
     }
@@ -1991,7 +2000,16 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
                 // -------------
             }
             renderStudentStatsList();
-            setTimeout(() => displayWinner(winner, categoryName), 0);
+
+            setTimeout(() => {
+                // Check if we are in history mode (index != -1) or manual mode
+                if (state.winnerHistoryIndex !== -1) {
+                    displayWinner(); // Refresh using history index (keeps arrows)
+                } else {
+                    displayWinner(winner, categoryName); // Refresh using manual selection (no arrows)
+                }
+            }, 0);
+
             state.saveData();
         });
     }
@@ -2047,7 +2065,16 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
                 winnerNameEl.title = '';
             }
             renderStudentStatsList();
-            setTimeout(() => displayWinner(winner, categoryName), 0);
+
+            setTimeout(() => {
+                // Check if we are in history mode (index != -1) or manual mode
+                if (state.winnerHistoryIndex !== -1) {
+                    displayWinner(); // Refresh using history index (keeps arrows)
+                } else {
+                    displayWinner(winner, categoryName); // Refresh using manual selection (no arrows)
+                }
+            }, 0);
+
             state.saveData();
         });
     }
