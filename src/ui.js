@@ -14,6 +14,8 @@ import { Category } from './models.js';
 import { handleUndoLastSelection } from './main.js';
 import JSZip from 'jszip';
 
+import { toJalaali, toGregorian } from 'jalaali-js';
+
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');
 export const newClassNameInput = document.getElementById('new-class-name');
@@ -4103,36 +4105,67 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                 label: 'تغییر تاریخ',
                 icon: '📅',
                 action: () => {
-                    const dateInput = document.getElementById('date-picker-input');
+                    const daySelect = document.getElementById('dp-day');
+                    const monthSelect = document.getElementById('dp-month');
+                    const yearSelect = document.getElementById('dp-year');
 
-                    // Format current date to YYYY-MM-DD for the input
-                    // We use local time components to avoid timezone shifts
-                    const year = session.startTime.getFullYear();
-                    const month = String(session.startTime.getMonth() + 1).padStart(2, '0');
-                    const day = String(session.startTime.getDate()).padStart(2, '0');
-                    dateInput.value = `${year}-${month}-${day}`;
+                    // 1. Convert Current Gregorian Date to Jalaali
+                    const jDate = toJalaali(session.startTime);
 
-                    // Set the callback for when the user clicks "Confirm"
-                    state.setDatePickerCallback((newDateString) => {
-                        if (!newDateString) return;
+                    // 2. Populate Dropdowns (Dynamically)
+                    // -- Days (1-31)
+                    daySelect.innerHTML = '';
+                    for (let i = 1; i <= 31; i++) {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = i.toLocaleString('fa-IR');
+                        if (i === jDate.jd) option.selected = true;
+                        daySelect.appendChild(option);
+                    }
 
-                        const newDateParts = newDateString.split('-');
-                        const newYear = parseInt(newDateParts[0]);
-                        const newMonth = parseInt(newDateParts[1]) - 1; // Months are 0-indexed
-                        const newDay = parseInt(newDateParts[2]);
+                    // -- Months (Names)
+                    const persianMonths = [
+                        'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
+                        'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
+                    ];
+                    monthSelect.innerHTML = '';
+                    persianMonths.forEach((name, index) => {
+                        const option = document.createElement('option');
+                        option.value = index + 1; // 1-based
+                        option.textContent = name;
+                        if (index + 1 === jDate.jm) option.selected = true;
+                        monthSelect.appendChild(option);
+                    });
 
-                        // create a new Date object based on the input
-                        const updatedDate = new Date(newYear, newMonth, newDay);
+                    // -- Years (Current +/- 5 years)
+                    yearSelect.innerHTML = '';
+                    const currentYear = jDate.jy;
+                    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+                        const option = document.createElement('option');
+                        option.value = i;
+                        option.textContent = i.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); // Farsi digits
+                        if (i === jDate.jy) option.selected = true;
+                        yearSelect.appendChild(option);
+                    }
 
-                        // MERGE TIME: Keep the original hours/minutes
+                    // 3. Define Callback (Receives Jalaali Object from Main.js)
+                    state.setDatePickerCallback((dateObj) => {
+                        if (!dateObj) return;
+
+                        // Convert Jalaali -> Gregorian
+                        const gDate = toGregorian(parseInt(dateObj.jy), parseInt(dateObj.jm), parseInt(dateObj.jd));
+
+                        // Create JS Date (Note: JS Month is 0-indexed)
+                        const updatedDate = new Date(gDate.gy, gDate.gm - 1, gDate.gd);
+
+                        // MERGE TIME: Keep original hours/minutes
                         updatedDate.setHours(session.startTime.getHours());
                         updatedDate.setMinutes(session.startTime.getMinutes());
                         updatedDate.setSeconds(session.startTime.getSeconds());
 
-                        // Apply update
+                        // Log & Save
                         const oldDateStr = session.startTime.toLocaleDateString('fa-IR');
                         session.startTime = updatedDate;
-
                         const newDateStr = session.startTime.toLocaleDateString('fa-IR');
 
                         logManager.addLog(state.currentClassroom.info.name,

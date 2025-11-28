@@ -333,9 +333,10 @@
             <p style="font-size:14px; color:#666; margin-bottom:15px;">
                 تاریخ جدید را انتخاب کنید. زمان (ساعت) جلسه تغییر نخواهد کرد.
             </p>
-            <div class="input-group centered-input-group">
-                <input type="date" id="date-picker-input"
-                    style="width: 100%; text-align: center; padding: 10px; font-size: 16px; border: 1px solid #ddd; border-radius: 5px;">
+            <div class="input-group centered-input-group" style="flex-direction: row-reverse; gap: 5px;">
+                <select id="dp-day" class="date-select"></select>
+                <select id="dp-month" class="date-select"></select>
+                <select id="dp-year" class="date-select"></select>
             </div>
             <div class="modal-actions">
                 <button id="date-picker-cancel-btn" class="btn-secondary">لغو</button>

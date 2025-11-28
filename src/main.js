@@ -293,21 +293,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Date Picker Modal Listeners ---
     const datePickerConfirmBtn = document.getElementById('date-picker-confirm-btn');
     const datePickerCancelBtn = document.getElementById('date-picker-cancel-btn');
-    const datePickerInput = document.getElementById('date-picker-input');
+    // Get references to the 3 dropdowns
+    const dpDay = document.getElementById('dp-day');
+    const dpMonth = document.getElementById('dp-month');
+    const dpYear = document.getElementById('dp-year');
 
     datePickerConfirmBtn.addEventListener('click', () => {
-        const value = datePickerInput.value;
-        if (value && typeof state.datePickerCallback === 'function') {
-            state.datePickerCallback(value);
+        // Collect values
+        const jy = dpYear.value;
+        const jm = dpMonth.value;
+        const jd = dpDay.value;
+
+        if (jy && jm && jd && typeof state.datePickerCallback === 'function') {
+            // Pass simple object to callback
+            state.datePickerCallback({ jy, jm, jd });
             ui.closeActiveModal();
         } else {
-            ui.showNotification("⚠️ لطفاً یک تاریخ معتبر انتخاب کنید.");
+            ui.showNotification("⚠️ خطا در انتخاب تاریخ.");
         }
-        state.setDatePickerCallback(null);
-    });
-
-    datePickerCancelBtn.addEventListener('click', () => {
-        ui.closeActiveModal();
         state.setDatePickerCallback(null);
     });
     // --- End of Date Picker Modal Listeners ---
