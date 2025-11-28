@@ -4679,8 +4679,15 @@ export async function renderRestorePointsPage() {
             const li = document.createElement('li');
             li.className = 'restore-point-card';
 
-            // 1. Format Date & Size
-            const date = new Date(record.timestamp).toLocaleString('fa-IR');
+            // 1. Format Date & Size (Now with Weekday)
+            const date = new Date(record.timestamp).toLocaleString('fa-IR', {
+                weekday: 'long', // Adds "شنبه", "یکشنبه", etc.
+                year: 'numeric',
+                month: 'numeric',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
             const sizeKB = (record.file.size / 1024).toFixed(1) + ' KB';
 
             // 2. Build HTML Structure
