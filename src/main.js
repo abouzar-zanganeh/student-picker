@@ -1,7 +1,7 @@
 import * as state from './state.js';
 import { resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent, getSessionDisplayMap } from './state.js';
 import * as ui from './ui.js';
-import { switchDashboardTab } from './ui.js';
+import { switchDashboardTab, renderRestorePointsPage } from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard } from './utils.js';
 import * as logManager from './logManager.js';
@@ -1012,6 +1012,16 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.showPage('trash-page');
         closeSideNav(); // Close the nav menu after clicking
     });
+
+    // Restore Points Menu Button
+    const restorePointsBtn = document.getElementById('restore-points-nav-btn');
+    if (restorePointsBtn) {
+        restorePointsBtn.addEventListener('click', () => {
+            ui.renderRestorePointsPage();
+            ui.showPage('restore-points-page');
+            closeSideNav(); // Reuse your existing helper
+        });
+    }
 
 
     const demoModeBtn = document.getElementById('demo-mode-btn'); // for the demo mode (this and the following event listener)

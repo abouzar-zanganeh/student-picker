@@ -44,6 +44,7 @@
         <button id="demo-mode-btn" class="nav-btn">🎭 حالت نمایش (Demo)</button>
         <button id="backup-data-btn" class="nav-btn">📤 پشتیبان‌گیری</button>
         <button id="restore-data-btn" class="nav-btn">📥 بازیابی</button>
+        <button id="restore-points-nav-btn" class="nav-btn">↺ نقاط بازگشت</button>
         <input type="file" id="restore-file-input" class="hidden-input" accept=".json,.txt">
     </div>
     <div id="overlay" class="overlay modal-overlay"></div>
@@ -224,6 +225,15 @@
         <p style="font-size: 14px; color: #666; text-align: center;">این لیست حداکثر ۵۰ آیتم اخیر را نمایش می‌دهد.</p>
         <hr class="separator">
         <ul id="trashed-items-list" class="list-container">
+        </ul>
+    </main>
+
+    <main id="restore-points-page" class="page">
+        <h2>نقاط بازگشت</h2>
+        <p style="font-size: 14px; color: #666; text-align: center; margin-bottom: 20px;">
+            ۳ فایل پشتیبان اخیر شما که به‌صورت خودکار ذخیره شده‌اند.
+        </p>
+        <ul id="restore-points-list" class="list-container">
         </ul>
     </main>
 

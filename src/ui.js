@@ -1,5 +1,5 @@
 import * as state from './state.js';
-import { addBackupSnapshot } from './db.js';
+import { addBackupSnapshot, getBackupSnapshots, deleteBackupSnapshot } from './db.js';
 
 import { processRestore } from './state.js';
 
@@ -12,6 +12,7 @@ import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
 import { Category } from './models.js';
 import { handleUndoLastSelection } from './main.js';
+import JSZip from 'jszip';
 
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');
@@ -870,7 +871,7 @@ export async function initiateBackupProcess(classNamesToBackup = []) {
     // Silently save a snapshot to the "Garage" (IndexedDB)
     addBackupSnapshot(fileToShare, {
         name: fileToShare.name,
-        description: classNamesToBackup.length > 0 ? `Backup of ${classNamesToBackup.length} classes` : 'Full System Backup',
+        description: classNamesToBackup.length > 0 ? `Backup of ${classNamesToBackup.length} classes` : 'فایل پشتیبان از کل برنامه',
         version: "2.0-b64"
     }).catch(err => console.error("Failed to save local snapshot:", err));
 
@@ -4609,4 +4610,77 @@ function formatClassDays(dayIndices) {
     });
 
     return sortedIndices.map(i => dayMap[i]).join('، ');
+}
+
+// --- Restore Points Logic ---
+
+export async function renderRestorePointsPage() {
+    const list = document.getElementById('restore-points-list');
+    list.innerHTML = '<li style="text-align:center; padding:20px;">در حال بارگذاری...</li>';
+
+    try {
+        const snapshots = await getBackupSnapshots();
+
+        if (snapshots.length === 0) {
+            list.innerHTML = '<li style="text-align:center; padding:20px;">هیچ فایل پشتیبانی یافت نشد.</li>';
+            return;
+        }
+
+        list.innerHTML = ''; // Clear loading message
+
+        snapshots.forEach(record => {
+            const li = document.createElement('li');
+            li.className = 'restore-point-card';
+
+            // 1. Format Date & Size
+            const date = new Date(record.timestamp).toLocaleString('fa-IR');
+            const sizeKB = (record.file.size / 1024).toFixed(1) + ' KB';
+
+            // 2. Build HTML Structure
+            li.innerHTML = `
+                <div class="restore-card-header">
+                    <span class="restore-date">${date}</span>
+                    <span class="restore-size">${sizeKB}</span>
+                </div>
+                <div class="restore-desc">${record.metadata.description || 'بدون توضیحات'}</div>
+                <div class="restore-actions">
+                    <button class="btn-restore-action">بازگردانی</button>
+                </div>
+            `;
+
+            // 3. Add Restore Logic
+            const restoreBtn = li.querySelector('.btn-restore-action');
+            restoreBtn.addEventListener('click', async () => {
+                try {
+                    // 1. Read the text content from the file blob
+                    // content will be the Base64 string like "UEsDB..."
+                    const base64Content = await record.file.text();
+
+                    //2. Load the Zip from that Base64 string
+                    const zip = new JSZip();
+                    const unzipped = await zip.loadAsync(base64Content, { base64: true });
+
+                    const backupFile = unzipped.file("backup.json");
+
+                    if (!backupFile) throw new Error("فایل backup.json یافت نشد.");
+
+                    const jsonString = await backupFile.async("string");
+                    const plainData = JSON.parse(jsonString);
+
+                    // B. Trigger the existing Restore Modal
+                    showRestoreConfirmModal(plainData);
+
+                } catch (err) {
+                    console.error("Restore failed:", err);
+                    showNotification("❌ فایل پشتیبان معتبر نیست.");
+                }
+            });
+
+            list.appendChild(li);
+        });
+
+    } catch (err) {
+        console.error("Failed to load snapshots:", err);
+        list.innerHTML = '<li style="text-align:center; color:red;">خطا در بارگذاری اطلاعات.</li>';
+    }
 }
