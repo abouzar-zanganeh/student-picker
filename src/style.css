@@ -3059,6 +3059,14 @@ body.modal-active {
     font-weight: bold;
 }
 
+/* Highlight for the class currently in session */
+.active-class-card {
+    background-color: #e6ffed !important;
+    /* Light green override */
+    border-left: 5px solid var(--color-success) !important;
+    /* Green accent bar */
+}
+
 /* --- Responsive Adjustments for Wider Screens (Laptops/Tablets) --- */
 @media screen and (min-width: 600px) {
     .attendance-list-item {

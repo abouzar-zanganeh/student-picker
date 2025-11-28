@@ -3307,6 +3307,13 @@ function createClassInfoContainer(classroom) {
 function createClassListItem(classroom) {
     const li = document.createElement('li');
 
+    // Check status and apply highlight for the ongoing class (class that's inside its schedule time)
+    const status = getClassScheduleStatus(classroom);
+    if (status.type === 'active') {
+        li.classList.add('active-class-card');
+        li.title = 'این کلاس هم‌اکنون در حال برگزاری است'; // Tooltip hint
+    }
+
     // --- Checkbox for selection ---
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
