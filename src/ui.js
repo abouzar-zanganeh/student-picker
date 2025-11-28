@@ -305,9 +305,42 @@ export function showRestoreConfirmModal(plainData) {
     }
 
     // --- Prepare the modal content ---
-    const classCount = Object.keys(plainData.data.classrooms).length;
-    const classWord = classCount === 1 ? 'کلاس' : 'کلاس'; // Handling pluralization
-    messageEl.textContent = `فایل پشتیبان شما حاوی ${classCount} ${classWord} است. لطفاً نحوه بازیابی را مشخص کنید.`;
+    const classroomsObj = plainData.data.classrooms || {};
+    const classNames = Object.values(classroomsObj).map(c => c.info.name);
+    const classCount = classNames.length;
+    const classWord = classCount === 1 ? 'کلاس' : 'کلاس';
+
+    // Build a simple HTML list of names
+    // We use a max-height style to ensure the modal doesn't get too tall if there are 20 classes
+    const classesListHtml = classNames.map(name =>
+        `<li style="margin-bottom: 4px;">🔹 ${name}</li>`
+    ).join('');
+
+    messageEl.innerHTML = `
+        <div style="margin-bottom: 10px;">
+            فایل پشتیبان شامل <strong>${classCount} ${classWord}</strong> زیر است:
+        </div>
+        <ul style="
+            margin: 0; 
+            padding: 10px; 
+            background-color: #f8f9fa; 
+            border-radius: 5px; 
+            border: 1px solid #e9ecef;
+            list-style: none; 
+            max-height: 150px; 
+            overflow-y: auto;
+            text-align: right;
+        ">
+            ${classesListHtml}
+        </ul>
+        <div style="margin-top: 15px;">
+            لطفاً نحوه بازیابی را مشخص کنید.
+        </div>
+    `;
+
+    appendCheckbox.checked = true; // Default to append mode
+
+
     appendCheckbox.checked = true; // Default to append mode
 
     // --- Define button actions ---
