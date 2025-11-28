@@ -12,8 +12,8 @@
     <meta name="apple-mobile-web-app-title" content="دستیار معلم">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="images/icon-192.png" type="image/png">
-  <script type="module" crossorigin src="/assets/index-DvxZKqct.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-C1yF7L0p.css">
+  <script type="module" crossorigin src="/assets/index-DGC1xMAS.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-WNon1qqN.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body>
@@ -324,6 +324,24 @@
             <div class="modal-actions">
                 <button id="cancel-note-btn" class="btn-secondary">لغو</button>
                 <button id="class-save-note-btn" class="btn-success">ذخیره</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="date-picker-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="date-picker-title">تغییر تاریخ جلسه</h3>
+            <p style="font-size:14px; color:#666; margin-bottom:15px;">
+                تاریخ جدید را انتخاب کنید. زمان (ساعت) جلسه تغییر نخواهد کرد.
+            </p>
+            <div class="input-group centered-input-group" style="flex-direction: row-reverse; gap: 5px;">
+                <select id="dp-day" class="date-select"></select>
+                <select id="dp-month" class="date-select"></select>
+                <select id="dp-year" class="date-select"></select>
+            </div>
+            <div class="modal-actions">
+                <button id="date-picker-cancel-btn" class="btn-secondary">لغو</button>
+                <button id="date-picker-confirm-btn" class="btn-success">تایید</button>
             </div>
         </div>
     </div>
