@@ -2003,7 +2003,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
             const isCurrentlyActive = exitBtn.classList.contains('active');
 
             if (!isCurrentlyActive) {
-                // Deactivate other mutually exclusive buttons first
+                // 1. Deactivate other mutually exclusive buttons & Revert their stats
                 if (absentBtn.classList.contains('active')) {
                     absentBtn.classList.remove('active');
                     state.selectedSession.setAttendance(winner.identity.studentId, 'present');
@@ -2013,28 +2013,36 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
                     issueBtn.classList.remove('active');
                     studentRecord.hadIssue = false;
                     const categoryName = state.selectedCategory.name;
-                    if (winner.categoryIssues[categoryName]) { winner.categoryIssues[categoryName] = Math.max(0, winner.categoryIssues[categoryName] - 1); }
+                    if (winner.categoryIssues[categoryName]) {
+                        winner.categoryIssues[categoryName] = Math.max(0, winner.categoryIssues[categoryName] - 1);
+                    }
                     winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
                 }
 
+                // 2. Activate Exit State
                 exitBtn.classList.add('active');
                 studentRecord.wasOutOfClass = true;
 
+                // Increment Counters
+                winner.statusCounters.outOfClassCount = (winner.statusCounters.outOfClassCount || 0) + 1;
+                winner.statusCounters.missedChances++;
 
-
-                // Reset any potential 'absent' styling first
+                // Visual cues
                 winnerNameEl.style.textDecoration = '';
                 winnerNameEl.style.opacity = '';
-
-                // Visual cue for the winner's name
                 winnerNameEl.style.color = 'var(--color-strong-warning)';
                 winnerNameEl.title = 'این دانش‌آموز در زمان انتخاب خارج از کلاس بود';
 
             } else {
+                // 3. Deactivate Exit State
                 exitBtn.classList.remove('active');
                 studentRecord.wasOutOfClass = false;
 
-                // Remove the visual cue
+                // Decrement Counters
+                winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
+                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+
+                // Remove visual cues
                 winnerNameEl.style.color = '';
                 winnerNameEl.title = '';
             }
