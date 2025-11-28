@@ -114,7 +114,17 @@ export class Homework {
 export class Session {
     constructor(sessionNumber) {
         this.sessionNumber = sessionNumber;
+
+        // startTime: The "Logical" date of the session. 
+        // This is what appears in the UI and can be edited by the teacher 
+        // (e.g., to record a past cancelled session).
         this.startTime = new Date();
+
+        // createdAt: The "Audit" timestamp. 
+        // This marks exactly when the record was created in the system 
+        // and should generally remain immutable.
+        this.createdAt = new Date();
+
         this.note = '';
         this.isDeleted = false;
         this.endTime = null;

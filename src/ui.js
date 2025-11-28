@@ -4096,6 +4096,57 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                         { confirmText: 'بله', confirmClass: 'btn-warning', isDelete: true }
                     );
                 }
+            },
+
+            // [!code ++] New "Change Date" Item
+            {
+                label: 'تغییر تاریخ',
+                icon: '📅',
+                action: () => {
+                    const dateInput = document.getElementById('date-picker-input');
+
+                    // Format current date to YYYY-MM-DD for the input
+                    // We use local time components to avoid timezone shifts
+                    const year = session.startTime.getFullYear();
+                    const month = String(session.startTime.getMonth() + 1).padStart(2, '0');
+                    const day = String(session.startTime.getDate()).padStart(2, '0');
+                    dateInput.value = `${year}-${month}-${day}`;
+
+                    // Set the callback for when the user clicks "Confirm"
+                    state.setDatePickerCallback((newDateString) => {
+                        if (!newDateString) return;
+
+                        const newDateParts = newDateString.split('-');
+                        const newYear = parseInt(newDateParts[0]);
+                        const newMonth = parseInt(newDateParts[1]) - 1; // Months are 0-indexed
+                        const newDay = parseInt(newDateParts[2]);
+
+                        // create a new Date object based on the input
+                        const updatedDate = new Date(newYear, newMonth, newDay);
+
+                        // MERGE TIME: Keep the original hours/minutes
+                        updatedDate.setHours(session.startTime.getHours());
+                        updatedDate.setMinutes(session.startTime.getMinutes());
+                        updatedDate.setSeconds(session.startTime.getSeconds());
+
+                        // Apply update
+                        const oldDateStr = session.startTime.toLocaleDateString('fa-IR');
+                        session.startTime = updatedDate;
+
+                        const newDateStr = session.startTime.toLocaleDateString('fa-IR');
+
+                        logManager.addLog(state.currentClassroom.info.name,
+                            `تاریخ جلسه ${displaySessionNumber} از ${oldDateStr} به ${newDateStr} تغییر یافت.`,
+                            { type: 'VIEW_SESSIONS' }
+                        );
+
+                        state.saveData();
+                        renderSessions();
+                        showNotification(`✅ تاریخ جلسه به ${newDateStr} تغییر یافت.`);
+                    });
+
+                    openModal('date-picker-modal');
+                }
             }
         ];
 

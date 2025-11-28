@@ -290,6 +290,29 @@ document.addEventListener('DOMContentLoaded', () => {
         state.setSecureConfirmCallback(null);
     });
 
+    // --- Date Picker Modal Listeners ---
+    const datePickerConfirmBtn = document.getElementById('date-picker-confirm-btn');
+    const datePickerCancelBtn = document.getElementById('date-picker-cancel-btn');
+    const datePickerInput = document.getElementById('date-picker-input');
+
+    datePickerConfirmBtn.addEventListener('click', () => {
+        const value = datePickerInput.value;
+        if (value && typeof state.datePickerCallback === 'function') {
+            state.datePickerCallback(value);
+            ui.closeActiveModal();
+        } else {
+            ui.showNotification("⚠️ لطفاً یک تاریخ معتبر انتخاب کنید.");
+        }
+        state.setDatePickerCallback(null);
+    });
+
+    datePickerCancelBtn.addEventListener('click', () => {
+        ui.closeActiveModal();
+        state.setDatePickerCallback(null);
+    });
+    // --- End of Date Picker Modal Listeners ---
+
+
     secureConfirmConfirmBtn.addEventListener('click', () => {
         if (typeof state.secureConfirmCallback === 'function') {
             state.secureConfirmCallback();

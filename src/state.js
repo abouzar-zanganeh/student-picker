@@ -30,6 +30,8 @@ export let saveCategoryCallback = null;
 
 export let manualSelection = null; // To hold a student selected from the stats table
 
+export let datePickerCallback = null;
+
 //for moving students
 export let studentToMove = null;
 export let sourceClassForMove = null;
@@ -341,6 +343,12 @@ export function rehydrateData(plainClassrooms) {
             sessionInstance.note = plainSession.note || '';
 
             sessionInstance.startTime = new Date(plainSession.startTime);
+
+            // If createdAt exists, use it. If not (old data), use startTime.
+            sessionInstance.createdAt = plainSession.createdAt
+                ? new Date(plainSession.createdAt)
+                : new Date(plainSession.startTime);
+
             sessionInstance.endTime = plainSession.endTime ? new Date(plainSession.endTime) : null;
             sessionInstance.isFinished = plainSession.isFinished;
             sessionInstance.isMakeup = plainSession.isMakeup;
@@ -887,3 +895,5 @@ export function setLastBackupTimestamp() {
     userSettings.lastBackupTimestamp = new Date().toISOString();
     saveData();
 }
+
+export function setDatePickerCallback(callback) { datePickerCallback = callback; }
