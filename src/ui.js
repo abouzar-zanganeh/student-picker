@@ -1,4 +1,5 @@
 import * as state from './state.js';
+import { addBackupSnapshot } from './db.js';
 
 import { processRestore } from './state.js';
 
@@ -857,7 +858,7 @@ export function triggerFileDownload(fileObject) {
 }
 
 export async function initiateBackupProcess(classNamesToBackup = []) {
-    // 1. Await the file creation. This is the async part.
+    // 1. Await the file creation.
     const fileToShare = await state.prepareBackupData(classNamesToBackup);
 
     // 1b. Check if file creation succeeded
@@ -866,16 +867,22 @@ export async function initiateBackupProcess(classNamesToBackup = []) {
         return;
     }
 
+    // Silently save a snapshot to the "Garage" (IndexedDB)
+    addBackupSnapshot(fileToShare, {
+        name: fileToShare.name,
+        description: classNamesToBackup.length > 0 ? `Backup of ${classNamesToBackup.length} classes` : 'Full System Backup',
+        version: "2.0-b64"
+    }).catch(err => console.error("Failed to save local snapshot:", err));
+
     // 2. Check for mobile/share capability.
     const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice && navigator.share && navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
 
-        // 3. Show a confirmation modal. The 'onConfirm' callback will contain
-        //    the share logic, running it from a *new* user click.
+        // 3. Show a confirmation modal.
         showCustomConfirm(
             "فایل پشتیبان شما آماده است. آیا مایل به اشتراک‌گذاری آن هستید؟",
             () => {
-                // 4. This code now runs *directly* from the "Yes" click.
+                // 4. Run share logic
                 try {
                     navigator.share({
                         title: fileToShare.name,
@@ -883,7 +890,6 @@ export async function initiateBackupProcess(classNamesToBackup = []) {
                         files: [fileToShare],
                     })
                         .then(() => {
-                            // --- CHANGED: Ask for confirmation here too ---
                             showCustomConfirm(
                                 "آیا فایل پشتیبان با موفقیت ارسال/ذخیره شد؟",
                                 () => {
@@ -2146,7 +2152,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
                 // Add comma separator if it's not the last item
                 if (index < recentScores.length - 1) {
-                    skillScoresSpan.appendChild(document.createTextNode(' , '));
+                    skillScoresSpan.appendChild(document.createTextNode(','));
                 }
             });
         } else {
