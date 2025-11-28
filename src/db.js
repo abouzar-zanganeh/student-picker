@@ -51,13 +51,13 @@ export async function addBackupSnapshot(file, metadata) {
 
         const countRequest = cleanupStore.count();
         countRequest.onsuccess = () => {
-            if (countRequest.result > 3) {
+            if (countRequest.result > 10) {
                 // Fetch all keys (sorted by ID ascending = oldest first)
                 const keysRequest = cleanupStore.getAllKeys();
                 keysRequest.onsuccess = () => {
                     const keys = keysRequest.result;
                     // Delete items until only 3 remain
-                    while (keys.length > 3) {
+                    while (keys.length > 10) {
                         const keyToDelete = keys.shift(); // Remove the first (oldest) key
                         cleanupStore.delete(keyToDelete);
                         console.log(`♻️ Auto-deleted old backup snapshot: ${keyToDelete}`);
