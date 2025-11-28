@@ -157,7 +157,6 @@ export async function prepareBackupData(classNames = []) {
 
     // --- FILENAME LOGIC START ---
     const now = new Date();
-    // Extract Persian date parts
     const parts = new Intl.DateTimeFormat('fa-IR-u-nu-latn', {
         year: 'numeric',
         month: 'numeric',
@@ -170,12 +169,25 @@ export async function prepareBackupData(classNames = []) {
         return acc;
     }, {});
 
-    // Slice the year to get the last 2 digits (e.g., "1404" -> "04")
     const shortYear = parts.year.slice(-2);
+    const timeStamp = `${shortYear}-${parts.month}-${parts.day}_${parts.hour}-${parts.minute}`;
 
-    // Construct filename: SP_04-8-22_22-45.txt
-    // Note: We use '-' for time because ':' is invalid in Windows filenames.
-    const fileName = `SP_${shortYear}-${parts.month}-${parts.day}_${parts.hour}-${parts.minute}.txt`;
+    let fileName;
+
+    if (classNames.length === 0) {
+        // Case A: Full Backup
+        fileName = `SP_Full_${timeStamp}.txt`;
+    } else if (classNames.length === 1) {
+        // Case B: Single Class (Sanitized)
+        // 1. Remove invalid filename chars (< > : " / \ | ? *)
+        // 2. Replace spaces with underscores
+        const rawName = classNames[0];
+        const safeName = rawName.replace(/[<>:"/\\|?*]/g, '').replace(/\s+/g, '_');
+        fileName = `SP_${safeName}_${timeStamp}.txt`;
+    } else {
+        // Case C: Multiple Classes
+        fileName = `SP_Selected-${classNames.length}_${timeStamp}.txt`;
+    }
     // --- FILENAME LOGIC END ---
 
     try {

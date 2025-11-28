@@ -868,10 +868,20 @@ export async function initiateBackupProcess(classNamesToBackup = []) {
         return;
     }
 
+    // Generate Farsi Description
+    let backupDescription = 'پشتیبان کامل سیستم';
+
+    if (classNamesToBackup.length > 0) {
+        // Join names with Persian comma
+        const namesList = classNamesToBackup.join('، ');
+        const label = classNamesToBackup.length === 1 ? 'پشتیبان کلاس:' : 'پشتیبان کلاس‌های:';
+        backupDescription = `${label} ${namesList}`;
+    }
+
     // Silently save a snapshot to the "Garage" (IndexedDB)
     addBackupSnapshot(fileToShare, {
         name: fileToShare.name,
-        description: classNamesToBackup.length > 0 ? `Backup of ${classNamesToBackup.length} classes` : 'فایل پشتیبان از کل برنامه',
+        description: backupDescription,
         version: "2.0-b64"
     }).catch(err => console.error("Failed to save local snapshot:", err));
 
