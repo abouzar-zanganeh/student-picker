@@ -286,20 +286,19 @@ export function showRestoreConfirmModal(plainData) {
     const modal = document.getElementById('restore-confirm-modal');
     const messageEl = document.getElementById('restore-modal-message');
     const appendCheckbox = document.getElementById('restore-append-checkbox');
+    const appendLabel = document.querySelector('label[for="restore-append-checkbox"]'); // Get label to update text
     const cancelBtn = document.getElementById('restore-confirm-cancel-btn');
     const confirmBtn = document.getElementById('restore-confirm-confirm-btn');
-
     const warningEl = document.getElementById('restore-modal-warning');
 
     // Reset warning visibility
     warningEl.style.display = 'none';
 
     // Check if the backup is older than the last restore
-    const backupTimestamp = plainData.metadata.createdAt;
+    const backupTimestamp = plainData.metadata?.createdAt || 0; // Safe access
     if (state.userSettings.lastRestoreTimestamp && backupTimestamp < state.userSettings.lastRestoreTimestamp) {
         const backupDate = new Date(backupTimestamp).toLocaleDateString('fa-IR');
         const restoreDate = new Date(state.userSettings.lastRestoreTimestamp).toLocaleDateString('fa-IR');
-
         warningEl.textContent = `⚠️ هشدار: این فایل پشتیبان (${backupDate}) قدیمی‌تر از آخرین بازیابی شما (${restoreDate}) است.`;
         warningEl.style.display = 'block';
     }
@@ -310,8 +309,7 @@ export function showRestoreConfirmModal(plainData) {
     const classCount = classNames.length;
     const classWord = classCount === 1 ? 'کلاس' : 'کلاس';
 
-    // Build a simple HTML list of names
-    // We use a max-height style to ensure the modal doesn't get too tall if there are 20 classes
+    // Build list of classes
     const classesListHtml = classNames.map(name =>
         `<li style="margin-bottom: 4px;">🔹 ${name}</li>`
     ).join('');
@@ -338,33 +336,39 @@ export function showRestoreConfirmModal(plainData) {
         </div>
     `;
 
-    appendCheckbox.checked = true; // Default to append mode
-
-
-    appendCheckbox.checked = true; // Default to append mode
+    // Update Checkbox Logic
+    appendCheckbox.checked = false; // Default: Smart Sync (Unchecked)
+    if (appendLabel) {
+        appendLabel.textContent = "جایگزینی کامل (حذف داده‌های فعلی)";
+    }
 
     // --- Define button actions ---
     const confirmHandler = () => {
-        const isAppendMode = appendCheckbox.checked;
-        state.processRestore(plainData, isAppendMode); // We will create this function next
+        const isCleanRestore = appendCheckbox.checked;
+        state.processRestore(plainData, isCleanRestore); // Pass the new flag
 
         // Clean up and provide feedback
-        modal.removeEventListener('click', confirmHandler); // Avoid memory leaks
+        confirmBtn.onclick = null; // Clean listener
+        cancelBtn.onclick = null;
+        modal.removeEventListener('click', confirmHandler);
+
         closeActiveModal();
         renderClassList();
         showPage('class-management-page');
-        showNotification("✅ اطلاعات با موفقیت بازیابی شد.");
+
+        const modeText = isCleanRestore ? "پاک‌سازی و بازیابی" : "همگام‌سازی هوشمند";
+        showNotification(`✅ اطلاعات با موفقیت بازیابی شد (${modeText}).`);
     };
 
     const cancelHandler = () => {
+        confirmBtn.onclick = null;
+        cancelBtn.onclick = null;
         closeActiveModal();
     };
 
-    // --- Attach event listeners (only once) ---
     confirmBtn.onclick = confirmHandler;
     cancelBtn.onclick = cancelHandler;
 
-    // --- Show the modal ---
     openModal('restore-confirm-modal');
 }
 

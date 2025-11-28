@@ -392,46 +392,73 @@ export function rehydrateData(plainClassrooms) {
     }
 }
 
-export function processRestore(plainData, isAppendMode) {
-    if (isAppendMode) {
-        // --- APPEND MODE ---
-        const incomingClassrooms = plainData.data.classrooms;
-
-        for (let className in incomingClassrooms) {
-            let newName = className;
-            const classroomData = incomingClassrooms[className];
-
-            // Handle potential name conflicts by renaming the incoming class
-            while (classrooms[newName]) {
-                newName = `${newName} (Restored)`;
-            }
-
-            // If renamed, update the name inside the class object itself
-            if (newName !== className) {
-                classroomData.info.name = newName;
-            }
-
-            classrooms[newName] = classroomData; // Add the new class
-        }
-
-        // Merge and de-duplicate trash bins
-        if (plainData.data.trashBin) {
-            const combinedTrash = [...trashBin, ...plainData.data.trashBin];
-            // Use a Map to easily get unique entries by ID
-            const uniqueTrash = [...new Map(combinedTrash.map(item => [item.id, item])).values()];
-            setTrashBin(uniqueTrash);
-        }
-
-        // Re-run rehydration to convert all plain objects (including new ones) to class instances
-        rehydrateData(classrooms);
-
-    } else {
-        // --- OVERWRITE MODE ---
+export function processRestore(plainData, isCleanRestore) {
+    if (isCleanRestore) {
+        // --- MODE B: Clean Restore ---
+        // 1. Wipe everything and replace with backup data
         rehydrateData(plainData.data.classrooms);
         setTrashBin(plainData.data.trashBin || []);
+    } else {
+        // --- MODE A: Smart Sync (ID-Based) ---
+        const backupClassrooms = plainData.data.classrooms;
+        const backupTrash = plainData.data.trashBin || [];
+
+        // 1. Map current classes by their Unique ID (scheduleCode) for fast lookup
+        // Map Format: { "code_123": "Math 101", "code_456": "Science" }
+        const currentIdMap = new Map();
+        for (const name in classrooms) {
+            const cls = classrooms[name];
+            if (cls.info && cls.info.scheduleCode) {
+                currentIdMap.set(cls.info.scheduleCode, name);
+            }
+        }
+
+        // 2. Iterate through incoming backup classes
+        for (const backupName in backupClassrooms) {
+            const backupClassData = backupClassrooms[backupName];
+            const backupId = backupClassData.info.scheduleCode;
+
+            // Check if we already have this class ID locally
+            if (currentIdMap.has(backupId)) {
+                // MATCH FOUND: Replace the existing class
+                const existingClassName = currentIdMap.get(backupId);
+
+                // If the name changed in the backup, we must delete the old key
+                if (existingClassName !== backupClassData.info.name) {
+                    delete classrooms[existingClassName];
+                }
+
+                // Overwrite with new data (using the name from the backup)
+                classrooms[backupClassData.info.name] = backupClassData;
+            } else {
+                // NO MATCH: It's a new class, add it
+                // Handle potential name collision if ID is new but Name exists
+                let finalName = backupClassData.info.name;
+                while (classrooms[finalName]) {
+                    finalName = `${finalName} (Imported)`;
+                }
+                // Update name inside info if we renamed it
+                if (finalName !== backupClassData.info.name) {
+                    backupClassData.info.name = finalName;
+                }
+
+                classrooms[finalName] = backupClassData;
+            }
+        }
+
+        // 3. Smart Merge Trash Bin (Add missing items)
+        const currentTrashIds = new Set(trashBin.map(t => t.id));
+        backupTrash.forEach(item => {
+            if (!currentTrashIds.has(item.id)) {
+                trashBin.push(item);
+            }
+        });
+
+        // Re-run rehydration to convert all plain objects to class instances
+        rehydrateData(classrooms);
     }
 
-    // --- Final Steps for both modes ---
+    // --- Final Steps ---
     setUserSettings({ lastRestoreTimestamp: new Date().toISOString() });
     saveData();
 }
