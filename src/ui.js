@@ -753,8 +753,7 @@ function updateStudentProfileNoteForHomework(student, session, content) {
     const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
     const displayNumber = sessionDisplayNumberMap.get(session.sessionNumber);
     const noteSource = { type: 'fromAttendance', sessionNumber: session.sessionNumber };
-    const notePrefix = `یادداشت مربوط به جلسه ${displayNumber}: `;
-
+    const notePrefix = `یادداشت جلسه ${displayNumber}:\n`;
     const existingNote = student.profile.notes.find(n =>
         !n.isDeleted &&
         n.source &&
@@ -1465,7 +1464,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
             const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
             const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
             const noteSource = { type: 'fromAttendance', sessionNumber: state.selectedSession.sessionNumber };
-            const notePrefix = `یادداشت مربوط به جلسه ${displayNumber}: `;
+            const notePrefix = `یادداشت جلسه ${displayNumber}:\n`;
 
             const existingNote = student.profile.notes.find(n => !n.isDeleted && n.source && n.source.type === 'fromAttendance' && n.source.sessionNumber === noteSource.sessionNumber);
 
