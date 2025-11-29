@@ -313,6 +313,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         state.setDatePickerCallback(null);
     });
+
+    if (datePickerCancelBtn) {
+        datePickerCancelBtn.addEventListener('click', () => {
+            ui.closeActiveModal();
+            state.setDatePickerCallback(null); // Clear the callback so it doesn't fire later
+        });
+    }
+
+
     // --- End of Date Picker Modal Listeners ---
 
 
