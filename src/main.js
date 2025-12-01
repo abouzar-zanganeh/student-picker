@@ -970,15 +970,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     classSaveNoteBtn.addEventListener('click', () => {
         const content = newNoteContent.value.trim();
-        const callback = state.saveNoteCallback; // Get the callback
+        const callback = state.saveNoteCallback;
 
-        // Pass the callback to closeActiveModal.
-        // This ensures the modal closes *before* the callback runs.
-        ui.closeActiveModal(() => {
-            if (typeof callback === 'function') {
-                callback(content); // Execute the saved logic
+        if (typeof callback === 'function') {
+            // execute the callback first
+            const result = callback(content);
+
+            // Protocol:
+            // return false -> Validation Failed (Keep Open)
+            // return Function -> Success + Navigation (Close then Run)
+            // return undefined/other -> Success (Close)
+
+            if (result === false) {
+                // Do not close the modal
+                return;
             }
-        });
+
+            ui.closeActiveModal(() => {
+                if (typeof result === 'function') {
+                    result(); // Run the post-close navigation (like opening profile)
+                }
+            });
+        } else {
+            ui.closeActiveModal();
+        }
     });
 
     const moveStudentConfirmBtn = document.getElementById('move-student-confirm-btn');

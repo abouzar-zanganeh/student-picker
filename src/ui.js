@@ -510,18 +510,32 @@ export function showRenameStudentModal(student, classroom) {
     // 1. Configure the modal for renaming
     const modalTitle = document.getElementById('add-note-modal-title');
     modalTitle.textContent = 'تغییر نام دانش‌آموز';
-    newNoteContent.value = oldName;
+
+    // Pre-fill Logic: Show dot format if parts exist, otherwise show normal name
+    const initialValue = (student.identity.firstName && student.identity.lastName)
+        ? `${student.identity.firstName} . ${student.identity.lastName}`
+        : oldName;
+
+    newNoteContent.value = initialValue;
+
     newNoteContent.rows = 1;
     newNoteContent.dispatchEvent(new Event('input', { bubbles: true })); // Trigger auto-direction
 
     // 2. Define what happens when the "Save" button is clicked
     state.setSaveNoteCallback((newName) => {
-        // Parse the new input to get clean name + parts
         const parsedIdentity = parseStudentName(newName);
         const cleanNewName = parsedIdentity.name;
 
-        if (cleanNewName && cleanNewName !== oldName) {
-            // Check for duplicates using the CLEAN name
+        // Validation Guard: Dotted student missing dot
+        if (student.identity.firstName && student.identity.lastName && !parsedIdentity.firstName) {
+            showNotification('⚠️ این دانش‌آموز دارای نام و نام‌خانوادگی تفکیک شده است. لطفاً حتماً از نقطه (.) بین نام و نام‌خانوادگی استفاده کنید.');
+            return false; // Keep modal open
+        }
+
+        // Logic Check: Did name change OR did structure change (added a dot)?
+        const structureChanged = !student.identity.firstName && parsedIdentity.firstName;
+
+        if (cleanNewName && (cleanNewName !== oldName || structureChanged)) {
             const isDuplicate = getActiveItems(classroom.students).some(
                 s => s.identity.studentId !== student.identity.studentId &&
                     s.identity.name.toLowerCase() === cleanNewName.toLowerCase()
@@ -529,8 +543,8 @@ export function showRenameStudentModal(student, classroom) {
 
             if (isDuplicate) {
                 showNotification('دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.');
+                return false; // Keep modal open
             } else {
-                // Update all 3 identity fields
                 student.identity.name = cleanNewName;
                 student.identity.firstName = parsedIdentity.firstName;
                 student.identity.lastName = parsedIdentity.lastName;
@@ -539,7 +553,6 @@ export function showRenameStudentModal(student, classroom) {
 
                 state.saveData();
 
-                // Re-render relevant UI parts to show the new name
                 renderSettingsStudentList();
                 renderStudentStatsList();
                 renderAttendancePage();
@@ -548,12 +561,15 @@ export function showRenameStudentModal(student, classroom) {
                     showStudentProfile(student);
                 }
 
-                showNotification(`✅نام دانش‌آموز به «${cleanNewName}» تغییر یافت.`);
+                showNotification(`✅ نام دانش‌آموز به «${cleanNewName}» تغییر یافت.`);
             }
+        } else if (!cleanNewName) {
+            showNotification('⚠️ نام نمی‌تواند خالی باشد.');
+            return false; // Keep modal open
         }
 
-        // 3. Reset the modal to its default state for adding notes
-        const modalTitle = document.getElementById('add-note-modal-title'); // Ensure reference exists
+        // Reset modal title for next use
+        const modalTitle = document.getElementById('add-note-modal-title');
         modalTitle.textContent = 'ثبت یادداشت جدید';
         newNoteContent.rows = 4;
     });
@@ -2697,18 +2713,20 @@ export function showStudentProfile(student) {
         newNoteContent.value = ''; // Clear modal for a new note
         newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
+        // Inside addNoteBtn.addEventListener...
         state.setSaveNoteCallback((content) => {
             if (content) {
-                studentForNote.addNote(content); // <-- USE CAPTURED STUDENT
+                studentForNote.addNote(content);
                 state.saveData();
 
                 logManager.addLog(state.currentClassroom.info.name, `یادداشت جدیدی برای دانش‌آموز «${studentForNote.identity.name}» ثبت شد.`, { type: 'VIEW_STUDENT_PROFILE', studentId: studentForNote.identity.studentId });
 
-                displayWinner(); // Refresh background panel
+                displayWinner();
                 showNotification('✅ یادداشت با موفقیت ثبت شد.');
+
+                // Return a function to be run AFTER the note modal closes
+                return () => showStudentProfile(studentForNote);
             }
-            // After note modal closes (from main.js), re-open profile
-            showStudentProfile(studentForNote); // <-- RE-OPEN PROFILE
         });
 
         // Close the current profile modal, and THEN open the note modal.
