@@ -6,6 +6,10 @@ export class Student {
     constructor(identityInfo) {
         this.identity = {
             name: identityInfo.name,
+
+            firstName: identityInfo.firstName || null,
+            lastName: identityInfo.lastName || null,
+
             studentId: identityInfo.studentId || `id_${new Date().getTime()}_${Math.random()}`,
             branchName: identityInfo.branchName || null,
             ageGroup: identityInfo.ageGroup || 'adult',
