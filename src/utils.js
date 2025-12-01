@@ -60,3 +60,29 @@ export function normalizeKeyboard(str) {
     return result;
 }
 
+export function parseStudentName(inputString) {
+    if (!inputString || typeof inputString !== 'string') {
+        return { name: '', firstName: null, lastName: null };
+    }
+
+    const dotIndex = inputString.indexOf('.');
+
+    // Check if dot exists and ensures there is text before AND after it
+    if (dotIndex > 0 && dotIndex < inputString.length - 1) {
+        const firstName = inputString.substring(0, dotIndex).trim();
+        const lastName = inputString.substring(dotIndex + 1).trim();
+
+        return {
+            name: `${firstName} ${lastName}`,
+            firstName: firstName,
+            lastName: lastName
+        };
+    }
+
+    // Fallback: No valid dot signal found
+    return {
+        name: inputString.trim(),
+        firstName: null,
+        lastName: null
+    };
+}

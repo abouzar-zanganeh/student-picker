@@ -3,7 +3,7 @@ import { resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent, getS
 import * as ui from './ui.js';
 import { switchDashboardTab, renderRestorePointsPage } from './ui.js';
 import { Classroom, Student, Category } from './models.js';
-import { normalizeText, normalizeKeyboard } from './utils.js';
+import { normalizeText, normalizeKeyboard, parseStudentName } from './utils.js';
 import * as logManager from './logManager.js';
 import JSZip from 'jszip';
 
