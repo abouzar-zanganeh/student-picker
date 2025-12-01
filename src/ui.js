@@ -7,7 +7,7 @@ import {
     getActiveItems, getSessionDisplayMap, permanentlyDeleteStudent,
     permanentlyDeleteSession, permanentlyDeleteCategory, permanentlyDeleteScore, permanentlyDeleteNote
 } from './state.js';
-import { detectTextDirection, renderMultiLineText } from './utils.js';
+import { detectTextDirection, renderMultiLineText, parseStudentName } from './utils.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
 import { Category } from './models.js';
@@ -516,21 +516,26 @@ export function showRenameStudentModal(student, classroom) {
 
     // 2. Define what happens when the "Save" button is clicked
     state.setSaveNoteCallback((newName) => {
-        const trimmedNewName = newName.trim();
+        // Parse the new input to get clean name + parts
+        const parsedIdentity = parseStudentName(newName);
+        const cleanNewName = parsedIdentity.name;
 
-        if (trimmedNewName && trimmedNewName !== oldName) {
-            // Check for duplicates, excluding the student being renamed
+        if (cleanNewName && cleanNewName !== oldName) {
+            // Check for duplicates using the CLEAN name
             const isDuplicate = getActiveItems(classroom.students).some(
                 s => s.identity.studentId !== student.identity.studentId &&
-                    s.identity.name.toLowerCase() === trimmedNewName.toLowerCase()
+                    s.identity.name.toLowerCase() === cleanNewName.toLowerCase()
             );
 
             if (isDuplicate) {
                 showNotification('دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.');
             } else {
-                student.identity.name = trimmedNewName;
+                // Update all 3 identity fields
+                student.identity.name = cleanNewName;
+                student.identity.firstName = parsedIdentity.firstName;
+                student.identity.lastName = parsedIdentity.lastName;
 
-                logManager.addLog(classroom.info.name, `نام دانش‌آموز «${oldName}» به «${trimmedNewName}» تغییر یافت.`, { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
+                logManager.addLog(classroom.info.name, `نام دانش‌آموز «${oldName}» به «${cleanNewName}» تغییر یافت.`, { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
 
                 state.saveData();
 
@@ -543,11 +548,12 @@ export function showRenameStudentModal(student, classroom) {
                     showStudentProfile(student);
                 }
 
-                showNotification(`✅نام دانش‌آموز به «${trimmedNewName}» تغییر یافت.`);
+                showNotification(`✅نام دانش‌آموز به «${cleanNewName}» تغییر یافت.`);
             }
         }
 
         // 3. Reset the modal to its default state for adding notes
+        const modalTitle = document.getElementById('add-note-modal-title'); // Ensure reference exists
         modalTitle.textContent = 'ثبت یادداشت جدید';
         newNoteContent.rows = 4;
     });

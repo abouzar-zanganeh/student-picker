@@ -594,7 +594,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Now, we can safely add the new student.
-            const newStudent = new Student({ name: name });
+            // Use the helper to parse the name (looks for dot signal)
+            const parsedIdentity = parseStudentName(name);
+            const newStudent = new Student(parsedIdentity);
+
             state.currentClassroom.addStudent(newStudent);
 
             if (state.currentClassroom.sessions.length > 0) {
@@ -677,8 +680,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        const newStudent = new Student({ name: studentName });
-        state.currentClassroom.addStudent(newStudent);
+        // Use the helper to parse the name (looks for dot signal)
+        const parsedIdentity = parseStudentName(studentName);
+        const newStudent = new Student(parsedIdentity); state.currentClassroom.addStudent(newStudent);
 
         if (state.currentClassroom.sessions.length > 0) {
 
