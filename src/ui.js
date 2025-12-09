@@ -101,6 +101,12 @@ const resultDiv = document.getElementById('selected-student-result');
 export const contextMenu = document.getElementById('custom-context-menu');
 export const breadcrumbContainer = document.getElementById('breadcrumb-container');
 
+// ... modal for reporting on the context menu of main page ...
+export const reportConfigModal = document.getElementById('report-config-modal');
+export const reportColumnsContainer = document.getElementById('report-columns-container');
+export const reportPrintBtn = document.getElementById('report-print-btn');
+export const reportCancelBtn = document.getElementById('report-cancel-btn');
+
 let winnerRemovalLongPressTimer = null;
 
 let contextMenuTarget = null; // Tracks the LI element that was right-clicked
@@ -3472,6 +3478,14 @@ function createClassListItem(classroom) {
         const menuItems = [
 
             {
+                label: 'چاپ گزارش کلاس',
+                icon: '🖨️',
+                action: () => {
+                    showReportConfigModal(classroom);
+                }
+            },
+
+            {
                 label: classListUl.classList.contains('selection-mode-active') ? 'لغو انتخاب' : 'انتخاب چند کلاس',
                 icon: '✔️',
                 action: () => {
@@ -4851,4 +4865,186 @@ export async function renderRestorePointsPage() {
         console.error("Failed to load snapshots:", err);
         list.innerHTML = '<li style="text-align:center; color:red;">خطا در بارگذاری اطلاعات.</li>';
     }
+}
+
+// --- Printable Report Logic ---
+
+function generatePrintableReport(classroom, selectedColumns) {
+    // 1. Prepare Data
+    const students = getActiveItems(classroom.students);
+    const dateStr = new Date().toLocaleDateString('fa-IR', {
+        year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+    });
+
+    // 2. Build Table Headers
+    let theadHtml = '<tr>';
+    selectedColumns.forEach(col => {
+        theadHtml += `<th>${col.label}</th>`;
+    });
+    theadHtml += '</tr>';
+
+    // 3. Build Table Rows
+    let tbodyHtml = '';
+    students.forEach((student, index) => {
+        tbodyHtml += '<tr>';
+        selectedColumns.forEach(col => {
+            let cellValue = '-';
+
+            // Logic to fetch value based on column ID
+            if (col.id === 'row_num') cellValue = index + 1;
+            else if (col.id === 'name') cellValue = student.identity.name;
+            else if (col.id === 'total_selections') cellValue = student.statusCounters.totalSelections;
+            else if (col.id === 'missed_chances') cellValue = student.statusCounters.missedChances;
+            else if (col.id === 'issues') cellValue = Object.values(student.categoryIssues || {}).reduce((a, b) => a + b, 0);
+            else if (col.id === 'absences') {
+                // Calculate absences dynamically
+                cellValue = classroom.sessions.reduce((acc, sess) => {
+                    if (sess.isDeleted || sess.isCancelled) return acc;
+                    const rec = sess.studentRecords[student.identity.studentId];
+                    return acc + (rec && rec.attendance === 'absent' ? 1 : 0);
+                }, 0);
+            }
+            else if (col.id === 'avg_score') cellValue = student.getOverallAverageScore() || '-';
+            else if (col.id === 'final_score') cellValue = classroom.calculateFinalStudentScore(student) || '-';
+            else if (col.type === 'category') {
+                // It's a specific category score/count
+                // For this report, let's show the 'Score' if graded, or 'Selection Count' if not? 
+                // Let's stick to Selection Count for participation consistency, 
+                // OR Average Score for that specific skill if available.
+                // Let's show: "Score (Count)" or just Score. 
+                // Simple approach: Show selection count for now as it's the core mechanic.
+                cellValue = student.categoryCounts[col.id] || 0;
+            }
+
+            tbodyHtml += `<td>${cellValue}</td>`;
+        });
+        tbodyHtml += '</tr>';
+    });
+
+    // 4. Create Print Window
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        showNotification('⚠️ مرورگر شما پنجره جدید را مسدود کرد. لطفاً اجازه دهید.', 'error');
+        return;
+    }
+
+    const htmlContent = `
+        <!DOCTYPE html>
+        <html lang="fa" dir="rtl">
+        <head>
+            <title>گزارش کلاس ${classroom.info.name}</title>
+            <style>
+                @media print {
+                    @page { size: A4; margin: 10mm; }
+                    body { font-family: Tahoma, 'Vazirmatn', sans-serif; color: #000; }
+                }
+                body { font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; }
+                h1 { text-align: center; margin-bottom: 5px; font-size: 24px; }
+                .meta { text-align: center; margin-bottom: 30px; font-size: 14px; color: #444; }
+                table { width: 100%; border-collapse: collapse; font-size: 12px; }
+                th, td { border: 1px solid #333; padding: 6px 8px; text-align: center; }
+                th { background-color: #eee; font-weight: bold; }
+                tr:nth-child(even) { background-color: #f9f9f9; }
+                .signature { margin-top: 50px; display: flex; justify-content: space-between; padding: 0 50px; }
+            </style>
+        </head>
+        <body>
+            <h1>گزارش وضعیت کلاس ${classroom.info.name}</h1>
+            <div class="meta">
+                تاریخ گزارش: ${dateStr} | تعداد دانش‌آموزان: ${students.length}
+            </div>
+            <table>
+                <thead>${theadHtml}</thead>
+                <tbody>${tbodyHtml}</tbody>
+            </table>
+            <div class="signature">
+                <div>امضای معلم</div>
+                <div>مهر و امضای مدرسه</div>
+            </div>
+            <script>
+                window.onload = function() { window.print(); }
+            <\/script>
+        </body>
+        </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+}
+
+function showReportConfigModal(classroom) {
+    const container = reportColumnsContainer;
+    container.innerHTML = ''; // Clear previous
+
+    // 1. Define Available Columns
+    const standardColumns = [
+        { id: 'row_num', label: 'ردیف', checked: true },
+        { id: 'name', label: 'نام دانش‌آموز', checked: true },
+        { id: 'total_selections', label: 'کل انتخاب‌ها', checked: true },
+        { id: 'absences', label: 'تعداد غیبت', checked: true },
+        { id: 'missed_chances', label: 'فرصت سوخته', checked: false },
+        { id: 'issues', label: 'موارد انضباطی', checked: false },
+        { id: 'avg_score', label: 'میانگین نمرات', checked: true },
+        { id: 'final_score', label: 'نمره نهایی (کانون)', checked: true },
+    ];
+
+    // Add Dynamic Categories
+    classroom.categories.forEach(cat => {
+        if (!cat.isDeleted) {
+            standardColumns.push({
+                id: cat.name, // Use name as ID for categories
+                label: `تعداد ${cat.name}`,
+                type: 'category',
+                checked: false
+            });
+        }
+    });
+
+    // 2. Render Checkboxes
+    standardColumns.forEach(col => {
+        const wrapper = document.createElement('label');
+        wrapper.className = 'report-column-item';
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = col.checked;
+        checkbox.dataset.colId = col.id;
+        checkbox.dataset.colLabel = col.label;
+        if (col.type) checkbox.dataset.colType = col.type;
+
+        const text = document.createElement('span');
+        text.textContent = col.label;
+
+        wrapper.appendChild(checkbox);
+        wrapper.appendChild(text);
+        container.appendChild(wrapper);
+    });
+
+    // 3. Button Handlers (Unique to this opening)
+    reportPrintBtn.onclick = () => {
+        const selected = [];
+        const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
+        checkboxes.forEach(cb => {
+            selected.push({
+                id: cb.dataset.colId,
+                label: cb.dataset.colLabel,
+                type: cb.dataset.colType
+            });
+        });
+
+        if (selected.length === 0) {
+            showNotification('⚠️ لطفاً حداقل یک ستون را انتخاب کنید.');
+            return;
+        }
+
+        closeActiveModal();
+        generatePrintableReport(classroom, selected);
+    };
+
+    reportCancelBtn.onclick = () => {
+        closeActiveModal();
+    };
+
+    // 4. Open Modal
+    openModal('report-config-modal');
 }
