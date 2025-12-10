@@ -559,6 +559,7 @@ export function showRenameStudentModal(student, classroom) {
 
                 state.saveData();
 
+                // 3. Re-render UI
                 renderSettingsStudentList();
                 renderStudentStatsList();
                 renderAttendancePage();
@@ -566,6 +567,21 @@ export function showRenameStudentModal(student, classroom) {
                 if (state.selectedStudentForProfile && state.selectedStudentForProfile.identity.studentId === student.identity.studentId) {
                     showStudentProfile(student);
                 }
+
+                // We find the new row by the ID we added in Step 2
+                const updatedRow = document.querySelector(`#settings-student-list li[data-student-id="${student.identity.studentId}"]`);
+                if (updatedRow) {
+                    updatedRow.classList.add('recently-updated');
+
+                    // Remove the class after 10 seconds
+                    setTimeout(() => {
+                        if (updatedRow) updatedRow.classList.remove('recently-updated');
+                    }, 10000);
+
+                    // Optional: Scroll the row into view if it jumped out of sight
+                    updatedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                // ----------------------------------
 
                 showNotification(`✅ نام دانش‌آموز به «${cleanNewName}» تغییر یافت.`);
             }
@@ -591,9 +607,6 @@ export function openModal(modalId) {
     if (modal) {
         // Prevents opening a new modal if one is already active
         if (state.activeModal) return;
-
-        document.body.classList.add('modal-active');
-
         modal.classList.add('modal-visible');
         state.setActiveModal(modalId);
         // Adds a dummy state to the history to "trap" the back button
@@ -627,8 +640,6 @@ export function closeActiveModal(onClosed, isHistoryPop = false) {
         setTimeout(() => {
             modal.classList.remove('modal-visible');
             modal.classList.remove('modal-closing');
-
-            document.body.classList.remove('modal-active');
 
             if (activeModalId === 'custom-confirm-modal') {
                 state.setConfirmCallback(null);
@@ -3687,6 +3698,9 @@ export function renderSettingsStudentList() {
 
     getActiveItems(state.currentClassroom.students).forEach(student => {
         const li = document.createElement('li');
+
+        li.dataset.studentId = student.identity.studentId;
+
         const nameSpan = document.createElement('span');
         nameSpan.textContent = student.identity.name;
         nameSpan.style.flexGrow = '1';

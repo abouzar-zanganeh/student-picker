@@ -2808,10 +2808,6 @@ textarea,
     vertical-align: middle;
 }
 
-/* --- Utility for Modal Scroll Lock --- */
-body.modal-active {
-    overflow: hidden;
-}
 
 /* --- Styles for Classrooms Selection Mode when the checkboxes appear next to class names --- */
 .mass-selection-checkbox {
@@ -3212,3 +3208,11 @@ body.modal-active {
 }
 
 /* end of fix */
+
+/* Highlight for recently renamed student in settings */
+.recently-updated {
+    background-color: #e9ecef !important;
+    /* Force override to match hover style */
+    transition: background-color 0.5s ease;
+    /* Smooth fade in/out */
+}
