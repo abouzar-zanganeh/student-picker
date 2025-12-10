@@ -20,6 +20,8 @@
     /* Chrome 36+, Opera 23+, Firefox 39+, Safari 12+, iOS 10+ */
 }
 
+
+
 :root {
     --font-family-main: 'Vazirmatn', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --color-primary: #007bff;
@@ -3197,3 +3199,16 @@ body.modal-active {
 }
 
 /* end of report modal styles */
+
+/* Fix for Report Modal Overflow */
+#report-config-modal .modal-content {
+    max-height: 85vh;
+    /* Limit height to 85% of the viewport */
+    overflow-y: auto;
+    /* Enable vertical scrolling if content exceeds height */
+    display: flex;
+    /* Use flexbox to handle layout gracefully */
+    flex-direction: column;
+}
+
+/* end of fix */
