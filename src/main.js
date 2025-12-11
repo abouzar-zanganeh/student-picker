@@ -1877,7 +1877,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Screen Saver Logic (v3) ---
     const screenSaverOverlay = document.getElementById('screen-saver-overlay');
-    const screenSaverToggle = document.getElementById('screen-saver-toggle');
+
     let inactivityTimer;
     const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 2 minutes
 
@@ -1929,45 +1929,72 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Initialize based on saved settings ---
-    screenSaverToggle.checked = state.userSettings.isScreenSaverEnabled;
+    // --- App Settings Logic ---
+    const appSettingsModal = document.getElementById('app-settings-modal');
+    const appSettingsBtn = document.getElementById('app-settings-nav-btn');
+    const closeSettingsBtn = document.getElementById('close-settings-btn');
+
+    // Toggle Elements
+    const soundToggle = document.getElementById('setting-sound-toggle');
+    const vibrationToggle = document.getElementById('setting-vibration-toggle');
+    const screensaverToggle = document.getElementById('setting-screensaver-toggle');
+
+    // 1. Open Settings Modal
+    if (appSettingsBtn) {
+        appSettingsBtn.addEventListener('click', () => {
+            closeSideNav();
+
+            // Sync UI with current state
+            soundToggle.checked = state.userSettings.isSoundEnabled;
+            vibrationToggle.checked = state.userSettings.isVibrationEnabled;
+            screensaverToggle.checked = state.userSettings.isScreenSaverEnabled;
+
+            ui.openModal('app-settings-modal');
+        });
+    }
+
+    // 2. Close Settings Modal
+    if (closeSettingsBtn) {
+        closeSettingsBtn.addEventListener('click', () => {
+            ui.closeActiveModal();
+        });
+    }
+
+    // 3. Handle Sound Toggle
+    soundToggle.addEventListener('change', (e) => {
+        state.setUserSettings({ isSoundEnabled: e.target.checked });
+        // Optional: Play a test sound so user knows it's on
+        if (e.target.checked) {
+            playSuccessSound();
+        }
+    });
+
+    // 4. Handle Vibration Toggle
+    vibrationToggle.addEventListener('change', (e) => {
+        state.setUserSettings({ isVibrationEnabled: e.target.checked });
+        // Optional: Trigger a test vibration
+        if (e.target.checked && navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+    });
+
+    // 5. Handle Screen Saver Toggle (Moved from Side Nav)
+    // Initialize state on load
     if (state.userSettings.isScreenSaverEnabled) {
         initializeScreenSaver();
     }
 
-    screenSaverToggle.addEventListener('change', (e) => {
+    screensaverToggle.addEventListener('change', (e) => {
         if (e.target.checked) {
-            // --- ENABLING ---
+            // Enable
             state.setUserSettings({ isScreenSaverEnabled: true });
             initializeScreenSaver();
         } else {
-            closeSideNav();
-            // --- DISABLING ---
-            e.preventDefault(); // Stop the checkbox from unchecking immediately
-            ui.showCustomConfirm(
-                "نکته:\nمحافظ صفحه در تلفن های همراه جدید کمک می کند که دستگاه باطری کمتری مصرف کند و به دلیل ثابت ماندن صفحه نمایش در گوشی های قدیمی تر، صفحه نمایش دچار ماندگی رد پیکسل نگردد. آیا مطمئن هستید که می خواهید این ویژگی را غیر فعال کنید؟",
-                () => { // onConfirm
-                    e.target.checked = false; // Uncheck it on confirm
-                    state.setUserSettings({ isScreenSaverEnabled: false });
-                    deinitializeScreenSaver();
-                    ui.showNotification("توصیه می شود زمان خاموش شدن صفحه نمایش گوشی خود را به حداقل دو دقیقه تغییر دهید تا در استفاده های طولانی مدت صفحه نمایش گوشی اصطحلاک کمتری را تجربه کند", 7000);
-                },
-                {
-                    confirmText: 'بله، غیرفعال کن',
-                    cancelText: 'لغو',
-                    onCancel: () => {
-                        e.target.checked = true;
-                    }
-                }
-            );
+            // Disable
+            state.setUserSettings({ isScreenSaverEnabled: false });
+            deinitializeScreenSaver();
         }
     });
-
-
-
-
-    // End of Screen Saver...
-
-
     // Temporary for debugging, must be commented out as soon as debugging ends
     // window.state = state;
     // window.ui = ui;

@@ -144,7 +144,9 @@ export function setupLongPress(element, callback) {
     const start = (e) => {
         // Prevent default only if necessary? No, keep it simple for now.
         timer = setTimeout(() => {
-            if (navigator.vibrate) navigator.vibrate(50); // Haptic feedback
+            if (state.userSettings.isVibrationEnabled && navigator.vibrate) {
+                navigator.vibrate(50);
+            }
             callback(e);
         }, longPressDuration);
     };

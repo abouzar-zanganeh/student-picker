@@ -49,6 +49,8 @@ export let selectedStudentsForMassComment = [];
 export let userSettings = {
     // This object stores the state values for the app settings which can be customized by the user
     isScreenSaverEnabled: true,
+    isSoundEnabled: true,
+    isVibrationEnabled: true,
     lastRestoreTimestamp: null,
     lastBackupTimestamp: null,
 };
@@ -151,7 +153,8 @@ export async function prepareBackupData(classNames = []) {
         },
         data: {
             classrooms: dataToBackup,
-            trashBin // We always include the full trash bin.
+            trashBin,
+            userSettings
         }
     };
 
@@ -464,6 +467,11 @@ export function processRestore(plainData, isCleanRestore) {
 
         // Re-run rehydration to convert all plain objects to class instances
         rehydrateData(classrooms);
+    }
+
+    // Restore User Settings if they exist in the backup
+    if (plainData.data.userSettings) {
+        setUserSettings(plainData.data.userSettings);
     }
 
     // --- Final Steps ---

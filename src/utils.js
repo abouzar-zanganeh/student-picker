@@ -1,3 +1,5 @@
+import { userSettings } from './state.js';
+
 export function normalizeText(str) {
     // A safeguard to ensure we're always working with a string
     if (typeof str !== 'string') {
@@ -91,6 +93,9 @@ export function parseStudentName(inputString) {
 let sharedAudioContext = null;
 
 export function playSuccessSound() {
+
+    if (!userSettings.isSoundEnabled) return;
+
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
 
