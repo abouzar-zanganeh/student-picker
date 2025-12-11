@@ -3,7 +3,7 @@ import { resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent, getS
 import * as ui from './ui.js';
 import { switchDashboardTab, renderRestorePointsPage } from './ui.js';
 import { Classroom, Student, Category } from './models.js';
-import { normalizeText, normalizeKeyboard, parseStudentName } from './utils.js';
+import { normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound } from './utils.js';
 import * as logManager from './logManager.js';
 import JSZip from 'jszip';
 
@@ -352,6 +352,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const winner = state.currentClassroom.selectNextWinner(state.selectedCategory.name, state.selectedSession);
 
         if (winner) {
+
+            playSuccessSound();
+
             const studentRecord = state.selectedSession.studentRecords[winner.identity.studentId];
             if (studentRecord && studentRecord.attendance === 'absent') {
                 winner.statusCounters.missedChances++;

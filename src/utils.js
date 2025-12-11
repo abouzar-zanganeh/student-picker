@@ -87,28 +87,52 @@ export function parseStudentName(inputString) {
     };
 }
 
+// Singleton AudioContext to prevent resource exhaustion
+let sharedAudioContext = null;
+
 export function playSuccessSound() {
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
 
-    const ctx = new AudioContext();
-    const oscillator = ctx.createOscillator();
-    const gainNode = ctx.createGain();
+    if (!sharedAudioContext) {
+        sharedAudioContext = new AudioContext();
+    }
 
-    oscillator.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    const ctx = sharedAudioContext;
 
-    // Sound Design: A soft sine wave (smooth tone)
-    oscillator.type = 'sine';
+    // Helper function to actually generate the sound
+    const generateSound = () => {
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain();
 
-    // Pitch: Start at 500Hz and slide to 600Hz (cheerful uplift)
-    oscillator.frequency.setValueAtTime(500, ctx.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.1);
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
 
-    // Volume: Start low-medium and fade out quickly
-    gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+        oscillator.type = 'sine';
 
-    oscillator.start();
-    oscillator.stop(ctx.currentTime + 0.5);
+        // Use current time relative to the now-active context
+        const now = ctx.currentTime;
+
+        // Pitch: 450Hz (Your preference)
+        oscillator.frequency.setValueAtTime(450, now);
+
+        // Volume Envelope: Ultra-Short Click (~30ms)
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.3, now + 0.002);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.025);
+        gainNode.gain.linearRampToValueAtTime(0, now + 0.03);
+
+        oscillator.start(now);
+        oscillator.stop(now + 0.04);
+    };
+
+    // Robust State Handling:
+    // If suspended, resume first, THEN play. Otherwise, play immediately.
+    if (ctx.state === 'suspended') {
+        ctx.resume().then(() => {
+            generateSound();
+        }).catch(err => console.error("Audio resume failed:", err));
+    } else {
+        generateSound();
+    }
 }
