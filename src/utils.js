@@ -86,3 +86,29 @@ export function parseStudentName(inputString) {
         lastName: null
     };
 }
+
+export function playSuccessSound() {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+
+    const ctx = new AudioContext();
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    // Sound Design: A soft sine wave (smooth tone)
+    oscillator.type = 'sine';
+
+    // Pitch: Start at 500Hz and slide to 600Hz (cheerful uplift)
+    oscillator.frequency.setValueAtTime(500, ctx.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.1);
+
+    // Volume: Start low-medium and fade out quickly
+    gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+
+    oscillator.start();
+    oscillator.stop(ctx.currentTime + 0.5);
+}
