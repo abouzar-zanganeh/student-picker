@@ -12,7 +12,7 @@
     <meta name="apple-mobile-web-app-title" content="دستیار معلم">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="images/icon-192.png" type="image/png">
-  <script type="module" crossorigin src="/assets/index-CxeDKKQ4.js"></script>
+  <script type="module" crossorigin src="/assets/index-CD4JQayw.js"></script>
   <link rel="stylesheet" crossorigin href="/assets/index-VfIDyURn.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
@@ -36,10 +36,9 @@
 
     <div id="side-nav-menu" class="side-nav">
         <a href="javascript:void(0)" id="close-nav-btn" class="close-btn">&times;</a>
-        <label class="nav-btn checkbox-label">
-            <span>⚙️ فعال‌سازی محافظ صفحه</span>
-            <input type="checkbox" id="screen-saver-toggle">
-        </label>
+
+        <button id="app-settings-nav-btn" class="nav-btn">⚙️ تنظیمات برنامه</button>
+
         <hr class="nav-separator">
         <button id="trash-nav-btn" class="nav-btn">🗑️ سطل زباله</button>
         <button id="demo-mode-btn" class="nav-btn">🎭 حالت نمایش (Demo)</button>
@@ -48,6 +47,36 @@
         <button id="restore-points-nav-btn" class="nav-btn">↺ نقاط بازگشت</button>
         <input type="file" id="restore-file-input" class="hidden-input" accept=".json,.txt">
     </div>
+
+    <div id="app-settings-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>تنظیمات برنامه</h3>
+            <ul class="list-container">
+                <li>
+                    <span>🔊 افکت صوتی (انتخاب)</span>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="setting-sound-toggle">
+                    </label>
+                </li>
+                <li>
+                    <span>📳 لرزش (ویبره)</span>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="setting-vibration-toggle">
+                    </label>
+                </li>
+                <li>
+                    <span>💤 محافظ صفحه (Screen Saver)</span>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="setting-screensaver-toggle">
+                    </label>
+                </li>
+            </ul>
+            <div class="modal-actions">
+                <button id="close-settings-btn" class="btn-secondary">بستن</button>
+            </div>
+        </div>
+    </div>
+
     <div id="overlay" class="overlay modal-overlay"></div>
 
     <main id="class-management-page" class="page active">
