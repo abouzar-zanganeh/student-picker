@@ -2198,6 +2198,14 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
     buttonContainer.appendChild(profileBtn);
     resultDiv.appendChild(buttonContainer);
 
+    // --- Add Qualitative Assessment Row ---
+    // Only show if we have a valid category (which we usually do)
+    if (categoryName) {
+        const qualitativeRow = createQualitativeButtons(winner, categoryName);
+        resultDiv.appendChild(qualitativeRow);
+    }
+    // -------------------------------------------
+
     // --- Details Container (scores, notes) ---
     const detailsContainer = document.createElement('div');
     detailsContainer.className = 'student-details-container';
@@ -5217,4 +5225,82 @@ function showReportConfigModal(classroom) {
 
     // 6. Open Modal
     openModal('report-config-modal');
+}
+
+function createQualitativeButtons(student, categoryName) {
+    const container = document.createElement('div');
+    container.className = 'qualitative-button-container';
+
+    // Safety checks for data existence (Lazy Initialization)
+    if (!student.qualitativeStats) student.qualitativeStats = {};
+    if (!student.qualitativeStats[categoryName]) {
+        student.qualitativeStats[categoryName] = { effort: 0, good: 0, excellent: 0 };
+    }
+
+    // Ensure session record exists
+    if (!state.selectedSession.studentRecords[student.identity.studentId].performanceRatings) {
+        state.selectedSession.studentRecords[student.identity.studentId].performanceRatings = {};
+    }
+
+    const record = state.selectedSession.studentRecords[student.identity.studentId];
+    // Check if buttons should be locked based on student status or session state
+    const isLocked = state.selectedSession.isFinished ||
+        record.attendance === 'absent' ||
+        record.hadIssue ||
+        record.wasOutOfClass;
+
+    const currentRating = record.performanceRatings[categoryName];
+
+    // Define our three buttons
+    const buttons = [
+        { key: 'effort', label: 'تلاش', className: 'effort-btn' },
+        { key: 'good', label: 'خوب', className: 'good-btn' },
+        { key: 'excellent', label: 'عالی', className: 'excellent-btn' }
+    ];
+
+    buttons.forEach(btnData => {
+        const btn = document.createElement('button');
+        btn.className = `qualitative-btn ${btnData.className}`;
+        btn.textContent = btnData.label;
+        btn.disabled = isLocked;
+
+        if (currentRating === btnData.key) {
+            btn.classList.add('active');
+        }
+
+        btn.addEventListener('click', () => {
+            const oldRating = record.performanceRatings[categoryName];
+            const newRating = btnData.key;
+
+            // Scenario 1: Deselecting the active button (Turning it OFF)
+            if (oldRating === newRating) {
+                delete record.performanceRatings[categoryName];
+                // Decrement the counter for this type
+                if (student.qualitativeStats[categoryName][oldRating] > 0) {
+                    student.qualitativeStats[categoryName][oldRating]--;
+                }
+            }
+            // Scenario 2: Switching or Selecting a new button
+            else {
+                // If there was a previous rating, remove it first
+                if (oldRating) {
+                    if (student.qualitativeStats[categoryName][oldRating] > 0) {
+                        student.qualitativeStats[categoryName][oldRating]--;
+                    }
+                }
+                // Apply new rating
+                record.performanceRatings[categoryName] = newRating;
+                student.qualitativeStats[categoryName][newRating] = (student.qualitativeStats[categoryName][newRating] || 0) + 1;
+            }
+
+            state.saveData();
+
+            // Re-render just this row to reflect changes (simple visual refresh)
+            displayWinner();
+        });
+
+        container.appendChild(btn);
+    });
+
+    return container;
 }
