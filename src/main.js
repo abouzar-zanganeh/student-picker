@@ -2084,6 +2084,22 @@ export function handleUndoLastSelection(student, categoryName) {
                 record.selections[categoryName] = Math.max(0, record.selections[categoryName] - 1);
             }
 
+            // --- NEW: Revert Qualitative Stats ---
+            if (record && record.performanceRatings && record.performanceRatings[categoryName]) {
+                const ratingToRemove = record.performanceRatings[categoryName];
+
+                // Decrement global counter for this specific rating
+                if (student.qualitativeStats &&
+                    student.qualitativeStats[categoryName] &&
+                    student.qualitativeStats[categoryName][ratingToRemove] > 0) {
+                    student.qualitativeStats[categoryName][ratingToRemove]--;
+                }
+
+                // Remove the rating from the current session record
+                delete record.performanceRatings[categoryName];
+            }
+            // -------------------------------------
+
             // 4. Find the *new* last winner for this category
             let newLastWinnerId = null;
             // We iterate backward through the *remaining* history
