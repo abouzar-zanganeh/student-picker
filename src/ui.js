@@ -520,7 +520,7 @@ export function showRenameStudentModal(student, classroom) {
     const oldLastName = student.identity.lastName || "";
 
     const modalTitle = document.getElementById('add-note-modal-title');
-    modalTitle.textContent = 'تغییر نام دانش‌آموز';
+    modalTitle.textContent = 'تغییر نام دانش‌ آموز';
 
     const initialValue = (student.identity.firstName && student.identity.lastName)
         ? `${student.identity.firstName} . ${student.identity.lastName}`
