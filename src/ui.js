@@ -4898,20 +4898,19 @@ function generatePrintableReport(classroom, selectedColumns, sortMode = 'default
         year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
     });
 
-    // 2. Apply Sorting (If requested)
+    // 2. Apply Sorting (Hybrid Logic: Structured First, Unstructured Last)
     if (sortMode === 'alpha') {
-        students.sort((a, b) => {
-            const getSortKey = (student) => {
-                if (student.identity.lastName) {
-                    return student.identity.lastName;
-                }
-                const parts = student.identity.name.trim().split(/\s+/);
-                return parts[parts.length - 1] || '';
-            };
-            const keyA = getSortKey(a);
-            const keyB = getSortKey(b);
-            return keyA.localeCompare(keyB, 'fa-IR');
+        // A. Split into two groups
+        const structuredStudents = students.filter(s => s.identity.firstName && s.identity.lastName);
+        const unstructuredStudents = students.filter(s => !s.identity.firstName || !s.identity.lastName);
+
+        // B. Sort structured students by Last Name
+        structuredStudents.sort((a, b) => {
+            return a.identity.lastName.localeCompare(b.identity.lastName, 'fa');
         });
+
+        // C. Merge: Structured students first, then Unstructured (keeping their original order)
+        students = [...structuredStudents, ...unstructuredStudents];
     }
 
     // 3. Build Table Headers
@@ -4932,18 +4931,15 @@ function generatePrintableReport(classroom, selectedColumns, sortMode = 'default
                 cellValue = index + 1;
             }
             else if (col.id === 'name') {
-                if (student.identity.lastName && student.identity.firstName) {
-                    cellValue = `${student.identity.lastName}، ${student.identity.firstName}`;
+                // --- UPDATED NAME LOGIC (Matches Settings Page) ---
+                if (student.identity.firstName && student.identity.lastName) {
+                    // Visual Guide: First Name + Persian Comma + Last Name
+                    cellValue = `${student.identity.firstName} ، ${student.identity.lastName}`;
                 } else {
-                    const parts = student.identity.name.trim().split(/\s+/);
-                    if (parts.length > 1) {
-                        const lastName = parts.pop();
-                        const firstName = parts.join(' ');
-                        cellValue = `${lastName}، ${firstName}`;
-                    } else {
-                        cellValue = student.identity.name;
-                    }
+                    // Unstructured names: Show as is
+                    cellValue = student.identity.name;
                 }
+                // --------------------------------------------------
             }
             else if (col.id === 'total_selections') cellValue = student.statusCounters.totalSelections;
             else if (col.id === 'missed_chances') cellValue = student.statusCounters.missedChances;
@@ -4961,7 +4957,7 @@ function generatePrintableReport(classroom, selectedColumns, sortMode = 'default
                 cellValue = student.categoryCounts[col.id] || 0;
             }
 
-            // --- CHANGED: Apply right-alignment specifically to the Name column ---
+            // Apply right-alignment specifically to the Name column
             const cellStyle = (col.id === 'name') ? 'style="text-align: right;"' : '';
             tbodyHtml += `<td ${cellStyle}>${cellValue}</td>`;
         });
