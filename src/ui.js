@@ -3697,76 +3697,80 @@ export function renderClassList() {
 // End of functions needed for rendering the classroom page
 
 export function renderSettingsStudentList() {
-    settingsStudentListUl.innerHTML = '';
     if (!state.currentClassroom) return;
 
-    getActiveItems(state.currentClassroom.students).forEach(student => {
+    settingsStudentListUl.innerHTML = '';
+
+    // 1. Get all active students
+    const allStudents = getActiveItems(state.currentClassroom.students);
+
+    // 2. Split them into two groups
+    const structuredStudents = allStudents.filter(s => s.identity.firstName && s.identity.lastName);
+    const unstructuredStudents = allStudents.filter(s => !s.identity.firstName || !s.identity.lastName);
+
+    // 3. Sort the structured ones by Last Name (Persian locale safe)
+    structuredStudents.sort((a, b) => {
+        return a.identity.lastName.localeCompare(b.identity.lastName, 'fa');
+    });
+
+    // 4. Merge: Structured students (A-Z) come first, Unstructured (by Creation Time) come last
+    const sortedStudents = [...structuredStudents, ...unstructuredStudents];
+
+    // 5. Render the list
+    sortedStudents.forEach(student => {
         const li = document.createElement('li');
 
+        // Critical for the highlight feature we added earlier
         li.dataset.studentId = student.identity.studentId;
 
         const nameSpan = document.createElement('span');
-        nameSpan.textContent = student.identity.name;
-        nameSpan.style.flexGrow = '1';
 
-        nameSpan.className = 'student-name-link';
-        nameSpan.addEventListener('click', () => {
-            showStudentProfile(student);
+        // --- VISUAL GUIDE LOGIC ---
+        // If separated, show "First ، Last". If not, show normal "Name"
+        if (student.identity.firstName && student.identity.lastName) {
+            nameSpan.textContent = `${student.identity.firstName} ، ${student.identity.lastName}`;
+        } else {
+            nameSpan.textContent = student.identity.name;
+        }
+        // --------------------------
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '×'; // Close icon
+        deleteBtn.classList.add('delete-btn');
+        deleteBtn.title = 'حذف دانش‌آموز';
+
+        // Delete Logic
+        deleteBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent triggering the rename modal
+            showCustomConfirm(
+                `آیا از حذف دانش‌آموز «${student.identity.name}» مطمئن هستید؟`,
+                () => {
+                    const result = state.permanentlyDeleteStudent(student, state.currentClassroom);
+                    if (result.success) {
+                        renderSettingsStudentList();
+                        renderStudentStatsList();
+                        renderAttendancePage();
+                        showNotification(`دانش‌آموز «${student.identity.name}» حذف شد.`);
+                    } else {
+                        showNotification(result.message, 'error');
+                    }
+                },
+                { confirmText: 'حذف', confirmClass: 'btn-danger' }
+            );
+        });
+
+        // Rename Logic (Long Press / Right Click)
+        setupLongPress(li, (e) => {
+            showRenameStudentModal(student, state.currentClassroom);
+        });
+
+        li.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            showRenameStudentModal(student, state.currentClassroom);
         });
 
         li.appendChild(nameSpan);
-
-        li.addEventListener('contextmenu', (event) => {
-            const menuItems = [
-
-                {
-                    label: 'تغییر نام',
-                    icon: '✏️',
-                    action: () => {
-                        showRenameStudentModal(student, state.currentClassroom);
-                    }
-                },
-
-                {
-                    label: 'انتقال دانش‌آموز',
-                    icon: '➡️',
-                    action: () => {
-                        // This will call the function we create in Part B
-                        showMoveStudentModal(student, state.currentClassroom);
-                    }
-                },
-
-                {
-                    label: 'حذف دانش‌آموز',
-                    icon: '🗑️',
-                    className: 'danger',
-                    action: () => {
-                        showCustomConfirm(
-                            `آیا از انتقال دانش‌آموز «${student.identity.name}» به سطل زباله مطمئن هستید؟`,
-                            () => {
-                                const trashEntry = {
-                                    id: `trash_${Date.now()}_${Math.random()}`,
-                                    timestamp: new Date().toISOString(),
-                                    type: 'student',
-                                    description: `دانش‌آموز «${student.identity.name}» از کلاس «${state.currentClassroom.info.name}»`,
-                                    restoreData: { studentId: student.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
-                                };
-                                state.trashBin.unshift(trashEntry);
-                                if (state.trashBin.length > 50) state.trashBin.pop();
-
-                                student.isDeleted = true;
-                                logManager.addLog(state.currentClassroom.info.name, `دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
-                                state.saveData();
-                                renderSettingsStudentList();
-                                showNotification(`✅ دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`);
-                            },
-                            { confirmText: 'بله', confirmClass: 'btn-warning', isDelete: true }
-                        );
-                    }
-                }
-            ];
-            openContextMenu(event, menuItems);
-        });
+        li.appendChild(deleteBtn);
         settingsStudentListUl.appendChild(li);
     });
 }
