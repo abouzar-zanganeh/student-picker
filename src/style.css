@@ -3216,3 +3216,71 @@ textarea,
     transition: background-color 0.5s ease;
     /* Smooth fade in/out */
 }
+
+/* --- Qualitative Performance Buttons --- */
+.qualitative-button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+    /* Space between the top row (Absent/Issue) and this row */
+    padding-top: 10px;
+    border-top: 1px dashed var(--color-border);
+    /* Subtle separator */
+}
+
+.qualitative-btn {
+    flex: 1;
+    /* Make them equal width */
+    padding: 6px 10px;
+    font-size: 13px;
+    background-color: transparent;
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius-main);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--color-text-muted);
+}
+
+/* 1. Effort (Orange) - تلاش */
+.qualitative-btn.effort-btn {
+    border-color: #fd7e14;
+    color: #fd7e14;
+}
+
+.qualitative-btn.effort-btn.active {
+    background-color: #fd7e14;
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(253, 126, 20, 0.3);
+}
+
+/* 2. Good (Green) - خوب */
+.qualitative-btn.good-btn {
+    border-color: var(--color-success);
+    color: var(--color-success);
+}
+
+.qualitative-btn.good-btn.active {
+    background-color: var(--color-success);
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3);
+}
+
+/* 3. Excellent (Blue) - عالی */
+.qualitative-btn.excellent-btn {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.qualitative-btn.excellent-btn.active {
+    background-color: var(--color-primary);
+    color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+/* Disabled State (triggered by Absent/Issue/Exit) */
+.qualitative-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
