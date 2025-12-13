@@ -3739,23 +3739,40 @@ export function renderSettingsStudentList() {
         deleteBtn.classList.add('delete-btn');
         deleteBtn.title = 'حذف دانش‌آموز';
 
-        // Delete Logic
+        // Delete Logic (Soft Delete / Move to Trash)
         deleteBtn.addEventListener('click', (e) => {
             e.stopPropagation(); // Prevent triggering the rename modal
             showCustomConfirm(
-                `آیا از حذف دانش‌آموز «${student.identity.name}» مطمئن هستید؟`,
+                `آیا از انتقال دانش‌آموز «${student.identity.name}» به سطل زباله مطمئن هستید؟`,
                 () => {
-                    const result = state.permanentlyDeleteStudent(student, state.currentClassroom);
-                    if (result.success) {
-                        renderSettingsStudentList();
-                        renderStudentStatsList();
-                        renderAttendancePage();
-                        showNotification(`دانش‌آموز «${student.identity.name}» حذف شد.`);
-                    } else {
-                        showNotification(result.message, 'error');
-                    }
+                    // 1. Create Trash Entry
+                    const trashEntry = {
+                        id: `trash_${Date.now()}_${Math.random()}`,
+                        timestamp: new Date().toISOString(),
+                        type: 'student',
+                        description: `دانش‌آموز «${student.identity.name}» از کلاس «${state.currentClassroom.info.name}»`,
+                        restoreData: { studentId: student.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
+                    };
+
+                    // 2. Add to Trash Bin
+                    state.trashBin.unshift(trashEntry);
+                    if (state.trashBin.length > 50) state.trashBin.pop();
+
+                    // 3. Mark as Deleted
+                    student.isDeleted = true;
+
+                    // 4. Log and Save
+                    logManager.addLog(state.currentClassroom.info.name, `دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+                    state.saveData();
+
+                    // 5. Refresh UI
+                    renderSettingsStudentList();
+                    renderStudentStatsList();
+                    renderAttendancePage();
+
+                    showNotification(`✅ دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`);
                 },
-                { confirmText: 'حذف', confirmClass: 'btn-danger' }
+                { confirmText: 'بله', confirmClass: 'btn-warning' }
             );
         });
 
@@ -5106,13 +5123,13 @@ function showReportConfigModal(classroom) {
         
         <div style="display: flex; flex-direction: column; gap: 10px;">
             <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                <input type="radio" name="report-sort" value="default" checked style="accent-color: var(--color-primary);">
-                <span>پیش‌فرض (بر اساس زمان ورود به کلاس)</span>
+                <input type="radio" name="report-sort" value="alpha" checked style="accent-color: var(--color-primary);">
+                <span>بر اساس نام خانوادگی</span>
             </label>
-            
+
             <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                <input type="radio" name="report-sort" value="alpha" style="accent-color: var(--color-primary);">
-                <span>الفبایی (بر اساس نام خانوادگی)</span>
+                <input type="radio" name="report-sort" value="default" style="accent-color: var(--color-primary);">
+                <span>بر اساس زمان ورود به کلاس</span>
             </label>
         </div>
 
@@ -5145,6 +5162,8 @@ function showReportConfigModal(classroom) {
     };
 
     radios.forEach(r => r.addEventListener('change', updateWarning));
+
+    updateWarning();
 
     // 5. Button Handlers
     reportPrintBtn.onclick = () => {
