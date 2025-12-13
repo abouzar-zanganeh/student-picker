@@ -2916,7 +2916,18 @@ function renderProfileContent(container) {
 
     const totalIssues = Object.values(student.categoryIssues || {}).reduce((sum, count) => sum + count, 0);
 
-    // Create a new stats summary div, since we're not using the old hardcoded one
+    // --- NEW: Calculate Qualitative Totals ---
+    let totalEffort = 0, totalGood = 0, totalExcellent = 0;
+    const qStats = student.qualitativeStats || {};
+    Object.values(qStats).forEach(s => {
+        totalEffort += s.effort || 0;
+        totalGood += s.good || 0;
+        totalExcellent += s.excellent || 0;
+    });
+    const totalRated = totalEffort + totalGood + totalExcellent;
+    // -----------------------------------------
+
+    // Create a new stats summary div
     const statsSummaryDiv = document.createElement('div');
     statsSummaryDiv.className = 'stats-summary-box';
     statsSummaryDiv.innerHTML = `
@@ -2924,11 +2935,16 @@ function renderProfileContent(container) {
         <p><strong>غیبت:</strong> ${absenceCount}</p>
         <p><strong>فرصت از دست رفته:</strong> ${student.statusCounters.missedChances || 0}</p>
         <p><strong>مشکل:</strong> ${totalIssues}</p>
+        <p><strong>عملکرد کیفی:</strong> ${totalRated}</p>
     `;
     container.appendChild(statsSummaryDiv);
 
     const totalSelectionsP = statsSummaryDiv.querySelector('p:nth-child(1)'); // کل انتخاب
     const totalIssuesP = statsSummaryDiv.querySelector('p:nth-child(4)');     // مشکل
+    const totalQualityP = statsSummaryDiv.querySelector('p:nth-child(5)');    // عملکرد کیفی (New)
+
+    container.appendChild(statsSummaryDiv);
+
 
     // The rest of this function is mostly a copy-paste of the old renderStudentProfilePage,
     // but adapted to append elements to the 'container' parameter.
@@ -2986,6 +3002,36 @@ function renderProfileContent(container) {
             statsSummaryDiv.appendChild(issuesBreakdownContainer);
         }
     }
+
+    // --- NEW: Qualitative Breakdown ---
+    const qualityBreakdownContainer = document.createElement('div');
+    qualityBreakdownContainer.className = 'stats-breakdown';
+
+    if (totalRated > 0) {
+        // Iterate over categories to show specific stats
+        for (const cat in qStats) {
+            const s = qStats[cat];
+            const catTotal = (s.effort || 0) + (s.good || 0) + (s.excellent || 0);
+
+            if (catTotal > 0) {
+                const p = document.createElement('p');
+                p.className = 'stats-breakdown-item';
+                // Inline styles used to match the button colors
+                p.innerHTML = `<strong>${cat}:</strong> <span style="color:var(--color-primary)">عالی:${s.excellent}</span> | <span style="color:var(--color-success)">خوب:${s.good}</span> | <span style="color:#fd7e14">تلاش:${s.effort}</span>`;
+                qualityBreakdownContainer.appendChild(p);
+            }
+        }
+
+        if (totalQualityP) {
+            totalQualityP.classList.add('collapsible-toggle');
+            totalQualityP.onclick = () => {
+                qualityBreakdownContainer.classList.toggle('open');
+                totalQualityP.classList.toggle('open');
+            };
+            statsSummaryDiv.appendChild(qualityBreakdownContainer);
+        }
+    }
+    // ----------------------------------
 
     const homeworkInfoP = document.createElement('p');
     const homeworkLabel = document.createElement('strong');

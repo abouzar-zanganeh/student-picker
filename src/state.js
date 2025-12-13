@@ -311,6 +311,8 @@ function _rehydrateStudent(plainStudent) {
     studentInstance.categoryCounts = plainStudent.categoryCounts || {};
     studentInstance.categoryIssues = plainStudent.categoryIssues || {};
 
+    studentInstance.qualitativeStats = plainStudent.qualitativeStats || {};
+
     studentInstance.onboardingSession = plainStudent.onboardingSession || null;
 
     return studentInstance;
