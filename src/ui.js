@@ -3724,6 +3724,8 @@ export function renderSettingsStudentList() {
         li.dataset.studentId = student.identity.studentId;
 
         const nameSpan = document.createElement('span');
+        nameSpan.className = 'student-name-link'; // Restore styling
+        nameSpan.style.flexGrow = '1'; // Ensure it fills the space for easier clicking
 
         // --- VISUAL GUIDE LOGIC ---
         // If separated, show "First ، Last". If not, show normal "Name"
@@ -3732,56 +3734,18 @@ export function renderSettingsStudentList() {
         } else {
             nameSpan.textContent = student.identity.name;
         }
-        // --------------------------
 
-        const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = '×'; // Close icon
-        deleteBtn.classList.add('delete-btn');
-        deleteBtn.title = 'حذف دانش‌آموز';
-
-        // Delete Logic (Soft Delete / Move to Trash)
-        deleteBtn.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent triggering the rename modal
-            showCustomConfirm(
-                `آیا از انتقال دانش‌آموز «${student.identity.name}» به سطل زباله مطمئن هستید؟`,
-                () => {
-                    // 1. Create Trash Entry
-                    const trashEntry = {
-                        id: `trash_${Date.now()}_${Math.random()}`,
-                        timestamp: new Date().toISOString(),
-                        type: 'student',
-                        description: `دانش‌آموز «${student.identity.name}» از کلاس «${state.currentClassroom.info.name}»`,
-                        restoreData: { studentId: student.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
-                    };
-
-                    // 2. Add to Trash Bin
-                    state.trashBin.unshift(trashEntry);
-                    if (state.trashBin.length > 50) state.trashBin.pop();
-
-                    // 3. Mark as Deleted
-                    student.isDeleted = true;
-
-                    // 4. Log and Save
-                    logManager.addLog(state.currentClassroom.info.name, `دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
-                    state.saveData();
-
-                    // 5. Refresh UI
-                    renderSettingsStudentList();
-                    renderStudentStatsList();
-                    renderAttendancePage();
-
-                    showNotification(`✅ دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`);
-                },
-                { confirmText: 'بله', confirmClass: 'btn-warning' }
-            );
+        // Restore Click Listener to Open Profile
+        nameSpan.addEventListener('click', () => {
+            showStudentProfile(student);
         });
 
-        // Rename Logic (Long Press / Right Click)
+        // Rename Logic (Long Press)
         setupLongPress(li, (e) => {
             showRenameStudentModal(student, state.currentClassroom);
         });
 
-        // Restored Context Menu
+        // Context Menu
         li.addEventListener('contextmenu', (event) => {
             const menuItems = [
                 {
@@ -3836,7 +3800,7 @@ export function renderSettingsStudentList() {
         });
 
         li.appendChild(nameSpan);
-        li.appendChild(deleteBtn);
+        // Note: deleteBtn is gone
         settingsStudentListUl.appendChild(li);
     });
 }
