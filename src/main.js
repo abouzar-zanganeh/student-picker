@@ -623,13 +623,12 @@ document.addEventListener('DOMContentLoaded', () => {
         logManager.addLog(state.currentClassroom.info.name,
             `${selectedCheckboxes.length} دانش‌آموز جدید از لیست ورودی به کلاس اضافه شدند.`, { type: 'VIEW_SESSIONS' });
 
-        ui.renderSettingsStudentList();
+        ui.showSettingsPage(state.currentClassroom);
 
         if (onboardingOccurred) {
             showOnboardingNotification(selectedCheckboxes.length);
         }
 
-        ui.showPage('settings-page');
         pasteArea.value = '';
         state.setNamesToImport([]);
     });
@@ -639,19 +638,46 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.showPage('settings-page');
     });
 
+    pasteArea.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            const value = pasteArea.value;
+            const cursorPosition = pasteArea.selectionStart;
+            const lastNewLineIndex = value.lastIndexOf('\n', cursorPosition - 1);
+            const currentLine = value.substring(lastNewLineIndex + 1, cursorPosition).trim();
+
+            const dotIndex = currentLine.indexOf('.');
+            if (currentLine && (dotIndex <= 0 || dotIndex >= currentLine.length - 1)) {
+                e.preventDefault(); // Prevents the new line from being created
+                ui.showNotification("لطفا نام و نام خانوادگی شخص را با یک نقطه از هم جدا کنید. مثال: علی . احمدی");
+            }
+        }
+    });
+
     processPasteBtn.addEventListener('click', () => {
         const text = pasteArea.value.trim();
         if (!text) {
-            alert("کادر متنی خالی است. لطفاً اسامی را وارد کنید.");
+            ui.showNotification("کادر متنی خالی است. لطفاً اسامی را وارد کنید.");
             return;
         }
         const names = text.split('\n').map(name => name.trim()).filter(name => name.length > 0);
+
+        // Validation: Check every name for the dot format
+        const invalidName = names.find(name => {
+            const dotIndex = name.indexOf('.');
+            return dotIndex <= 0 || dotIndex >= name.length - 1;
+        });
+
+        if (invalidName) {
+            ui.showNotification(`فرمت نام «${invalidName}» صحیح نیست. لطفا نام و نام خانوادگی را با نقطه جدا کنید.`);
+            return;
+        }
+
         if (names.length > 0) {
             state.setNamesToImport(names);
             ui.renderImportPreview();
             ui.showPage('csv-preview-page');
         } else {
-            alert("هیچ نام معتبری برای ورود پیدا نشد.");
+            ui.showNotification("هیچ نام معتبری برای ورود پیدا نشد.");
         }
     });
 
@@ -666,6 +692,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const studentName = newStudentNameInput.value.trim();
         if (!studentName) {
             alert("لطفاً نام دانش‌آموز را وارد کنید.");
+            return;
+        }
+        const dotIndex = studentName.indexOf('.');
+        if (dotIndex <= 0 || dotIndex >= studentName.length - 1) {
+            ui.showNotification("لطفا نام و نام خانوادگی شخص را با یک نقطه از هم جدا کنید. مثال: علی . احمدی");
             return;
         }
 

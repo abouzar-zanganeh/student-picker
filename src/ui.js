@@ -531,6 +531,13 @@ export function showRenameStudentModal(student, classroom) {
     newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
     state.setSaveNoteCallback((newName) => {
+
+        const dotIndex = newName.indexOf('.');
+        if (dotIndex <= 0 || dotIndex >= newName.length - 1) {
+            showNotification("لطفا نام و نام خانوادگی شخص را با یک نقطه از هم جدا کنید. مثال: علی . احمدی");
+            return false; // This prevents the modal from closing
+        }
+
         const parsedIdentity = parseStudentName(newName);
         const cleanNewName = parsedIdentity.name;
 
