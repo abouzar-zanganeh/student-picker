@@ -515,35 +515,45 @@ export function showRenameStudentModal(student, classroom) {
 
     const oldName = student.identity.name;
 
-    // 1. Configure the modal for renaming
+    // Save the old structural parts for comparison
+    const oldFirstName = student.identity.firstName || "";
+    const oldLastName = student.identity.lastName || "";
+
     const modalTitle = document.getElementById('add-note-modal-title');
     modalTitle.textContent = 'تغییر نام دانش‌آموز';
 
-    // Pre-fill Logic: Show dot format if parts exist, otherwise show normal name
     const initialValue = (student.identity.firstName && student.identity.lastName)
         ? `${student.identity.firstName} . ${student.identity.lastName}`
         : oldName;
 
     newNoteContent.value = initialValue;
-
     newNoteContent.rows = 1;
-    newNoteContent.dispatchEvent(new Event('input', { bubbles: true })); // Trigger auto-direction
+    newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
-    // 2. Define what happens when the "Save" button is clicked
     state.setSaveNoteCallback((newName) => {
         const parsedIdentity = parseStudentName(newName);
         const cleanNewName = parsedIdentity.name;
 
-        // Validation Guard: Dotted student missing dot
+        // Treat undefined/null as empty strings for safe comparison
+        const newFirstName = parsedIdentity.firstName || "";
+
+        // Guard: Dotted student missing dot
         if (student.identity.firstName && student.identity.lastName && !parsedIdentity.firstName) {
             showNotification('⚠️ این دانش‌آموز دارای نام و نام‌خانوادگی تفکیک شده است. لطفاً حتماً از نقطه (.) بین نام و نام‌خانوادگی استفاده کنید.');
-            return false; // Keep modal open
+            return false;
         }
 
-        // Logic Check: Did name change OR did structure change (added a dot)?
-        const structureChanged = !student.identity.firstName && parsedIdentity.firstName;
+        // --- FIX: ROBUST CHANGE DETECTION ---
+        // 1. Did the characters actually change? (e.g. spelling)
+        const textChanged = cleanNewName !== oldName;
 
-        if (cleanNewName && (cleanNewName !== oldName || structureChanged)) {
+        // 2. Did the structure split change? (e.g. moving the dot)
+        // We compare the NEW first name against the OLD first name.
+        const structureChanged = newFirstName !== oldFirstName;
+
+        // The Condition: Save if text changed OR if structure changed
+        if (cleanNewName && (textChanged || structureChanged)) {
+
             const isDuplicate = getActiveItems(classroom.students).some(
                 s => s.identity.studentId !== student.identity.studentId &&
                     s.identity.name.toLowerCase() === cleanNewName.toLowerCase()
@@ -551,7 +561,7 @@ export function showRenameStudentModal(student, classroom) {
 
             if (isDuplicate) {
                 showNotification('دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.');
-                return false; // Keep modal open
+                return false;
             } else {
                 student.identity.name = cleanNewName;
                 student.identity.firstName = parsedIdentity.firstName;
@@ -561,7 +571,6 @@ export function showRenameStudentModal(student, classroom) {
 
                 state.saveData();
 
-                // 3. Re-render UI
                 renderSettingsStudentList();
                 renderStudentStatsList();
                 renderAttendancePage();
@@ -570,35 +579,28 @@ export function showRenameStudentModal(student, classroom) {
                     showStudentProfile(student);
                 }
 
-                // We find the new row by the ID we added in Step 2
                 const updatedRow = document.querySelector(`#settings-student-list li[data-student-id="${student.identity.studentId}"]`);
                 if (updatedRow) {
                     updatedRow.classList.add('recently-updated');
-
-                    // Remove the class after 10 seconds
                     setTimeout(() => {
                         if (updatedRow) updatedRow.classList.remove('recently-updated');
                     }, 10000);
-
-                    // Optional: Scroll the row into view if it jumped out of sight
                     updatedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
-                // ----------------------------------
 
                 showNotification(`✅ نام دانش‌آموز به «${cleanNewName}» تغییر یافت.`);
             }
         } else if (!cleanNewName) {
             showNotification('⚠️ نام نمی‌تواند خالی باشد.');
-            return false; // Keep modal open
+            return false;
         }
 
-        // Reset modal title for next use
+        // Reset modal title
         const modalTitle = document.getElementById('add-note-modal-title');
         modalTitle.textContent = 'ثبت یادداشت جدید';
         newNoteContent.rows = 4;
     });
 
-    // 4. Open the modal and pre-select the text
     openModal('add-note-modal');
     newNoteContent.focus();
     newNoteContent.select();

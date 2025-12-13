@@ -40,10 +40,12 @@ function restoreStateFromURL() {
 
     // Based on the pageId, render and show the correct page
     switch (pageId) {
+
         case 'session-page':
             ui.renderSessions();
             ui.showPage('session-page');
             break;
+
         case 'session-dashboard-page':
             // Determine the correct tab to show.
             const effectiveTab = (pageId === 'attendance-page') ? 'attendance' : tab;
@@ -52,17 +54,16 @@ function restoreStateFromURL() {
             break;
 
         case 'settings-page':
-            ui.settingsClassNameHeader.textContent = `تنظیمات کلاس: ${state.currentClassroom.info.name}`;
-            ui.renderSettingsStudentList();
-            ui.renderSettingsCategories();
-            ui.showPage('settings-page');
+            ui.showSettingsPage(state.currentClassroom);
             break;
+
         case 'student-profile-page':
             // Render the dashboard underneath, using the 'tab' from URL
             ui.renderSessionDashboard(tab);
             // Then, show the profile modal on top
             ui.showStudentProfile(state.selectedStudentForProfile);
             break;
+
         default:
             // If the pageId is something else (like trash-page, etc.), we don't restore it.
             return false;
