@@ -3781,9 +3781,58 @@ export function renderSettingsStudentList() {
             showRenameStudentModal(student, state.currentClassroom);
         });
 
-        li.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-            showRenameStudentModal(student, state.currentClassroom);
+        // Restored Context Menu
+        li.addEventListener('contextmenu', (event) => {
+            const menuItems = [
+                {
+                    label: 'تغییر نام',
+                    icon: '✏️',
+                    action: () => {
+                        showRenameStudentModal(student, state.currentClassroom);
+                    }
+                },
+                {
+                    label: 'انتقال دانش‌آموز',
+                    icon: '➡️',
+                    action: () => {
+                        showMoveStudentModal(student, state.currentClassroom);
+                    }
+                },
+                {
+                    label: 'حذف دانش‌آموز',
+                    icon: '🗑️',
+                    className: 'danger',
+                    action: () => {
+                        showCustomConfirm(
+                            `آیا از انتقال دانش‌آموز «${student.identity.name}» به سطل زباله مطمئن هستید؟`,
+                            () => {
+                                const trashEntry = {
+                                    id: `trash_${Date.now()}_${Math.random()}`,
+                                    timestamp: new Date().toISOString(),
+                                    type: 'student',
+                                    description: `دانش‌آموز «${student.identity.name}» از کلاس «${state.currentClassroom.info.name}»`,
+                                    restoreData: { studentId: student.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
+                                };
+                                state.trashBin.unshift(trashEntry);
+                                if (state.trashBin.length > 50) state.trashBin.pop();
+
+                                student.isDeleted = true;
+                                logManager.addLog(state.currentClassroom.info.name, `دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+                                state.saveData();
+
+                                // Refresh all relevant UI parts
+                                renderSettingsStudentList();
+                                renderStudentStatsList();
+                                renderAttendancePage();
+
+                                showNotification(`✅ دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`);
+                            },
+                            { confirmText: 'بله', confirmClass: 'btn-warning' }
+                        );
+                    }
+                }
+            ];
+            openContextMenu(event, menuItems);
         });
 
         li.appendChild(nameSpan);
