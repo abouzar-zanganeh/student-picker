@@ -30,6 +30,8 @@ export class Student {
         this.categoryCounts = {};
         this.categoryIssues = {};
 
+        this.qualitativeStats = {}; // Stores qualitative feedback per category: { "Grammar": { effort: 0, good: 0, excellent: 0 } }
+
         this.logs = {
             parentContacts: [],
             scores: {},
@@ -160,6 +162,7 @@ export class Session {
                 selections: {}, //The recording of how many times a student was selected in this session per category. for example: { "Vocabulary": 2, "Grammar": 1 }.
                 hadIssue: false,
                 wasOutOfClass: false,
+                performanceRatings: {}, // Stores the rating for this session per category: { "Grammar": "good" }
 
             };
         }
