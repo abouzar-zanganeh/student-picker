@@ -5277,27 +5277,32 @@ function createQualitativeButtons(student, categoryName) {
     const container = document.createElement('div');
     container.className = 'qualitative-button-container';
 
-    // Safety checks for data existence (Lazy Initialization)
+    // 1. Determine Context: Are we in History Mode or Manual Mode?
+    const historyIndex = state.winnerHistoryIndex;
+    const isHistoryMode = historyIndex !== -1 && state.selectedSession.winnerHistory[historyIndex];
+
+    // We prioritize the History Entry if available. 
+    // If Manual selection (index -1), we fall back to the session record (or just null if you prefer).
+    const historyEntry = isHistoryMode ? state.selectedSession.winnerHistory[historyIndex] : null;
+    const sessionRecord = state.selectedSession.studentRecords[student.identity.studentId];
+
+    // Initialize stats containers if missing
     if (!student.qualitativeStats) student.qualitativeStats = {};
     if (!student.qualitativeStats[categoryName]) {
         student.qualitativeStats[categoryName] = { effort: 0, good: 0, excellent: 0 };
     }
+    if (!sessionRecord.performanceRatings) sessionRecord.performanceRatings = {};
 
-    // Ensure session record exists
-    if (!state.selectedSession.studentRecords[student.identity.studentId].performanceRatings) {
-        state.selectedSession.studentRecords[student.identity.studentId].performanceRatings = {};
-    }
+    // 2. Determine "Current Rating" Source
+    // If in history mode, the truth is in the history entry. Otherwise, check session record.
+    const currentRating = isHistoryMode ? historyEntry.rating : sessionRecord.performanceRatings[categoryName];
 
-    const record = state.selectedSession.studentRecords[student.identity.studentId];
-    // Check if buttons should be locked based on student status or session state
+    // Check lock state
     const isLocked = state.selectedSession.isFinished ||
-        record.attendance === 'absent' ||
-        record.hadIssue ||
-        record.wasOutOfClass;
+        sessionRecord.attendance === 'absent' ||
+        sessionRecord.hadIssue ||
+        sessionRecord.wasOutOfClass;
 
-    const currentRating = record.performanceRatings[categoryName];
-
-    // Define our three buttons
     const buttons = [
         { key: 'effort', label: 'تلاش', className: 'effort-btn' },
         { key: 'good', label: 'خوب', className: 'good-btn' },
@@ -5315,34 +5320,33 @@ function createQualitativeButtons(student, categoryName) {
         }
 
         btn.addEventListener('click', () => {
-            const oldRating = record.performanceRatings[categoryName];
             const newRating = btnData.key;
 
-            // Scenario 1: Deselecting the active button (Turning it OFF)
-            if (oldRating === newRating) {
-                delete record.performanceRatings[categoryName];
-                // Decrement the counter for this type
-                if (student.qualitativeStats[categoryName][oldRating] > 0) {
-                    student.qualitativeStats[categoryName][oldRating]--;
+            // A. Update Global Stats (Student Model)
+            // 1. Remove old impact if exists
+            if (currentRating) {
+                if (student.qualitativeStats[categoryName][currentRating] > 0) {
+                    student.qualitativeStats[categoryName][currentRating]--;
                 }
             }
-            // Scenario 2: Switching or Selecting a new button
-            else {
-                // If there was a previous rating, remove it first
-                if (oldRating) {
-                    if (student.qualitativeStats[categoryName][oldRating] > 0) {
-                        student.qualitativeStats[categoryName][oldRating]--;
-                    }
-                }
-                // Apply new rating
-                record.performanceRatings[categoryName] = newRating;
+            // 2. Add new impact (Toggle logic: if clicking same button, we just removed it above and stop there)
+            if (currentRating !== newRating) {
                 student.qualitativeStats[categoryName][newRating] = (student.qualitativeStats[categoryName][newRating] || 0) + 1;
             }
 
-            state.saveData();
+            // B. Update The Source of Truth (History or Session)
+            const finalRating = (currentRating === newRating) ? null : newRating; // Toggle logic
 
-            // Re-render just this row to reflect changes (simple visual refresh)
-            displayWinner();
+            if (isHistoryMode) {
+                historyEntry.rating = finalRating;
+            } else {
+                // Fallback for manual selection
+                if (finalRating) sessionRecord.performanceRatings[categoryName] = finalRating;
+                else delete sessionRecord.performanceRatings[categoryName];
+            }
+
+            state.saveData();
+            displayWinner(); // Re-render
         });
 
         container.appendChild(btn);

@@ -385,8 +385,9 @@ export function rehydrateData(plainClassrooms) {
                         s => s.identity.studentId === historyEntry.winner.identity.studentId
                     );
                     return {
-                        winner: rehydratedStudent, // This will be undefined if the student was deleted
-                        categoryName: historyEntry.categoryName
+                        winner: rehydratedStudent,
+                        categoryName: historyEntry.categoryName,
+                        rating: historyEntry.rating || null // --- Preserve the rating ---
                     };
                 })
                 .filter(hydratedEntry => hydratedEntry.winner); // Now, filter out entries where the student wasn't found
