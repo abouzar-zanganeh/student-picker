@@ -10,7 +10,7 @@ import {
 import { detectTextDirection, renderMultiLineText, parseStudentName } from './utils.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
-import { Category } from './models.js';
+import { Category, EDUCATIONAL_SYSTEMS } from './models.js';
 import { handleUndoLastSelection } from './main.js';
 import JSZip from 'jszip';
 
@@ -135,6 +135,10 @@ export const attendanceSearchInput = document.createElement('input');
 export const sessionDashboardPage = document.getElementById('session-dashboard-page');
 
 export const attendancePane = document.getElementById('attendance-pane');
+
+// for educational system and level selects in settings page
+export const settingsEduSystemSelect = document.getElementById('settings-edu-system');
+export const settingsLevelSelect = document.getElementById('settings-level');
 
 // Helper for handling Long Press events
 export function setupLongPress(element, callback) {
@@ -3947,24 +3951,82 @@ export function renderSettingsCategories() {
 
 export function renderSettingsOther() {
     if (!state.currentClassroom) return;
+    const classroom = state.currentClassroom;
 
-    // Select the correct radio button based on the saved class type
-    const classType = state.currentClassroom.info.type || 'in-person'; // Default to in-person
+    // --- 1. Educational System Setup ---
+    settingsEduSystemSelect.innerHTML = '';
+    Object.values(EDUCATIONAL_SYSTEMS).forEach(sys => {
+        const option = document.createElement('option');
+        option.value = sys.id;
+        option.textContent = sys.label;
+        settingsEduSystemSelect.appendChild(option);
+    });
+    // Set current value
+    settingsEduSystemSelect.value = classroom.info.educationalSystem || 'custom';
+
+    // Helper function to update Level options
+    const updateLevelOptions = (systemId) => {
+        settingsLevelSelect.innerHTML = '';
+        const system = EDUCATIONAL_SYSTEMS[systemId];
+
+        if (system && system.levels.length > 0) {
+            system.levels.forEach(lvl => {
+                const option = document.createElement('option');
+                option.value = lvl;
+                option.textContent = lvl;
+                settingsLevelSelect.appendChild(option);
+            });
+            settingsLevelSelect.disabled = false;
+        } else {
+            // For Custom, we currently just show a generic option
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = '---';
+            settingsLevelSelect.appendChild(option);
+            settingsLevelSelect.disabled = true;
+        }
+    };
+
+    // Initialize Levels based on current system
+    updateLevelOptions(classroom.info.educationalSystem || 'custom');
+
+    // Set current level (if it exists in the new list)
+    if (classroom.info.level) {
+        settingsLevelSelect.value = classroom.info.level;
+    }
+
+    // --- 2. Event Listeners (using .onchange to prevent duplicate listeners) ---
+    settingsEduSystemSelect.onchange = () => {
+        const newSystem = settingsEduSystemSelect.value;
+        classroom.info.educationalSystem = newSystem;
+
+        // Update levels and reset the specific level value
+        updateLevelOptions(newSystem);
+        classroom.info.level = settingsLevelSelect.value; // Defaults to the first option
+
+        state.saveData();
+    };
+
+    settingsLevelSelect.onchange = () => {
+        classroom.info.level = settingsLevelSelect.value;
+        state.saveData();
+    };
+
+    // --- 3. Class Type Logic  ---
+    const classType = classroom.info.type || 'in-person';
     const radioToSelect = document.querySelector(`#settings-page input[name="class-type-setting"][value="${classType}"]`);
     if (radioToSelect) {
         radioToSelect.checked = true;
     }
 
-    // Populate Schedule Days
-    const scheduleDays = state.currentClassroom.info.scheduleDays || [];
+    // --- 4.  Schedule Logic ---
+    const scheduleDays = classroom.info.scheduleDays || [];
     document.querySelectorAll('input[name="schedule-day"]').forEach(checkbox => {
-        // We parse int because we stored them as numbers [6, 0, 1...]
         checkbox.checked = scheduleDays.includes(parseInt(checkbox.value));
     });
 
-    // Populate Schedule Times
-    document.getElementById('settings-schedule-start').value = state.currentClassroom.info.scheduleStartTime || '';
-    document.getElementById('settings-schedule-end').value = state.currentClassroom.info.scheduleEndTime || '';
+    document.getElementById('settings-schedule-start').value = classroom.info.scheduleStartTime || '';
+    document.getElementById('settings-schedule-end').value = classroom.info.scheduleEndTime || '';
 }
 
 export function _internalShowPage(pageId) {

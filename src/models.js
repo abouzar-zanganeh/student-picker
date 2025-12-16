@@ -2,6 +2,36 @@
 //  بخش ۱: تعریف کلاس‌ها (بلوپرینت‌های معماری جدید)
 // =================================================================
 
+export const EDUCATIONAL_SYSTEMS = {
+    ili: {
+        id: 'ili',
+        label: 'کانون زبان ایران',
+        levels: [
+            'Basic 1', 'Basic 2', 'Basic 3',
+            'Elementary 1', 'Elementary 2', 'Elementary 3',
+            'Pre-intermediate 1', 'Pre-intermediate 2', 'Pre-intermediate 3',
+            'Intermediate 1', 'Intermediate 2', 'Intermediate 3',
+            'High-intermediate 1', 'High-intermediate 2', 'High-intermediate 3',
+            'Advanced 1', 'Advanced 2', 'Advanced 3'
+        ]
+    },
+    school: {
+        id: 'school',
+        label: 'آموزش و پرورش',
+        levels: [
+            'کلاس اول', 'کلاس دوم', 'کلاس سوم',
+            'کلاس چهارم', 'کلاس پنجم', 'کلاس ششم',
+            'کلاس هفتم', 'کلاس هشتم', 'کلاس نهم',
+            'کلاس دهم', 'کلاس یازدهم', 'کلاس دوازدهم'
+        ]
+    },
+    custom: {
+        id: 'custom',
+        label: 'سایر / آزاد',
+        levels: []
+    }
+};
+
 export class Student {
     constructor(identityInfo) {
         this.identity = {
@@ -272,6 +302,9 @@ export class Classroom {
             name: info.name || 'NotNamed',
             teacherName: info.teacherName || null,
             type: info.type || 'in-person',
+
+            educationalSystem: info.educationalSystem || 'custom',
+
             term: info.term || null,
             scheduleText: info.scheduleText || null,
             level: info.level || null,
