@@ -3554,8 +3554,74 @@ function createClassListItem(classroom) {
             };
         }
 
-        const menuItems = [
+        // --- 1. Define Default Single Delete Item ---
+        const deleteItem = {
+            label: 'حذف کلاس',
+            icon: '🗑️',
+            className: 'danger',
+            action: () => {
+                showCustomConfirm(
+                    `آیا از انتقال کلاس «${classroom.info.name}» به سطل زباله مطمئن هستید؟`,
+                    () => {
+                        const trashEntry = {
+                            id: `trash_${Date.now()}_${Math.random()}`,
+                            timestamp: new Date().toISOString(),
+                            type: 'classroom',
+                            description: `کلاس «${classroom.info.name}»`,
+                            restoreData: { name: classroom.info.name }
+                        };
+                        state.trashBin.unshift(trashEntry);
+                        if (state.trashBin.length > 50) state.trashBin.pop();
 
+                        classroom.isDeleted = true;
+                        logManager.addLog(classroom.info.name, `کلاس «${classroom.info.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+                        state.saveData();
+                        renderClassList();
+                        showNotification(`✅ کلاس «${classroom.info.name}» به سطل زباله منتقل شد.`);
+                    },
+                    { confirmText: 'بله', confirmClass: 'btn-warning', isDelete: true }
+                );
+            }
+        };
+
+        // --- 2. Override for Batch Deletion ---
+        if (selectedCount > 1 && state.selectedClassIds.includes(classroom.info.name)) {
+            deleteItem.label = `حذف ${selectedCount} کلاس`;
+            deleteItem.action = () => {
+                showCustomConfirm(
+                    `آیا از انتقال ${selectedCount} کلاس انتخاب شده به سطل زباله مطمئن هستید؟`,
+                    () => {
+                        // Iterate and delete all selected classes
+                        state.selectedClassIds.forEach(clsName => {
+                            const cls = state.classrooms[clsName];
+                            if (cls && !cls.isDeleted) {
+                                const trashEntry = {
+                                    id: `trash_${Date.now()}_${Math.random()}`,
+                                    timestamp: new Date().toISOString(),
+                                    type: 'classroom',
+                                    description: `کلاس «${cls.info.name}»`,
+                                    restoreData: { name: cls.info.name }
+                                };
+                                state.trashBin.unshift(trashEntry);
+                                cls.isDeleted = true;
+                                logManager.addLog(cls.info.name, `کلاس «${cls.info.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+                            }
+                        });
+
+                        // Maintain trash bin size limit
+                        while (state.trashBin.length > 50) state.trashBin.pop();
+
+                        state.setSelectedClassIds([]); // Clear selection
+                        state.saveData();
+                        renderClassList();
+                        showNotification(`✅ ${selectedCount} کلاس به سطل زباله منتقل شدند.`);
+                    },
+                    { confirmText: 'بله', confirmClass: 'btn-warning', isDelete: true } // isDelete triggers the Secure Modal
+                );
+            };
+        }
+
+        const menuItems = [
             {
                 label: 'چاپ گزارش کلاس',
                 icon: '🖨️',
@@ -3563,7 +3629,6 @@ function createClassListItem(classroom) {
                     showReportConfigModal(classroom);
                 }
             },
-
             {
                 label: classListUl.classList.contains('selection-mode-active') ? 'لغو انتخاب' : 'انتخاب چند کلاس',
                 icon: '✔️',
@@ -3571,16 +3636,13 @@ function createClassListItem(classroom) {
                     const wasSelectionMode = classListUl.classList.contains('selection-mode-active');
                     classListUl.classList.toggle('selection-mode-active');
 
-                    // If we are turning selection mode OFF
                     if (wasSelectionMode) {
-                        state.setSelectedClassIds([]); // Clear the array
-                        renderClassList(); // Re-render to uncheck all boxes
+                        state.setSelectedClassIds([]);
+                        renderClassList();
                     }
                 }
             },
-
             backupItem,
-
             {
                 label: 'یادداشت کلاس',
                 icon: '📝',
@@ -3588,7 +3650,6 @@ function createClassListItem(classroom) {
                     showClassNoteModal(classroom);
                 }
             },
-
             {
                 label: 'تنظیمات کلاس',
                 icon: '⚙️',
@@ -3596,7 +3657,6 @@ function createClassListItem(classroom) {
                     showSettingsPage(classroom);
                 }
             },
-
             {
                 label: 'گزارش فعالیت‌ها',
                 icon: '📋',
@@ -3604,81 +3664,39 @@ function createClassListItem(classroom) {
                     renderLogModal(classroom.info.name);
                 }
             },
-
             {
                 label: 'تغییر نام',
                 icon: '✏️',
                 action: () => {
                     const oldName = classroom.info.name;
-
-                    // 1. Configure the modal for renaming the class
                     const modalTitle = document.getElementById('add-note-modal-title');
                     modalTitle.textContent = 'تغییر نام کلاس';
                     newNoteContent.value = oldName;
                     newNoteContent.rows = 1;
 
-                    // 2. Define what happens when the "Save" button is clicked
                     state.setSaveNoteCallback((newName) => {
                         const trimmedNewName = newName.trim();
-
-                        // Only proceed if the name is new and not empty
                         if (trimmedNewName && trimmedNewName !== oldName) {
                             const result = state.renameClassroom(oldName, trimmedNewName);
-
                             if (result.success) {
-
-                                // First, rename the log history to match the new class name
                                 logManager.renameClassroomLog(oldName, trimmedNewName);
-
-                                // Now, add the log entry for the rename action itself
                                 logManager.addLog(trimmedNewName, `نام کلاس از «${oldName}» به «${trimmedNewName}» تغییر یافت.`, { type: 'VIEW_SESSIONS' });
                                 state.saveData();
-
                                 renderClassList();
                                 showNotification(`✅نام کلاس به «${trimmedNewName}» تغییر یافت.`);
                             } else {
                                 showNotification(result.message);
                             }
                         }
-
-                        // 3. Reset the modal to its default state for adding notes
                         modalTitle.textContent = 'ثبت یادداشت جدید';
                         newNoteContent.rows = 4;
                     });
-
-                    // 4. Open the modal and pre-select the text
                     openModal('add-note-modal');
                     newNoteContent.focus();
                     newNoteContent.select();
                 }
             },
-            {
-                label: 'حذف کلاس',
-                icon: '🗑️',
-                className: 'danger',
-                action: () => {
-                    showCustomConfirm(
-                        `آیا از انتقال کلاس «${classroom.info.name}» به سطل زباله مطمئن هستید؟`,
-                        () => {
-                            const trashEntry = {
-                                id: `trash_${Date.now()}_${Math.random()}`,
-                                timestamp: new Date().toISOString(),
-                                type: 'classroom',
-                                description: `کلاس «${classroom.info.name}»`,
-                                restoreData: { name: classroom.info.name }
-                            };
-                            state.trashBin.unshift(trashEntry);
-                            if (state.trashBin.length > 50) state.trashBin.pop(); // Keep the list at 50 items
-
-                            classroom.isDeleted = true; // Still mark as deleted to hide it from the main list
-                            state.saveData();
-                            renderClassList();
-                            showNotification(`✅ کلاس «${classroom.info.name}» به سطل زباله منتقل شد.`);
-                        },
-                        { confirmText: 'بله', confirmClass: 'btn-warning', isDelete: true }
-                    );
-                }
-            }
+            deleteItem
         ];
         openContextMenu(event, menuItems);
     });
