@@ -3284,3 +3284,15 @@ textarea,
     cursor: not-allowed;
     filter: grayscale(100%);
 }
+
+.settings-select {
+    font-family: inherit;
+    /* This forces it to use the parent's (Vazir) font */
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 50%;
+    /* Optional: makes it look neat in the input group */
+}
