@@ -2800,14 +2800,17 @@ function renderProfileScoringSection(container) {
 
     // 2. Create and append the HTML content for the section
     scoringSection.innerHTML = `
-        <h3>ثبت نمره جدید</h3>
-        <div id="modal-graded-pills" class="category-pills"></div>
-        <div class="input-group centered-input-group" style="margin-top: 15px;">
-            <input type="number" id="modal-new-score-value" placeholder="نمره (مثلا: 85)">
-        </div>
-        <textarea id="modal-new-score-comment" placeholder="توضیحات این نمره (اختیاری)..." style="margin-top: 10px;"></textarea>
-        <button id="modal-add-score-btn" class="btn-success" style="width: 100%; margin-top: 10px;">ثبت نمره</button>
-    `;
+    <h3>ثبت نمره جدید</h3>
+    <div id="modal-graded-pills" class="category-pills"></div>
+    <div class="input-group" style="margin-top: 15px; display: flex; gap: 10px;">
+        <input type="number" id="modal-new-score-value" placeholder="نمره" style="width: 70px; text-align: center;">
+        <input type="text" id="modal-new-score-comment" placeholder="توضیحات (اختیاری)..." style="flex-grow: 1;">
+    </div>
+    <button id="modal-add-score-btn" class="btn-success" style="width: 100%; margin-top: 10px;">ثبت نمره</button>
+`;
+
+    // Enable auto-direction for the new comment input
+    setAutoDirectionOnInput(scoringSection.querySelector('#modal-new-score-comment'));
 
     // 3. Populate the graded category pills
     const pillsContainer = scoringSection.querySelector('#modal-graded-pills');
