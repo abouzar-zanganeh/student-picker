@@ -2458,8 +2458,8 @@ function renderCategoryPills() {
                                     description: `دسته‌بندی «${category.name}» از کلاس «${state.currentClassroom.info.name}»`,
                                     restoreData: { categoryId: category.id, classId: state.currentClassroom.info.scheduleCode }
                                 };
-                                state.trashBin.unshift(trashEntry);
-                                if (state.trashBin.length > 50) state.trashBin.pop();
+
+                                state.addToTrashBin(trashEntry);
 
                                 //Mark all associated scores as deleted ---
                                 const skillKey = category.name.toLowerCase();
@@ -2711,8 +2711,8 @@ export function showStudentProfile(student) {
                         description: `دانش‌آموز «${studentToDelete.identity.name}» از کلاس «${currentClass.info.name}»`,
                         restoreData: { studentId: studentToDelete.identity.studentId, classId: currentClass.info.scheduleCode }
                     };
-                    state.trashBin.unshift(trashEntry);
-                    if (state.trashBin.length > 50) state.trashBin.pop();
+
+                    state.addToTrashBin(trashEntry);
 
                     studentToDelete.isDeleted = true;
                     logManager.addLog(currentClass.info.name, `دانش‌آموز «${studentToDelete.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
@@ -3151,8 +3151,8 @@ export function renderScoresHistory(scoresContainer) {
                                 description: `نمره ${score.value} (${score.skill}) برای «${student.identity.name}»`,
                                 restoreData: { scoreId: score.id, skill: score.skill, studentId: student.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
                             };
-                            state.trashBin.unshift(trashEntry);
-                            if (state.trashBin.length > 50) state.trashBin.pop();
+
+                            state.addToTrashBin(trashEntry);
 
                             score.isDeleted = true; // Mark as deleted
                             state.saveData();
@@ -3239,8 +3239,9 @@ export function renderStudentNotes(notesContainer) {
                                 description: `یادداشت برای دانش‌آموز «${studentForNote.identity.name}»`,
                                 restoreData: { noteId: note.id, studentId: studentForNote.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
                             };
-                            state.trashBin.unshift(trashEntry);
-                            if (state.trashBin.length > 50) state.trashBin.pop();
+
+
+                            state.addToTrashBin(trashEntry);
 
                             note.isDeleted = true;
                             logManager.addLog(state.currentClassroom.info.name, `یادداشت دانش‌آموز «${studentForNote.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
@@ -3570,8 +3571,9 @@ function createClassListItem(classroom) {
                             description: `کلاس «${classroom.info.name}»`,
                             restoreData: { name: classroom.info.name }
                         };
-                        state.trashBin.unshift(trashEntry);
-                        if (state.trashBin.length > 50) state.trashBin.pop();
+
+                        // USE THE NEW FUNCTION
+                        state.addToTrashBin(trashEntry);
 
                         classroom.isDeleted = true;
                         logManager.addLog(classroom.info.name, `کلاس «${classroom.info.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
@@ -3591,7 +3593,6 @@ function createClassListItem(classroom) {
                 showCustomConfirm(
                     `آیا از انتقال ${selectedCount} کلاس انتخاب شده به سطل زباله مطمئن هستید؟`,
                     () => {
-                        // Iterate and delete all selected classes
                         state.selectedClassIds.forEach(clsName => {
                             const cls = state.classrooms[clsName];
                             if (cls && !cls.isDeleted) {
@@ -3602,21 +3603,21 @@ function createClassListItem(classroom) {
                                     description: `کلاس «${cls.info.name}»`,
                                     restoreData: { name: cls.info.name }
                                 };
-                                state.trashBin.unshift(trashEntry);
+
+                                // USE THE NEW FUNCTION
+                                state.addToTrashBin(trashEntry);
+
                                 cls.isDeleted = true;
                                 logManager.addLog(cls.info.name, `کلاس «${cls.info.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
                             }
                         });
 
-                        // Maintain trash bin size limit
-                        while (state.trashBin.length > 50) state.trashBin.pop();
-
-                        state.setSelectedClassIds([]); // Clear selection
+                        state.setSelectedClassIds([]);
                         state.saveData();
                         renderClassList();
                         showNotification(`✅ ${selectedCount} کلاس به سطل زباله منتقل شدند.`);
                     },
-                    { confirmText: 'بله', confirmClass: 'btn-warning', isDelete: true } // isDelete triggers the Secure Modal
+                    { confirmText: 'بله', confirmClass: 'btn-warning', isDelete: true }
                 );
             };
         }
@@ -3859,8 +3860,9 @@ export function renderSettingsStudentList() {
                                     description: `دانش‌آموز «${student.identity.name}» از کلاس «${state.currentClassroom.info.name}»`,
                                     restoreData: { studentId: student.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
                                 };
-                                state.trashBin.unshift(trashEntry);
-                                if (state.trashBin.length > 50) state.trashBin.pop();
+
+                                // NEW LOGIC: Use the central function
+                                state.addToTrashBin(trashEntry);
 
                                 student.isDeleted = true;
                                 logManager.addLog(state.currentClassroom.info.name, `دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
@@ -3924,8 +3926,9 @@ export function renderSettingsCategories() {
                         description: `دسته‌بندی «${category.name}» از کلاس «${state.currentClassroom.info.name}»`,
                         restoreData: { categoryId: category.id, classId: state.currentClassroom.info.scheduleCode }
                     };
-                    state.trashBin.unshift(trashEntry);
-                    if (state.trashBin.length > 50) state.trashBin.pop();
+
+                    // NEW LOGIC
+                    state.addToTrashBin(trashEntry);
 
                     category.isDeleted = true;
                     logManager.addLog(state.currentClassroom.info.name, `دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
@@ -4257,8 +4260,9 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                                 description: `جلسه ${displayNumText} از کلاس «${state.currentClassroom.info.name}»`,
                                 restoreData: { sessionNumber: session.sessionNumber, classId: state.currentClassroom.info.scheduleCode }
                             };
-                            state.trashBin.unshift(trashEntry);
-                            if (state.trashBin.length > 50) state.trashBin.pop();
+
+                            // NEW LOGIC
+                            state.addToTrashBin(trashEntry);
 
                             session.isDeleted = true;
                             logManager.addLog(state.currentClassroom.info.name, `جلسه ${displayNumText} به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });

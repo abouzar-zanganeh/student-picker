@@ -650,8 +650,8 @@ export function moveStudent(studentToMove, sourceClassroom, destinationClassroom
             classId: sourceClassroom.info.scheduleCode // Use the unique ID
         }
     };
-    trashBin.unshift(trashEntry); // Add to the start of the trash bin
-    if (trashBin.length > 50) trashBin.pop(); // Keep the list at 50 items
+
+    addToTrashBin(trashEntry);
 
     // 8. Mark the original student as deleted (soft delete)
     const originalStudent = sourceClassroom.students.find(
@@ -864,6 +864,64 @@ export function exitDemoMode() {
     originalStateBackup = null;
 }
 
+/**
+ * Adds an item to the trash bin and enforces the size limit.
+ * If the bin exceeds 50 items, the oldest item is removed and its data is permanently deleted.
+ */
+export function addToTrashBin(entry) {
+    trashBin.unshift(entry);
+
+    // Check for overflow (Zombie Data)
+    while (trashBin.length > 50) {
+        const overflowItem = trashBin.pop(); // Remove oldest reference
+        permanentlyDeleteFromTrash(overflowItem); // Kill the actual data
+    }
+    saveData();
+}
+
+/**
+ * Permanently deletes the underlying data of a trash item.
+ * This acts as a router, calling the specific delete function based on the item type.
+ */
+export function permanentlyDeleteFromTrash(entry) {
+    if (!entry || !entry.restoreData) return;
+
+    console.log(`🗑️ Auto-cleaning overflow item: ${entry.description}`);
+
+    switch (entry.type) {
+        case 'classroom':
+            // Classrooms are stored by name in the global object
+            if (entry.restoreData.name && classrooms[entry.restoreData.name]) {
+                delete classrooms[entry.restoreData.name];
+            }
+            break;
+        case 'student':
+            if (entry.restoreData.identity?.studentId) {
+                permanentlyDeleteStudent(entry.restoreData.identity.studentId);
+            }
+            break;
+        case 'session':
+            if (entry.restoreData.id) {
+                permanentlyDeleteSession(entry.restoreData.id);
+            }
+            break;
+        case 'category':
+            if (entry.restoreData.id) {
+                permanentlyDeleteCategory(entry.restoreData.id);
+            }
+            break;
+        case 'score':
+            // Scores usually require the full object to identify the student/session
+            permanentlyDeleteScore(entry.restoreData);
+            break;
+        case 'note':
+            if (entry.restoreData.id) {
+                permanentlyDeleteNote(entry.restoreData.id);
+            }
+            break;
+    }
+}
+
 export function setCurrentClassroom(classroom) { currentClassroom = classroom; }
 export function setLiveSession(session) { liveSession = session; }
 export function setSelectedSession(session) { selectedSession = session; }
@@ -908,3 +966,4 @@ export function setLastBackupTimestamp() {
 }
 
 export function setDatePickerCallback(callback) { datePickerCallback = callback; }
+
