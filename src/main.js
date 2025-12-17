@@ -823,10 +823,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Confirm Creation (Debug Version)
     if (ui.confirmAddClassBtn) {
-        console.log("✅ DEBUG: Create Button Found in JS!"); // Log 1
 
         ui.confirmAddClassBtn.addEventListener('click', () => {
-            console.log("✅ DEBUG: Create Button Clicked!"); // Log 2
 
             // 1. Check Input
             const nameInput = ui.modalNewClassNameInput;
@@ -835,7 +833,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             const name = nameInput.value.trim();
-            console.log("DEBUG: Class Name entered:", name); // Log 3
 
             // Basic Validation
             if (!name) {
