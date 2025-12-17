@@ -18,8 +18,16 @@ import { toJalaali, toGregorian } from 'jalaali-js';
 
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');
-export const newClassNameInput = document.getElementById('new-class-name');
-export const addClassBtn = document.getElementById('add-class-btn');
+
+// Elements for the add-class modal
+export const openAddClassModalBtn = document.getElementById('open-add-class-modal-btn');
+export const addClassModal = document.getElementById('add-class-modal');
+export const modalNewClassNameInput = document.getElementById('modal-new-class-name');
+export const modalAddClassSystemSelect = document.getElementById('modal-add-class-system');
+export const modalAddClassLevelSelect = document.getElementById('modal-add-class-level');
+export const confirmAddClassBtn = document.getElementById('confirm-add-class-btn');
+export const cancelAddClassBtn = document.getElementById('cancel-add-class-btn');
+
 export const classListUl = document.getElementById('class-list');
 export const undoToast = document.getElementById('undo-toast');
 export const undoMessage = document.getElementById('undo-message');
@@ -3953,64 +3961,26 @@ export function renderSettingsOther() {
     if (!state.currentClassroom) return;
     const classroom = state.currentClassroom;
 
-    // --- 1. Educational System Setup ---
-    settingsEduSystemSelect.innerHTML = '';
-    Object.values(EDUCATIONAL_SYSTEMS).forEach(sys => {
-        const option = document.createElement('option');
-        option.value = sys.id;
-        option.textContent = sys.label;
-        settingsEduSystemSelect.appendChild(option);
-    });
-    // Set current value
-    settingsEduSystemSelect.value = classroom.info.educationalSystem || 'custom';
+    // --- 1. Educational System Setup (Refactored) ---
+    populateSystemLevelSelects(
+        settingsEduSystemSelect,
+        settingsLevelSelect,
+        classroom.info.educationalSystem,
+        classroom.info.level
+    );
 
-    // Helper function to update Level options
-    const updateLevelOptions = (systemId) => {
-        settingsLevelSelect.innerHTML = '';
-        const system = EDUCATIONAL_SYSTEMS[systemId];
-
-        if (system && system.levels.length > 0) {
-            system.levels.forEach(lvl => {
-                const option = document.createElement('option');
-                option.value = lvl;
-                option.textContent = lvl;
-                settingsLevelSelect.appendChild(option);
-            });
-            settingsLevelSelect.disabled = false;
-        } else {
-            // For Custom, we currently just show a generic option
-            const option = document.createElement('option');
-            option.value = '';
-            option.textContent = '---';
-            settingsLevelSelect.appendChild(option);
-            settingsLevelSelect.disabled = true;
-        }
-    };
-
-    // Initialize Levels based on current system
-    updateLevelOptions(classroom.info.educationalSystem || 'custom');
-
-    // Set current level (if it exists in the new list)
-    if (classroom.info.level) {
-        settingsLevelSelect.value = classroom.info.level;
-    }
-
-    // --- 2. Event Listeners (using .onchange to prevent duplicate listeners) ---
-    settingsEduSystemSelect.onchange = () => {
-        const newSystem = settingsEduSystemSelect.value;
-        classroom.info.educationalSystem = newSystem;
-
-        // Update levels and reset the specific level value
-        updateLevelOptions(newSystem);
-        classroom.info.level = settingsLevelSelect.value; // Defaults to the first option
-
-        state.saveData();
-    };
-
-    settingsLevelSelect.onchange = () => {
+    // Add specific listeners for the Settings page to save data immediately
+    settingsEduSystemSelect.addEventListener('change', () => {
+        classroom.info.educationalSystem = settingsEduSystemSelect.value;
+        // We need to grab the new level value because the helper resets it
         classroom.info.level = settingsLevelSelect.value;
         state.saveData();
-    };
+    });
+
+    settingsLevelSelect.addEventListener('change', () => {
+        classroom.info.level = settingsLevelSelect.value;
+        state.saveData();
+    });
 
     // --- 3. Class Type Logic  ---
     const classType = classroom.info.type || 'in-person';
@@ -5440,4 +5410,75 @@ function createQualitativeButtons(student, categoryName) {
     });
 
     return container;
+}
+
+export function populateSystemLevelSelects(systemSelect, levelSelect, initialSystem = 'custom', initialLevel = null) {
+    // 1. Clear and Populate System Select
+    systemSelect.innerHTML = '';
+    Object.values(EDUCATIONAL_SYSTEMS).forEach(sys => {
+        const option = document.createElement('option');
+        option.value = sys.id;
+        option.textContent = sys.label;
+        systemSelect.appendChild(option);
+    });
+
+    // Set the initial system selection
+    systemSelect.value = initialSystem;
+
+    // 2. Define the Logic to Update Levels
+    const updateLevels = (systemId) => {
+        levelSelect.innerHTML = '';
+        const system = EDUCATIONAL_SYSTEMS[systemId];
+
+        if (system && system.levels.length > 0) {
+            system.levels.forEach(lvl => {
+                const option = document.createElement('option');
+                option.value = lvl;
+                option.textContent = lvl;
+                levelSelect.appendChild(option);
+            });
+            levelSelect.disabled = false;
+        } else {
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = '---';
+            levelSelect.appendChild(option);
+            levelSelect.disabled = true;
+        }
+    };
+
+    // 3. Initialize Levels based on the initial system
+    updateLevels(initialSystem);
+
+    // 4. Set the initial level if provided
+    if (initialLevel) {
+        levelSelect.value = initialLevel;
+    }
+
+    // 5. Attach Change Listener
+    systemSelect.onchange = () => {
+        updateLevels(systemSelect.value);
+        // Trigger a change event on levelSelect so other listeners know it updated
+        levelSelect.dispatchEvent(new Event('change'));
+    };
+}
+
+export function openAddClassModal() {
+    // 1. Reset Inputs
+    modalNewClassNameInput.value = '';
+
+    // 2. Populate Dropdowns (using our shared helper)
+    // Default to 'custom' system and no specific level
+    populateSystemLevelSelects(modalAddClassSystemSelect, modalAddClassLevelSelect, 'custom');
+
+    // 3. Show Modal using the standard app function
+    // This handles the 'modal-visible' class and back-button history automatically
+    openModal('add-class-modal');
+
+    modalNewClassNameInput.focus();
+}
+
+export function closeAddClassModal() {
+    // Use the standard app function to close
+    closeActiveModal();
 }

@@ -77,8 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- HTML Elements (from ui.js, but needed for event listeners) ---
     const {
-        globalStudentSearchInput, globalStudentSearchResultsDiv,
-        newClassNameInput, addClassBtn, classListUl, undoBtn,
+        globalStudentSearchInput, globalStudentSearchResultsDiv, classListUl, undoBtn,
         settingsPage, settingsClassNameHeader, settingsStudentListUl, categoryListUl,
         newStudentNameInput, addStudentBtn, pasteArea,
         processPasteBtn, csvPreviewPage, csvPreviewList, csvConfirmBtn,
@@ -803,43 +802,91 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    addClassBtn.addEventListener('click', () => {
-        const className = newClassNameInput.value.trim();
-        const selectedTypeRadio = document.querySelector('input[name="class-type"]:checked');
-        if (!className && !selectedTypeRadio) {
-            ui.showNotification("⚠️لطفاً نام و نوع کلاس را مشخص کنید.");
-            return;
-        }
-        if (!className) {
-            ui.showNotification("⚠️لطفاً نام کلاس را وارد کنید.");
-            return;
-        }
-        if (!selectedTypeRadio) {
-            ui.showNotification("⚠️لطفاً نوع کلاس را انتخاب کنید.");
-            return;
-        }
-        if (state.classrooms[className]) {
-            if (state.classrooms[className].isDeleted) {
-                ui.showNotification(`⚠️ کلاسی با این نام در سطل زباله است. ابتدا آن را بازیابی کنید و یا آن را پاک کنید.`);
-            } else {
-                ui.showNotification("⚠️کلاسی با این نام از قبل وجود دارد.");
+    // --- Add Class Modal Logic ---
+
+    // 1. Open Modal
+    // We get the element here to be safe
+    const openAddClassBtn = document.getElementById('open-add-class-modal-btn');
+
+    if (openAddClassBtn) {
+        openAddClassBtn.addEventListener('click', () => {
+            ui.openAddClassModal();
+        });
+    }
+
+    // 2. Cancel / Close
+    if (ui.cancelAddClassBtn) {
+        ui.cancelAddClassBtn.addEventListener('click', () => {
+            ui.closeAddClassModal();
+        });
+    }
+
+    // 3. Confirm Creation (Debug Version)
+    if (ui.confirmAddClassBtn) {
+        console.log("✅ DEBUG: Create Button Found in JS!"); // Log 1
+
+        ui.confirmAddClassBtn.addEventListener('click', () => {
+            console.log("✅ DEBUG: Create Button Clicked!"); // Log 2
+
+            // 1. Check Input
+            const nameInput = ui.modalNewClassNameInput;
+            if (!nameInput) {
+                console.error("❌ DEBUG: Name Input element is missing!");
+                return;
             }
-            return; // Stop the function in both cases
-        }
-        const classType = selectedTypeRadio.value;
-        const newClassroom = new Classroom({ name: className, type: classType });
-        state.classrooms[className] = newClassroom;
-        state.saveData();
+            const name = nameInput.value.trim();
+            console.log("DEBUG: Class Name entered:", name); // Log 3
 
-        logManager.addLog(className, `کلاس «${className}» ایجاد شد.`, { type: 'VIEW_SESSIONS' });
+            // Basic Validation
+            if (!name) {
+                alert('لطفاً نام کلاس را وارد کنید.');
+                return;
+            }
+            if (state.classrooms[name]) {
+                alert('کلاسی با این نام قبلاً ایجاد شده است.');
+                return;
+            }
 
-        ui.renderClassList();
+            try {
+                // Gather Data from Modal Inputs
+                const typeRadio = document.querySelector('input[name="modal-class-type"]:checked');
+                if (!typeRadio) {
+                    console.error("❌ DEBUG: Class Type radio not selected or found!");
+                    return;
+                }
+                const type = typeRadio.value;
+                const educationalSystem = ui.modalAddClassSystemSelect.value;
+                const level = ui.modalAddClassLevelSelect.value;
 
-        ui.showNotification(`✅ کلاس «${className}» با موفقیت ایجاد شد.`);
+                console.log("DEBUG: Data gathered:", { name, type, educationalSystem, level }); // Log 4
 
-        newClassNameInput.value = '';
-        selectedTypeRadio.checked = false;
-    });
+                // Instantiate New Class
+                const newClassroom = new Classroom({
+                    name: name,
+                    type: type,
+                    educationalSystem: educationalSystem,
+                    level: level
+                });
+
+                // Save to State
+                state.classrooms[name] = newClassroom;
+                state.saveData();
+                console.log("DEBUG: Data Saved."); // Log 5
+
+                // Update UI & Close
+                ui.renderClassList();
+                ui.closeAddClassModal();
+                console.log("DEBUG: Success!"); // Log 6
+
+            } catch (error) {
+                console.error("❌ CRASH ERROR:", error);
+                alert("خطایی رخ داد: " + error.message);
+            }
+        });
+    } else {
+        console.error("❌ DEBUG: Create Button (ui.confirmAddClassBtn) is NOT found!");
+    }
+    //---------------------------------
 
 
 
@@ -889,12 +936,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         ui.renderGlobalSearchResults(allResults);
-    });
-
-    newClassNameInput.addEventListener('keyup', (event) => {
-        if (event.key === 'Enter') {
-            addClassBtn.click();
-        }
     });
 
     undoBtn.addEventListener('click', ui.handleUndo);
