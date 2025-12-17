@@ -163,7 +163,7 @@ ul {
 }
 
 .input-group input[type="text"] {
-    width: 100%;
+    width: auto;
 }
 
 .centered-input-group {
@@ -558,6 +558,12 @@ button:disabled:hover {
     margin-right: 10px;
     flex-shrink: 0;
 }
+
+#add-class-modal .input-group {
+
+    margin-bottom: 30px;
+}
+
 
 /* استایل‌های مربوط به برچسب نوع کلاس */
 .type-badge {
@@ -3369,4 +3375,8 @@ textarea,
 /* Optional: Make the button slightly larger in empty state to draw attention */
 .fab-container.center-empty-state .fab-btn {
     transform: scale(1.2);
+}
+
+label {
+    align-content: center;
 }
