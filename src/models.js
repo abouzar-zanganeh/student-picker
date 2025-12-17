@@ -343,7 +343,10 @@ export class Classroom {
     }
 
     startNewSession() {
-        const sessionNumber = this.sessions.length + 1;
+
+        const maxSessionNumber = this.sessions.reduce((max, s) => Math.max(max, s.sessionNumber), 0);
+        const sessionNumber = maxSessionNumber + 1;
+
         const newSession = new Session(sessionNumber);
         this.sessions.push(newSession);
         return newSession;
