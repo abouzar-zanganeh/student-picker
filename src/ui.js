@@ -3845,7 +3845,7 @@ export function renderSettingsStudentList() {
         // --- VISUAL GUIDE LOGIC ---
         // If separated, show "First ، Last". If not, show normal "Name"
         if (student.identity.firstName && student.identity.lastName) {
-            nameSpan.textContent = `${student.identity.firstName} ، ${student.identity.lastName}`;
+            nameSpan.textContent = `${student.identity.firstName}، ${student.identity.lastName}`;
         } else {
             nameSpan.textContent = student.identity.name;
         }
@@ -5093,7 +5093,7 @@ function generatePrintableReport(classroom, selectedColumns, sortMode = 'default
             if (col.id === 'row_num') cellValue = index + 1;
             else if (col.id === 'name') {
                 if (student.identity.firstName && student.identity.lastName) {
-                    cellValue = `${student.identity.firstName} ، ${student.identity.lastName}`;
+                    cellValue = `${student.identity.lastName}، ${student.identity.firstName}`;
                 } else {
                     cellValue = student.identity.name;
                 }
@@ -5120,9 +5120,21 @@ function generatePrintableReport(classroom, selectedColumns, sortMode = 'default
                 cellValue = scores.length > 0 ? scores.map(s => s.value).join('، ') : '-';
             }
 
-            const cellStyle = (col.id === 'name') ? 'style="text-align: right;"' : '';
+            // Logic: Names are Right-aligned + Nowrap
+            // Scores & Numbers are Center-aligned + Nowrap (for lists)
+            let styleCss = 'text-align: center;'; // Default for counts, averages, rows
+
+            if (col.id === 'name') {
+                styleCss = 'text-align: right; white-space: nowrap;';
+            } else if (col.type === 'category_scores') {
+                styleCss = 'text-align: center; white-space: nowrap;';
+            }
+
+            const cellStyle = `style="${styleCss}"`;
+
             tbodyHtml += `<td ${cellStyle}>${cellValue}</td>`;
         });
+
         tbodyHtml += '</tr>';
     });
 
