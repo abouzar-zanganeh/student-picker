@@ -5112,6 +5112,14 @@ function generatePrintableReport(classroom, selectedColumns, sortMode = 'default
             else if (col.id === 'total_selections') cellValue = student.statusCounters.totalSelections;
             else if (col.id === 'missed_chances') cellValue = student.statusCounters.missedChances;
             else if (col.id === 'issues') cellValue = Object.values(student.categoryIssues || {}).reduce((a, b) => a + b, 0);
+
+            else if (col.id === 'exit_count') cellValue = student.statusCounters.outOfClassCount || 0;
+            else if (col.type === 'category_scores') {
+                const skillKey = col.id.toLowerCase();
+                const scores = student.logs.scores[skillKey]?.filter(s => !s.isDeleted) || [];
+                cellValue = scores.length > 0 ? scores.map(s => s.value).join('، ') : '-';
+            }
+
             else if (col.id === 'absences') {
                 cellValue = classroom.sessions.reduce((acc, sess) => {
                     if (sess.isDeleted || sess.isCancelled) return acc;
@@ -5217,8 +5225,9 @@ function showReportConfigModal(classroom) {
         { id: 'name', label: 'نام دانش‌آموز', checked: true },
         { id: 'total_selections', label: 'کل انتخاب‌ها', checked: true },
         { id: 'absences', label: 'تعداد غیبت', checked: true },
+        { id: 'exit_count', label: 'تعداد خروج', checked: false },
         { id: 'missed_chances', label: 'فرصت سوخته', checked: false },
-        { id: 'issues', label: 'موارد انضباطی', checked: false },
+        { id: 'issues', label: 'مشکل‌پاسخگویی', checked: false },
         { id: 'avg_score', label: 'میانگین نمرات', checked: true },
         { id: 'final_score', label: 'نمره نهایی (کانون)', checked: true },
     ];
@@ -5226,12 +5235,23 @@ function showReportConfigModal(classroom) {
     // Add Dynamic Categories
     classroom.categories.forEach(cat => {
         if (!cat.isDeleted) {
+            // 1. The Count Column (Standard)
             standardColumns.push({
                 id: cat.name,
                 label: `تعداد ${cat.name}`,
                 type: 'category',
                 checked: false
             });
+
+            // 2. The Scores Column (Only if graded)
+            if (cat.isGradedCategory) {
+                standardColumns.push({
+                    id: cat.name,
+                    label: `نمرات ${cat.name}`,
+                    type: 'category_scores',
+                    checked: false
+                });
+            }
         }
     });
 
