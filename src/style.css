@@ -3296,3 +3296,77 @@ textarea,
     width: 50%;
     /* Optional: makes it look neat in the input group */
 }
+
+/* Floating Action Button Container */
+.fab-container {
+    position: fixed;
+    bottom: 30px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    /* Space between button and label */
+    pointer-events: none;
+    /* Allows clicks to pass through the empty space around items */
+}
+
+/* The Button itself */
+.fab-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--color-primary, #007bff);
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s;
+    padding-bottom: 4px;
+    pointer-events: auto;
+    /* Re-enable clicks for the button */
+}
+
+.fab-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.fab-btn:active {
+    transform: scale(0.95);
+}
+
+/* The Text Label */
+.fab-label {
+    /* Replaced solid white with a gradient fading from light blue (right) to white (left) */
+    background: linear-gradient(to left, #e8f0fe, #ffffff 70%);
+    color: #444;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+    pointer-events: auto;
+}
+
+/* Center the FAB when list is empty */
+.fab-container.center-empty-state {
+    position: static;
+    /* Removes fixed positioning */
+    width: 100%;
+    justify-content: center;
+    /* Spacing from the element above (search bar or stats) */
+    transform: none;
+    /* Reset any transforms */
+    pointer-events: auto;
+}
+
+/* Optional: Make the button slightly larger in empty state to draw attention */
+.fab-container.center-empty-state .fab-btn {
+    transform: scale(1.2);
+}

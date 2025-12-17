@@ -3762,8 +3762,30 @@ export function renderClassList() {
 
     classListUl.innerHTML = '';
 
-    // Convert to array and Apply the new Time-Based Sorting
-    const sortedClasses = Object.values(state.classrooms).sort((a, b) => {
+    const activeClasses = Object.values(state.classrooms).filter(c => !c.isDeleted);
+
+    // --- Select elements ---
+    const fabContainer = document.querySelector('.fab-container');
+    const globalSearchContainer = document.querySelector('.global-search-container');
+
+    // --- Handle Empty State ---
+    if (activeClasses.length === 0) {
+        // 1. Center the FAB
+        if (fabContainer) fabContainer.classList.add('center-empty-state');
+
+        // 2. Hide the search container completely
+        if (globalSearchContainer) globalSearchContainer.style.display = 'none';
+
+        classListUl.innerHTML = '<li class="no-content-message" style="text-align:center; margin-top:20px;">هنوز کلاسی ایجاد نشده است.</li>';
+        return;
+    } else {
+        // Restore standard view
+        if (fabContainer) fabContainer.classList.remove('center-empty-state');
+        if (globalSearchContainer) globalSearchContainer.style.display = ''; // Clears the inline style to revert to CSS default
+    }
+    // ---------------------------------------
+
+    const sortedClasses = activeClasses.sort((a, b) => {
         const statusA = getClassScheduleStatus(a);
         const statusB = getClassScheduleStatus(b);
 
@@ -3782,8 +3804,6 @@ export function renderClassList() {
     });
 
     sortedClasses.forEach(classroom => {
-        if (classroom.isDeleted) return;
-
         const li = createClassListItem(classroom);
         classListUl.appendChild(li);
     });
