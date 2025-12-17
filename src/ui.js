@@ -5057,8 +5057,6 @@ export async function renderRestorePointsPage() {
     }
 }
 
-// --- Printable Report Logic ---
-
 function generatePrintableReport(classroom, selectedColumns, sortMode = 'default', needsWarningFootnote = false) {
     // 1. Prepare Data
     let students = [...state.getActiveItems(classroom.students)];
@@ -5068,16 +5066,13 @@ function generatePrintableReport(classroom, selectedColumns, sortMode = 'default
 
     // 2. Apply Sorting (Hybrid Logic: Structured First, Unstructured Last)
     if (sortMode === 'alpha') {
-        // A. Split into two groups
         const structuredStudents = students.filter(s => s.identity.firstName && s.identity.lastName);
         const unstructuredStudents = students.filter(s => !s.identity.firstName || !s.identity.lastName);
 
-        // B. Sort structured students by Last Name
         structuredStudents.sort((a, b) => {
             return a.identity.lastName.localeCompare(b.identity.lastName, 'fa');
         });
 
-        // C. Merge: Structured students first, then Unstructured (keeping their original order)
         students = [...structuredStudents, ...unstructuredStudents];
     }
 
@@ -5095,31 +5090,15 @@ function generatePrintableReport(classroom, selectedColumns, sortMode = 'default
         selectedColumns.forEach(col => {
             let cellValue = '-';
 
-            if (col.id === 'row_num') {
-                cellValue = index + 1;
-            }
+            if (col.id === 'row_num') cellValue = index + 1;
             else if (col.id === 'name') {
-                // --- UPDATED NAME LOGIC (Matches Settings Page) ---
                 if (student.identity.firstName && student.identity.lastName) {
-                    // Visual Guide: First Name + Persian Comma + Last Name
                     cellValue = `${student.identity.firstName} ، ${student.identity.lastName}`;
                 } else {
-                    // Unstructured names: Show as is
                     cellValue = student.identity.name;
                 }
-                // --------------------------------------------------
             }
             else if (col.id === 'total_selections') cellValue = student.statusCounters.totalSelections;
-            else if (col.id === 'missed_chances') cellValue = student.statusCounters.missedChances;
-            else if (col.id === 'issues') cellValue = Object.values(student.categoryIssues || {}).reduce((a, b) => a + b, 0);
-
-            else if (col.id === 'exit_count') cellValue = student.statusCounters.outOfClassCount || 0;
-            else if (col.type === 'category_scores') {
-                const skillKey = col.id.toLowerCase();
-                const scores = student.logs.scores[skillKey]?.filter(s => !s.isDeleted) || [];
-                cellValue = scores.length > 0 ? scores.map(s => s.value).join('، ') : '-';
-            }
-
             else if (col.id === 'absences') {
                 cellValue = classroom.sessions.reduce((acc, sess) => {
                     if (sess.isDeleted || sess.isCancelled) return acc;
@@ -5127,13 +5106,20 @@ function generatePrintableReport(classroom, selectedColumns, sortMode = 'default
                     return acc + (rec && rec.attendance === 'absent' ? 1 : 0);
                 }, 0);
             }
+            else if (col.id === 'exit_count') cellValue = student.statusCounters.outOfClassCount || 0;
+            else if (col.id === 'missed_chances') cellValue = student.statusCounters.missedChances;
+            else if (col.id === 'issues') cellValue = Object.values(student.categoryIssues || {}).reduce((a, b) => a + b, 0);
             else if (col.id === 'avg_score') cellValue = student.getOverallAverageScore() || '-';
             else if (col.id === 'final_score') cellValue = classroom.calculateFinalStudentScore(student) || '-';
             else if (col.type === 'category') {
                 cellValue = student.categoryCounts[col.id] || 0;
             }
+            else if (col.type === 'category_scores') {
+                const skillKey = col.id.toLowerCase();
+                const scores = student.logs.scores[skillKey]?.filter(s => !s.isDeleted) || [];
+                cellValue = scores.length > 0 ? scores.map(s => s.value).join('، ') : '-';
+            }
 
-            // Apply right-alignment specifically to the Name column
             const cellStyle = (col.id === 'name') ? 'style="text-align: right;"' : '';
             tbodyHtml += `<td ${cellStyle}>${cellValue}</td>`;
         });
@@ -5150,6 +5136,12 @@ function generatePrintableReport(classroom, selectedColumns, sortMode = 'default
         `;
     }
 
+    // --- Capture App Stylesheets ---
+    // This grabs all <link rel="stylesheet"> tags from your main app to inject into the print window
+    const appStyles = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+        .map(link => link.outerHTML)
+        .join('');
+
     // 6. Create Print Window
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
@@ -5162,12 +5154,14 @@ function generatePrintableReport(classroom, selectedColumns, sortMode = 'default
         <html lang="fa" dir="rtl">
         <head>
             <title>گزارش کلاس ${classroom.info.name}</title>
-            <style>
+            ${appStyles} <style>
                 @media print {
                     @page { size: A4; margin: 10mm; }
-                    body { font-family: Tahoma, 'Vazirmatn', sans-serif; color: #000; }
+                    /* Updated Font Family */
+                    body { font-family: 'Vazirmatn', 'Vazir', Tahoma, sans-serif; color: #000; }
                 }
-                body { font-family: Tahoma, sans-serif; padding: 20px; direction: rtl; }
+                /* Updated Font Family */
+                body { font-family: 'Vazirmatn', 'Vazir', Tahoma, sans-serif; padding: 20px; direction: rtl; }
                 h1 { text-align: center; margin-bottom: 5px; font-size: 24px; }
                 .meta { text-align: center; margin-bottom: 30px; font-size: 14px; color: #444; }
                 table { width: 100%; border-collapse: collapse; font-size: 12px; }
