@@ -1819,6 +1819,14 @@ export function renderStudentStatsList() {
 export function displayWinner(manualWinner = null, manualCategoryName = null) {
     const resultDiv = document.getElementById('selected-student-result');
     resultDiv.innerHTML = '';
+
+    // --- Table Row Highlight Management ---
+    // First, clear any existing winner highlight from the table
+    const previousWinnerRow = document.querySelector('.current-winner-highlight');
+    if (previousWinnerRow) {
+        previousWinnerRow.classList.remove('current-winner-highlight');
+    }
+
     resultDiv.classList.remove('absent');
 
     let winner, categoryName;
@@ -1833,6 +1841,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
         state.setWinnerHistoryIndex(-1);
     } else {
         state.setManualSelection(null);
+        updateCategoryColumnHighlight(null);
         // --- FALLBACK: Original logic for showing a historical winner ---
         if (!state.selectedSession || state.winnerHistoryIndex < 0 || !state.selectedSession.winnerHistory[state.winnerHistoryIndex]) {
             return;
@@ -1842,12 +1851,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
         categoryName = historyEntry.categoryName;
     }
 
-    // --- Table Row Highlight Management ---
-    // First, clear any existing winner highlight from the table
-    const previousWinnerRow = document.querySelector('.current-winner-highlight');
-    if (previousWinnerRow) {
-        previousWinnerRow.classList.remove('current-winner-highlight');
-    }
+
 
     // Now, find and highlight the new winner's row
     if (winner) {
@@ -2586,7 +2590,7 @@ function updateSelectButtonText(category) {
     }
 }
 
-function updateQuickGradeUIForCategory(category) {
+export function updateQuickGradeUIForCategory(category) {
 
     if (state.selectedSession.isFinished) {
         quickScoreInput.disabled = true;
@@ -2616,7 +2620,7 @@ function updateQuickGradeUIForCategory(category) {
     }
 }
 
-function updateCategoryColumnHighlight(categoryName) {
+export function updateCategoryColumnHighlight(categoryName) {
     const table = document.querySelector('.student-stats-table');
     if (!table) return;
 

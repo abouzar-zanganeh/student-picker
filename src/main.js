@@ -11,6 +11,8 @@ import { normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound } 
 
 let devModeClicks = 0;
 
+let selectBtnLongPressActive = false;
+
 
 
 function restoreStateFromURL() {
@@ -371,6 +373,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     ui.selectStudentBtn.addEventListener('click', () => {
+
+        if (selectBtnLongPressActive) {
+            selectBtnLongPressActive = false;
+            return;
+        }
+
         // 1. Guard check: Prevent selection if there's unsaved data (Applies to both modes)
         if (ui.quickScoreInput.value.trim() !== '' || ui.quickNoteTextarea.value.trim() !== '') {
             ui.showNotification("⚠️لطفاً ابتدا با دکمه «ثبت»، تغییرات را ذخیره کنید و یا نمره و یادداشت را پاک کنید.");
@@ -378,13 +386,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (isAssessmentModeActive) {
-            // 2. Assessment Mode Logic
             const winner = pickAssessmentWinner(state.currentClassroom, state.selectedCategory);
             if (winner) {
-                ui.displayWinner(winner, state.selectedCategory.name); // Shows winner without adding to history
-                ui.renderStudentStatsList(); // Updates table highlight
-                state.saveData(); // Persists the new "scoredThisSession" state
+                // Trigger highlights
+                ui.renderStudentStatsList();
+                ui.displayWinner(winner, state.selectedCategory.name);
 
+                ui.updateCategoryColumnHighlight(state.selectedCategory.name);
+                state.saveData();
             }
         } else {
             // 3. Standard Mode Logic
@@ -2092,6 +2101,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     ui.setupLongPress(ui.selectStudentBtn, () => {
+
+        selectBtnLongPressActive = true;
+
         if (!state.selectedCategory) {
             ui.showNotification("⚠️ ابتدا یک دسته‌بندی انتخاب کنید.");
             return;
@@ -2103,6 +2115,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         setIsAssessmentModeActive(!isAssessmentModeActive);
+
+        state.setWinnerHistoryIndex(-1);
+        state.setManualSelection(null);
+        ui.displayWinner();
+        ui.updateQuickGradeUIForCategory(state.selectedCategory);
+
         ui.selectStudentBtnWrapper.classList.toggle('assessment-mode-active', isAssessmentModeActive);
 
         const msg = isAssessmentModeActive ? "حالت انتخاب برای نمره‌دهی فعال شد." : "حالت انتخاب معمولی فعال شد.";
