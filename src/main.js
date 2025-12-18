@@ -2130,13 +2130,9 @@ export function handleUndoLastSelection(student, categoryName) {
             const poolData = state.assessmentPools[categoryId];
 
             if (poolData) {
-                // 1. Remove from scored list
+                // Simply remove them from this list; refreshAssessmentPool will naturally 
+                // include them again on the next click because their score didn't increase.
                 poolData.scoredThisSession = poolData.scoredThisSession.filter(id => id !== student.identity.studentId);
-
-                // 2. Move back to toBeScored list
-                if (!poolData.toBeScored.includes(student.identity.studentId)) {
-                    poolData.toBeScored.push(student.identity.studentId);
-                }
             }
 
             // 3. Reset UI state
@@ -2314,26 +2310,28 @@ function getTotalScoresForCategory(student, categoryName) {
 
 // Generates or refreshes the toBeScored pool based on minimum score counts
 function refreshAssessmentPool(classroom, category) {
-    const activeStudents = state.getActiveItems(classroom.students);
     const categoryId = category.id;
-
-    // Ensure the session tracking object exists
+    // 1. Initialize state object if missing
     if (!state.assessmentPools[categoryId]) {
         state.assessmentPools[categoryId] = { toBeScored: [], scoredThisSession: [] };
     }
 
     const poolData = state.assessmentPools[categoryId];
+    const activeStudents = state.getActiveItems(classroom.students);
 
-    // Filter out students already scored this session
+    // 2. Filter students not yet scored this session
     const eligibleStudents = activeStudents.filter(s => !poolData.scoredThisSession.includes(s.identity.studentId));
 
-    if (eligibleStudents.length === 0) return [];
+    if (eligibleStudents.length === 0) {
+        poolData.toBeScored = [];
+        return [];
+    }
 
-    // Find the minimum number of scores any eligible student has
+    // 3. Find candidates with the minimum score count
     const scoreCounts = eligibleStudents.map(s => getTotalScoresForCategory(s, category.name));
     const minScores = Math.min(...scoreCounts);
 
-    // Pool consists of students who have that minimum count
+    // 4. Update the state property so you can see it in the console
     poolData.toBeScored = eligibleStudents
         .filter(s => getTotalScoresForCategory(s, category.name) === minScores)
         .map(s => s.identity.studentId);
@@ -2342,26 +2340,20 @@ function refreshAssessmentPool(classroom, category) {
 }
 
 export function pickAssessmentWinner(classroom, category) {
-    const categoryId = category.id;
-    let poolData = state.assessmentPools[categoryId];
+    // 1. Always refresh the pool to get the latest min-score candidates
+    const pool = refreshAssessmentPool(classroom, category);
 
-    // Initialize or Refresh pool if empty
-    if (!poolData || poolData.toBeScored.length === 0) {
-        const newPool = refreshAssessmentPool(classroom, category);
-        poolData = state.assessmentPools[categoryId];
-
-        if (newPool.length === 0) {
-            ui.showNotification("⚠️ تمام دانش‌آموزان این دسته‌بندی در این جلسه نمره گرفته‌اند.");
-            return null;
-        }
+    if (pool.length === 0) {
+        ui.showNotification("⚠️ تمام دانش‌آموزان واجد شرایط در این جلسه نمره گرفته‌اند.");
+        return null;
     }
 
-    // Random selection from the toBeScored pool
-    const randomIndex = Math.floor(Math.random() * poolData.toBeScored.length);
-    const winnerId = poolData.toBeScored.splice(randomIndex, 1)[0];
+    // 2. Random selection from the fresh pool
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    const winnerId = pool[randomIndex];
 
-    // Add to session-long scored list
-    state.markStudentAsScoredInSession(categoryId, winnerId);
+    // 3. Mark as scored for this session
+    state.markStudentAsScoredInSession(category.id, winnerId);
 
     return classroom.students.find(s => s.identity.studentId === winnerId);
 }
