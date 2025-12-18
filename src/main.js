@@ -2234,3 +2234,64 @@ function setupSwipeNavigation() {
         touchEndX = 0;
     }
 }
+
+// Calculates total scores for a student in a specific category across all history
+function getTotalScoresForCategory(student, categoryName) {
+    const skillKey = categoryName.toLowerCase();
+    const scores = student.logs.scores[skillKey] || [];
+    return scores.filter(s => !s.isDeleted).length;
+}
+
+// Generates or refreshes the toBeScored pool based on minimum score counts
+function refreshAssessmentPool(classroom, category) {
+    const activeStudents = state.getActiveItems(classroom.students);
+    const categoryId = category.id;
+
+    // Ensure the session tracking object exists
+    if (!state.assessmentPools[categoryId]) {
+        state.assessmentPools[categoryId] = { toBeScored: [], scoredThisSession: [] };
+    }
+
+    const poolData = state.assessmentPools[categoryId];
+
+    // Filter out students already scored this session
+    const eligibleStudents = activeStudents.filter(s => !poolData.scoredThisSession.includes(s.identity.studentId));
+
+    if (eligibleStudents.length === 0) return [];
+
+    // Find the minimum number of scores any eligible student has
+    const scoreCounts = eligibleStudents.map(s => getTotalScoresForCategory(s, category.name));
+    const minScores = Math.min(...scoreCounts);
+
+    // Pool consists of students who have that minimum count
+    poolData.toBeScored = eligibleStudents
+        .filter(s => getTotalScoresForCategory(s, category.name) === minScores)
+        .map(s => s.identity.studentId);
+
+    return poolData.toBeScored;
+}
+
+export function pickAssessmentWinner(classroom, category) {
+    const categoryId = category.id;
+    let poolData = state.assessmentPools[categoryId];
+
+    // Initialize or Refresh pool if empty
+    if (!poolData || poolData.toBeScored.length === 0) {
+        const newPool = refreshAssessmentPool(classroom, category);
+        poolData = state.assessmentPools[categoryId];
+
+        if (newPool.length === 0) {
+            ui.showNotification("⚠️ تمام دانش‌آموزان این دسته‌بندی در این جلسه نمره گرفته‌اند.");
+            return null;
+        }
+    }
+
+    // Random selection from the toBeScored pool
+    const randomIndex = Math.floor(Math.random() * poolData.toBeScored.length);
+    const winnerId = poolData.toBeScored.splice(randomIndex, 1)[0];
+
+    // Add to session-long scored list
+    state.markStudentAsScoredInSession(categoryId, winnerId);
+
+    return classroom.students.find(s => s.identity.studentId === winnerId);
+}
