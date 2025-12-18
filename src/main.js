@@ -309,6 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Visual feedback: brief pulse animation on the header
             document.querySelector('.app-header h1').style.color = 'var(--color-primary)';
+            document.querySelector('.app-header h1').classList.add('dev-mode-tilt');
         }
     });
 
@@ -2115,12 +2116,38 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 export function handleUndoLastSelection(student, categoryName) {
-    // --- Safety Checks (Step 4) ---
 
     // 1. Check if we are in a valid state
     if (!state.selectedSession || state.selectedSession.isFinished) {
         ui.showNotification("⚠️ امکان لغو انتخاب در جلسه خاتمه یافته وجود ندارد.");
         return;
+    }
+
+    // --- Assessment Mode Undo Logic ---
+    if (isAssessmentModeActive) {
+        ui.showCustomConfirm(`آیا از لغو وضعیت نمره‌دهی «${student.identity.name}» مطمئن هستید؟ این دانش‌آموز به لیست انتظار بازمی‌گردد.`, () => {
+            const categoryId = state.selectedCategory.id;
+            const poolData = state.assessmentPools[categoryId];
+
+            if (poolData) {
+                // 1. Remove from scored list
+                poolData.scoredThisSession = poolData.scoredThisSession.filter(id => id !== student.identity.studentId);
+
+                // 2. Move back to toBeScored list
+                if (!poolData.toBeScored.includes(student.identity.studentId)) {
+                    poolData.toBeScored.push(student.identity.studentId);
+                }
+            }
+
+            // 3. Reset UI state
+            state.setManualSelection(null);
+            ui.renderStudentStatsList();
+            ui.displayWinner(); // Clears the display because there is no history entry to show.
+
+            state.saveData();
+            ui.showNotification(`✅ «${student.identity.name}» به لیست انتظار نمره بازگشت.`);
+        });
+        return; // Stop here so we don't run the standard history undo logic.
     }
 
     // 2. Check if we are viewing the MOST RECENT winner.
