@@ -1,11 +1,15 @@
 import * as state from './state.js';
-import { resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent, getSessionDisplayMap } from './state.js';
 import * as ui from './ui.js';
+import * as logManager from './logManager.js';
+import * as utils from './utils.js';
+import * as db from './db.js';
+import JSZip from 'jszip';
+import { resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent, getSessionDisplayMap, isAssessmentModeActive, setIsAssessmentModeActive } from './state.js';
 import { switchDashboardTab, renderRestorePointsPage } from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound } from './utils.js';
-import * as logManager from './logManager.js';
-import JSZip from 'jszip';
+
+let devModeClicks = 0;
 
 
 
@@ -285,6 +289,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+
+    // --- Developer Mode Activation ---
+    // This developer mode will expose internal modules to the global 'dev' object after 10 clicks on the header.
+    document.querySelector('.app-header h1').addEventListener('click', () => {
+        devModeClicks++;
+
+        if (devModeClicks === 10) {
+            // Expose modules to a global namespace
+            window.dev = {
+                state,
+                ui,
+                utils,
+                db
+            };
+
+            console.log("🛠️ Developer Mode Activated! Access modules via the 'dev' object (e.g., dev.state.currentClassroom)");
+            ui.showNotification("🛠️ حالت توسعه‌دهنده فعال شد.");
+
+            // Visual feedback: brief pulse animation on the header
+            document.querySelector('.app-header h1').style.color = 'var(--color-primary)';
+        }
+    });
+
     secureConfirmCancelBtn.addEventListener('click', () => {
         ui.closeActiveModal();
         state.setSecureConfirmCallback(null);
@@ -342,62 +369,58 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    selectStudentBtn.addEventListener('click', () => {
+    ui.selectStudentBtn.addEventListener('click', () => {
+        // 1. Guard check: Prevent selection if there's unsaved data (Applies to both modes)
         if (ui.quickScoreInput.value.trim() !== '' || ui.quickNoteTextarea.value.trim() !== '') {
             ui.showNotification("⚠️لطفاً ابتدا با دکمه «ثبت»، تغییرات را ذخیره کنید و یا نمره و یادداشت را پاک کنید.");
             return;
         }
-        if (!state.currentClassroom || !state.selectedSession || !state.selectedCategory) return;
 
-        const winner = state.currentClassroom.selectNextWinner(state.selectedCategory.name, state.selectedSession);
-
-        if (winner) {
-
-            playSuccessSound();
-
-            const studentRecord = state.selectedSession.studentRecords[winner.identity.studentId];
-            if (studentRecord && studentRecord.attendance === 'absent') {
-                winner.statusCounters.missedChances++;
-            }
-            if (studentRecord && studentRecord.hadIssue) {
-                winner.statusCounters.missedChances++;
-
-                const categoryName = state.selectedCategory.name;
-                winner.categoryIssues[categoryName] = (winner.categoryIssues[categoryName] || 0) + 1;
+        if (isAssessmentModeActive) {
+            // 2. Assessment Mode Logic
+            const winner = pickAssessmentWinner(state.currentClassroom, state.selectedCategory);
+            if (winner) {
+                ui.displayWinner(winner, state.selectedCategory.name); // Shows winner without adding to history
+                ui.renderStudentStatsList(); // Updates table highlight
+                state.saveData(); // Persists the new "scoredThisSession" state
 
             }
-
-            if (studentRecord && studentRecord.wasOutOfClass) {
-                winner.statusCounters.outOfClassCount = (winner.statusCounters.outOfClassCount || 0) + 1;
-                winner.statusCounters.missedChances++;
-            }
-
-
-            // --- New History Logic ---
-            const historyEntry = {
-                winner,
-                categoryName: state.selectedCategory.name
-            };
-            state.selectedSession.winnerHistory.push(historyEntry);
-
-            // Keep the history capped at 10 items
-            if (state.selectedSession.winnerHistory.length > 10) {
-                state.selectedSession.winnerHistory.shift();
-            }
-
-            // Set the index to point to the newest winner we just added
-            state.setWinnerHistoryIndex(state.selectedSession.winnerHistory.length - 1);
-            // --- End New History Logic ---
-
-
-
-            state.selectedSession.lastUsedCategoryId = state.selectedCategory.id;
-            state.selectedSession.lastSelectedWinnerId = winner.identity.studentId;
-            ui.renderStudentStatsList();
-            setTimeout(() => ui.displayWinner(), 0);
-            state.saveData();
         } else {
-            ui.showNotification("❌دانش‌آموز واجد شرایطی برای انتخاب یافت نشد.");
+            // 3. Standard Mode Logic
+            if (!state.currentClassroom || !state.selectedSession || !state.selectedCategory) return;
+
+            const winner = state.currentClassroom.selectNextWinner(state.selectedCategory.name, state.selectedSession);
+
+            if (winner) {
+                playSuccessSound();
+
+                // Increment standard counters
+                const studentRecord = state.selectedSession.studentRecords[winner.identity.studentId];
+                if (studentRecord?.attendance === 'absent') winner.statusCounters.missedChances++;
+                if (studentRecord?.hadIssue) {
+                    winner.statusCounters.missedChances++;
+                    winner.categoryIssues[state.selectedCategory.name] = (winner.categoryIssues[state.selectedCategory.name] || 0) + 1;
+                }
+                if (studentRecord?.wasOutOfClass) {
+                    winner.statusCounters.outOfClassCount = (winner.statusCounters.outOfClassCount || 0) + 1;
+                    winner.statusCounters.missedChances++;
+                }
+
+                // Update History
+                const historyEntry = { winner, categoryName: state.selectedCategory.name };
+                state.selectedSession.winnerHistory.push(historyEntry);
+                if (state.selectedSession.winnerHistory.length > 10) state.selectedSession.winnerHistory.shift();
+                state.setWinnerHistoryIndex(state.selectedSession.winnerHistory.length - 1);
+
+                state.selectedSession.lastUsedCategoryId = state.selectedCategory.id;
+                state.selectedSession.lastSelectedWinnerId = winner.identity.studentId;
+
+                ui.renderStudentStatsList();
+                setTimeout(() => ui.displayWinner(), 0);
+                state.saveData();
+            } else {
+                ui.showNotification("❌دانش‌آموز واجد شرایطی برای انتخاب یافت نشد.");
+            }
         }
     });
 
@@ -1019,6 +1042,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.saveData();
             ui.renderStudentStatsList(); // Refreshes the stats table to show the new score.
             ui.showNotification(`✅نمره برای ${student.identity.name} در مهارت ${category.name} ثبت شد.`);
+            state.markStudentAsScoredInSession(state.selectedCategory.id, student.identity.studentId);
             // Clear inputs for the next entry
             ui.quickScoreInput.value = '';
             ui.quickNoteTextarea.value = '';
@@ -2065,6 +2089,25 @@ document.addEventListener('DOMContentLoaded', () => {
             deinitializeScreenSaver();
         }
     });
+
+    ui.setupLongPress(ui.selectStudentBtn, () => {
+        if (!state.selectedCategory) {
+            ui.showNotification("⚠️ ابتدا یک دسته‌بندی انتخاب کنید.");
+            return;
+        }
+
+        if (!state.selectedCategory.isGradedCategory) {
+            ui.showNotification("⚠️ این دسته‌بندی نمره‌دار نیست.");
+            return;
+        }
+
+        setIsAssessmentModeActive(!isAssessmentModeActive);
+        ui.selectStudentBtnWrapper.classList.toggle('assessment-mode-active', isAssessmentModeActive);
+
+        const msg = isAssessmentModeActive ? "حالت انتخاب برای نمره‌دهی فعال شد." : "حالت انتخاب معمولی فعال شد.";
+        ui.showNotification(msg);
+    });
+
     // Temporary for debugging, must be commented out as soon as debugging ends
     // window.state = state;
     // window.ui = ui;

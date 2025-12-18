@@ -61,6 +61,11 @@ export let userSettings = {
 };
 
 export let assessmentSessionExclusions = new Set(); // Stores IDs of students picked in Assessment Mode
+
+export let isAssessmentModeActive = false;
+export function setIsAssessmentModeActive(value) {
+    isAssessmentModeActive = value;
+}
 //-----------------------
 
 
