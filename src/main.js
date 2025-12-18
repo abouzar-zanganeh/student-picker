@@ -387,13 +387,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (isAssessmentModeActive) {
             const winner = pickAssessmentWinner(state.currentClassroom, state.selectedCategory);
+
             if (winner) {
                 // Trigger highlights
                 ui.renderStudentStatsList();
                 ui.displayWinner(winner, state.selectedCategory.name);
-
                 ui.updateCategoryColumnHighlight(state.selectedCategory.name);
                 state.saveData();
+            } else {
+                // THE DETECTION: This runs when pickAssessmentWinner returns null
+                ui.showCustomConfirm(
+                    "برای تمام دانش‌آموزان در این جلسه یک بار فرصت نمره‌گیری فراهم شده؛ آیا می‌خواهید برای بار دوم این کار را تکرار کنید؟",
+                    () => {
+                        const categoryId = state.selectedCategory.id;
+                        // Reset the round for this category
+                        state.assessmentPools[categoryId].scoredThisSession = [];
+
+                        // Automatically trigger the first selection of the new round
+                        ui.selectStudentBtn.click();
+                    },
+                    { confirmText: 'بله', cancelText: 'خیر', confirmClass: 'btn-success' }
+                );
             }
         } else {
             // 3. Standard Mode Logic
@@ -2362,7 +2376,6 @@ export function pickAssessmentWinner(classroom, category) {
     const pool = refreshAssessmentPool(classroom, category);
 
     if (pool.length === 0) {
-        ui.showNotification("⚠️ تمام دانش‌آموزان واجد شرایط در این جلسه نمره گرفته‌اند.");
         return null;
     }
 
