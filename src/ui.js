@@ -56,6 +56,9 @@ export const addCategoryBtn = document.getElementById('add-category-btn');
 export const appHeader = document.querySelector('.app-header');
 export const selectStudentBtn = document.getElementById('select-student-btn');
 export const selectStudentBtnWrapper = document.getElementById('select-student-btn-wrapper');
+
+export const assessmentModeLabel = document.getElementById('assessment-mode-label');
+
 export const attendancePage = document.getElementById('attendance-page');
 export const attendanceListUl = document.getElementById('attendance-list');
 export const finishAttendanceBtn = document.getElementById('finish-attendance-btn');

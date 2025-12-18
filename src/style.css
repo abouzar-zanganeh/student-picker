@@ -3380,3 +3380,21 @@ textarea,
 label {
     align-content: center;
 }
+
+.assessment-label {
+    display: none;
+    font-size: 12px;
+    color: var(--color-strong-warning);
+    text-align: right;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+.assessment-mode-active .assessment-label {
+    display: block;
+}
+
+.assessment-mode-active #select-student-btn {
+    background-color: #6f42c1;
+    /* A distinct purple for Assessment Mode */
+}
