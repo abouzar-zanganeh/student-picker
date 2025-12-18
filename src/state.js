@@ -15,6 +15,9 @@ export let namesToImport = []; // آرایه‌ای برای نگهداری مو
 export let importedFileContent = null; // برای نگهداری محتوای کامل فایل CSV
 export let notificationTimeout = null;
 export let selectedCategory = null;
+
+export let assessmentPools = {}; // Tracks { categoryId: { toBeScored: [], scoredThisSession: [] } }
+
 export let easterEggClickCount = 0;
 export let easterEggLastClickTime = 0;
 export let resetEasterEggClickCount = 0;
@@ -24,6 +27,8 @@ export let cancelCallback = null;
 export let secureConfirmCallback = null;
 export let activeModal = null; // Will hold the ID of the currently open modal
 export let winnerHistoryIndex = -1; // -1 indicates we're not in history view
+
+
 export let saveNoteCallback = null;
 
 export let saveCategoryCallback = null;
@@ -54,6 +59,9 @@ export let userSettings = {
     lastRestoreTimestamp: null,
     lastBackupTimestamp: null,
 };
+
+export let assessmentSessionExclusions = new Set(); // Stores IDs of students picked in Assessment Mode
+//-----------------------
 
 
 
@@ -967,3 +975,18 @@ export function setLastBackupTimestamp() {
 
 export function setDatePickerCallback(callback) { datePickerCallback = callback; }
 
+export function resetAssessmentExclusions() {
+    assessmentSessionExclusions.clear();
+}
+
+export function setAssessmentPools(pools) { assessmentPools = pools; }
+export function resetAssessmentPools() { assessmentPools = {}; }
+
+export function markStudentAsScoredInSession(categoryId, studentId) {
+    if (!assessmentPools[categoryId]) {
+        assessmentPools[categoryId] = { toBeScored: [], scoredThisSession: [] };
+    }
+    if (!assessmentPools[categoryId].scoredThisSession.includes(studentId)) {
+        assessmentPools[categoryId].scoredThisSession.push(studentId);
+    }
+}
