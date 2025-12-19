@@ -900,16 +900,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 const type = typeRadio.value;
                 const educationalSystem = ui.modalAddClassSystemSelect.value;
-                const level = ui.modalAddClassLevelSelect.value;
 
 
-                // Instantiate New Class
+                const newClassName = ui.modalNewClassNameInput.value.trim();
+                if (!newClassName) {
+                    ui.showNotification('⚠️ لطفاً نام کلاس را وارد کنید.');
+                    return;
+                }
+                if (state.classrooms[newClassName]) {
+                    ui.showNotification('⚠️ کلاسی با این نام وجود دارد.');
+                    return;
+                }
+
+                // Read class type
+                const classType = document.querySelector('input[name="modal-class-type"]:checked')?.value || 'in-person';
+
+                // Read educational system and level
+                const eduSystem = ui.modalAddClassSystemSelect.value;
+                const level = ui.modalAddClassLevelSelect.value || null;
+
+                // Read scheduling data
+                const scheduleText = ui.modalScheduleTextInput.value.trim() || null;
+                const scheduleDays = Array.from(ui.modalScheduleDaysContainer.querySelectorAll('input:checked'))
+                    .map(checkbox => parseInt(checkbox.value, 10));
+                const scheduleStartTime = ui.modalScheduleStartTimeInput.value || null;
+                const scheduleEndTime = ui.modalScheduleEndTimeInput.value || null;
+
+                // Create the new classroom with all info
                 const newClassroom = new Classroom({
-                    name: name,
-                    type: type,
-                    educationalSystem: educationalSystem,
-                    level: level
+                    name: newClassName,
+                    type: classType,
+                    educationalSystem: eduSystem,
+                    level: level,
+                    scheduleText: scheduleText,
+                    scheduleDays: scheduleDays,
+                    scheduleStartTime: scheduleStartTime,
+                    scheduleEndTime: scheduleEndTime
                 });
+
+                state.classrooms[newClassName] = newClassroom;
+                state.saveData();
+
+                ui.closeActiveModal();
+                ui.renderClassList();
+                ui.showNotification(`✅ کلاس «${newClassName}» ایجاد شد.`);
 
                 // Save to State
                 state.classrooms[name] = newClassroom;

@@ -550,6 +550,31 @@
                 </select>
             </div>
 
+            <h3 id="modal-schedule-toggle" class="accordion-toggle open" style="margin-top: 20px;">
+                <span class="arrow">▼</span>
+                زمان‌بندی کلاس (اختیاری)
+            </h3>
+            <div id="modal-schedule-content" class="accordion-content open">
+                <div class="input-group">
+                    <label for="modal-schedule-text">زمان‌بندی متنی:</label>
+                    <input type="text" id="modal-schedule-text" placeholder="مثال: شنبه‌ها ۱۴:۰۰ - ۱۶:۰۰" dir="auto">
+                </div>
+                <div class="input-group" style="margin-top: 15px;">
+                    <label>روزهای هفته:</label>
+                    <div id="modal-schedule-days" class="checkbox-group">
+                        <!-- Checkboxes will be generated dynamically in JS -->
+                    </div>
+                </div>
+                <div class="input-group" style="margin-top: 15px;">
+                    <label for="modal-schedule-start-time">ساعت شروع:</label>
+                    <input type="time" id="modal-schedule-start-time">
+                </div>
+                <div class="input-group" style="margin-top: 15px;">
+                    <label for="modal-schedule-end-time">ساعت پایان:</label>
+                    <input type="time" id="modal-schedule-end-time">
+                </div>
+            </div>
+
             <div class="modal-actions" style="margin-top: 20px;">
                 <button id="cancel-add-class-btn" class="modal-action-btn">لغو</button>
                 <button id="confirm-add-class-btn" class="modal-action-btn btn-primary">ایجاد کلاس</button>

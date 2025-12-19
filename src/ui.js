@@ -151,6 +151,14 @@ export const attendancePane = document.getElementById('attendance-pane');
 export const settingsEduSystemSelect = document.getElementById('settings-edu-system');
 export const settingsLevelSelect = document.getElementById('settings-level');
 
+// Elements for schedule section in add-class modal
+export const modalScheduleTextInput = document.getElementById('modal-schedule-text');
+export const modalScheduleDaysContainer = document.getElementById('modal-schedule-days');
+export const modalScheduleStartTimeInput = document.getElementById('modal-schedule-start-time');
+export const modalScheduleEndTimeInput = document.getElementById('modal-schedule-end-time');
+export const modalScheduleToggle = document.getElementById('modal-schedule-toggle');
+export const modalScheduleContent = document.getElementById('modal-schedule-content');
+
 // Helper for handling Long Press events
 export function setupLongPress(element, callback) {
     let timer;
@@ -5527,6 +5535,27 @@ export function openAddClassModal() {
     // 3. Show Modal using the standard app function
     // This handles the 'modal-visible' class and back-button history automatically
     openModal('add-class-modal');
+
+    // Generate day checkboxes (similar to settings page logic)
+    const daysOfWeek = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه', 'شنبه'];
+    modalScheduleDaysContainer.innerHTML = '';
+    daysOfWeek.forEach((day, index) => {
+        const label = document.createElement('label');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = (index + 1) % 7; // 0=Sunday, but adjust if needed for Persian week
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(day));
+        modalScheduleDaysContainer.appendChild(label);
+    });
+
+    // Set up accordion toggle for the scheduling section
+    modalScheduleToggle.addEventListener('click', () => {
+        modalScheduleToggle.classList.toggle('open');
+        modalScheduleContent.classList.toggle('open');
+        const arrow = modalScheduleToggle.querySelector('.arrow');
+        arrow.textContent = modalScheduleToggle.classList.contains('open') ? '▼' : '▶';
+    });
 
     modalNewClassNameInput.focus();
 }
