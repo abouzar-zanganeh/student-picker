@@ -902,7 +902,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const educationalSystem = ui.modalAddClassSystemSelect.value;
                 const level = ui.modalAddClassLevelSelect.value;
 
-                console.log("DEBUG: Data gathered:", { name, type, educationalSystem, level }); // Log 4
 
                 // Instantiate New Class
                 const newClassroom = new Classroom({
@@ -915,12 +914,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Save to State
                 state.classrooms[name] = newClassroom;
                 state.saveData();
-                console.log("DEBUG: Data Saved."); // Log 5
 
                 // Update UI & Close
                 ui.renderClassList();
                 ui.closeAddClassModal();
-                console.log("DEBUG: Success!"); // Log 6
 
             } catch (error) {
                 console.error("❌ CRASH ERROR:", error);
