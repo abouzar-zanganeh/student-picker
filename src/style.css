@@ -1222,6 +1222,11 @@ button:disabled:hover {
     max-width: 400px;
     width: 100%;
     box-sizing: border-box;
+
+    max-height: 80vh;
+    /* Limits height to 80% of viewport, preventing overflow off-screen. */
+    overflow-y: auto;
+    /* Enables vertical scrolling if content is taller than max-height. */
 }
 
 #secure-confirm-code {

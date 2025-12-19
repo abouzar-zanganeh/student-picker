@@ -5536,16 +5536,24 @@ export function openAddClassModal() {
     // This handles the 'modal-visible' class and back-button history automatically
     openModal('add-class-modal');
 
-    // Generate day checkboxes (similar to settings page logic)
-    const daysOfWeek = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه', 'شنبه'];
+    // Generate day checkboxes in Persian order: Starting from شنبه (Saturday=6) to جمعه (Friday=5)  
+    const persianDays = [
+        { label: 'شنبه', value: 6 }, // Saturday  
+        { label: 'یکشنبه', value: 0 }, // Sunday  
+        { label: 'دوشنبه', value: 1 }, // Monday  
+        { label: 'سه‌شنبه', value: 2 }, // Tuesday  
+        { label: 'چهارشنبه', value: 3 }, // Wednesday  
+        { label: 'پنج‌شنبه', value: 4 }, // Thursday  
+        { label: 'جمعه', value: 5 } // Friday  
+    ];
     modalScheduleDaysContainer.innerHTML = '';
-    daysOfWeek.forEach((day, index) => {
+    persianDays.forEach(day => {
         const label = document.createElement('label');
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
-        checkbox.value = (index + 1) % 7; // 0=Sunday, but adjust if needed for Persian week
+        checkbox.value = day.value;
         label.appendChild(checkbox);
-        label.appendChild(document.createTextNode(day));
+        label.appendChild(document.createTextNode(day.label));
         modalScheduleDaysContainer.appendChild(label);
     });
 
