@@ -3411,3 +3411,13 @@ label {
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     color: var(--color-strong-warning) !important;
 }
+
+.checkbox-group-in-add-class-modal {
+    display: flex;
+    flex-wrap: wrap;
+    /* Allows checkboxes to wrap to new lines if needed */
+    gap: 15px;
+    /* Adds space between checkboxes for better breathing room */
+    margin-top: 5px;
+    /* Small space below the label */
+}
