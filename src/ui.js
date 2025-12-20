@@ -7,7 +7,7 @@ import {
     getActiveItems, getSessionDisplayMap, permanentlyDeleteStudent,
     permanentlyDeleteSession, permanentlyDeleteCategory, permanentlyDeleteScore, permanentlyDeleteNote
 } from './state.js';
-import { detectTextDirection, renderMultiLineText, parseStudentName } from './utils.js';
+import { detectTextDirection, renderMultiLineText, parseStudentName, sortStudents } from './utils.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
 import { Category, EDUCATIONAL_SYSTEMS } from './models.js';
@@ -1345,7 +1345,9 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     // 2. Define Name
     const nameSpan = document.createElement('span');
     nameSpan.className = 'student-name';
-    nameSpan.textContent = student.identity.name;
+    nameSpan.textContent = student.identity.firstName && student.identity.lastName
+        ? `${student.identity.lastName}، ${student.identity.firstName}`
+        : student.identity.name;
 
     // Normal Click: Profile (Blocked if long press occurred)
     nameSpan.addEventListener('click', (e) => {
@@ -1607,13 +1609,15 @@ function getRealSessionNumber() {
 }
 
 export function renderAttendancePage() {
+
+    const allStudents = getActiveItems(state.currentClassroom.students);
+    const sortedStudents = sortStudents(allStudents);
+
     if (!state.currentClassroom || !state.selectedSession) return;
 
-    // --- FIX: Ensure all active students have a record in the current session ---
-    getActiveItems(state.currentClassroom.students).forEach(student => {
+    sortedStudents.forEach(student => {
         state.selectedSession.initializeStudentRecord(student.identity.studentId);
     });
-    // --- END FIX ---
 
     state.setSelectedStudentsForMassComment([]);
 
@@ -1653,7 +1657,7 @@ export function renderAttendancePage() {
 
     attendanceListUl.appendChild(headerLi);
 
-    getActiveItems(state.currentClassroom.students).forEach(student => {
+    sortedStudents.forEach(student => {
         const li = createAttendanceListItem(student, sessionDisplayNumberMap);
         attendanceListUl.appendChild(li);
     });
@@ -1716,7 +1720,8 @@ export function renderStudentStatsList() {
     });
 
     const tbody = table.createTBody();
-    const activeStudents = getActiveItems(state.currentClassroom.students);
+
+    const activeStudents = sortStudents(getActiveItems(state.currentClassroom.students));
 
     const calculateAbsences = (student) => {
         let absenceCount = 0;
@@ -1746,7 +1751,7 @@ export function renderStudentStatsList() {
         // 1. Add data for the static columns
         const nameCell = row.insertCell();
         const nameLink = document.createElement('span');
-        nameLink.textContent = student.identity.name;
+        nameLink.textContent = `${student.identity.lastName}، ${student.identity.firstName}`;
         nameLink.className = 'student-name-link';
         nameLink.addEventListener('click', () => {
             showStudentProfile(student);
@@ -3834,19 +3839,12 @@ export function renderSettingsStudentList() {
     // 1. Get all active students
     const allStudents = getActiveItems(state.currentClassroom.students);
 
-    // 2. Split them into two groups
-    const structuredStudents = allStudents.filter(s => s.identity.firstName && s.identity.lastName);
-    const unstructuredStudents = allStudents.filter(s => !s.identity.firstName || !s.identity.lastName);
+    //2. sort students into structured and unstructured
+    const sortedStudents = sortStudents(allStudents);
 
-    // 3. Sort the structured ones by Last Name (Persian locale safe)
-    structuredStudents.sort((a, b) => {
-        return a.identity.lastName.localeCompare(b.identity.lastName, 'fa');
-    });
 
-    // 4. Merge: Structured students (A-Z) come first, Unstructured (by Creation Time) come last
-    const sortedStudents = [...structuredStudents, ...unstructuredStudents];
 
-    // 5. Render the list
+    // 3. Render the list
     sortedStudents.forEach(student => {
         const li = document.createElement('li');
 
@@ -3860,7 +3858,7 @@ export function renderSettingsStudentList() {
         // --- VISUAL GUIDE LOGIC ---
         // If separated, show "First ، Last". If not, show normal "Name"
         if (student.identity.firstName && student.identity.lastName) {
-            nameSpan.textContent = `${student.identity.firstName}، ${student.identity.lastName}`;
+            nameSpan.textContent = `${student.identity.lastName}، ${student.identity.firstName}`;
         } else {
             nameSpan.textContent = student.identity.name;
         }
@@ -5079,16 +5077,9 @@ function generatePrintableReport(classroom, selectedColumns, sortMode = 'default
         year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
     });
 
-    // 2. Apply Sorting (Hybrid Logic: Structured First, Unstructured Last)
+    // 2. Apply Sorting using sorting helper in utils.js
     if (sortMode === 'alpha') {
-        const structuredStudents = students.filter(s => s.identity.firstName && s.identity.lastName);
-        const unstructuredStudents = students.filter(s => !s.identity.firstName || !s.identity.lastName);
-
-        structuredStudents.sort((a, b) => {
-            return a.identity.lastName.localeCompare(b.identity.lastName, 'fa');
-        });
-
-        students = [...structuredStudents, ...unstructuredStudents];
+        students = sortStudents(students);
     }
 
     // 3. Build Table Headers

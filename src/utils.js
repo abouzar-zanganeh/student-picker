@@ -141,3 +141,36 @@ export function playSuccessSound() {
         generateSound();
     }
 }
+// helper function to use for any type of students names sorting 
+export function sortStudents(students) {
+    const structured = students.filter(
+        s => s.identity.firstName && s.identity.lastName
+    );
+
+    const semiStructured = students.filter(
+        s =>
+            (!s.identity.firstName || !s.identity.lastName) &&
+            typeof s.identity.name === 'string'
+    );
+
+    const unstructured = students.filter(
+        s =>
+            (!s.identity.firstName || !s.identity.lastName) &&
+            !s.identity.name
+    );
+
+    // Sort by last name, then first name (Persian locale)
+    structured.sort((a, b) => {
+        const last = a.identity.lastName.localeCompare(b.identity.lastName, 'fa');
+        if (last !== 0) return last;
+        return a.identity.firstName.localeCompare(b.identity.firstName, 'fa');
+    });
+
+    // Sort single-string names
+    semiStructured.sort((a, b) =>
+        a.identity.name.localeCompare(b.identity.name, 'fa')
+    );
+
+    return [...structured, ...semiStructured, ...unstructured];
+}
+
