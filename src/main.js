@@ -694,7 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const dotIndex = currentLine.indexOf('.');
             if (currentLine && (dotIndex <= 0 || dotIndex >= currentLine.length - 1)) {
                 e.preventDefault(); // Prevents the new line from being created
-                ui.showNotification("لطفا نام و نام خانوادگی شخص را با یک نقطه از هم جدا کنید. مثال: علی . احمدی");
+                ui.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید. مثال: علی . احمدی");
             }
         }
     });
@@ -742,7 +742,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const dotIndex = studentName.indexOf('.');
         if (dotIndex <= 0 || dotIndex >= studentName.length - 1) {
-            ui.showNotification("لطفا نام و نام خانوادگی شخص را با یک نقطه از هم جدا کنید. مثال: علی . احمدی");
+            ui.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید. مثال: علی . احمدی");
             return;
         }
 

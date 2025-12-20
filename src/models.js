@@ -7,6 +7,19 @@ export const EDUCATIONAL_SYSTEMS = {
         id: 'ili',
         label: 'کانون زبان ایران',
         levels: [
+            // Kids
+            'Primer 1', 'Primer 2',
+            'Step Up 1', 'Step Up 2', 'Step Up 3', 'Step Up 4',
+            'Move Up 1', 'Move Up 2', 'Move Up 3', 'Move Up 4',
+            'Jump Up 1', 'Jump Up 2', 'Jump Up 3', 'Jump Up 4',
+
+            // Young Adults
+            'Start 1',
+            'Run 1', 'Run 2', 'Run 3', 'Run 4',
+            'Race 1', 'Race 2', 'Race 3',
+            'Reach 1', 'Reach 2', 'Reach 3', 'Reach 4',
+
+            // Adults
             'Basic 1', 'Basic 2', 'Basic 3',
             'Elementary 1', 'Elementary 2', 'Elementary 3',
             'Pre-intermediate 1', 'Pre-intermediate 2', 'Pre-intermediate 3',
@@ -15,6 +28,7 @@ export const EDUCATIONAL_SYSTEMS = {
             'Advanced 1', 'Advanced 2', 'Advanced 3'
         ]
     },
+
     school: {
         id: 'school',
         label: 'آموزش و پرورش',
