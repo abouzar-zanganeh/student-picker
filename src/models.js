@@ -352,10 +352,6 @@ export class Classroom {
         this.students.push(studentInstance);
     }
 
-    removeStudent(studentId) {
-        this.students = this.students.filter(s => s.identity.studentId !== studentId);
-    }
-
     startNewSession() {
 
         const maxSessionNumber = this.sessions.reduce((max, s) => Math.max(max, s.sessionNumber), 0);
@@ -411,15 +407,6 @@ export class Classroom {
             }
         }
         return null;
-    }
-
-    endLiveSession() {
-        const sessionToEnd = this.liveSession;
-        if (sessionToEnd) {
-            sessionToEnd.end();
-            return true;
-        }
-        return false;
     }
 
     calculateFinalStudentScore(student) {
