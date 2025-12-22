@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
         backupShareBtn, backupOptionsCancelBtn, categoryModalSaveBtn, categoryModalCancelBtn,
         massCommentBtn, massCommentCancelBtn, massCommentSaveBtn,
         massCommentContent, massCommentAppendCheckbox, processMassHomeworkComment,
-        attendanceSearchInput
+        attendanceSearchInput, newCategoryWeightInput
     } = ui; // This is a bit of a trick to avoid rewriting all the getElementById calls
     const trashNavBtn = document.getElementById('trash-nav-btn');
 
@@ -195,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof state.saveCategoryCallback === 'function') {
             state.saveCategoryCallback(categoryName, isGraded);
         }
+        ui.renderStudentStatsList();
     });
 
     window.addEventListener('scroll', ui.closeContextMenu);
@@ -451,7 +452,10 @@ document.addEventListener('DOMContentLoaded', () => {
     addCategoryBtn.addEventListener('click', () => {
         if (!state.currentClassroom) return;
         const categoryName = newCategoryNameInput.value.trim();
+
         const isGraded = isGradedCheckbox.checked; // Get the checkbox status
+
+        const weight = parseFloat(newCategoryWeightInput.value) || 1;
 
         if (!categoryName) {
             alert("⚠️لطفاً نام دسته‌بندی را وارد کنید.");
@@ -473,9 +477,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert("⚠️این دسته‌بندی از قبل وجود دارد.");
                 return;
             }
+
         }
-        // Pass the 'isGraded' status to the constructor
-        const newCategory = new Category(categoryName, '', isGraded);
+        // Pass the 'isGraded' status and weight to the constructor
+        const newCategory = new Category(categoryName, '', isGraded, weight);
         state.currentClassroom.categories.push(newCategory);
         state.saveData();
 

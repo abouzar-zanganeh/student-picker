@@ -476,6 +476,7 @@ export function showCategoryModal(onSave, options = {}) {
         title = 'ایجاد دسته‌بندی جدید',
         initialName = '',
         initialIsGraded = false,
+        initialWeight = 1,
         saveButtonText = 'ذخیره'
     } = options;
 
@@ -483,6 +484,9 @@ export function showCategoryModal(onSave, options = {}) {
     categoryModalTitle.textContent = title;
     newCategoryModalNameInput.value = initialName;
     newCategoryModalIsGradedCheckbox.checked = initialIsGraded;
+
+    newCategoryModalWeightInput.value = initialWeight;
+
     categoryModalSaveBtn.textContent = saveButtonText;
 
     // 2. Set the callback function that will run on save
@@ -1692,7 +1696,7 @@ export function renderStudentStatsList() {
     const nameHeader = ['نام'];
 
     // 2. Define the static counter headers that will now go at the end.
-    const counterHeaders = ['کل انتخاب ها', 'غیبت', 'خروج', 'فرصت ازدست‌رفته', 'مشکل', 'میانگین', 'نمره کلاسی (کانون)'];
+    const counterHeaders = ['کل انتخاب ها', 'غیبت', 'خروج', 'فرصت ازدست‌رفته', 'مشکل', 'میانگین', 'نمره نهایی'];
 
     // 3. Get the dynamic part by filtering for gradable categories.
     const gradedCategoryHeaders = state.currentClassroom.categories

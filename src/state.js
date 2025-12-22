@@ -409,7 +409,13 @@ export function rehydrateData(plainClassrooms) {
         });
 
         classroomInstance.categories = (plainClass.categories || []).map(plainCategory => {
-            const categoryInstance = new Category(plainCategory.name, plainCategory.description, plainCategory.isGradedCategory); categoryInstance.id = plainCategory.id;
+            const categoryInstance = new Category(
+                plainCategory.name,
+                plainCategory.description,
+                plainCategory.isGradedCategory,
+                plainCategory.weight || 1
+            );
+            categoryInstance.id = plainCategory.id;
             categoryInstance.isDeleted = plainCategory.isDeleted;
             return categoryInstance;
         });
