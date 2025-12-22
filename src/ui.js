@@ -159,6 +159,9 @@ export const modalScheduleEndTimeInput = document.getElementById('modal-schedule
 export const modalScheduleToggle = document.getElementById('modal-schedule-toggle');
 export const modalScheduleContent = document.getElementById('modal-schedule-content');
 
+export const newCategoryWeightInput = document.getElementById('new-category-weight');
+export const newCategoryModalWeightInput = document.getElementById('new-category-modal-weight');
+
 // Helper for handling Long Press events
 export function setupLongPress(element, callback) {
     let timer;
@@ -484,12 +487,13 @@ export function showCategoryModal(onSave, options = {}) {
 
     // 2. Set the callback function that will run on save
     state.setSaveCategoryCallback((categoryName, isGraded) => {
+        const weight = parseFloat(newCategoryModalWeightInput.value) || 1;
         // Basic validation before executing the main callback
         if (!categoryName) {
             showNotification('⚠️ لطفاً نام دسته‌بندی را وارد کنید.');
             return;
         }
-        onSave(categoryName, isGraded);
+        onSave(categoryName, isGraded, weight);
         closeActiveModal(); // Close the modal on successful save
     });
 
@@ -2456,10 +2460,11 @@ function renderCategoryPills() {
                     label: 'تغییر نام',
                     icon: '✏️',
                     action: () => {
-                        showCategoryModal((newName, newIsGraded) => {
+                        showCategoryModal((newName, newIsGraded, newWeight) => {
                             const result = state.renameCategory(state.currentClassroom, category, newName);
                             if (result.success) {
                                 category.isGradedCategory = newIsGraded;
+                                category.weight = newWeight;
                                 state.saveData();
                                 logManager.addLog(state.currentClassroom.info.name, `نام دسته‌بندی «${category.name}» به «${newName}» تغییر یافت.`);
                                 renderCategoryPills();
@@ -2472,6 +2477,7 @@ function renderCategoryPills() {
                             title: 'ویرایش دسته‌بندی',
                             initialName: category.name,
                             initialIsGraded: category.isGradedCategory,
+                            initialWeight: category.weight || 1,
                             saveButtonText: 'ذخیره تغییرات'
                         });
                     }
@@ -2549,7 +2555,8 @@ function renderCategoryPills() {
 
     if (!state.selectedSession.isFinished) {
         addPill.addEventListener('click', () => {
-            showCategoryModal((categoryName, isGraded) => {
+            // Added 'weight' to the callback parameters below
+            showCategoryModal((categoryName, isGraded, weight) => {
                 const existingCategory = state.currentClassroom.categories.find(
                     cat => cat.name.toLowerCase() === categoryName.toLowerCase() && !cat.isDeleted
                 );
@@ -2557,17 +2564,18 @@ function renderCategoryPills() {
                     showNotification("⚠️ این دسته‌بندی از قبل وجود دارد.");
                     return;
                 }
-                const newCategory = new Category(categoryName, '', isGraded);
+
+                const newCategory = new Category(categoryName, '', isGraded, weight);
                 state.currentClassroom.categories.push(newCategory);
+
                 state.saveData();
                 logManager.addLog(state.currentClassroom.info.name,
                     `دسته‌بندی جدید «${categoryName}» اضافه شد.`, {
                     type: 'VIEW_CLASS_SETTINGS'
-                }
-                );
+                });
                 renderCategoryPills();
                 showNotification(`✅ دسته‌بندی «${categoryName}» اضافه شد.`);
-            });
+            }, { initialWeight: 1 }); // Passing default weight to the modal options
         });
     } else {
         addPill.classList.add('disabled');
@@ -3956,6 +3964,14 @@ export function renderSettingsCategories() {
             gradedBadge.textContent = 'نمره‌دار';
             nameAndBadgeContainer.appendChild(gradedBadge);
         }
+
+        if (category.isGradedCategory) {
+            const weightBadge = document.createElement('span');
+            weightBadge.className = 'category-badge weight-badge';
+            weightBadge.textContent = `ضریب: ${category.weight || 1}`;
+            nameAndBadgeContainer.appendChild(weightBadge);
+        }
+
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn-icon';
         deleteBtn.innerHTML = '🗑️';

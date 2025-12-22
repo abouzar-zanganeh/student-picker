@@ -139,6 +139,11 @@
                 <input type="checkbox" id="is-graded-checkbox">
                 <label for="is-graded-checkbox">نمره‌دار</label>
             </div>
+
+            <div class="input-wrapper" style="width: 80px;">
+                <input type="number" id="new-category-weight" value="1" min="1" placeholder="ضریب">
+            </div>
+
             <button id="add-category-btn">افزودن</button>
         </div>
         <ul id="category-list" class="list-container"></ul>
@@ -476,6 +481,8 @@
             <div class="modal-options">
                 <input type="checkbox" id="new-category-modal-is-graded">
                 <label for="new-category-modal-is-graded">نمره‌دار</label>
+                <input type="number" id="new-category-modal-weight" value="1" min="1"
+                    style="width: 60px; margin-right: 10px;" title="ضریب نمره">
             </div>
             <div class="modal-actions">
                 <button id="category-modal-cancel-btn" class="btn-secondary">لغو</button>
