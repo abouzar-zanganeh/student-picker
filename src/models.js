@@ -468,28 +468,6 @@ export class Classroom {
 
         return Math.trunc(finalScore * 10) / 10;
     }
-
-    assignAllFinalScores() {
-        let successCount = 0;
-        let failedStudentsNames = [];
-        console.log("شروع عملیات محاسبه نمره نهایی برای تمام دانش‌آموزان...");
-        this.students.forEach(student => {
-            const calculatedScore = this.calculateFinalStudentScore(student);
-            if (calculatedScore !== null) {
-                student.finalClassActivityScore = calculatedScore;
-                successCount++;
-            } else {
-                student.finalClassActivityScore = null;
-                failedStudentsNames.push(student.identity.name);
-            }
-        });
-        const failedCount = failedStudentsNames.length;
-        console.log(`عملیات پایان یافت. تعداد نمرات موفق: ${successCount} | تعداد ناموفق (نمرات ناقص): ${failedCount}`);
-        if (failedCount > 0) {
-            console.log("اسامی دانش‌آموزانی که نمراتشان ناقص است:");
-            failedStudentsNames.forEach(name => console.log(`- ${name}`));
-        }
-    }
 }
 
 export class Category {
