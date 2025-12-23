@@ -2566,6 +2566,9 @@ function renderCategoryPills() {
     if (!state.selectedSession.isFinished) {
         addPill.addEventListener('click', () => {
 
+            newCategoryModalIsGradedCheckbox.checked = false;
+            newCategoryModalWeightInput.style.display = 'none';
+
             showCategoryModal((categoryName, isGraded, weight) => {
 
                 const existingCategory = state.currentClassroom.categories.find(
