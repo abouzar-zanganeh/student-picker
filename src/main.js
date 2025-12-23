@@ -5,7 +5,7 @@ import * as utils from './utils.js';
 import * as db from './db.js';
 import JSZip from 'jszip';
 import { resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent, getSessionDisplayMap, isAssessmentModeActive, setIsAssessmentModeActive } from './state.js';
-import { switchDashboardTab, renderRestorePointsPage } from './ui.js';
+import { switchDashboardTab, renderRestorePointsPage, newCategoryModalIsGradedCheckbox } from './ui.js';
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound } from './utils.js';
 
@@ -2177,9 +2177,18 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.showNotification(msg);
     });
 
-    // Temporary for debugging, must be commented out as soon as debugging ends
-    // window.state = state;
-    // window.ui = ui;
+    const newCategoryModalIsGradedCheckbox = document.getElementById('new-category-modal-is-graded');
+    const newCategoryModalWeightInput = document.getElementById('new-category-modal-weight');
+
+    if (newCategoryModalIsGradedCheckbox && newCategoryModalWeightInput) {
+        newCategoryModalIsGradedCheckbox.addEventListener('change', (e) => {
+            newCategoryModalWeightInput.style.display = e.target.checked ? 'block' : 'none';
+        });
+
+        // Set initial state on load
+        newCategoryModalWeightInput.style.display = newCategoryModalIsGradedCheckbox.checked ? 'block' : 'none';
+    }
+
 
 });
 

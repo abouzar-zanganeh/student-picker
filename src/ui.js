@@ -58,6 +58,7 @@ export const selectStudentBtn = document.getElementById('select-student-btn');
 export const selectStudentBtnWrapper = document.getElementById('select-student-btn-wrapper');
 
 export const assessmentModeLabel = document.getElementById('assessment-mode-label');
+export const categoryWeightLabel = document.getElementById('category-weight-label');
 
 export const attendancePage = document.getElementById('attendance-page');
 export const attendanceListUl = document.getElementById('attendance-list');
@@ -484,6 +485,7 @@ export function showCategoryModal(onSave, options = {}) {
     categoryModalTitle.textContent = title;
     newCategoryModalNameInput.value = initialName;
     newCategoryModalIsGradedCheckbox.checked = initialIsGraded;
+
 
     newCategoryModalWeightInput.value = initialWeight;
 
@@ -1887,9 +1889,11 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
     // --- NEW: Sync Category State and UI ---
     const correspondingCategory = state.currentClassroom.categories.find(c => c.name === categoryName);
     if (correspondingCategory) {
+
         // Update the application state to the historical category
         state.setSelectedCategory(correspondingCategory);
         updateSelectButtonText(correspondingCategory);
+        updateCategoryWeightLabel(correspondingCategory);
 
         // Update the UI to show the correct active pill
         const allPills = document.querySelectorAll('#category-selection-container .pill');
@@ -2394,6 +2398,7 @@ function initializeStudentPageUI() {
 
 
 
+
     // Set header and clear containers
     categoryPillsContainer.innerHTML = '';
     resultDiv.innerHTML = '';
@@ -2434,6 +2439,7 @@ function renderCategoryPills() {
                 pill.classList.add('active');
                 state.setSelectedCategory(category);
                 updateSelectButtonText(category);
+                updateCategoryWeightLabel(category);
                 updateQuickGradeUIForCategory(category);
                 updateCategoryColumnHighlight(category.name);
                 selectStudentBtnWrapper.classList.remove('disabled-wrapper');
@@ -2559,9 +2565,11 @@ function renderCategoryPills() {
 
     if (!state.selectedSession.isFinished) {
         addPill.addEventListener('click', () => {
-            // Added 'weight' to the callback parameters below
+
             showCategoryModal((categoryName, isGraded, weight) => {
+
                 const existingCategory = state.currentClassroom.categories.find(
+
                     cat => cat.name.toLowerCase() === categoryName.toLowerCase() && !cat.isDeleted
                 );
                 if (existingCategory) {
@@ -2607,11 +2615,23 @@ function restoreSessionState() {
     }
 }
 
+// Updates the main "Select Student" button text based on the selected category
 function updateSelectButtonText(category) {
     if (category) {
         selectStudentBtn.textContent = `نفر بعدی در ${category.name}`;
+
     } else {
         selectStudentBtn.textContent = 'نفر بعدی';
+    }
+}
+
+
+function updateCategoryWeightLabel(category) {
+    if (category && category.isGradedCategory) {
+        categoryWeightLabel.textContent = `ضریب: ${category.weight || 1}`;
+        categoryWeightLabel.style.display = 'block';
+    } else {
+        categoryWeightLabel.style.display = 'none';
     }
 }
 
