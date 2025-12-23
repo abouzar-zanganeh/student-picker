@@ -184,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     categoryModalCancelBtn.addEventListener('click', () => {
+
         ui.closeActiveModal();
         state.setSaveCategoryCallback(null); // Clear the callback on cancel
     });
@@ -2179,14 +2180,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const newCategoryModalIsGradedCheckbox = document.getElementById('new-category-modal-is-graded');
     const newCategoryModalWeightInput = document.getElementById('new-category-modal-weight');
+    const newCategoryModalWeightLabel = document.getElementById('new-category-modal-weight-label');
 
     if (newCategoryModalIsGradedCheckbox && newCategoryModalWeightInput) {
         newCategoryModalIsGradedCheckbox.addEventListener('change', (e) => {
             newCategoryModalWeightInput.style.display = e.target.checked ? 'block' : 'none';
+            newCategoryModalWeightLabel.style.display = e.target.checked ? 'block' : 'none';
+
         });
 
         // Set initial state on load
-        newCategoryModalWeightInput.style.display = newCategoryModalIsGradedCheckbox.checked ? 'block' : 'none';
+        // Set initial state on load
+        const isChecked = newCategoryModalIsGradedCheckbox.checked;
+        newCategoryModalWeightInput.style.display = isChecked ? 'block' : 'none';
+        newCategoryModalWeightLabel.style.display = isChecked ? 'block' : 'none';
     }
 
 
