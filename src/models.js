@@ -128,7 +128,7 @@ export class Student {
         }
 
         const average = totalValue / scoreCount;
-        return Math.round(average * 100) / 100;
+        return Math.trunc(average * 10) / 10;
     }
 }
 
