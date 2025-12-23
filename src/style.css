@@ -2482,12 +2482,13 @@ textarea,
 /* end of Demo Mode */
 
 /* category modal */
-.category-modal-options {
+.modal-options {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-top: 15px;
-    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 6vh;
+    margin-bottom: 6vh;
 }
 
 .add-category-pill {

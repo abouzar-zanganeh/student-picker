@@ -2178,22 +2178,16 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.showNotification(msg);
     });
 
-    const newCategoryModalIsGradedCheckbox = document.getElementById('new-category-modal-is-graded');
-    const newCategoryModalWeightInput = document.getElementById('new-category-modal-weight');
-    const newCategoryModalWeightLabel = document.getElementById('new-category-modal-weight-label');
+    const weightGroup = document.getElementById('new-category-modal-weight-group');
 
-    if (newCategoryModalIsGradedCheckbox && newCategoryModalWeightInput) {
+    if (newCategoryModalIsGradedCheckbox && weightGroup) {
         newCategoryModalIsGradedCheckbox.addEventListener('change', (e) => {
-            newCategoryModalWeightInput.style.display = e.target.checked ? 'block' : 'none';
-            newCategoryModalWeightLabel.style.display = e.target.checked ? 'block' : 'none';
-
+            weightGroup.style.display = e.target.checked ? 'flex' : 'none';
         });
 
-        // Set initial state on load
-        // Set initial state on load
+        // Set initial state on load using the group
         const isChecked = newCategoryModalIsGradedCheckbox.checked;
-        newCategoryModalWeightInput.style.display = isChecked ? 'block' : 'none';
-        newCategoryModalWeightLabel.style.display = isChecked ? 'block' : 'none';
+        weightGroup.style.display = isChecked ? 'flex' : 'none';
     }
 
 

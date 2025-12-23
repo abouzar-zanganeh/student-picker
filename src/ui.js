@@ -2567,8 +2567,7 @@ function renderCategoryPills() {
         addPill.addEventListener('click', () => {
 
             newCategoryModalIsGradedCheckbox.checked = false;
-            newCategoryModalWeightInput.style.display = 'none';
-            document.getElementById('new-category-modal-weight-label').style.display = 'none';
+            document.getElementById('new-category-modal-weight-group').style.display = 'none';
 
             showCategoryModal((categoryName, isGraded, weight) => {
 
