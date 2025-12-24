@@ -2192,6 +2192,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.openAddCategoryModal();
     });
 
+    newCategoryModalIsGradedCheckbox.addEventListener('change', (e) => {
+        newCategoryModalWeightGroup.style.display = e.target.checked ? 'flex' : 'none';
+    });
+
 
 });
 
