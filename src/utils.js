@@ -171,3 +171,19 @@ export function sortStudents(students) {
     return [...structured, ...semiStructured, ...unstructured];
 }
 
+// Sets up an element to respond to both double-click (desktop) and double-tap (mobile)
+export function setupDoubleAction(element, callback) {
+    let lastTap = 0;
+    // Handle Desktop
+    element.addEventListener('dblclick', callback);
+    // Handle Mobile (Custom double-tap detection)
+    element.addEventListener('touchend', (e) => {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        if (tapLength < 400 && tapLength > 0) {
+            e.preventDefault();
+            callback(e);
+        }
+        lastTap = currentTime;
+    });
+}

@@ -7,7 +7,7 @@ import {
     getActiveItems, getSessionDisplayMap, permanentlyDeleteStudent,
     permanentlyDeleteSession, permanentlyDeleteCategory, permanentlyDeleteScore, permanentlyDeleteNote
 } from './state.js';
-import { detectTextDirection, renderMultiLineText, parseStudentName, sortStudents } from './utils.js';
+import { detectTextDirection, renderMultiLineText, parseStudentName, sortStudents, setupDoubleAction } from './utils.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
 import { Category, EDUCATIONAL_SYSTEMS } from './models.js';
@@ -262,6 +262,21 @@ export function setupDashboardTabs() {
         attendancePane.classList.add('active');
         selectorPane.classList.remove('active');
         showPage('session-dashboard-page', { tab: 'attendance' });
+    });
+
+    setupDoubleAction(attendanceTabBtn, (e) => {
+        // Standard switch
+        switchDashboardTab('attendance');
+        renderAttendancePage();
+
+        // The double-action happens after the first click has already 
+        // fired, so we just need to target the newly rendered input.
+        setTimeout(() => {
+            const searchInput = document.getElementById('attendance-search-input');
+            if (searchInput) {
+                searchInput.focus();
+            }
+        }, 100);
     });
 }
 
