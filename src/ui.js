@@ -496,7 +496,7 @@ export function showCategoryModal(onSave, options = {}) {
     categoryModalSaveBtn.textContent = saveButtonText;
 
     // 2. Set the callback function that will run on save
-    state.setSaveCategoryCallback((categoryName, isGraded, weight = 1) => {
+    state.setSaveCategoryCallback((categoryName, isGraded) => {
         const weight = parseFloat(newCategoryModalWeightInput.value) || 1;
         // Basic validation before executing the main callback
         if (!categoryName) {
