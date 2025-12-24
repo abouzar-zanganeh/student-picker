@@ -103,7 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
         backupShareBtn, backupOptionsCancelBtn, categoryModalSaveBtn, categoryModalCancelBtn,
         massCommentBtn, massCommentCancelBtn, massCommentSaveBtn,
         massCommentContent, massCommentAppendCheckbox, processMassHomeworkComment,
-        attendanceSearchInput,
+        attendanceSearchInput, newCategoryModalNameInput, newCategoryModalIsGradedCheckbox,
+        newCategoryModalWeightInput, newCategoryModalWeightGroup, openAddCategoryBtn
     } = ui; // This is a bit of a trick to avoid rewriting all the getElementById calls
     const trashNavBtn = document.getElementById('trash-nav-btn');
 
