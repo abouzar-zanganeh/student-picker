@@ -451,50 +451,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    addCategoryBtn.addEventListener('click', () => {
-        if (!state.currentClassroom) return;
-        const categoryName = newCategoryNameInput.value.trim();
-
-        const isGraded = isGradedCheckbox.checked; // Get the checkbox status
-
-        const weight = parseFloat(newCategoryWeightInput.value) || 1;
-
-        if (!categoryName) {
-            alert("⚠️لطفاً نام دسته‌بندی را وارد کنید.");
-            return;
-        }
-        const existingCategory = state.currentClassroom.categories.find(
-            cat => cat.name.toLowerCase() === categoryName.toLowerCase()
-        );
-
-        if (existingCategory) {
-            if (existingCategory.isDeleted) {
-                // It's a deleted category, so purge it before creating the new one.
-                const indexToRemove = state.currentClassroom.categories.findIndex(c => c === existingCategory);
-                if (indexToRemove > -1) {
-                    state.currentClassroom.categories.splice(indexToRemove, 1);
-                }
-            } else {
-                // It's an active category, so show the error.
-                alert("⚠️این دسته‌بندی از قبل وجود دارد.");
-                return;
-            }
-
-        }
-        // Pass the 'isGraded' status and weight to the constructor
-        const newCategory = new Category(categoryName, '', isGraded, weight);
-        state.currentClassroom.categories.push(newCategory);
-        state.saveData();
-
-        logManager.addLog(state.currentClassroom.info.name,
-            `دسته‌بندی جدید «${categoryName}» اضافه شد.`, { type: 'VIEW_CLASS_SETTINGS' });
-
-        ui.renderSettingsCategories();
-
-        // Reset the form fields for the next entry
-        newCategoryNameInput.value = '';
-        isGradedCheckbox.checked = false;
-    });
 
     // --- EVENT LISTENERS FOR CLASS TYPE ---
     const classTypeSettingRadios = document.querySelectorAll('#settings-page input[name="class-type-setting"]');
