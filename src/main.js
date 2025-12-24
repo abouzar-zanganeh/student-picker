@@ -2178,6 +2178,20 @@ document.addEventListener('DOMContentLoaded', () => {
         weightGroup.style.display = isChecked ? 'flex' : 'none';
     }
 
+    openAddCategoryBtn.addEventListener('click', () => {
+        state.setSaveCategoryCallback((name, isGraded, weight) => {
+            if (!name) return;
+            if (state.currentClassroom.categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+                ui.showNotification('⚠️ این دسته‌بندی قبلاً اضافه شده است.');
+                return;
+            }
+            state.currentClassroom.categories.push(new Category(name, '', isGraded, weight));
+            state.saveData();
+            ui.renderSettingsCategories();
+        });
+        ui.openAddCategoryModal();
+    });
+
 
 });
 
