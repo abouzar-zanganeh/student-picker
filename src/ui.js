@@ -163,6 +163,10 @@ export const modalScheduleContent = document.getElementById('modal-schedule-cont
 
 export const newCategoryModalWeightInput = document.getElementById('new-category-modal-weight');
 
+export const newCategoryModal = document.getElementById('category-modal');
+export const newCategoryModalWeightGroup = document.getElementById('new-category-modal-weight-group');
+export const openAddCategoryBtn = document.getElementById('open-add-category-btn');
+
 // Helper for handling Long Press events
 export function setupLongPress(element, callback) {
     let timer;
