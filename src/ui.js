@@ -3020,9 +3020,6 @@ function renderProfileContent(container) {
     container.appendChild(statsSummaryDiv);
 
 
-    // The rest of this function is mostly a copy-paste of the old renderStudentProfilePage,
-    // but adapted to append elements to the 'container' parameter.
-
     const activeCategories = getActiveItems(state.currentClassroom.categories);
     const selectionsBreakdownContainer = document.createElement('div');
     selectionsBreakdownContainer.className = 'stats-breakdown';
@@ -3067,13 +3064,13 @@ function renderProfileContent(container) {
             issuesBreakdownContainer.appendChild(p);
         });
 
-        if (totalIssuesP) {
+        if (totalIssuesP && totalIssues > 0) {
             totalIssuesP.classList.add('collapsible-toggle');
             totalIssuesP.onclick = () => {
                 issuesBreakdownContainer.classList.toggle('open');
-                totalIssuesP.classList.toggle('open'); // Toggles the triangle
+                totalIssuesP.classList.toggle('open');
             };
-            statsSummaryDiv.appendChild(issuesBreakdownContainer);
+            totalIssuesP.after(issuesBreakdownContainer);
         }
     }
 
@@ -3096,13 +3093,13 @@ function renderProfileContent(container) {
             }
         }
 
-        if (totalQualityP) {
+        if (totalQualityP && totalRated > 0) {
             totalQualityP.classList.add('collapsible-toggle');
             totalQualityP.onclick = () => {
                 qualityBreakdownContainer.classList.toggle('open');
                 totalQualityP.classList.toggle('open');
             };
-            statsSummaryDiv.appendChild(qualityBreakdownContainer);
+            totalQualityP.after(qualityBreakdownContainer); // Insert after the <p>, not inside statsSummaryDiv
         }
     }
     // ----------------------------------

@@ -1074,7 +1074,7 @@ button:disabled:hover {
 
 .stats-summary-box p {
     margin: 8px 0;
-    display: flex;
+
     justify-content: space-between;
 }
 
