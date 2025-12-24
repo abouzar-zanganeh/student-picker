@@ -191,13 +191,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     categoryModalSaveBtn.addEventListener('click', () => {
-        const categoryName = ui.newCategoryModalNameInput.value.trim();
-        const isGraded = ui.newCategoryModalIsGradedCheckbox.checked;
+        const categoryName = newCategoryModalNameInput.value.trim();
+        const isGraded = newCategoryModalIsGradedCheckbox.checked;
+        const weight = parseInt(newCategoryModalWeightInput.value, 10) || 1;
 
         if (typeof state.saveCategoryCallback === 'function') {
-            state.saveCategoryCallback(categoryName, isGraded);
+            state.saveCategoryCallback(categoryName, isGraded, weight);
         }
-        ui.renderStudentStatsList();
+        ui.renderStudentStatsList(); // If needed; otherwise remove
     });
 
     window.addEventListener('scroll', ui.closeContextMenu);
