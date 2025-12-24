@@ -629,6 +629,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     csvConfirmBtn.addEventListener('click', () => {
         const selectedCheckboxes = csvPreviewList.querySelectorAll('input[type="checkbox"]:checked');
+        let addedCount = 0;
+        let skippedNames = [];
         let onboardingOccurred = false;
 
         selectedCheckboxes.forEach(checkbox => {
@@ -643,25 +645,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (existingStudent) {
                 if (existingStudent.isDeleted) {
-                    // It's a deleted student, so purge them and all their data.
+                    // پاک‌سازی دانش‌آموز حذف شده برای جایگزینی با نسخه جدید
                     permanentlyDeleteStudent(existingStudent, state.currentClassroom);
                 } else {
-                    // It's an active student, so we log it and skip adding this one.
-                    console.log(`دانش‌آموز «${parsedName.name}» به دلیل تکراری بودن اضافه نشد.`);
-                    return; // Skips to the next item in the forEach loop
+                    // افزودن به لیست تکراری‌ها و پرش از این مرحله
+                    skippedNames.push(parsedName.name);
+                    return;
                 }
             }
 
-            // Now, we can safely add the new student.
-            // Use the helper to parse the name (looks for dot signal)
-            const parsedIdentity = parseStudentName(name);
-            const newStudent = new Student(parsedIdentity);
-
+            const newStudent = new Student(parsedName);
             state.currentClassroom.addStudent(newStudent);
 
+            // مدیریت دانش‌آموز جدید در کلاسی که جلسات قدیمی دارد
             if (state.currentClassroom.sessions.length > 0) {
-
-                // Manually set absence for all finished sessions
                 getActiveItems(state.currentClassroom.sessions)
                     .filter(s => s.isFinished && !s.isCancelled)
                     .forEach(session => {
@@ -671,22 +668,42 @@ document.addEventListener('DOMContentLoaded', () => {
                 onboardNewStudent(newStudent, state.currentClassroom);
                 onboardingOccurred = true;
             }
+            addedCount++;
         });
 
         state.saveData();
 
-        logManager.addLog(state.currentClassroom.info.name,
-            `${selectedCheckboxes.length} دانش‌آموز جدید از لیست ورودی به کلاس اضافه شدند.`, { type: 'VIEW_SESSIONS' });
+        // ثبت در گزارش فعالیت‌ها
+        if (addedCount > 0) {
+            logManager.addLog(state.currentClassroom.info.name,
+                `${addedCount} دانش‌آموز جدید از لیست ورودی به کلاس اضافه شدند.`,
+                { type: 'VIEW_SESSIONS' });
+        }
 
         ui.showSettingsPage(state.currentClassroom);
 
+        // آماده‌سازی بخش "تکراری‌ها" در پیام
+        let duplicateInfo = skippedNames.length > 0
+            ? `⚠️ موارد زیر به دلیل تکراری بودن نادیده گرفته شدند:\n- ${skippedNames.join('\n- ')}`
+            : '';
+
+        // نمایش گزارش نهایی با استفاده از تابع به‌روز شده
         if (onboardingOccurred) {
-            showOnboardingNotification(selectedCheckboxes.length);
+            showOnboardingNotification(addedCount, duplicateInfo);
+        } else if (skippedNames.length > 0 || addedCount > 0) {
+            const finalMsg = addedCount > 0
+                ? `✅ ${addedCount} دانش‌آموز با موفقیت اضافه شدند.\n${duplicateInfo}`
+                : duplicateInfo;
+
+            ui.showCustomConfirm(finalMsg, () => { }, {
+                confirmText: 'متوجه شدم',
+                confirmClass: 'btn-success',
+                onCancel: null
+            });
         }
 
         pasteArea.value = '';
         state.setNamesToImport([]);
-
     });
 
     csvCancelBtn.addEventListener('click', () => {
@@ -1699,17 +1716,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function showOnboardingNotification(studentCount) {
-        const studentWord = studentCount > 1 ? 'دانش‌آموزان جدید' : 'دانش‌آموز جدید';
-        const message = `چون این کلاس جلسات برگزار شده دارد، برای ${studentWord} آمار پایه‌ای (متناسب با سایر دانش‌آموزان) ثبت شد تا در فرایند انتخاب اختلالی ایجاد نشود.`;
+    // main.js - Update the function signature and body
+    // main.js - Update this function (around line 1250)
+    function showOnboardingNotification(addedCount, extraMessage = '') {
+        const studentWord = addedCount > 1 ? 'دانش‌آموزان جدید' : 'دانش‌آموز جدید';
+
+        // 1. Start with the success header
+        let message = `✅ ${addedCount} ${studentWord} با موفقیت اضافه شدند.\n`;
+
+        // 2. Add the onboarding explanation
+        message += `💡 چون این کلاس جلسات برگزار شده دارد، برای این افراد آمار پایه‌ای (متناسب با کلاس) ثبت شد تا در فرایند انتخاب اختلالی ایجاد نشود.`;
+
+        // 3. Append duplicate info if any
+        if (extraMessage) {
+            message += `\n${extraMessage}`;
+        }
 
         ui.showCustomConfirm(
             message,
-            () => { }, // OK button just closes the modal
+            () => { },
             {
                 confirmText: 'متوجه شدم',
                 confirmClass: 'btn-success',
-                onCancel: null // This triggers our new single-button mode
+                onCancel: null
             }
         );
     }

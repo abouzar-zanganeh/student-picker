@@ -426,7 +426,7 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
         : onConfirm;
 
     // --- This part sets up the modal's appearance and is now used for all cases ---
-    confirmModalMessage.textContent = message;
+    confirmModalMessage.innerHTML = message.replace(/\n/g, '<br>');
     confirmModalConfirmBtn.textContent = confirmText;
     confirmModalCancelBtn.textContent = cancelText;
 
