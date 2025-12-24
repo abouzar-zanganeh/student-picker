@@ -200,12 +200,14 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // Run the callback (adds the category)
         if (typeof state.saveCategoryCallback === 'function') {
             state.saveCategoryCallback(categoryName, isGraded, weight);
         }
 
-        ui.closeActiveModal(); // Close explicitly after save
-        ui.renderSettingsCategories(); // Refresh the list
+        ui.closeActiveModal();
+        ui.showNotification('✅ دسته‌بندی جدید با موفقیت اضافه شد.');
+        ui.renderSettingsCategories(); // Refresh list
     });
 
     window.addEventListener('scroll', ui.closeContextMenu);
