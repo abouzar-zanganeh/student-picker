@@ -168,9 +168,9 @@ export const newCategoryModalWeightGroup = document.getElementById('new-category
 export const openAddCategoryBtn = document.getElementById('open-add-category-btn');
 
 // Helper for handling Long Press events
-export function setupLongPress(element, callback) {
+export function setupLongPress(element, callback, duration = 800) {
     let timer;
-    const longPressDuration = 800; // 800ms to trigger
+    let longPressDuration = duration;
 
     const start = (e) => {
         // Prevent default only if necessary? No, keep it simple for now.
@@ -3907,10 +3907,6 @@ export function renderSettingsStudentList() {
             showStudentProfile(student);
         });
 
-        // Rename Logic (Long Press)
-        setupLongPress(li, (e) => {
-            showRenameStudentModal(student, state.currentClassroom);
-        });
 
         // Context Menu
         li.addEventListener('contextmenu', (event) => {
