@@ -3127,6 +3127,18 @@ export function renderScoresHistory(scoresContainer) {
     scoresHeader.textContent = 'تاریخچه نمرات:';
     scoresHeader.style.marginTop = '20px';
 
+    const avgValue = student.getOverallAverageScore();
+    const avgSpan = document.createElement('span');
+    avgSpan.className = 'profile-avg-badge';
+    avgSpan.textContent = ` (میانگین: ${avgValue !== null ? avgValue : '-'})`;
+    scoresHeader.appendChild(avgSpan);
+
+    const finalScore = state.currentClassroom.calculateFinalStudentScore(student);
+    const finalScoreSpan = document.createElement('span');
+    finalScoreSpan.className = 'profile-avg-badge';
+    finalScoreSpan.textContent = ` (نمره نهایی: ${finalScore !== null ? finalScore : '-'})`;
+    scoresHeader.appendChild(finalScoreSpan);
+
     const profileScoresListUl = document.createElement('ul');
     profileScoresListUl.className = 'list-container';
 

@@ -3422,3 +3422,10 @@ label {
     margin-top: 5px;
     /* Small space below the label */
 }
+
+.profile-avg-badge {
+    font-size: 0.8em;
+    font-weight: normal;
+    color: var(--color-primary);
+    margin-right: 8px;
+}
