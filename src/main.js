@@ -206,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         ui.closeActiveModal();
-        ui.showNotification('✅ دسته‌بندی جدید با موفقیت اضافه شد.');
+        ui.showNotification(`✅ دسته‌بندی جدید ${categoryName} با موفقیت اضافه شد.`);
         ui.renderSettingsCategories(); // Refresh list
     });
 
