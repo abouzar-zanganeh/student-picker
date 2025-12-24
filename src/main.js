@@ -633,10 +633,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         selectedCheckboxes.forEach(checkbox => {
             const name = checkbox.dataset.name;
+            const parsedName = parseStudentName(name);
+            const normalizedNewName = normalizeText(parsedName.name);
 
-            const existingStudent = state.currentClassroom.students.find(
-                student => student.identity.name.toLowerCase() === name.toLowerCase()
-            );
+            const existingStudent = state.currentClassroom.students.find(student => {
+                const normalizedExisting = normalizeText(student.identity.name);
+                return normalizedExisting === normalizedNewName && normalizedNewName !== '';
+            });
 
             if (existingStudent) {
                 if (existingStudent.isDeleted) {
@@ -644,7 +647,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     permanentlyDeleteStudent(existingStudent, state.currentClassroom);
                 } else {
                     // It's an active student, so we log it and skip adding this one.
-                    console.log(`دانش‌آموز «${name}» به دلیل تکراری بودن اضافه نشد.`);
+                    console.log(`دانش‌آموز «${parsedName.name}» به دلیل تکراری بودن اضافه نشد.`);
                     return; // Skips to the next item in the forEach loop
                 }
             }
@@ -683,6 +686,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         pasteArea.value = '';
         state.setNamesToImport([]);
+
     });
 
     csvCancelBtn.addEventListener('click', () => {
@@ -752,19 +756,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const existingStudent = state.currentClassroom.students.find(
-            student => student.identity.name.toLowerCase() === studentName.toLowerCase()
+        const parsed = parseStudentName(newStudentNameInput.value);
+        const normalizedNewName = normalizeText(parsed.name);
+
+        const isDuplicate = getActiveItems(state.currentClassroom.students).some(s =>
+            normalizeText(s.identity.name) === normalizedNewName
         );
 
-        if (existingStudent) {
-            if (existingStudent.isDeleted) {
-                // It's a deleted student, so purge them and all their data.
-                permanentlyDeleteStudent(existingStudent, state.currentClassroom);
-            } else {
-                // It's an active student, so show the error.
-                alert("❌دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.");
-                return;
-            }
+        if (isDuplicate) {
+            alert(`دانش‌آموز «${parsed.name}» قبلاً در لیست وجود دارد.`);
+            return;
         }
 
         // Use the helper to parse the name (looks for dot signal)
