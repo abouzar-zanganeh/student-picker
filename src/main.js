@@ -195,10 +195,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const isGraded = newCategoryModalIsGradedCheckbox.checked;
         const weight = parseInt(newCategoryModalWeightInput.value, 10) || 1;
 
+        if (!categoryName) {
+            ui.showNotification('⚠️ نام دسته‌بندی نمی‌تواند خالی باشد.');
+            return;
+        }
+
         if (typeof state.saveCategoryCallback === 'function') {
             state.saveCategoryCallback(categoryName, isGraded, weight);
         }
-        ui.renderStudentStatsList(); // If needed; otherwise remove
+
+        ui.closeActiveModal(); // Close explicitly after save
+        ui.renderSettingsCategories(); // Refresh the list
     });
 
     window.addEventListener('scroll', ui.closeContextMenu);
