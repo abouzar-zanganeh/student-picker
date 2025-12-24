@@ -88,8 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
         newStudentNameInput, addStudentBtn, pasteArea,
         processPasteBtn, csvPreviewPage, csvPreviewList, csvConfirmBtn,
         csvCancelBtn, importCsvBtn, csvFileInput, columnMappingPage,
-        columnSelectDropdown, confirmColumnBtn, cancelImportBtn, newCategoryNameInput,
-        addCategoryBtn, selectStudentBtn, attendancePage, attendanceClassNameHeader,
+        columnSelectDropdown, confirmColumnBtn, cancelImportBtn,
+        selectStudentBtn, attendancePage, attendanceClassNameHeader,
         attendanceListUl, finishAttendanceBtn,
         classListHeader, studentStatsHeader, hamburgerMenuBtn,
         sideNavMenu, closeNavBtn, overlay, backupDataBtn, restoreDataBtn,
@@ -99,11 +99,11 @@ document.addEventListener('DOMContentLoaded', () => {
         secureConfirmCancelBtn, secureConfirmConfirmBtn, addNoteModal,
         newNoteContent, classSaveNoteBtn, cancelNoteBtn, studentSearchInput,
         studentSearchResultsDiv, profileStatsSummaryDiv,
-        profileScoresListUl, isGradedCheckbox, backupOptionsModal, backupDownloadBtn,
+        profileScoresListUl, backupOptionsModal, backupDownloadBtn,
         backupShareBtn, backupOptionsCancelBtn, categoryModalSaveBtn, categoryModalCancelBtn,
         massCommentBtn, massCommentCancelBtn, massCommentSaveBtn,
         massCommentContent, massCommentAppendCheckbox, processMassHomeworkComment,
-        attendanceSearchInput, newCategoryWeightInput
+        attendanceSearchInput,
     } = ui; // This is a bit of a trick to avoid rewriting all the getElementById calls
     const trashNavBtn = document.getElementById('trash-nav-btn');
 
