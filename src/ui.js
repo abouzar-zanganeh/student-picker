@@ -51,8 +51,8 @@ export const columnMappingPage = document.getElementById('column-mapping-page');
 export const columnSelectDropdown = document.getElementById('column-select-dropdown');
 export const confirmColumnBtn = document.getElementById('confirm-column-btn');
 export const cancelImportBtn = document.getElementById('cancel-import-btn');
-export const newCategoryNameInput = document.getElementById('new-category-name');
-export const addCategoryBtn = document.getElementById('add-category-btn');
+
+
 export const appHeader = document.querySelector('.app-header');
 export const selectStudentBtn = document.getElementById('select-student-btn');
 export const selectStudentBtnWrapper = document.getElementById('select-student-btn-wrapper');
@@ -97,7 +97,7 @@ export const profileStatsSummaryDiv = document.getElementById('profile-stats-sum
 export const profileScoresListUl = document.getElementById('profile-scores-list');
 export const globalStudentSearchInput = document.getElementById('global-student-search-input');
 export const globalStudentSearchResultsDiv = document.getElementById('global-student-search-results');
-export const isGradedCheckbox = document.getElementById('is-graded-checkbox');
+
 export const trashedClassesList = document.getElementById('trashed-classes-list');
 export const trashedStudentsList = document.getElementById('trashed-students-list');
 export const trashedSessionsList = document.getElementById('trashed-sessions-list');
@@ -160,7 +160,7 @@ export const modalScheduleEndTimeInput = document.getElementById('modal-schedule
 export const modalScheduleToggle = document.getElementById('modal-schedule-toggle');
 export const modalScheduleContent = document.getElementById('modal-schedule-content');
 
-export const newCategoryWeightInput = document.getElementById('new-category-weight');
+
 export const newCategoryModalWeightInput = document.getElementById('new-category-modal-weight');
 
 // Helper for handling Long Press events
