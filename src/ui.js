@@ -5606,6 +5606,15 @@ export function openAddClassModal() {
     modalNewClassNameInput.focus();
 }
 
+export function openAddCategoryModal() {
+    newCategoryModalNameInput.value = '';
+    newCategoryModalIsGradedCheckbox.checked = false;
+    newCategoryModalWeightInput.value = 1;
+    newCategoryModalWeightGroup.style.display = 'none'; // Hide weight group initially
+    openModal('category-modal');
+    newCategoryModalNameInput.focus();
+}
+
 export function closeAddClassModal() {
     // Use the standard app function to close
     closeActiveModal();
