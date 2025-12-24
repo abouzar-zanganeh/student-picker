@@ -530,11 +530,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- END EVENT LISTENERS ---
 
-    newCategoryNameInput.addEventListener('keyup', (event) => {
-        if (event.key === 'Enter') {
-            addCategoryBtn.click();
-        }
-    });
 
     confirmColumnBtn.addEventListener('click', () => {
         if (!state.importedFileContent) {
