@@ -3429,3 +3429,19 @@ label {
     color: var(--color-primary);
     margin-right: 8px;
 }
+
+.attendance-counters {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--color-border);
+    font-size: 13px;
+    color: var(--color-text-muted);
+}
+
+.attendance-counters strong {
+    color: var(--color-primary);
+    font-size: 15px;
+}

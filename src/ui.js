@@ -4835,6 +4835,18 @@ function renderAbsenteesSummary() {
         return record && record.attendance === 'absent';
     });
 
+    // --- NEW LOGIC START ---
+    const allActiveStudents = getActiveItems(state.currentClassroom.students);
+    const totalAbsent = absentStudents.length;
+    const totalPresent = allActiveStudents.length - totalAbsent;
+
+    const presentEl = document.getElementById('present-count');
+    const absentEl = document.getElementById('absent-count');
+
+    if (presentEl) presentEl.textContent = totalPresent.toLocaleString('fa-IR');
+    if (absentEl) absentEl.textContent = totalAbsent.toLocaleString('fa-IR');
+    // --- NEW LOGIC END ---
+
     // 3. Update the session number in the title
     const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
     sessionNumberSpan.textContent = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
@@ -4909,7 +4921,16 @@ function setupAbsenteesCopyButton() {
         };
 
         // Build the formatted string for the clipboard
-        let textToCopy = `لیست غایبین جلسه شماره ${getRealSessionNumber()}:\n\n`;
+        // Build the formatted string for the clipboard
+        const allActiveStudents = getActiveItems(state.currentClassroom.students);
+        const totalAbsent = absentStudents.length;
+        const totalPresent = allActiveStudents.length - totalAbsent;
+
+        let textToCopy = `گزارش حضور و غیاب جلسه شماره ${getRealSessionNumber()}:\n`;
+        textToCopy += `✅ حاضرین: ${totalPresent.toLocaleString('fa-IR')}\n`;
+        textToCopy += `❌ غایبین: ${totalAbsent.toLocaleString('fa-IR')}\n\n`;
+        textToCopy += `لیست اسامی غایبین:\n`;
+
         absentStudents.forEach(student => {
             const totalAbsences = calculateTotalAbsences(student);
             textToCopy += `- ${student.identity.name} (تعداد غیبت‌ها: ${totalAbsences})\n`;
