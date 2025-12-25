@@ -4803,6 +4803,10 @@ function createAbsenteesSummaryBox() {
                 <button id="copy-absentees-btn" class="btn-icon" title="کپی لیست غایبین">📋</button>
             </div>
             <div id="absentees-summary-list" class="summary-list"></div>
+            <div class="attendance-counters">
+                <span>تعداد حاضرین: <strong id="present-count">0</strong></span>
+                <span>تعداد غایبین: <strong id="absent-count">0</strong></span>
+            </div>
         </div>
     `;
 }
