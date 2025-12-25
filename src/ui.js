@@ -196,7 +196,7 @@ export function setupLongPress(element, callback, duration = 800) {
     element.addEventListener('mouseleave', cancel);
 }
 
-
+// Renders the session dashboard page with the specified initial tab
 export function renderSessionDashboard(initialTab = 'selector') {
     if (!state.currentClassroom || !state.selectedSession) {
         showPage('class-management-page');
@@ -208,23 +208,18 @@ export function renderSessionDashboard(initialTab = 'selector') {
     renderCategoryPills();
     renderStudentStatsList();
 
-    // This sets up the content for the "Attendance" pane
     renderAttendancePage();
 
-    // Now, show the main dashboard page
     showPage('session-dashboard-page', { tab: initialTab });
 
-    // And finally, activate the tab-switching logic
     setupDashboardTabs();
 
-    // --- NEW: Switch to the correct initial tab ---
     switchDashboardTab(initialTab);
-    // --- END NEW ---
 
-    // Restore the last selected category and winner
     restoreSessionState();
 }
 
+// Switches the active tab in the session dashboard
 export function switchDashboardTab(tabName) {
     const selectorTabBtn = document.getElementById('selector-tab-btn');
     const attendanceTabBtn = document.getElementById('attendance-tab-btn');
@@ -239,6 +234,7 @@ export function switchDashboardTab(tabName) {
     attendancePane.classList.toggle('active', !isSelector);
 }
 
+// Sets up event listeners for tab buttons in the session dashboard
 export function setupDashboardTabs() {
     const selectorTabBtn = document.getElementById('selector-tab-btn');
     const attendanceTabBtn = document.getElementById('attendance-tab-btn');
@@ -1199,14 +1195,6 @@ export function renderBreadcrumbs() {
 
             if (state.selectedStudentForProfile) {
                 path.push({ label: `پروفایل: ${state.selectedStudentForProfile.identity.name}` });
-            } else if (activePage === 'session-dashboard-page') {
-                // Check which tab is active
-                const isAttendance = document.getElementById('attendance-tab-btn').classList.contains('active');
-                if (isAttendance) {
-                    path.push({ label: 'حضور و غیاب' });
-                } else {
-                    path.push({ label: 'انتخابگر' });
-                }
             }
         }
     } else {
