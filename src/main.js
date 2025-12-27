@@ -547,7 +547,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     confirmColumnBtn.addEventListener('click', () => {
         if (!state.importedFileContent) {
-            alert("❌خطایی رخ داده است. لطفاً فایل را دوباره انتخاب کنید.");
+            ui.showNotification("❌خطایی رخ داده است. لطفاً فایل را دوباره انتخاب کنید.");
             ui.showPage('settings-page');
             return;
         }
@@ -564,7 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.renderImportPreview();
             ui.showPage('csv-preview-page');
         } else {
-            alert("هیچ نامی در ستون انتخاب شده پیدا نشد. لطفاً ستون دیگری را امتحان کنید یا فایل خود را بررسی کنید.");
+            ui.showNotification("هیچ نامی در ستون انتخاب شده پیدا نشد. لطفاً ستون دیگری را امتحان کنید یا فایل خود را بررسی کنید.");
         }
         state.setImportedFileContent(null);
     });
@@ -688,7 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const dotIndex = currentLine.indexOf('.');
             if (currentLine && (dotIndex <= 0 || dotIndex >= currentLine.length - 1)) {
                 e.preventDefault(); // Prevents the new line from being created
-                ui.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید. مثال: علی . احمدی");
+                ui.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید.⚠️ مثال: علی . احمدی", 5000);
             }
         }
     });
@@ -708,7 +708,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (invalidName) {
-            ui.showNotification(`فرمت نام «${invalidName}» صحیح نیست. لطفا نام و نام خانوادگی را با نقطه جدا کنید.`);
+            ui.showNotification(`فرمت نام «${invalidName}» صحیح نیست. لطفا نام و نام خانوادگی را با نقطه جدا کنید⚠️.`, 5000);
             return;
         }
 
@@ -731,12 +731,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!state.currentClassroom) return;
         const studentName = newStudentNameInput.value.trim();
         if (!studentName) {
-            alert("لطفاً نام دانش‌آموز را وارد کنید.");
+            ui.showNotification("لطفاً نام دانش‌آموز را وارد کنید.");
             return;
         }
         const dotIndex = studentName.indexOf('.');
         if (dotIndex <= 0 || dotIndex >= studentName.length - 1) {
-            ui.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید. مثال: علی . احمدی");
+            ui.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید.⚠️ مثال: علی . احمدی", 5000);
             return;
         }
 
@@ -748,7 +748,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         if (isDuplicate) {
-            alert(`دانش‌آموز «${parsed.name}» قبلاً در لیست وجود دارد.`);
+            ui.showNotification(`دانش‌آموز «${parsed.name}» قبلاً در لیست وجود دارد.`, 4000);
             return;
         }
 
@@ -874,11 +874,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Basic Validation
             if (!name) {
-                alert('لطفاً نام کلاس را وارد کنید.');
+                ui.showNotification('لطفاً نام کلاس را وارد کنید.');
                 return;
             }
             if (state.classrooms[name]) {
-                alert('کلاسی با این نام قبلاً ایجاد شده است.');
+                ui.showNotification('کلاسی با این نام قبلاً ایجاد شده است.');
                 return;
             }
 
@@ -946,7 +946,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             } catch (error) {
                 console.error("❌ CRASH ERROR:", error);
-                alert("خطایی رخ داد: " + error.message);
+                ui.showNotification("خطایی رخ داد: " + error.message);
             }
         });
     } else {
