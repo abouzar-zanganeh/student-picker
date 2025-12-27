@@ -1847,547 +1847,42 @@ export function renderStudentStatsList() {
 }
 
 export function displayWinner(manualWinner = null, manualCategoryName = null) {
+    // 1. Resolve State: Determine who the winner is (Manual or History)
+    const selectionState = resolveWinnerState(manualWinner, manualCategoryName);
+
+    // If no winner can be resolved (e.g., empty history), stop here.
+    if (!selectionState) return;
+
+    const { winner, categoryName } = selectionState;
+
+    // 2. Update Side Effects: Handle Table highlighting, Pills, and Form updates
+    // (This also clears the resultDiv.innerHTML)
+    updateWinnerHighlights(winner, categoryName);
+
     const resultDiv = document.getElementById('selected-student-result');
-    resultDiv.innerHTML = '';
-
-    // --- Table Row Highlight Management ---
-    // First, clear any existing winner highlight from the table
-    const previousWinnerRow = document.querySelector('.current-winner-highlight');
-    if (previousWinnerRow) {
-        previousWinnerRow.classList.remove('current-winner-highlight');
-    }
-
-    resultDiv.classList.remove('absent');
-
-    let winner, categoryName;
-
-    // --- NEW: Prioritize manual override from table click ---
-    if (manualWinner && manualCategoryName) {
-        winner = manualWinner;
-        categoryName = manualCategoryName;
-        state.setManualSelection({ student: manualWinner, categoryName: manualCategoryName });
-
-        // When a student is manually selected, we are not browsing the history.
-        state.setWinnerHistoryIndex(-1);
-    } else {
-        state.setManualSelection(null);
-        updateCategoryColumnHighlight(null);
-        // --- FALLBACK: Original logic for showing a historical winner ---
-        if (!state.selectedSession || state.winnerHistoryIndex < 0 || !state.selectedSession.winnerHistory[state.winnerHistoryIndex]) {
-            return;
-        }
-        const historyEntry = state.selectedSession.winnerHistory[state.winnerHistoryIndex];
-        winner = historyEntry.winner;
-        categoryName = historyEntry.categoryName;
-    }
-
-
-
-    // Now, find and highlight the new winner's row
-    if (winner) {
-
-        const winnerRow = document.querySelector(`.student-stats-table tr[data-student-id="${winner.identity.studentId}"]`);
-        if (winnerRow) {
-            winnerRow.classList.add('current-winner-highlight');
-        }
-    }
-    // --- End Highlight Management ---
-
-    // --- NEW: Sync Category State and UI ---
-    const correspondingCategory = state.currentClassroom.categories.find(c => c.name === categoryName);
-    if (correspondingCategory) {
-
-        // Update the application state to the historical category
-        state.setSelectedCategory(correspondingCategory);
-        updateSelectButtonText(correspondingCategory);
-        updateCategoryWeightLabel(correspondingCategory);
-
-        // Update the UI to show the correct active pill
-        const allPills = document.querySelectorAll('#category-selection-container .pill');
-        allPills.forEach(p => p.classList.remove('active'));
-        const activePill = Array.from(allPills).find(p => p.textContent === categoryName);
-        if (activePill) {
-            activePill.classList.add('active');
-        }
-
-        // Update the quick grade form to match the new active category
-        updateQuickGradeUIForCategory(correspondingCategory);
-        updateCategoryColumnHighlight(correspondingCategory.name);
-    }
-    // --- END NEW ---
-
+    const isHistoryMode = !manualWinner;
     const studentRecord = state.selectedSession.studentRecords[winner.identity.studentId];
-    const isAbsent = studentRecord?.attendance === 'absent';
 
-    // --- Name and Navigation Container ---
-    const nameContainer = document.createElement('div');
-    nameContainer.className = 'winner-name-container';
-
-    const backBtn = document.createElement('button');
-    backBtn.className = 'btn-icon';
-    backBtn.innerHTML = '˅';
-    backBtn.title = 'برنده قبلی';
-    const isInHistoryMode = !manualWinner;
-    backBtn.classList.toggle('is-disabled', !isInHistoryMode || state.winnerHistoryIndex <= 0);
-    backBtn.addEventListener('click', () => {
-        if (backBtn.classList.contains('is-disabled')) {
-            backBtn.classList.add('shake-animation');
-            setTimeout(() => backBtn.classList.remove('shake-animation'), 200);
-        } else {
-            state.setWinnerHistoryIndex(state.winnerHistoryIndex - 1);
-            displayWinner(); // Re-render
-        }
-    });
-
-    const winnerNameEl = document.createElement('div');
-    winnerNameEl.className = 'winner-name';
-    winnerNameEl.innerHTML = `✨ <strong>${winner.identity.name}</strong>✨`;
-    winnerNameEl.classList.add('heartbeat-animation');
-    if (isAbsent) {
-        winnerNameEl.style.textDecoration = 'line-through';
-        winnerNameEl.style.opacity = '0.6';
-        winnerNameEl.style.color = 'var(--color-secondary)'; // Make the text gray
-    }
-
-    const hadIssue = studentRecord?.hadIssue;
-    if (hadIssue && !isAbsent) {
-        winnerNameEl.style.color = 'var(--color-warning)';
-        winnerNameEl.title = 'این دانش‌آموز در انتخاب قبلی با مشکل مواجه شده بود';
-    }
-
-    const wasOutOfClass = studentRecord?.wasOutOfClass;
-    if (wasOutOfClass && !isAbsent) {
-        winnerNameEl.style.color = 'var(--color-strong-warning)';
-        winnerNameEl.title = 'این دانش‌آموز در زمان انتخاب خارج از کلاس بود';
-    }
-
-    // --- Long Press Listeners for Undoing Selection ---
-    const longPressDuration = 1000; // 1 second
-
-    const startPress = (e) => {
-
-
-        // Start a timer
-        winnerRemovalLongPressTimer = setTimeout(() => {
-            // If the timer finishes, the press was long.
-            handleUndoLastSelection(winner, categoryName);
-            winnerRemovalLongPressTimer = null; // Clear the timer
-        }, longPressDuration);
-    };
-
-    const cancelPress = () => {
-        // If the user lets go or moves their finger away, clear the timer
-        if (winnerRemovalLongPressTimer) {
-            clearTimeout(winnerRemovalLongPressTimer);
-            winnerRemovalLongPressTimer = null;
-        }
-    };
-
-    // Mouse events for desktop
-    winnerNameEl.addEventListener('mousedown', startPress);
-    winnerNameEl.addEventListener('mouseup', cancelPress);
-    winnerNameEl.addEventListener('mouseout', cancelPress);
-
-    // Touch events for mobile
-    winnerNameEl.addEventListener('touchstart', startPress);
-    winnerNameEl.addEventListener('touchmove', cancelPress);
-    winnerNameEl.addEventListener('touchend', cancelPress);
-    winnerNameEl.addEventListener('touchcancel', cancelPress);
-    // --- End Long Press ---
-
-    const forwardBtn = document.createElement('button');
-    forwardBtn.className = 'btn-icon';
-    forwardBtn.innerHTML = '˄';
-    forwardBtn.title = 'برنده بعدی';
-    forwardBtn.classList.toggle('is-disabled', !isInHistoryMode || state.winnerHistoryIndex >= state.selectedSession.winnerHistory.length - 1);
-    forwardBtn.addEventListener('click', () => {
-        if (forwardBtn.classList.contains('is-disabled')) {
-            forwardBtn.classList.add('shake-animation');
-            setTimeout(() => forwardBtn.classList.remove('shake-animation'), 200);
-        } else {
-            state.setWinnerHistoryIndex(state.winnerHistoryIndex + 1);
-            displayWinner(); // Re-render
-        }
-    });
-
-    nameContainer.appendChild(forwardBtn);
-    nameContainer.appendChild(winnerNameEl);
-
-    // Check if the student is new in this specific session
-    if (winner.onboardingSession === state.selectedSession.sessionNumber) {
-        const newStudentBadge = document.createElement('div');
-        newStudentBadge.className = 'new-student-badge';
-        newStudentBadge.textContent = 'دانش آموز جدید';
-        nameContainer.appendChild(newStudentBadge);
-    }
-
-    nameContainer.appendChild(backBtn);
+    // 3. Render Header (Arrows, Name, New Student Badge, Undo)
+    const { nameContainer } = renderWinnerHeader(winner, categoryName, isHistoryMode);
     resultDiv.appendChild(nameContainer);
 
-    // Disable the main "Select Student" button if we are viewing a past winner
-    selectStudentBtn.disabled = isInHistoryMode && !forwardBtn.classList.contains('is-disabled');
+    // 4. Render Status Controls (Absent, Issue, Exit, Profile)
+    const controls = renderWinnerStatusControls(winner, studentRecord, categoryName);
+    resultDiv.appendChild(controls);
 
-    // --- Status Buttons (absent, issue, profile) ---
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'status-button-container';
-
-    const absentBtn = document.createElement('button');
-    absentBtn.textContent = 'غایب';
-    absentBtn.classList.add('status-button', 'absent-btn');
-    if (isAbsent) absentBtn.classList.add('active');
-
-    const issueBtn = document.createElement('button');
-    issueBtn.textContent = 'مشکل';
-    issueBtn.classList.add('status-button', 'issue-btn');
-    if (studentRecord?.hadIssue) issueBtn.classList.add('active');
-
-    const exitBtn = document.createElement('button');
-    exitBtn.textContent = 'خروج';
-    exitBtn.classList.add('status-button', 'exit-btn');
-    if (studentRecord?.wasOutOfClass) exitBtn.classList.add('active');
-
-    const profileBtn = document.createElement('button');
-    profileBtn.textContent = 'پروفایل';
-    profileBtn.className = 'status-button profile-btn';
-
-    if (state.selectedSession.isFinished) {
-        absentBtn.disabled = true;
-    } else {
-
-        absentBtn.addEventListener('click', () => {
-            const isCurrentlyActive = absentBtn.classList.contains('active');
-
-            if (exitBtn.classList.contains('active')) {
-                exitBtn.classList.remove('active');
-                studentRecord.wasOutOfClass = false;
-                winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
-                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
-            }
-
-            if (!isCurrentlyActive) {
-                if (issueBtn.classList.contains('active')) {
-                    issueBtn.classList.remove('active');
-                    studentRecord.hadIssue = false;
-                    winner.statusCounters.otherIssues = Math.max(0, winner.statusCounters.otherIssues - 1);
-                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
-                }
-                absentBtn.classList.add('active');
-                state.selectedSession.setAttendance(winner.identity.studentId, 'absent');
-                winner.statusCounters.missedChances++;
-
-                // Update UI Immediately
-                winnerNameEl.style.textDecoration = 'line-through';
-                winnerNameEl.style.opacity = '0.6';
-                winnerNameEl.style.color = 'var(--color-secondary)'; // Set text color to gray
-                winnerNameEl.title = '';
-            } else {
-                absentBtn.classList.remove('active');
-                state.selectedSession.setAttendance(winner.identity.studentId, 'present');
-                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
-
-                // Revert UI Immediately
-                winnerNameEl.style.textDecoration = '';
-                winnerNameEl.style.opacity = '';
-                winnerNameEl.style.color = ''; // Revert text color
-            }
-            renderStudentStatsList();
-
-            setTimeout(() => {
-                // Check if we are in history mode (index != -1) or manual mode
-                if (state.winnerHistoryIndex !== -1) {
-                    displayWinner(); // Refresh using history index (keeps arrows)
-                } else {
-                    displayWinner(winner, categoryName); // Refresh using manual selection (no arrows)
-                }
-            }, 0);
-
-            state.saveData();
-        });
-    }
-
-    if (state.selectedSession.isFinished) {
-        issueBtn.disabled = true;
-    } else {
-        issueBtn.addEventListener('click', () => {
-            const isCurrentlyActive = issueBtn.classList.contains('active');
-
-            if (exitBtn.classList.contains('active')) {
-                exitBtn.classList.remove('active');
-                studentRecord.wasOutOfClass = false;
-                winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
-                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
-            }
-
-            if (!isCurrentlyActive) {
-                if (absentBtn.classList.contains('active')) {
-                    absentBtn.classList.remove('active');
-                    state.selectedSession.setAttendance(winner.identity.studentId, 'present');
-                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
-                }
-                issueBtn.classList.add('active');
-                studentRecord.hadIssue = true;
-
-                const categoryName = state.selectedCategory.name;
-                winner.categoryIssues[categoryName] = (winner.categoryIssues[categoryName] || 0) + 1;
-
-                winner.statusCounters.missedChances++;
-
-                // --- First, clear any potential 'absent' styling ---
-                winnerNameEl.style.textDecoration = '';
-                winnerNameEl.style.opacity = '';
-                // ----------------------------------------------------
-
-                // Now, apply the 'issue' styling
-                winnerNameEl.style.color = 'var(--color-warning)';
-                winnerNameEl.title = 'این دانش‌آموز در انتخاب قبلی با مشکل مواجه شده بود';
-
-            } else {
-                issueBtn.classList.remove('active');
-                studentRecord.hadIssue = false;
-
-                const categoryName = state.selectedCategory.name;
-                if (winner.categoryIssues[categoryName]) { winner.categoryIssues[categoryName] = Math.max(0, winner.categoryIssues[categoryName] - 1); }
-
-                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
-
-                // --- ADDED ---
-                winnerNameEl.style.color = ''; // Reverts to default color
-                winnerNameEl.title = '';      // Removes the tooltip
-                // -------------
-            }
-            renderStudentStatsList();
-
-            setTimeout(() => {
-                // Check if we are in history mode (index != -1) or manual mode
-                if (state.winnerHistoryIndex !== -1) {
-                    displayWinner(); // Refresh using history index (keeps arrows)
-                } else {
-                    displayWinner(winner, categoryName); // Refresh using manual selection (no arrows)
-                }
-            }, 0);
-
-            state.saveData();
-        });
-    }
-
-    if (state.selectedSession.isFinished) {
-        exitBtn.disabled = true;
-    } else {
-        exitBtn.addEventListener('click', () => {
-            const isCurrentlyActive = exitBtn.classList.contains('active');
-
-            if (!isCurrentlyActive) {
-                // 1. Deactivate other mutually exclusive buttons & Revert their stats
-                if (absentBtn.classList.contains('active')) {
-                    absentBtn.classList.remove('active');
-                    state.selectedSession.setAttendance(winner.identity.studentId, 'present');
-                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
-                }
-                if (issueBtn.classList.contains('active')) {
-                    issueBtn.classList.remove('active');
-                    studentRecord.hadIssue = false;
-                    const categoryName = state.selectedCategory.name;
-                    if (winner.categoryIssues[categoryName]) {
-                        winner.categoryIssues[categoryName] = Math.max(0, winner.categoryIssues[categoryName] - 1);
-                    }
-                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
-                }
-
-                // 2. Activate Exit State
-                exitBtn.classList.add('active');
-                studentRecord.wasOutOfClass = true;
-
-                // Increment Counters
-                winner.statusCounters.outOfClassCount = (winner.statusCounters.outOfClassCount || 0) + 1;
-                winner.statusCounters.missedChances++;
-
-                // Visual cues
-                winnerNameEl.style.textDecoration = '';
-                winnerNameEl.style.opacity = '';
-                winnerNameEl.style.color = 'var(--color-strong-warning)';
-                winnerNameEl.title = 'این دانش‌آموز در زمان انتخاب خارج از کلاس بود';
-
-            } else {
-                // 3. Deactivate Exit State
-                exitBtn.classList.remove('active');
-                studentRecord.wasOutOfClass = false;
-
-                // Decrement Counters
-                winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
-                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
-
-                // Remove visual cues
-                winnerNameEl.style.color = '';
-                winnerNameEl.title = '';
-            }
-            renderStudentStatsList();
-
-            setTimeout(() => {
-                // Check if we are in history mode (index != -1) or manual mode
-                if (state.winnerHistoryIndex !== -1) {
-                    displayWinner(); // Refresh using history index (keeps arrows)
-                } else {
-                    displayWinner(winner, categoryName); // Refresh using manual selection (no arrows)
-                }
-            }, 0);
-
-            state.saveData();
-        });
-    }
-
-    if (state.selectedSession.isFinished) {
-        profileBtn.disabled = true;
-    } else {
-        profileBtn.addEventListener('click', () => {
-            showStudentProfile(winner);
-        });
-    }
-
-    buttonContainer.appendChild(absentBtn);
-    buttonContainer.appendChild(exitBtn);
-    buttonContainer.appendChild(issueBtn);
-    buttonContainer.appendChild(profileBtn);
-    resultDiv.appendChild(buttonContainer);
-
-    // --- Add Qualitative Assessment Row ---
-    // Only show if we have a valid category (which we usually do)
-    if (categoryName) {
+    // 5. Render Qualitative Assessment (Existing helper)
+    // We check if the function exists just to be safe, though it should be in your file.
+    if (categoryName && typeof createQualitativeButtons === 'function') {
         const qualitativeRow = createQualitativeButtons(winner, categoryName);
-        resultDiv.appendChild(qualitativeRow);
-    }
-    // -------------------------------------------
-
-    // --- Details Container (scores, notes) ---
-    const detailsContainer = document.createElement('div');
-    detailsContainer.className = 'student-details-container';
-
-    const scoresDiv = document.createElement('div');
-    scoresDiv.className = 'student-details-scores';
-    scoresDiv.innerHTML = '<h4>آخرین نمرات</h4>';
-
-    const scoresList = document.createElement('ul');
-    scoresList.className = 'scores-list';
-
-    // Get all *active* graded categories from the state
-    const gradedCategories = state.currentClassroom.categories.filter(
-        cat => cat.isGradedCategory && !cat.isDeleted
-    );
-    let hasAnyScore = false;
-    const studentScores = winner.logs.scores || {};
-
-    gradedCategories.forEach(category => {
-        const categoryName = category.name; // e.g., "Reading"
-        const skillKey = categoryName.toLowerCase(); // e.g., "reading"
-
-        const li = document.createElement('li');
-        const skillNameSpan = document.createElement('span');
-        skillNameSpan.className = 'skill-name';
-        skillNameSpan.textContent = `${categoryName}:`;
-        const skillScoresSpan = document.createElement('span');
-        skillScoresSpan.className = 'skill-scores';
-
-        const scoresForSkill = studentScores[skillKey]?.filter(s => !s.isDeleted);
-
-        if (scoresForSkill && scoresForSkill.length > 0) {
-            hasAnyScore = true;
-            // Get the last 3 scores
-            const recentScores = scoresForSkill.slice(-3);
-
-            // Loop through them to create individual elements
-            recentScores.forEach((score, index) => {
-                const scoreItem = document.createElement('span');
-                scoreItem.textContent = score.value + (score.comment ? '\'' : '');
-
-                // If there is a comment, attach the tooltip
-                if (score.comment) {
-                    scoreItem.dataset.tooltip = score.comment;
-                    scoreItem.style.position = 'relative'; // Crucial: makes the tooltip appear above THIS number
-                    scoreItem.style.cursor = 'help'; // Visual cue that it's hoverable
-                    scoreItem.classList.add('tooltip-container'); // Reuse existing class if needed
-                }
-
-                skillScoresSpan.appendChild(scoreItem);
-
-                // Add comma separator if it's not the last item
-                if (index < recentScores.length - 1) {
-                    skillScoresSpan.appendChild(document.createTextNode(','));
-                }
-            });
-        } else {
-            skillScoresSpan.textContent = 'none';
+        if (qualitativeRow) {
+            resultDiv.appendChild(qualitativeRow);
         }
-
-        li.appendChild(skillNameSpan);
-        li.appendChild(skillScoresSpan);
-        scoresList.appendChild(li);
-    });
-
-    if (!hasAnyScore) {
-        scoresList.innerHTML = `<div class="no-content-message">هنوز نمره‌ای ثبت نشده است.</div>`;
     }
 
-    scoresDiv.appendChild(scoresList);
-    detailsContainer.appendChild(scoresDiv);
-
-    const notesDiv = document.createElement('div');
-    notesDiv.className = 'student-details-notes';
-    // --- NEW: Create a proper header for the notes section ---
-    const notesHeader = document.createElement('div');
-    notesHeader.className = 'history-section-header'; // Reuse existing style for flex layout
-
-    const notesTitle = document.createElement('h4');
-    notesTitle.textContent = 'یادداشت‌ها';
-
-    const addNoteBtn = document.createElement('button');
-    addNoteBtn.className = 'btn-icon';
-    addNoteBtn.innerHTML = '📝';
-    addNoteBtn.title = 'افزودن یادداشت جدید';
-
-    if (state.selectedSession.isFinished) {
-        addNoteBtn.disabled = true;
-    } else {
-        addNoteBtn.addEventListener('click', () => {
-            newNoteContent.value = '';
-            newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
-
-            state.setSaveNoteCallback((content) => {
-                if (content) {
-                    winner.addNote(content); // 'winner' is the selected student in this scope
-                    state.saveData();
-                    displayWinner(); // This refreshes the winner panel to show the new note
-                    showNotification('✅ یادداشت با موفقیت ثبت شد.');
-                }
-            });
-
-            openModal('add-note-modal');
-            newNoteContent.focus();
-        });
-    }
-
-    notesHeader.appendChild(notesTitle);
-    notesHeader.appendChild(addNoteBtn);
-
-    notesDiv.appendChild(notesHeader);
-    // --- END NEW ---
-
-    const notesList = document.createElement('ul');
-    notesList.className = 'notes-list';
-
-    if (winner.profile.notes && winner.profile.notes.length > 0) {
-        const sortedNotes = [...winner.profile.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-        sortedNotes.forEach(note => {
-            const noteItem = document.createElement('li');
-            noteItem.dir = detectTextDirection(note.content); // Set the direction
-            noteItem.textContent = note.content;              // Set the content
-            notesList.appendChild(noteItem);
-        });
-    } else {
-        notesList.innerHTML = '<div class="no-content-message">یادداشتی وجود ندارد.</div>';
-    }
-
-    notesDiv.appendChild(notesList);
-    detailsContainer.appendChild(notesDiv);
-    resultDiv.appendChild(detailsContainer);
+    // 6. Render Details (Last Scores, Notes)
+    const details = renderWinnerDetails(winner, categoryName);
+    resultDiv.appendChild(details);
 }
 
 export function setAutoDirectionOnInput(inputElement) {
@@ -5651,4 +5146,490 @@ export function openAddCategoryModal() {
 export function closeAddClassModal() {
     // Use the standard app function to close
     closeActiveModal();
+}
+
+// =================================================================
+//  REFACTORING HELPERS (Phase 1)
+// =================================================================
+
+
+/**
+ * Determines the winner and category based on manual input or history.
+ * Updates state for manual selection if needed.
+ */
+function resolveWinnerState(manualWinner, manualCategoryName) {
+    let winner, categoryName;
+
+    // 1. Prioritize manual override from table click
+    if (manualWinner && manualCategoryName) {
+        winner = manualWinner;
+        categoryName = manualCategoryName;
+        state.setManualSelection({ student: manualWinner, categoryName: manualCategoryName });
+
+        // When a student is manually selected, we are not browsing the history.
+        state.setWinnerHistoryIndex(-1);
+    } else {
+        state.setManualSelection(null);
+        updateCategoryColumnHighlight(null);
+
+        // 2. Fallback: Original logic for showing a historical winner
+        if (!state.selectedSession || state.winnerHistoryIndex < 0 || !state.selectedSession.winnerHistory[state.winnerHistoryIndex]) {
+            return null; // No winner to display
+        }
+        const historyEntry = state.selectedSession.winnerHistory[state.winnerHistoryIndex];
+        winner = historyEntry.winner;
+        categoryName = historyEntry.categoryName;
+    }
+
+    return { winner, categoryName };
+}
+
+/**
+ * Handles UI highlights (Table Row, Category Pills, Quick Grade Form).
+ */
+function updateWinnerHighlights(winner, categoryName) {
+    const resultDiv = document.getElementById('selected-student-result');
+    resultDiv.innerHTML = ''; // Clear previous content
+    resultDiv.classList.remove('absent');
+
+    // 1. Table Row Highlight
+    const previousWinnerRow = document.querySelector('.current-winner-highlight');
+    if (previousWinnerRow) {
+        previousWinnerRow.classList.remove('current-winner-highlight');
+    }
+
+    if (winner) {
+        const winnerRow = document.querySelector(`.student-stats-table tr[data-student-id="${winner.identity.studentId}"]`);
+        if (winnerRow) {
+            winnerRow.classList.add('current-winner-highlight');
+        }
+    }
+
+    // 2. Sync Category State and UI
+    const correspondingCategory = state.currentClassroom.categories.find(c => c.name === categoryName);
+    if (correspondingCategory) {
+        // Update State
+        state.setSelectedCategory(correspondingCategory);
+
+        // Update UI Components
+        updateSelectButtonText(correspondingCategory);
+        updateCategoryWeightLabel(correspondingCategory);
+        updateQuickGradeUIForCategory(correspondingCategory);
+        updateCategoryColumnHighlight(correspondingCategory.name);
+
+        // Update Active Pill
+        const allPills = document.querySelectorAll('#category-selection-container .pill');
+        allPills.forEach(p => p.classList.remove('active'));
+        const activePill = Array.from(allPills).find(p => p.textContent === categoryName);
+        if (activePill) {
+            activePill.classList.add('active');
+        }
+    }
+}
+
+/**
+ * Renders the top navigation (arrows) and the winner's name.
+ * Returns the name element so we can update its style later (e.g., if marked absent).
+ */
+function renderWinnerHeader(winner, categoryName, isHistoryMode) {
+    const nameContainer = document.createElement('div');
+    nameContainer.className = 'winner-name-container';
+
+    // --- Back Button ---
+    const backBtn = document.createElement('button');
+    backBtn.className = 'btn-icon';
+    backBtn.innerHTML = '˅';
+    backBtn.title = 'برنده قبلی';
+    backBtn.classList.toggle('is-disabled', !isHistoryMode || state.winnerHistoryIndex <= 0);
+    backBtn.addEventListener('click', () => {
+        if (backBtn.classList.contains('is-disabled')) {
+            backBtn.classList.add('shake-animation');
+            setTimeout(() => backBtn.classList.remove('shake-animation'), 200);
+        } else {
+            state.setWinnerHistoryIndex(state.winnerHistoryIndex - 1);
+            displayWinner(); // Re-render
+        }
+    });
+
+    // --- Winner Name ---
+    const studentRecord = state.selectedSession.studentRecords[winner.identity.studentId];
+    const isAbsent = studentRecord?.attendance === 'absent';
+
+    const winnerNameEl = document.createElement('div');
+    winnerNameEl.className = 'winner-name';
+    winnerNameEl.innerHTML = `✨ <strong>${winner.identity.name}</strong>✨`;
+    winnerNameEl.classList.add('heartbeat-animation');
+
+    // Initial Styling based on status
+    if (isAbsent) {
+        winnerNameEl.style.textDecoration = 'line-through';
+        winnerNameEl.style.opacity = '0.6';
+        winnerNameEl.style.color = 'var(--color-secondary)';
+    } else if (studentRecord?.hadIssue) {
+        winnerNameEl.style.color = 'var(--color-warning)';
+        winnerNameEl.title = 'این دانش‌آموز در انتخاب قبلی با مشکل مواجه شده بود';
+    } else if (studentRecord?.wasOutOfClass) {
+        winnerNameEl.style.color = 'var(--color-strong-warning)';
+        winnerNameEl.title = 'این دانش‌آموز در زمان انتخاب خارج از کلاس بود';
+    }
+
+    // --- Long Press (Undo) ---
+    const startPress = () => {
+        winnerRemovalLongPressTimer = setTimeout(() => {
+            handleUndoLastSelection(winner, categoryName);
+            winnerRemovalLongPressTimer = null;
+        }, 1000);
+    };
+    const cancelPress = () => {
+        if (winnerRemovalLongPressTimer) {
+            clearTimeout(winnerRemovalLongPressTimer);
+            winnerRemovalLongPressTimer = null;
+        }
+    };
+
+    // Desktop & Mobile Events
+    ['mousedown', 'touchstart'].forEach(evt => winnerNameEl.addEventListener(evt, startPress));
+    ['mouseup', 'mouseout', 'touchend', 'touchcancel', 'touchmove'].forEach(evt => winnerNameEl.addEventListener(evt, cancelPress));
+
+    // --- Forward Button ---
+    const forwardBtn = document.createElement('button');
+    forwardBtn.className = 'btn-icon';
+    forwardBtn.innerHTML = '˄';
+    forwardBtn.title = 'برنده بعدی';
+    forwardBtn.classList.toggle('is-disabled', !isHistoryMode || state.winnerHistoryIndex >= state.selectedSession.winnerHistory.length - 1);
+    forwardBtn.addEventListener('click', () => {
+        if (forwardBtn.classList.contains('is-disabled')) {
+            forwardBtn.classList.add('shake-animation');
+            setTimeout(() => forwardBtn.classList.remove('shake-animation'), 200);
+        } else {
+            state.setWinnerHistoryIndex(state.winnerHistoryIndex + 1);
+            displayWinner(); // Re-render
+        }
+    });
+
+    // --- Assembly ---
+    nameContainer.appendChild(forwardBtn);
+    nameContainer.appendChild(winnerNameEl);
+
+    // New Student Badge
+    if (winner.onboardingSession === state.selectedSession.sessionNumber) {
+        const newStudentBadge = document.createElement('div');
+        newStudentBadge.className = 'new-student-badge';
+        newStudentBadge.textContent = 'دانش آموز جدید';
+        nameContainer.appendChild(newStudentBadge);
+    }
+
+    nameContainer.appendChild(backBtn);
+
+    // Side Effect: Disable/Enable Main Select Button
+    const selectStudentBtn = document.getElementById('select-student-btn');
+    if (selectStudentBtn) {
+        selectStudentBtn.disabled = isHistoryMode && !forwardBtn.classList.contains('is-disabled');
+    }
+
+    return { nameContainer, winnerNameEl };
+}
+
+/**
+ * Renders the status buttons (Absent, Issue, Exit, Profile) and handles their logic.
+ * Triggers a re-render of the winner view upon status changes.
+ */
+function renderWinnerStatusControls(winner, studentRecord, categoryName) {
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'status-button-container';
+
+    // 1. Create Buttons
+    const absentBtn = document.createElement('button');
+    absentBtn.textContent = 'غایب';
+    absentBtn.classList.add('status-button', 'absent-btn');
+    if (studentRecord?.attendance === 'absent') absentBtn.classList.add('active');
+
+    const issueBtn = document.createElement('button');
+    issueBtn.textContent = 'مشکل';
+    issueBtn.classList.add('status-button', 'issue-btn');
+    if (studentRecord?.hadIssue) issueBtn.classList.add('active');
+
+    const exitBtn = document.createElement('button');
+    exitBtn.textContent = 'خروج';
+    exitBtn.classList.add('status-button', 'exit-btn');
+    if (studentRecord?.wasOutOfClass) exitBtn.classList.add('active');
+
+    const profileBtn = document.createElement('button');
+    profileBtn.textContent = 'پروفایل';
+    profileBtn.className = 'status-button profile-btn';
+
+    // 2. Helper to refresh UI after status change
+    const refreshAfterChange = () => {
+        renderStudentStatsList(); // Update the sidebar list
+        setTimeout(() => {
+            // Re-render the winner view to reflect changes (colors, badges, etc.)
+            if (state.winnerHistoryIndex !== -1) {
+                displayWinner();
+            } else {
+                displayWinner(winner, categoryName);
+            }
+        }, 0);
+        state.saveData();
+    };
+
+    // 3. Event Listeners (Logic for updating counters and state)
+    if (state.selectedSession.isFinished) {
+        // Disable all if session is finished
+        [absentBtn, issueBtn, exitBtn, profileBtn].forEach(btn => btn.disabled = true);
+    } else {
+        // --- Absent Logic ---
+        absentBtn.addEventListener('click', () => {
+            const isCurrentlyActive = absentBtn.classList.contains('active');
+
+            // Handle mutual exclusivity: If Exit was active, deactivate it
+            if (exitBtn.classList.contains('active')) {
+                exitBtn.classList.remove('active');
+                studentRecord.wasOutOfClass = false;
+                winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
+                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+            }
+
+            if (!isCurrentlyActive) {
+                // If Issue was active, deactivate it
+                if (issueBtn.classList.contains('active')) {
+                    issueBtn.classList.remove('active');
+                    studentRecord.hadIssue = false;
+                    winner.statusCounters.otherIssues = Math.max(0, winner.statusCounters.otherIssues - 1);
+                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+                }
+                // Activate Absent
+                absentBtn.classList.add('active');
+                state.selectedSession.setAttendance(winner.identity.studentId, 'absent');
+                winner.statusCounters.missedChances++;
+            } else {
+                // Deactivate Absent
+                absentBtn.classList.remove('active');
+                state.selectedSession.setAttendance(winner.identity.studentId, 'present');
+                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+            }
+            refreshAfterChange();
+        });
+
+        // --- Issue Logic ---
+        issueBtn.addEventListener('click', () => {
+            const isCurrentlyActive = issueBtn.classList.contains('active');
+
+            if (exitBtn.classList.contains('active')) {
+                exitBtn.classList.remove('active');
+                studentRecord.wasOutOfClass = false;
+                winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
+                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+            }
+
+            if (!isCurrentlyActive) {
+                if (absentBtn.classList.contains('active')) {
+                    absentBtn.classList.remove('active');
+                    state.selectedSession.setAttendance(winner.identity.studentId, 'present');
+                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+                }
+                // Activate Issue
+                issueBtn.classList.add('active');
+                studentRecord.hadIssue = true;
+
+                // Track category specific issues
+                winner.categoryIssues[categoryName] = (winner.categoryIssues[categoryName] || 0) + 1;
+                winner.statusCounters.missedChances++;
+            } else {
+                // Deactivate Issue
+                issueBtn.classList.remove('active');
+                studentRecord.hadIssue = false;
+
+                if (winner.categoryIssues[categoryName]) {
+                    winner.categoryIssues[categoryName] = Math.max(0, winner.categoryIssues[categoryName] - 1);
+                }
+                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+            }
+            refreshAfterChange();
+        });
+
+        // --- Exit Logic ---
+        exitBtn.addEventListener('click', () => {
+            const isCurrentlyActive = exitBtn.classList.contains('active');
+
+            if (!isCurrentlyActive) {
+                // Deactivate Absent if active
+                if (absentBtn.classList.contains('active')) {
+                    absentBtn.classList.remove('active');
+                    state.selectedSession.setAttendance(winner.identity.studentId, 'present');
+                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+                }
+                // Deactivate Issue if active
+                if (issueBtn.classList.contains('active')) {
+                    issueBtn.classList.remove('active');
+                    studentRecord.hadIssue = false;
+                    if (winner.categoryIssues[categoryName]) {
+                        winner.categoryIssues[categoryName] = Math.max(0, winner.categoryIssues[categoryName] - 1);
+                    }
+                    winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+                }
+
+                // Activate Exit
+                exitBtn.classList.add('active');
+                studentRecord.wasOutOfClass = true;
+                winner.statusCounters.outOfClassCount = (winner.statusCounters.outOfClassCount || 0) + 1;
+                winner.statusCounters.missedChances++;
+            } else {
+                // Deactivate Exit
+                exitBtn.classList.remove('active');
+                studentRecord.wasOutOfClass = false;
+                winner.statusCounters.outOfClassCount = Math.max(0, (winner.statusCounters.outOfClassCount || 0) - 1);
+                winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
+            }
+            refreshAfterChange();
+        });
+
+        // --- Profile Logic ---
+        profileBtn.addEventListener('click', () => {
+            showStudentProfile(winner);
+        });
+    }
+
+    buttonContainer.appendChild(absentBtn);
+    buttonContainer.appendChild(exitBtn);
+    buttonContainer.appendChild(issueBtn);
+    buttonContainer.appendChild(profileBtn);
+
+    return buttonContainer;
+}
+
+/**
+ * Renders the bottom details section: Recent Scores and Notes.
+ */
+function renderWinnerDetails(winner, categoryName) {
+    const detailsContainer = document.createElement('div');
+    detailsContainer.className = 'student-details-container';
+
+    // --- 1. Recent Scores Section ---
+    const scoresDiv = document.createElement('div');
+    scoresDiv.className = 'student-details-scores';
+    scoresDiv.innerHTML = '<h4>آخرین نمرات</h4>';
+
+    const scoresList = document.createElement('ul');
+    scoresList.className = 'scores-list';
+
+    // Get all *active* graded categories
+    const gradedCategories = state.currentClassroom.categories.filter(
+        cat => cat.isGradedCategory && !cat.isDeleted
+    );
+
+    let hasAnyScore = false;
+    const studentScores = winner.logs.scores || {};
+
+    gradedCategories.forEach(category => {
+        const catName = category.name;
+        const skillKey = catName.toLowerCase();
+        const scoresForSkill = studentScores[skillKey]?.filter(s => !s.isDeleted);
+
+        const li = document.createElement('li');
+        const skillNameSpan = document.createElement('span');
+        skillNameSpan.className = 'skill-name';
+        skillNameSpan.textContent = `${catName}:`;
+
+        const skillScoresSpan = document.createElement('span');
+        skillScoresSpan.className = 'skill-scores';
+
+        if (scoresForSkill && scoresForSkill.length > 0) {
+            hasAnyScore = true;
+            // Show last 3 scores
+            const recentScores = scoresForSkill.slice(-3);
+
+            recentScores.forEach((score, index) => {
+                const scoreItem = document.createElement('span');
+                scoreItem.textContent = score.value + (score.comment ? '\'' : '');
+
+                if (score.comment) {
+                    scoreItem.dataset.tooltip = score.comment;
+                    scoreItem.style.position = 'relative';
+                    scoreItem.style.cursor = 'help';
+                    scoreItem.classList.add('tooltip-container');
+                }
+
+                skillScoresSpan.appendChild(scoreItem);
+
+                if (index < recentScores.length - 1) {
+                    skillScoresSpan.appendChild(document.createTextNode(','));
+                }
+            });
+        } else {
+            skillScoresSpan.textContent = 'none';
+        }
+
+        li.appendChild(skillNameSpan);
+        li.appendChild(skillScoresSpan);
+        scoresList.appendChild(li);
+    });
+
+    if (!hasAnyScore) {
+        scoresList.innerHTML = `<div class="no-content-message">هنوز نمره‌ای ثبت نشده است.</div>`;
+    }
+
+    scoresDiv.appendChild(scoresList);
+    detailsContainer.appendChild(scoresDiv);
+
+    // --- 2. Notes Section ---
+    const notesDiv = document.createElement('div');
+    notesDiv.className = 'student-details-notes';
+
+    // Header with Add Button
+    const notesHeader = document.createElement('div');
+    notesHeader.className = 'history-section-header';
+
+    const notesTitle = document.createElement('h4');
+    notesTitle.textContent = 'یادداشت‌ها';
+
+    const addNoteBtn = document.createElement('button');
+    addNoteBtn.className = 'btn-icon';
+    addNoteBtn.innerHTML = '📝';
+    addNoteBtn.title = 'افزودن یادداشت جدید';
+
+    if (state.selectedSession.isFinished) {
+        addNoteBtn.disabled = true;
+    } else {
+        addNoteBtn.addEventListener('click', () => {
+            newNoteContent.value = '';
+            newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
+
+            state.setSaveNoteCallback((content) => {
+                if (content) {
+                    winner.addNote(content);
+                    state.saveData();
+                    displayWinner(); // Refresh to show new note
+                    showNotification('✅ یادداشت با موفقیت ثبت شد.');
+                }
+            });
+
+            openModal('add-note-modal');
+            newNoteContent.focus();
+        });
+    }
+
+    notesHeader.appendChild(notesTitle);
+    notesHeader.appendChild(addNoteBtn);
+    notesDiv.appendChild(notesHeader);
+
+    // Notes List
+    const notesList = document.createElement('ul');
+    notesList.className = 'notes-list';
+
+    if (winner.profile.notes && winner.profile.notes.length > 0) {
+        const sortedNotes = [...winner.profile.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        sortedNotes.forEach(note => {
+            const noteItem = document.createElement('li');
+            noteItem.dir = detectTextDirection(note.content);
+            noteItem.textContent = note.content;
+            notesList.appendChild(noteItem);
+        });
+    } else {
+        notesList.innerHTML = '<div class="no-content-message">یادداشتی وجود ندارد.</div>';
+    }
+
+    notesDiv.appendChild(notesList);
+    detailsContainer.appendChild(notesDiv);
+
+    return detailsContainer;
 }

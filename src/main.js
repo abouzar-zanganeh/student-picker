@@ -290,8 +290,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     function createRandomClass() {
                         const testClassName = `کلاس تستی ${Object.keys(state.classrooms).length + 1}`;
                         const newClass = new Classroom({ name: testClassName, type: 'online' });
-                        const students = ['علی رضایی', 'مریم حسینی', 'زهرا احمدی', 'رضا محمدی', 'فاطمه کریمی'];
-                        students.forEach(name => newClass.addStudent(new Student({ name })));
+
+                        // Updated to include dots for parsing
+                        const students = ['علی . رضایی', 'مریم . حسینی', 'زهرا . احمدی', 'رضا . محمدی', 'فاطمه . کریمی'];
+
+                        // Use parseStudentName to populate firstName and lastName correctly
+                        students.forEach(name => newClass.addStudent(new Student(parseStudentName(name))));
+
                         state.classrooms[testClassName] = newClass;
                         state.saveData();
                         ui.renderClassList();
