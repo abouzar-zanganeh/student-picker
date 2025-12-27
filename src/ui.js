@@ -1983,8 +1983,6 @@ function renderCategoryPills() {
                     label: 'تغییر نام',
                     icon: '✏️',
                     action: () => {
-
-
                         if (newCategoryModalIsGradedCheckbox && newCategoryModalWeightGroup) {
 
                             newCategoryModalWeightGroup.style.display = newCategoryModalIsGradedCheckbox ? 'flex' : 'none';
@@ -1993,9 +1991,6 @@ function renderCategoryPills() {
                                 newCategoryModalWeightGroup.style.display = newCategoryModalIsGradedCheckbox.checked ? 'flex' : 'none';
                             });
                         }
-
-
-
                         showCategoryModal((newName, newIsGraded, newWeight) => {
                             const result = state.renameCategory(state.currentClassroom, category, newName);
                             if (result.success) {
