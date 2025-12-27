@@ -532,7 +532,7 @@ export function showCategoryModal(onSave, options = {}) {
         if (newCategoryModalIsGradedCheckbox.checked) {
             newCategoryModalWeightGroup.style.display = 'flex';
         } else {
-            newCategoryModalWeightGroup.style.display = 'none';
+            newCategoryModalWeightGroup.style.visibility = 'hidden';
         }
     }
 }
@@ -1983,14 +1983,7 @@ function renderCategoryPills() {
                     label: 'تغییر نام',
                     icon: '✏️',
                     action: () => {
-                        if (newCategoryModalIsGradedCheckbox && newCategoryModalWeightGroup) {
-
-                            newCategoryModalWeightGroup.style.display = newCategoryModalIsGradedCheckbox ? 'flex' : 'none';
-
-                            newCategoryModalIsGradedCheckbox.addEventListener('change', () => {
-                                newCategoryModalWeightGroup.style.display = newCategoryModalIsGradedCheckbox.checked ? 'flex' : 'none';
-                            });
-                        }
+                        switchWeightGroupVisibility();
                         showCategoryModal((newName, newIsGraded, newWeight) => {
                             const result = state.renameCategory(state.currentClassroom, category, newName);
                             if (result.success) {
@@ -2088,9 +2081,7 @@ function renderCategoryPills() {
     if (!state.selectedSession.isFinished) {
         addPill.addEventListener('click', () => {
 
-            newCategoryModalIsGradedCheckbox.checked = false;
-            document.getElementById('new-category-modal-weight-group').style.display = 'none';
-
+            switchWeightGroupVisibility();
             showCategoryModal((categoryName, isGraded, weight) => {
 
                 const existingCategory = state.currentClassroom.categories.find(
@@ -2119,6 +2110,19 @@ function renderCategoryPills() {
     }
 
     categoryPillsContainer.appendChild(addPill);
+}
+
+function switchWeightGroupVisibility() {
+    if (newCategoryModalIsGradedCheckbox && newCategoryModalWeightGroup) {
+
+        newCategoryModalWeightGroup.style.display = 'flex';
+
+        newCategoryModalWeightGroup.style.visibility = newCategoryModalIsGradedCheckbox ? 'visible' : 'hidden';
+
+        newCategoryModalIsGradedCheckbox.addEventListener('change', () => {
+            newCategoryModalWeightGroup.style.visibility = newCategoryModalIsGradedCheckbox.checked ? 'visible' : 'hidden';
+        });
+    }
 }
 
 function restoreSessionState() {
@@ -5158,7 +5162,7 @@ export function openAddCategoryModal() {
     newCategoryModalNameInput.value = '';
     newCategoryModalIsGradedCheckbox.checked = false;
     newCategoryModalWeightInput.value = 1;
-    newCategoryModalWeightGroup.style.display = 'none'; // Hide weight group initially
+    newCategoryModalWeightGroup.style.visibility = 'hidden'; // Hide weight group initially
     openModal('category-modal');
     newCategoryModalNameInput.focus();
 }
