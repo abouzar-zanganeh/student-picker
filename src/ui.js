@@ -501,8 +501,7 @@ export function showCategoryModal(onSave, options = {}) {
     newCategoryModalNameInput.value = initialName;
     newCategoryModalIsGradedCheckbox.checked = initialIsGraded;
 
-    switchDisplayForWeightGroup();
-
+    syncWeightGroupVisibility();
     newCategoryModalWeightInput.value = initialWeight;
 
     categoryModalSaveBtn.textContent = saveButtonText;
@@ -528,13 +527,7 @@ export function showCategoryModal(onSave, options = {}) {
         newCategoryModalNameInput.select();
     }
 
-    function switchDisplayForWeightGroup() {
-        if (newCategoryModalIsGradedCheckbox.checked) {
-            newCategoryModalWeightGroup.style.display = 'flex';
-        } else {
-            newCategoryModalWeightGroup.style.visibility = 'hidden';
-        }
-    }
+
 }
 
 export function showMoveStudentModal(student, sourceClass) {
@@ -1983,7 +1976,7 @@ function renderCategoryPills() {
                     label: 'تغییر نام',
                     icon: '✏️',
                     action: () => {
-                        switchWeightGroupVisibility();
+                        syncWeightGroupVisibility();
                         showCategoryModal((newName, newIsGraded, newWeight) => {
                             const result = state.renameCategory(state.currentClassroom, category, newName);
                             if (result.success) {
@@ -2081,7 +2074,7 @@ function renderCategoryPills() {
     if (!state.selectedSession.isFinished) {
         addPill.addEventListener('click', () => {
 
-            switchWeightGroupVisibility();
+            syncWeightGroupVisibility();
             showCategoryModal((categoryName, isGraded, weight) => {
 
                 const existingCategory = state.currentClassroom.categories.find(
@@ -2112,18 +2105,7 @@ function renderCategoryPills() {
     categoryPillsContainer.appendChild(addPill);
 }
 
-function switchWeightGroupVisibility() {
-    if (newCategoryModalIsGradedCheckbox && newCategoryModalWeightGroup) {
 
-        newCategoryModalWeightGroup.style.display = 'flex';
-
-        newCategoryModalWeightGroup.style.visibility = newCategoryModalIsGradedCheckbox ? 'visible' : 'hidden';
-
-        newCategoryModalIsGradedCheckbox.addEventListener('change', () => {
-            newCategoryModalWeightGroup.style.visibility = newCategoryModalIsGradedCheckbox.checked ? 'visible' : 'hidden';
-        });
-    }
-}
 
 function restoreSessionState() {
     if (state.selectedSession.lastUsedCategoryId) {
@@ -5656,4 +5638,18 @@ function renderWinnerDetails(winner, categoryName) {
     detailsContainer.appendChild(notesDiv);
 
     return detailsContainer;
+}
+
+/**
+ * Synchronizes the visibility of the Weight input group based on the 'Is Graded' checkbox.
+ */
+export function syncWeightGroupVisibility() {
+    if (newCategoryModalIsGradedCheckbox && newCategoryModalWeightGroup) {
+
+        newCategoryModalWeightGroup.style.display = 'flex';
+        const isGraded = newCategoryModalIsGradedCheckbox.checked;
+
+        newCategoryModalWeightGroup.style.visibility = isGraded ? 'visible' : 'hidden';
+
+    }
 }

@@ -2193,6 +2193,11 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.openAddCategoryModal();
     });
 
+    // Sync weight visibility in the category modal
+    if (newCategoryModalIsGradedCheckbox) {
+        newCategoryModalIsGradedCheckbox.addEventListener('change', ui.syncWeightGroupVisibility);
+    }
+
 });
 
 export function handleUndoLastSelection(student, categoryName) {
