@@ -501,6 +501,7 @@ export function showCategoryModal(onSave, options = {}) {
     newCategoryModalNameInput.value = initialName;
     newCategoryModalIsGradedCheckbox.checked = initialIsGraded;
 
+    switchDisplayForWeightGroup();
 
     newCategoryModalWeightInput.value = initialWeight;
 
@@ -518,11 +519,21 @@ export function showCategoryModal(onSave, options = {}) {
         closeActiveModal(); // Close the modal on successful save
     });
 
+
+
     // 3. Open the modal and focus the input
     openModal('category-modal');
     newCategoryModalNameInput.focus();
     if (initialName) {
         newCategoryModalNameInput.select();
+    }
+
+    function switchDisplayForWeightGroup() {
+        if (newCategoryModalIsGradedCheckbox.checked) {
+            newCategoryModalWeightGroup.style.display = 'flex';
+        } else {
+            newCategoryModalWeightGroup.style.display = 'none';
+        }
     }
 }
 
@@ -1972,6 +1983,19 @@ function renderCategoryPills() {
                     label: 'تغییر نام',
                     icon: '✏️',
                     action: () => {
+
+
+                        if (newCategoryModalIsGradedCheckbox && newCategoryModalWeightGroup) {
+
+                            newCategoryModalWeightGroup.style.display = newCategoryModalIsGradedCheckbox ? 'flex' : 'none';
+
+                            newCategoryModalIsGradedCheckbox.addEventListener('change', () => {
+                                newCategoryModalWeightGroup.style.display = newCategoryModalIsGradedCheckbox.checked ? 'flex' : 'none';
+                            });
+                        }
+
+
+
                         showCategoryModal((newName, newIsGraded, newWeight) => {
                             const result = state.renameCategory(state.currentClassroom, category, newName);
                             if (result.success) {
@@ -1981,6 +2005,7 @@ function renderCategoryPills() {
                                 logManager.addLog(state.currentClassroom.info.name, `نام دسته‌بندی «${category.name}» به «${newName}» تغییر یافت.`);
                                 renderCategoryPills();
                                 renderStudentStatsList();
+                                updateCategoryWeightLabel(category);
                                 showNotification(`✅ نام دسته‌بندی به «${newName}» تغییر یافت.`);
                             } else {
                                 showNotification(`⚠️ ${result.message}`);

@@ -2175,17 +2175,9 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.showNotification(msg);
     });
 
-    const weightGroup = document.getElementById('new-category-modal-weight-group');
 
-    if (newCategoryModalIsGradedCheckbox && weightGroup) {
-        newCategoryModalIsGradedCheckbox.addEventListener('change', (e) => {
-            weightGroup.style.display = e.target.checked ? 'flex' : 'none';
-        });
 
-        // Set initial state on load using the group
-        const isChecked = newCategoryModalIsGradedCheckbox.checked;
-        weightGroup.style.display = isChecked ? 'flex' : 'none';
-    }
+
 
     openAddCategoryBtn.addEventListener('click', () => {
         state.setSaveCategoryCallback((name, isGraded, weight) => {
@@ -2200,11 +2192,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         ui.openAddCategoryModal();
     });
-
-    newCategoryModalIsGradedCheckbox.addEventListener('change', (e) => {
-        newCategoryModalWeightGroup.style.display = e.target.checked ? 'flex' : 'none';
-    });
-
 
 });
 
