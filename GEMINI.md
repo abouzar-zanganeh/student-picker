@@ -30,3 +30,4 @@
 - **Performance:** Use debouncing (500ms) for storage operations.
 - **Normalization:** Use `normalizeText()` for all Persian string comparisons.
 - **Recovery:** Always offer "Trash Bin" functionality for deleted items.
+- **Notification:** Always use ui.showNotification() function instead of alert() function for notifications
