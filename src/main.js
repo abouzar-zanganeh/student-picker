@@ -9,6 +9,14 @@ import { switchDashboardTab, renderRestorePointsPage, newCategoryModalIsGradedCh
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound } from './utils.js';
 
+const NAVIGATION_HIERARCHY = {
+    'restore-points-page': 'class-management-page',
+    'session-page': 'class-management-page',
+    'session-dashboard-page': 'session-page',
+    'trash-page': 'class-management-page',
+    'class-management-page': null // Root
+};
+
 let devModeClicks = 0;
 
 let selectBtnLongPressActive = false;
