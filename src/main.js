@@ -30,6 +30,12 @@ function navigateSilently(pageId) {
     if (pageId === 'class-management-page') {
         state.setCurrentClassroom(null);
         state.setSelectedSession(null);
+
+        // This "cleans" the current history entry so 'Back' won't 
+        // find old class parameters in this slot.
+        history.replaceState({ pageId }, '', '#class-management-page');
+        ui._internalShowPage(pageId);
+        return; // Exit early
     }
     // When going to the session list, only clear the selected session
     else if (pageId === 'session-page') {
