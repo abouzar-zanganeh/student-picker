@@ -26,13 +26,18 @@ const NAVIGATION_HIERARCHY = {
 };
 // Navigates and renders without adding a new entry to the browser history
 function navigateSilently(pageId) {
-    // 1. Perform state cleanup
+    // 1. Perform state cleanup ONLY when going to the root page
     if (pageId === 'class-management-page') {
         state.setCurrentClassroom(null);
         state.setSelectedSession(null);
-    } else if (pageId === 'session-page') {
+    }
+    // When going to the session list, only clear the selected session
+    else if (pageId === 'session-page') {
         state.setSelectedSession(null);
-        ui.renderSessions();
+        // Ensure UI is refreshed for the classroom we are still in
+        if (state.currentClassroom) {
+            ui.renderSessions();
+        }
     }
 
     // 2. Update the URL to match the parent without pushing a new history item
@@ -65,7 +70,6 @@ function navigateUpHierarchy(isSilent = false) {
         if (isSilent) {
             navigateSilently(parentPageId);
         } else {
-            // This is for the Escape key or manual buttons
             ui.showPage(parentPageId);
         }
     }
@@ -1442,13 +1446,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- Global 'Escape' key handler ---
         // This code now only runs if the user is NOT typing.
+        // --- Global 'Escape' key handler ---
         if (event.key === 'Escape') {
-            // ... existing modal/context menu checks ...
+            // Priority 1: Close context menu if visible
+            if (ui.contextMenu.classList.contains('visible')) {
+                ui.closeContextMenu();
+                return;
+            }
+
+            // Priority 2: Close active modal
+            if (state.activeModal) {
+                ui.closeActiveModal();
+                return;
+            }
 
             // Priority 3: Hierarchical back navigation
-            navigateSilently();
+            // We use 'false' because this is a manual UI action, not a browser back event
+            navigateUpHierarchy(false);
 
-            return;
+            return; // Stop processing other shortcuts
         }
 
         // --- Page-Specific Shortcuts ---

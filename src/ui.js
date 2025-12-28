@@ -3589,6 +3589,7 @@ export function renderSettingsOther() {
 }
 
 export function _internalShowPage(pageId) {
+    // 1. Visual Toggle: Hide all pages and show the target
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
     });
@@ -3597,18 +3598,15 @@ export function _internalShowPage(pageId) {
         pageToShow.classList.add('active');
     }
 
-    // This part for the header can remain separate as it's a unique case
+    // 2. Header Toggle: Only show main app header on the root page
     if (pageId === 'class-management-page') {
-
-        state.setCurrentClassroom(null);
-        state.setSelectedSession(null);
-        state.setSelectedStudentForProfile(null);
-
         renderClassList();
         appHeader.style.display = 'flex';
     } else {
         appHeader.style.display = 'none';
     }
+
+    // 3. Update Breadcrumbs
     renderBreadcrumbs();
 }
 
