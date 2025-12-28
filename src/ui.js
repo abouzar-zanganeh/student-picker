@@ -2725,7 +2725,7 @@ export function renderScoresHistory(scoresContainer) {
             deleteBtn.addEventListener('click', () => {
                 closeActiveModal(() => {
                     showCustomConfirm(
-                        `آیا از انتقال نمره ${score.value} در مهارت «${score.skill}» به سطل زباله مطمئن هستید؟`,
+                        `آیا از انتقال نمره ${score.value} در مهارت «${score.skill}» برای دانش آموز «${student.identity.name}» به سطل زباله مطمئن هستید؟`,
                         () => {
                             // NEW: This logic now sends the item to the trash bin
                             const trashEntry = {
@@ -2745,7 +2745,7 @@ export function renderScoresHistory(scoresContainer) {
 
                             // Re-open the profile modal to see the change
                             showStudentProfile(student);
-                            showNotification('✅ نمره به سطل زباله منتقل شد.');
+                            showNotification(`✅ نمره دانش آموز ${student.identity.name} به سطل زباله منتقل شد.`);
                         },
                         {
                             confirmText: 'تایید انتقال',
