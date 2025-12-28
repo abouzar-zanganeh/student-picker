@@ -77,12 +77,6 @@ function restoreStateFromURL() {
             ui.showSettingsPage(state.currentClassroom);
             break;
 
-        case 'student-profile-page':
-            // Render the dashboard underneath, using the 'tab' from URL
-            ui.renderSessionDashboard(tab);
-            // Then, show the profile modal on top
-            ui.showStudentProfile(state.selectedStudentForProfile);
-            break;
 
         default:
             // If the pageId is something else (like trash-page, etc.), we don't restore it.
@@ -1393,11 +1387,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (pageId === 'session-page') {
                 ui.renderSessions();
                 ui._internalShowPage(pageId);
-            } else if (pageId === 'student-profile-page') {
-                // When restoring a profile URL, show the modal on top of the session list page.
-                ui.renderSessions(); // Render the page underneath
-                ui.showPage('session-page');
-                ui.showStudentProfile(state.selectedStudentForProfile); // Then open the modal
             } else {
                 ui._internalShowPage(pageId);
             }
@@ -1454,17 +1443,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 'csv-preview-page':
                 case 'column-mapping-page':
                     ui.showPage('settings-page');
-                    break;
-
-                case 'student-profile-page':
-                    state.setSelectedStudentForProfile(null);
-                    if (state.selectedSession) {
-                        // Came from a session, go back to the student page
-                        ui.showPage('student-page');
-                    } else {
-                        // Came from a shortcut (e.g., search), go back to the session list
-                        ui.showPage('session-page');
-                    }
                     break;
 
                 case 'attendance-page':
@@ -1528,24 +1506,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     const searchIcon = document.querySelector('.action-column .search-icon');
                     if (searchIcon) {
                         searchIcon.click();
-                    }
-                    break;
-
-                case 'g':
-                    if (studentProfilePage.classList.contains('active')) {
-                        history.back();
-                    } else {
-                        const lastWinnerId = state.selectedSession.lastSelectedWinnerId;
-                        if (lastWinnerId) {
-                            const student = state.currentClassroom.students.find(s => s.identity.studentId === lastWinnerId);
-                            if (student) {
-                                state.setSelectedStudentForProfile(student);
-                                ui.renderStudentProfilePage();
-                                ui.showPage('student-profile-page');
-                            }
-                        } else {
-                            ui.showNotification("⚠️ابتدا یک نفر را انتخاب کنید تا پروفایل او نمایش داده شود.");
-                        }
                     }
                     break;
 
