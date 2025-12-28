@@ -1405,9 +1405,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ui.closeContextMenu();
 
-        // Instead of relying on event.state to tell us WHERE to go,
-        // we use our hierarchy to move one level UP.
-        navigateUpHierarchy();
+        // Pass 'true' to ensure we don't create new history entries
+        navigateUpHierarchy(true);
     });
 
 
@@ -1437,7 +1436,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // ... existing modal/context menu checks ...
 
             // Priority 3: Hierarchical back navigation
-            navigateUpHierarchy();
+            navigateUpHierarchy(false);
 
             return;
         }
