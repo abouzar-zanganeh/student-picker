@@ -1445,18 +1445,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     ui.showPage('settings-page');
                     break;
 
-                case 'attendance-page':
-                    // From attendance, the logical back step is the main student selection page.
-                    ui.showPage('student-page');
-                    break;
-
-                case 'student-page':
-                    // From the student page, the logical back step is the session list.
-                    state.setSelectedSession(null);
-                    ui.renderSessions();
-                    ui.showPage('session-page');
-                    break;
-
                 case 'settings-page':
                 case 'session-page':
                     // Both pages are children of a class, go back to the class list
