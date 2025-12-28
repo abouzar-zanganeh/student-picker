@@ -840,6 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('new-session-btn').addEventListener('click', () => {
+
         if (state.currentClassroom) {
             const unfinishedSession = state.currentClassroom.sessions.find(session => !session.isFinished && !session.isCancelled && !session.isDeleted);
             if (unfinishedSession) {
@@ -1410,10 +1411,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('popstate', (event) => {
-        // If a modal is open, closing it is our priority.
-        // The history 'back' has already happened, so we just handle the UI.
-        if (state.activeModal) {
+        // If a modal is open OR we just closed one manually
+        if (state.activeModal || state.isModalTransitioning) {
             ui.closeActiveModal(null, true);
+            state.setIsModalTransitioning(false); // Reset the flag
             return;
         }
 

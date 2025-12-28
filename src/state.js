@@ -66,6 +66,11 @@ export let isAssessmentModeActive = false;
 export function setIsAssessmentModeActive(value) {
     isAssessmentModeActive = value;
 }
+
+export let isModalTransitioning = false; // New flag to track modal transitions
+export function setIsModalTransitioning(value) {
+    isModalTransitioning = value;
+}
 //-----------------------
 
 

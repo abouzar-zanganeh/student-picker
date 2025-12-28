@@ -680,6 +680,9 @@ export function openModal(modalId) {
 export function closeActiveModal(onClosed, isHistoryPop = false) {
     if (!state.activeModal) return;
 
+    // Add this line to signal to main.js that we are in a "modal-close" transition
+    state.setIsModalTransitioning(true);
+
     const modal = document.getElementById(state.activeModal);
     const activeModalId = state.activeModal;
 
