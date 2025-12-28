@@ -12,13 +12,13 @@ import { normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound } 
 
 // --- Navigation Hierarchy Map which states which page is the parent of which ---
 const NAVIGATION_HIERARCHY = {
-    'restore-points-page': 'class-management-page',
-    'session-page': 'class-management-page',
     'session-dashboard-page': 'session-page',
-    'trash-page': 'class-management-page',
-    'settings-page': 'class-management-page',
     'column-mapping-page': 'settings-page',
     'csv-preview-page': 'settings-page',
+    'restore-points-page': 'class-management-page',
+    'session-page': 'class-management-page',
+    'settings-page': 'class-management-page',
+    'trash-page': 'class-management-page',
     'class-management-page': null // Root
 };
 
