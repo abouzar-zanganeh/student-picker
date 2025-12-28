@@ -14,7 +14,8 @@ let devModeClicks = 0;
 let selectBtnLongPressActive = false;
 
 
-
+// Restores application state based on the URL hash and query parameters.
+// Returns true if a page was restored, false otherwise.
 function restoreStateFromURL() {
     const hash = window.location.hash;
     if (!hash || hash === '#') return false;
