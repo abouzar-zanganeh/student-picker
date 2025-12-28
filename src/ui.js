@@ -3614,44 +3614,22 @@ export function _internalShowPage(pageId) {
 
 export function showPage(pageId, options = {}) {
     const { tab } = options;
-    const historyState = {
-        pageId,
-        currentClassName: state.currentClassroom ? state.currentClassroom.info.name : null,
-        selectedSessionNumber: state.selectedSession ? state.selectedSession.sessionNumber : null,
-        selectedStudentId: state.selectedStudentForProfile ? state.selectedStudentForProfile.identity.studentId : null,
-    };
 
-    // Build a new URL with query parameters to store the context
+    // 1. Prepare the new Hash and Parameters
     let hash = `#${pageId}`;
-    const params = new URLSearchParams(window.location.hash.split('?')[1] || '');
+    const params = new URLSearchParams();
 
-    //  CLASSROOM LOGIC ---
     if (state.currentClassroom) {
         params.set('class', state.currentClassroom.info.name);
-    } else {
-        params.delete('class');
     }
-
-    //  SESSION LOGIC ---
     if (state.selectedSession) {
         params.set('session', state.selectedSession.sessionNumber);
-    } else {
-        params.delete('session');
     }
-
-    //  STUDENT LOGIC ---
     if (state.selectedStudentForProfile) {
         params.set('student', state.selectedStudentForProfile.identity.studentId);
-    } else {
-        params.delete('student');
     }
-
-    // --- TAB LOGIC ---
     if (pageId === 'session-dashboard-page' && tab) {
         params.set('tab', tab);
-    } else if (pageId !== 'session-dashboard-page') {
-        // Clean up tab param if we're not on the dashboard
-        params.delete('tab');
     }
 
     const paramsString = params.toString();
@@ -3659,11 +3637,13 @@ export function showPage(pageId, options = {}) {
         hash += `?${paramsString}`;
     }
 
-    // Only push a new entry to browser history if the URL has actually changed
+    // 2. ONLY push to history if the hash is actually different.
+    // This prevents "looping" when navigateUpHierarchy calls showPage.
     if (window.location.hash !== hash) {
-        history.pushState(historyState, '', hash);
+        history.pushState({ pageId }, '', hash);
     }
 
+    // 3. Perform the actual UI transition
     _internalShowPage(pageId);
 }
 

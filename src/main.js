@@ -9,6 +9,9 @@ import { switchDashboardTab, renderRestorePointsPage, newCategoryModalIsGradedCh
 import { Classroom, Student, Category } from './models.js';
 import { normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound } from './utils.js';
 
+let devModeClicks = 0;
+
+let selectBtnLongPressActive = false;
 
 // --- Navigation Hierarchy Map which states which page is the parent of which ---
 const NAVIGATION_HIERARCHY = {
@@ -21,11 +24,42 @@ const NAVIGATION_HIERARCHY = {
     'trash-page': 'class-management-page',
     'class-management-page': null // Root
 };
+// Navigates and renders without adding a new entry to the browser history
+function navigateSilently(pageId) {
+    // 1. Perform state cleanup based on the destination
+    if (pageId === 'class-management-page') {
+        state.setCurrentClassroom(null);
+        state.setSelectedSession(null);
+    } else if (pageId === 'session-page') {
+        state.setSelectedSession(null);
+        ui.renderSessions();
+    }
 
-let devModeClicks = 0;
+    // 2. Use the internal render function (bypassing history.pushState)
+    ui._internalShowPage(pageId);
+}
 
-let selectBtnLongPressActive = false;
+// Centralized function to navigate one level up the hierarchy
+function navigateUpHierarchy(isSilent = false) {
+    if (state.activeModal) {
+        ui.closeActiveModal();
+        return;
+    }
 
+    const activePage = document.querySelector('.page.active');
+    if (!activePage) return;
+
+    const parentPageId = NAVIGATION_HIERARCHY[activePage.id];
+
+    if (parentPageId) {
+        if (isSilent) {
+            navigateSilently(parentPageId);
+        } else {
+            // This is for the Escape key or manual buttons
+            ui.showPage(parentPageId);
+        }
+    }
+}
 
 // Restores application state based on the URL hash and query parameters.
 // Returns true if a page was restored, false otherwise.
@@ -1362,42 +1396,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('popstate', (event) => {
-        // If a modal is open when the back button is used,
-        // our only job is to close it and stop further action.
+        // If a modal is open, closing it is our priority.
+        // The history 'back' has already happened, so we just handle the UI.
         if (state.activeModal) {
-            // Call our function and pass 'true' to signify this is a history pop.
             ui.closeActiveModal(null, true);
-            return; // IMPORTANT: Stop here to prevent page navigation.
+            return;
         }
 
         ui.closeContextMenu();
-        if (event.state) {
-            const { pageId, currentClassName, selectedSessionNumber, selectedStudentId } = event.state;
-            if (currentClassName) {
-                state.setCurrentClassroom(state.classrooms[currentClassName]);
-                if (selectedSessionNumber) {
-                    state.setSelectedSession(state.currentClassroom.getSession(selectedSessionNumber));
-                }
-                if (selectedStudentId) {
-                    state.setSelectedStudentForProfile(state.currentClassroom.students.find(s => s.identity.studentId === selectedStudentId));
-                }
-            }
 
-            // This block handles restoring the correct page view from history
-            if (pageId === 'session-page') {
-                ui.renderSessions();
-                ui._internalShowPage(pageId);
-            } else {
-                ui._internalShowPage(pageId);
-            }
-
-        } else {
-            // If there's no state, go back to the home page
-            state.setCurrentClassroom(null);
-            state.setSelectedSession(null);
-            state.setSelectedStudentForProfile(null);
-            ui._internalShowPage('class-management-page');
-        }
+        // Instead of relying on event.state to tell us WHERE to go,
+        // we use our hierarchy to move one level UP.
+        navigateUpHierarchy();
     });
 
 
@@ -1424,36 +1434,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- Global 'Escape' key handler ---
         // This code now only runs if the user is NOT typing.
         if (event.key === 'Escape') {
-            // Priority 1: Close context menu if visible
-            if (ui.contextMenu.classList.contains('visible')) {
-                ui.closeContextMenu();
-                return;
-            }
-
-            // Priority 2: Close active modal
-            if (state.activeModal) {
-                ui.closeActiveModal();
-                return;
-            }
+            // ... existing modal/context menu checks ...
 
             // Priority 3: Hierarchical back navigation
-            const activePageId = document.querySelector('.page.active')?.id;
+            navigateUpHierarchy();
 
-            switch (activePageId) {
-                case 'csv-preview-page':
-                case 'column-mapping-page':
-                    ui.showPage('settings-page');
-                    break;
-
-                case 'settings-page':
-                case 'session-page':
-                    // Both pages are children of a class, go back to the class list
-                    state.setCurrentClassroom(null);
-                    ui.showPage('class-management-page');
-                    break;
-            }
-
-            return; // Stop processing other shortcuts
+            return;
         }
 
         // --- Page-Specific Shortcuts ---
