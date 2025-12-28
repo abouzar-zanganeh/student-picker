@@ -26,7 +26,7 @@ const NAVIGATION_HIERARCHY = {
 };
 // Navigates and renders without adding a new entry to the browser history
 function navigateSilently(pageId) {
-    // 1. Perform state cleanup based on the destination
+    // 1. Perform state cleanup
     if (pageId === 'class-management-page') {
         state.setCurrentClassroom(null);
         state.setSelectedSession(null);
@@ -35,7 +35,17 @@ function navigateSilently(pageId) {
         ui.renderSessions();
     }
 
-    // 2. Use the internal render function (bypassing history.pushState)
+    // 2. Update the URL to match the parent without pushing a new history item
+    const params = new URLSearchParams();
+    if (state.currentClassroom) params.set('class', state.currentClassroom.info.name);
+    if (state.selectedSession) params.set('session', state.selectedSession.sessionNumber);
+
+    const newHash = `#${pageId}${params.toString() ? '?' + params.toString() : ''}`;
+
+    // This is the magic line: it updates the address bar but stays on the same history "slot"
+    history.replaceState({ pageId }, '', newHash);
+
+    // 3. Render the UI
     ui._internalShowPage(pageId);
 }
 
@@ -1436,7 +1446,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // ... existing modal/context menu checks ...
 
             // Priority 3: Hierarchical back navigation
-            navigateUpHierarchy(false);
+            navigateSilently();
 
             return;
         }
