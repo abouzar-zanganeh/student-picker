@@ -1486,10 +1486,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     break;
 
-                case 'c':
-                    document.querySelector('.back-to-classes-btn').click();
-                    break;
-
                 case 'f':
                     const searchIcon = document.querySelector('.action-column .search-icon');
                     if (searchIcon) {
