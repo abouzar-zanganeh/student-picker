@@ -25,7 +25,7 @@ function openDB() {
 
 /**
  * Saves a backup file to the database.
- * Automatically deletes the oldest backup if there are more than 3.
+ * Automatically deletes the oldest backup if there are more than 10.
  * @param {File|Blob} file The compressed backup file
  * @param {Object} metadata Info about the backup (name, version, etc.)
  */
@@ -43,7 +43,7 @@ export async function addBackupSnapshot(file, metadata) {
 
     store.add(record);
 
-    // --- Rotation Logic (Keep Max 3) ---
+    // --- Rotation Logic (Keep Max 10) ---
     transaction.oncomplete = () => {
         // Start a new transaction for cleanup to ensure the 'add' is committed first
         const cleanupTx = db.transaction(STORE_NAME, 'readwrite');
