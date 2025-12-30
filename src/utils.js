@@ -219,3 +219,13 @@ export function hideKeyboard(element) {
         element.blur();
     }
 }
+
+// Sets up an input or textarea to auto-select all text on focus
+export function setupAutoSelectOnFocus(element) {
+    if (!element) return;
+
+    element.addEventListener('focus', () => {
+        // The native method that highlights all text
+        element.select();
+    });
+}

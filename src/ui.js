@@ -10,7 +10,8 @@ import {
 import {
     detectTextDirection, renderMultiLineText,
     parseStudentName, sortStudents, setupDoubleAction,
-    setupKeyboardShortcut, hideKeyboard
+    setupKeyboardShortcut, hideKeyboard,
+    setupAutoSelectOnFocus
 } from './utils.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
@@ -2427,6 +2428,8 @@ function renderProfileScoringSection(container) {
         addScoreBtn.click();
         hideKeyboard(scoreInput);
     });
+
+    setupAutoSelectOnFocus(scoreInput);
 
     setupKeyboardShortcut(commentTextarea, 'Enter', () => {
         addScoreBtn.click();

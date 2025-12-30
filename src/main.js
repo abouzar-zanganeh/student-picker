@@ -18,7 +18,7 @@ import {
 import { Classroom, Student, Category } from './models.js';
 import {
     normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound,
-    setupKeyboardShortcut, hideKeyboard
+    setupKeyboardShortcut, hideKeyboard, setupAutoSelectOnFocus
 } from './utils.js';
 
 
@@ -1178,6 +1178,8 @@ document.addEventListener('DOMContentLoaded', () => {
         hideKeyboard(quickScoreInput);
         quickGradeSubmitBtn.click();
     });
+
+    setupAutoSelectOnFocus(quickScoreInput);
 
     setupKeyboardShortcut(quickNoteTextarea, 'Enter', () => {
         hideKeyboard(quickNoteTextarea);
