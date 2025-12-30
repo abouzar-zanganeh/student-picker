@@ -58,7 +58,7 @@ const SYSTEM_CATEGORY_DEFAULTS = {
     }
 };
 
-// --- NEW: Populate the Adult levels (Basic 1 to Advanced 3) ---
+// --- Populate the Adult levels (Basic 1 to Advanced 3) ---
 const adultLevels = [
     'Basic 1', 'Basic 2', 'Basic 3',
     'Elementary 1', 'Elementary 2', 'Elementary 3',
