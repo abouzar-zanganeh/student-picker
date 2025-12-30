@@ -4,10 +4,23 @@ import * as logManager from './logManager.js';
 import * as utils from './utils.js';
 import * as db from './db.js';
 import JSZip from 'jszip';
-import { resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent, getSessionDisplayMap, isAssessmentModeActive, setIsAssessmentModeActive } from './state.js';
-import { switchDashboardTab, renderRestorePointsPage, newCategoryModalIsGradedCheckbox } from './ui.js';
+
+import {
+    resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent,
+    getSessionDisplayMap, isAssessmentModeActive, setIsAssessmentModeActive
+} from './state.js';
+
+import {
+    switchDashboardTab, renderRestorePointsPage, newCategoryModalIsGradedCheckbox,
+    quickGradeSubmitBtn, quickScoreInput, quickNoteTextarea
+} from './ui.js';
+
 import { Classroom, Student, Category } from './models.js';
-import { normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound } from './utils.js';
+import {
+    normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound,
+    setupKeyboardShortcut, hideKeyboard
+} from './utils.js';
+
 
 let devModeClicks = 0;
 
@@ -1106,7 +1119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    ui.quickGradeSubmitBtn.addEventListener('click', () => {
+    quickGradeSubmitBtn.addEventListener('click', () => {
         const scoreValue = ui.quickScoreInput.value;
         const noteText = ui.quickNoteTextarea.value.trim();
         let student;
@@ -1155,20 +1168,21 @@ document.addEventListener('DOMContentLoaded', () => {
             // Clear inputs for the next entry
             ui.quickScoreInput.value = '';
             ui.quickNoteTextarea.value = '';
+
             // Refresh the winner display to show the new score/note instantly
             ui.displayWinner();
         }
     });
 
-    const quickGradeSubmitHandler = (event) => {
-        if (event.key === 'Enter' && event.ctrlKey) {
-            event.preventDefault(); // Prevents adding a new line in the textarea
-            ui.quickGradeSubmitBtn.click();
-        }
-    };
+    setupKeyboardShortcut(quickScoreInput, 'Enter', () => {
+        hideKeyboard(quickScoreInput);
+        quickGradeSubmitBtn.click();
+    });
 
-    ui.quickScoreInput.addEventListener('keydown', quickGradeSubmitHandler);
-    ui.quickNoteTextarea.addEventListener('keydown', quickGradeSubmitHandler);
+    setupKeyboardShortcut(quickNoteTextarea, 'Enter', () => {
+        hideKeyboard(quickNoteTextarea);
+        quickGradeSubmitBtn.click();
+    });
 
     cancelNoteBtn.addEventListener('click', () => {
         ui.closeActiveModal();
@@ -2407,7 +2421,6 @@ export function pickAssessmentWinner(classroom, category) {
     if (pool.length === 0) {
         return null;
     }
-
     // 2. Random selection from the fresh pool
     const randomIndex = Math.floor(Math.random() * pool.length);
     const winnerId = pool[randomIndex];

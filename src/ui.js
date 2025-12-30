@@ -7,7 +7,11 @@ import {
     getActiveItems, getSessionDisplayMap, permanentlyDeleteStudent,
     permanentlyDeleteSession, permanentlyDeleteCategory, permanentlyDeleteScore, permanentlyDeleteNote
 } from './state.js';
-import { detectTextDirection, renderMultiLineText, parseStudentName, sortStudents, setupDoubleAction, setupKeyboardShortcut } from './utils.js';
+import {
+    detectTextDirection, renderMultiLineText,
+    parseStudentName, sortStudents, setupDoubleAction,
+    setupKeyboardShortcut, hideKeyboard
+} from './utils.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
 import { Category, EDUCATIONAL_SYSTEMS } from './models.js';
@@ -1905,9 +1909,6 @@ function initializeStudentPageUI() {
 
     updateSelectButtonText(null);
 
-
-
-
     // Set header and clear containers
     categoryPillsContainer.innerHTML = '';
     resultDiv.innerHTML = '';
@@ -2422,9 +2423,15 @@ function renderProfileScoringSection(container) {
     const scoreInput = scoringSection.querySelector('#modal-new-score-value');
     const commentTextarea = scoringSection.querySelector('#modal-new-score-comment');
 
-    setupKeyboardShortcut(scoreInput, 'Enter', () => { addScoreBtn.click(); });
+    setupKeyboardShortcut(scoreInput, 'Enter', () => {
+        addScoreBtn.click();
+        hideKeyboard(scoreInput);
+    });
 
-    setupKeyboardShortcut(commentTextarea, 'Enter', () => { addScoreBtn.click(); });
+    setupKeyboardShortcut(commentTextarea, 'Enter', () => {
+        addScoreBtn.click();
+        hideKeyboard(commentTextarea);
+    });
 
     addScoreBtn.addEventListener('click', () => {
         const activeSkillPill = pillsContainer.querySelector('.pill.active');
@@ -2433,10 +2440,6 @@ function renderProfileScoringSection(container) {
             return;
         }
         const skill = activeSkillPill.dataset.skillName;
-
-
-
-
 
         const value = scoreInput.value;
         const comment = commentTextarea.value.trim();
