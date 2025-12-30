@@ -46,6 +46,66 @@ export const EDUCATIONAL_SYSTEMS = {
     }
 };
 
+// --- NEW: Configuration for Default Categories ---
+const SYSTEM_CATEGORY_DEFAULTS = {
+    'ili': {
+        // Fallback for ILI levels not defined below
+        'default': [
+            { name: 'عمومی', description: 'دسته‌بندی پیش‌فرض', isGraded: true, weight: 1 }
+        ],
+        // Specific overrides for levels
+        'levels': {}
+    }
+};
+
+// --- NEW: Populate the Adult levels (Basic 1 to Advanced 3) ---
+const adultLevels = [
+    'Basic 1', 'Basic 2', 'Basic 3',
+    'Elementary 1', 'Elementary 2', 'Elementary 3',
+    'Pre-intermediate 1', 'Pre-intermediate 2', 'Pre-intermediate 3',
+    'Intermediate 1', 'Intermediate 2', 'Intermediate 3',
+    'High-intermediate 1', 'High-intermediate 2', 'High-intermediate 3',
+    'Advanced 1', 'Advanced 2', 'Advanced 3'
+];
+
+// Apply the requested rule to all adult levels
+adultLevels.forEach(level => {
+    SYSTEM_CATEGORY_DEFAULTS.ili.levels[level] = [
+        { name: 'List-Spk', description: 'Listening and Speaking', isGraded: true, weight: 3 },
+        { name: 'Reading', description: '', isGraded: true, weight: 2 },
+        { name: 'Writing', description: '', isGraded: true, weight: 1 }
+    ];
+});
+
+// --- NEW: Helper Function to generate categories ---
+function generateDefaultCategories(systemId, levelId) {
+    // 1. Check if the system exists in our config
+    const systemConfig = SYSTEM_CATEGORY_DEFAULTS[systemId];
+    if (!systemConfig) {
+        // Fallback to the old hardcoded defaults if system is unknown (e.g. 'custom')
+        return [
+            new Category('عمومی', 'دسته‌بندی پیش‌فرض', true, 1)
+        ];
+    }
+
+    // 2. Check for specific level overrides
+    let configList = systemConfig.levels[levelId];
+
+    // 3. If no level override, use the system default
+    if (!configList) {
+        configList = systemConfig.default;
+    }
+
+    // 4. Convert the config objects into Category instances
+    return configList.map(conf => new Category(
+        conf.name,
+        conf.description || '',
+        conf.isGraded || false,
+        conf.weight || 1
+    ));
+}
+
+
 export class Student {
     constructor(identityInfo) {
         this.identity = {
@@ -334,17 +394,10 @@ export class Classroom {
         this.sessions = [];
         this.note = '';
         this.isDeleted = false;
-        this.categories = [
-            // Default participation categories
-            new Category('Vocabulary', 'Questions about words and meanings.'),
-            new Category('Grammar', 'Questions about sentence structure and rules.'),
 
-            // Default graded categories
-            new Category('Listening', undefined, true),
-            new Category('Speaking', undefined, true),
-            new Category('Reading', undefined, true),
-            new Category('Writing', undefined, true)
-        ];
+        // --- UPDATED: Use dynamic generation based on System and Level ---
+        this.categories = generateDefaultCategories(this.info.educationalSystem, this.info.level);
+
         this.futurePlans = {};
     }
 
