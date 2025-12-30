@@ -1946,6 +1946,9 @@ function renderCategoryPills() {
             pill.addEventListener('click', () => {
                 document.querySelectorAll('#category-selection-container .pill').forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
+
+                setStyleForGradedCategoryPill(category, pill);
+
                 state.setSelectedCategory(category);
                 updateSelectButtonText(category);
                 updateCategoryWeightLabel(category);
@@ -2109,6 +2112,12 @@ function renderCategoryPills() {
 }
 
 
+
+function setStyleForGradedCategoryPill(category, pill) {
+    if (category.isGradedCategory) {
+        pill.classList.add('graded-category-pill');
+    }
+}
 
 function restoreSessionState() {
     if (state.selectedSession.lastUsedCategoryId) {
@@ -2402,6 +2411,7 @@ function renderProfileScoringSection(container) {
         pill.addEventListener('click', () => {
             pillsContainer.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
+            setStyleForGradedCategoryPill(category, pill);
         });
         pillsContainer.appendChild(pill);
     });
