@@ -10,12 +10,15 @@
 - **Goal:** Fair student participation, lag-free UI, and "Time Machine" data security.
 - **State Management:** `state.js` is the single source of truth. Updates must follow: Update State -> `saveData()` -> Trigger `ui.js`.
 - **File Map:**
+  - `index.html`: The main html file of the project.
+  - `models.js`: Classes for Classroom, Student, Session, Category.
+  - `main.js`: Core business logic and coordination.
   - `state.js`: Global state and persistence logic.
   - `ui.js`: DOM rendering and event listeners.
-  - `main.js`: Core business logic and coordination.
   - `db.js`: IndexedDB "Garage" for compressed backups.
-  - `models.js`: Classes for Classroom, Student, Session, Category.
   - `compression.worker.js`: Off-thread LZ-String compression.
+  - `db.js`: indexedDB related code.
+  - `style.css`: All the styles are defined here. Some are define in-line.
 ### 2.1
 - **Important Note:** If you need to process any of the above files, but the user hasn't uploaded them, ask him to upload it for you. This is due to the fact that under some circumstances the user might not want or might not be able to upload all the main files at once.
 
