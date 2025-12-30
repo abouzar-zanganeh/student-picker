@@ -3,6 +3,9 @@
 // =================================================================
 
 export const EDUCATIONAL_SYSTEMS = {
+
+    // Any change here should be synchronized with the SYSTEM_CATEGORY_DEFAULTS, ILI_KIDS_LEVELS, 
+    // ILI_YOUNG_ADULTS_LEVELS, and ILI_ADULT_LEVELS below.
     ili: {
         id: 'ili',
         label: 'کانون زبان ایران',
@@ -57,9 +60,25 @@ const SYSTEM_CATEGORY_DEFAULTS = {
         'levels': {}
     }
 };
+// --- Populate the Kids levels (Primer 1 to Jump Up 4) ---
+// The requested default categories for Kids levels will be defined in the future.
+
+const ILI_KIDS_LEVELS = [
+    'Primer 1', 'Primer 2',
+    'Step Up 1', 'Step Up 2', 'Step Up 3', 'Step Up 4',
+    'Move Up 1', 'Move Up 2', 'Move Up 3', 'Move Up 4',
+    'Jump Up 1', 'Jump Up 2', 'Jump Up 3', 'Jump Up 4'];
+
+// --- Young Adults levels (Start 1 to Reach 4) ---
+// The requested default categories for Young Adults levels will be defined in the future.
+const ILI_YOUNG_ADULTS_LEVELS = [
+    'Start 1',
+    'Run 1', 'Run 2', 'Run 3', 'Run 4',
+    'Race 1', 'Race 2', 'Race 3',
+    'Reach 1', 'Reach 2', 'Reach 3', 'Reach 4'];
 
 // --- Populate the Adult levels (Basic 1 to Advanced 3) ---
-const adultLevels = [
+const ILI_ADULT_LEVELS = [
     'Basic 1', 'Basic 2', 'Basic 3',
     'Elementary 1', 'Elementary 2', 'Elementary 3',
     'Pre-intermediate 1', 'Pre-intermediate 2', 'Pre-intermediate 3',
@@ -68,8 +87,9 @@ const adultLevels = [
     'Advanced 1', 'Advanced 2', 'Advanced 3'
 ];
 
-// Apply the requested rule to all adult levels
-adultLevels.forEach(level => {
+// Define the requested default categories to all adult levels. 
+// For other levels (kids and young adults), we will do it later.
+ILI_ADULT_LEVELS.forEach(level => {
     SYSTEM_CATEGORY_DEFAULTS.ili.levels[level] = [
         { name: 'List-Spk', description: 'Listening and Speaking', isGraded: true, weight: 3 },
         { name: 'Reading', description: '', isGraded: true, weight: 2 },
