@@ -850,7 +850,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.currentClassroom) {
             const unfinishedSession = state.currentClassroom.sessions.find(session => !session.isFinished && !session.isCancelled && !session.isDeleted);
             if (unfinishedSession) {
-                ui.showNotification(`⚠️ جلسه ${unfinishedSession.sessionNumber} هنوز تمام نشده است. لطفاً ابتدا با دکمه ✅ آن را خاتمه دهید.`);
+                ui.showNotification(`⚠️ جلسه ${unfinishedSession.sessionNumber} هنوز تمام نشده است. لطفاً ابتدا با دکمه «پایان جلسه» آن را خاتمه دهید.`, 4500);
 
                 return;
             }

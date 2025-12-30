@@ -187,3 +187,15 @@ export function setupDoubleAction(element, callback) {
         lastTap = currentTime;
     });
 }
+
+
+export function setupKeyboardShortcut(element, key, callback) {
+    if (!element) return;
+
+    element.addEventListener('keydown', (event) => {
+        if (event.shiftKey) return; // Allow Shift+Enter for new lines
+        if (event.key === key) {
+            callback(event);
+        }
+    });
+}

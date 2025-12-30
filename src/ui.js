@@ -7,7 +7,7 @@ import {
     getActiveItems, getSessionDisplayMap, permanentlyDeleteStudent,
     permanentlyDeleteSession, permanentlyDeleteCategory, permanentlyDeleteScore, permanentlyDeleteNote
 } from './state.js';
-import { detectTextDirection, renderMultiLineText, parseStudentName, sortStudents, setupDoubleAction } from './utils.js';
+import { detectTextDirection, renderMultiLineText, parseStudentName, sortStudents, setupDoubleAction, setupKeyboardShortcut } from './utils.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
 import { Category, EDUCATIONAL_SYSTEMS } from './models.js';
@@ -2153,8 +2153,9 @@ function updateCategoryWeightLabel(category) {
     if (category && category.isGradedCategory) {
         categoryWeightLabel.textContent = `ضریب: ${category.weight || 1}`;
         categoryWeightLabel.style.display = 'block';
+        categoryWeightLabel.style.visibility = 'visible';
     } else {
-        categoryWeightLabel.style.display = 'none';
+        categoryWeightLabel.style.visibility = 'hidden';
     }
 }
 
@@ -2418,6 +2419,13 @@ function renderProfileScoringSection(container) {
 
     // 4. Attach the "Add Score" button's event listener directly
     const addScoreBtn = scoringSection.querySelector('#modal-add-score-btn');
+    const scoreInput = scoringSection.querySelector('#modal-new-score-value');
+    const commentTextarea = scoringSection.querySelector('#modal-new-score-comment');
+
+    setupKeyboardShortcut(scoreInput, 'Enter', () => { addScoreBtn.click(); });
+
+    setupKeyboardShortcut(commentTextarea, 'Enter', () => { addScoreBtn.click(); });
+
     addScoreBtn.addEventListener('click', () => {
         const activeSkillPill = pillsContainer.querySelector('.pill.active');
         if (!activeSkillPill) {
@@ -2425,8 +2433,11 @@ function renderProfileScoringSection(container) {
             return;
         }
         const skill = activeSkillPill.dataset.skillName;
-        const scoreInput = scoringSection.querySelector('#modal-new-score-value');
-        const commentTextarea = scoringSection.querySelector('#modal-new-score-comment');
+
+
+
+
+
         const value = scoreInput.value;
         const comment = commentTextarea.value.trim();
 
@@ -2460,7 +2471,7 @@ function renderProfileScoringSection(container) {
         }
         renderHistorySection(modalContentContainer);
 
-        showNotification(`✅ نمره برای مهارت ${skill} با موفقیت ثبت شد.`);
+        showNotification(`✅ نمره برای مهارت ${skill} برای دانش آموز ${state.selectedStudentForProfile.identity.name} با موفقیت ثبت شد.`);
     });
 
     // 5. Finally, append the entire new section to the provided container
