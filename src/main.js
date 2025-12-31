@@ -287,6 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.closeActiveModal();
         ui.showNotification(`✅ دسته‌بندی جدید ${categoryName} با موفقیت اضافه شد.`);
         ui.renderSettingsCategories(); // Refresh list
+        ui.renderStudentStatsList();
     });
 
     window.addEventListener('scroll', ui.closeContextMenu);
