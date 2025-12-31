@@ -229,3 +229,23 @@ export function setupAutoSelectOnFocus(element) {
         element.select();
     });
 }
+
+// Temporarily applies a blinking error effect to an element for visual feedback
+// mostly used when there's invalid input or action.
+export function flashElement(element, duration = 4000, shouldScroll = true) {
+    if (shouldScroll) {
+        scrollToElement(element);
+    }
+
+    element.classList.add('blink-error');
+    setTimeout(() => {
+        element.classList.remove('blink-error');
+    }, duration);
+}
+
+// Smoothly scrolls the given element into the center of the viewport
+export function scrollToElement(element) {
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}

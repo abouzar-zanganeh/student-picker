@@ -11,7 +11,7 @@ import {
     detectTextDirection, renderMultiLineText,
     parseStudentName, sortStudents, setupDoubleAction,
     setupKeyboardShortcut, hideKeyboard,
-    setupAutoSelectOnFocus
+    setupAutoSelectOnFocus, flashElement, scrollToElement
 } from './utils.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';

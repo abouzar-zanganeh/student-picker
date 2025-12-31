@@ -10,16 +10,19 @@ import {
     getSessionDisplayMap, isAssessmentModeActive, setIsAssessmentModeActive
 } from './state.js';
 
+
 import {
     switchDashboardTab, renderRestorePointsPage, newCategoryModalIsGradedCheckbox,
     quickGradeSubmitBtn, quickScoreInput, quickNoteTextarea
 } from './ui.js';
 
+
 import { Classroom, Student, Category } from './models.js';
 import {
     normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound,
-    setupKeyboardShortcut, hideKeyboard, setupAutoSelectOnFocus
+    setupKeyboardShortcut, hideKeyboard, setupAutoSelectOnFocus, flashElement, scrollToElement
 } from './utils.js';
+
 
 
 let devModeClicks = 0;
@@ -271,6 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const weight = parseInt(newCategoryModalWeightInput.value, 10) || 1;
 
         if (!categoryName) {
+            flashElement(newCategoryModalNameInput, 3000);
             ui.showNotification('⚠️ نام دسته‌بندی نمی‌تواند خالی باشد.');
             return;
         }
@@ -474,7 +478,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 1. Guard check: Prevent selection if there's unsaved data (Applies to both modes)
         if (ui.quickScoreInput.value.trim() !== '' || ui.quickNoteTextarea.value.trim() !== '') {
-            ui.showNotification("⚠️لطفاً ابتدا با دکمه «ثبت»، تغییرات را ذخیره کنید و یا نمره و یادداشت را پاک کنید.");
+            ui.showNotification("⚠️لطفاً ابتدا با دکمه «ثبت»، تغییرات را ذخیره کنید و یا نمره و یادداشت را پاک کنید.", 4200);
+
+            flashElement(ui.quickScoreInput);
+            flashElement(ui.quickNoteTextarea);
+
             return;
         }
 
@@ -771,6 +779,7 @@ document.addEventListener('DOMContentLoaded', () => {
     processPasteBtn.addEventListener('click', () => {
         const text = pasteArea.value.trim();
         if (!text) {
+            flashElement(pasteArea, 3000);
             ui.showNotification("کادر متنی خالی است. لطفاً اسامی را وارد کنید.");
             return;
         }
@@ -806,6 +815,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!state.currentClassroom) return;
         const studentName = newStudentNameInput.value.trim();
         if (!studentName) {
+            flashElement(newStudentNameInput, 3000);
             ui.showNotification("لطفاً نام دانش‌آموز را وارد کنید.");
             return;
         }
@@ -864,7 +874,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const unfinishedSession = state.currentClassroom.sessions.find(session => !session.isFinished && !session.isCancelled && !session.isDeleted);
             if (unfinishedSession) {
                 ui.showNotification(`⚠️ جلسه ${unfinishedSession.sessionNumber} هنوز تمام نشده است. لطفاً ابتدا با دکمه «پایان جلسه» آن را خاتمه دهید.`, 4500);
-
+                const endSessionBtn = document.querySelector('#session-list > li:nth-child(1) > div.list-item-buttons > button.btn-success');
+                if (endSessionBtn) {
+                    flashElement(endSessionBtn);
+                }
                 return;
             }
 
@@ -950,25 +963,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Basic Validation
             if (!name) {
+                flashElement(nameInput, 3000);
                 ui.showNotification('لطفاً نام کلاس را وارد کنید.');
                 return;
             }
             if (state.classrooms[name]) {
+                flashElement(nameInput, 3000);
                 ui.showNotification('کلاسی با این نام قبلاً ایجاد شده است.');
                 return;
             }
 
             try {
-                // Gather Data from Modal Inputs
-                const typeRadio = document.querySelector('input[name="modal-class-type"]:checked');
-                if (!typeRadio) {
-                    console.error("❌ DEBUG: Class Type radio not selected or found!");
-                    return;
-                }
-                const type = typeRadio.value;
-                const educationalSystem = ui.modalAddClassSystemSelect.value;
-
-
+                // --- Read & validate class name ---
                 const newClassName = ui.modalNewClassNameInput.value.trim();
                 if (!newClassName) {
                     ui.showNotification('⚠️ لطفاً نام کلاس را وارد کنید.');
@@ -979,50 +985,51 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // Read class type
-                const classType = document.querySelector('input[name="modal-class-type"]:checked')?.value || 'in-person';
+                // --- Read class type ---
+                const typeRadio = document.querySelector('input[name="modal-class-type"]:checked');
+                if (!typeRadio) {
+                    console.error('Class type radio not selected');
+                    return;
+                }
+                const classType = typeRadio.value;
 
-                // Read educational system and level
+                // --- Read educational info ---
                 const eduSystem = ui.modalAddClassSystemSelect.value;
                 const level = ui.modalAddClassLevelSelect.value || null;
 
-                // Read scheduling data
+                // --- Read schedule info ---
                 const scheduleText = ui.modalScheduleTextInput.value.trim() || null;
-                const scheduleDays = Array.from(ui.modalScheduleDaysContainer.querySelectorAll('input:checked'))
-                    .map(checkbox => parseInt(checkbox.value, 10));
+                const scheduleDays = Array.from(
+                    ui.modalScheduleDaysContainer.querySelectorAll('input:checked')
+                ).map(cb => parseInt(cb.value, 10));
+
                 const scheduleStartTime = ui.modalScheduleStartTimeInput.value || null;
                 const scheduleEndTime = ui.modalScheduleEndTimeInput.value || null;
 
-                // Create the new classroom with all info
+                // --- Create classroom ---
                 const newClassroom = new Classroom({
                     name: newClassName,
                     type: classType,
                     educationalSystem: eduSystem,
-                    level: level,
-                    scheduleText: scheduleText,
-                    scheduleDays: scheduleDays,
-                    scheduleStartTime: scheduleStartTime,
-                    scheduleEndTime: scheduleEndTime
+                    level,
+                    scheduleText,
+                    scheduleDays,
+                    scheduleStartTime,
+                    scheduleEndTime
                 });
 
+                // --- Persist state (ONCE) ---
                 state.classrooms[newClassName] = newClassroom;
                 state.saveData();
 
-                ui.closeActiveModal();
-                ui.renderClassList();
-                ui.showNotification(`✅ کلاس «${newClassName}» ایجاد شد.`);
-
-                // Save to State
-                state.classrooms[name] = newClassroom;
-                state.saveData();
-
-                // Update UI & Close
+                // --- Update UI (ONCE) ---
                 ui.renderClassList();
                 ui.closeAddClassModal();
+                ui.showNotification(`✅ کلاس «${newClassName}» ایجاد شد.`);
 
             } catch (error) {
-                console.error("❌ CRASH ERROR:", error);
-                ui.showNotification("خطایی رخ داد: " + error.message);
+                console.error('CRASH ERROR:', error);
+                ui.showNotification('خطایی رخ داد: ' + error.message);
             }
         });
     } else {

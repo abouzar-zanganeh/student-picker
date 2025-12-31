@@ -3447,3 +3447,20 @@ label {
     color: var(--color-primary);
     font-size: 15px;
 }
+
+/* Animation for visual alerts */
+@keyframes blink-red {
+
+    0%,
+    100% {
+        background-color: #ffffff;
+    }
+
+    50% {
+        background-color: #ffcccc;
+    }
+}
+
+.blink-error {
+    animation: blink-red 1s ease-in-out infinite;
+}
