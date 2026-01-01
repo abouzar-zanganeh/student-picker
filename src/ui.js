@@ -686,6 +686,9 @@ export function openModal(modalId) {
 }
 
 export function closeActiveModal(onClosed, isHistoryPop = false) {
+
+    document.body.style.overflow = 'auto';
+
     if (!state.activeModal) return;
 
     // Add this line to signal to main.js that we are in a "modal-close" transition
