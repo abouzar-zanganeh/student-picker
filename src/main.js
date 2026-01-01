@@ -1,4 +1,5 @@
 import * as state from './state.js';
+import * as demo from './demo.js';
 import * as ui from './ui.js';
 import * as backup from './backup.js';
 import * as logManager from './logManager.js';
@@ -8,7 +9,7 @@ import JSZip from 'jszip';
 
 import {
     resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent,
-    getSessionDisplayMap, isAssessmentModeActive, setIsAssessmentModeActive
+    getSessionDisplayMap, isAssessmentModeActive, setIsAssessmentModeActive, setIsDemoMode
 } from './state.js';
 
 
@@ -26,6 +27,8 @@ import {
 import { exposeToConsole } from './developer.js';
 import { keyDownShortcuts } from './keyboard.js';
 import { testClassHook } from './testclass.js';
+
+import { enterDemoMode, handleExitDemoMode } from './demo.js';
 
 let selectBtnLongPressActive = false;
 
@@ -1265,7 +1268,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.showCustomConfirm(
                 "شما در حال ورود به حالت نمایش (Demo) هستید. در این حالت، هیچ‌کدام از تغییرات شما ذخیره نخواهد شد. آیا ادامه می‌دهید؟",
                 () => {
-                    state.enterDemoMode();
+                    enterDemoMode();
                     ui.updateDemoModeBanner();
                     closeSideNav();
                 },
@@ -1406,35 +1409,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // All keyboard shortcust will be defined here
     keyDownShortcuts(selectStudentBtn, attendancePage);
 
-    function closeSideNav() {
-        sideNavMenu.style.width = '0';
-        overlay.classList.add('modal-closing'); // Use the modal's closing class
 
-        setTimeout(() => {
-            // This removes all classes after the animation finishes
-            overlay.classList.remove('modal-visible', 'modal-closing');
-        }, 300); // This duration must match your CSS animation time
-    }
 
-    function handleExitDemoMode() {
-        ui.showCustomConfirm(
-            "آیا از خروج از حالت نمایش (Demo) مطمئن هستید؟ با خروج، تمام تغییرات آزمایشی شما حذف شده و داده‌های اصلی شما بازیابی خواهند شد.",
-            () => {
-                state.exitDemoMode();
 
-                // Reset the navigation state before re-rendering
-                state.setCurrentClassroom(null);
-                state.setSelectedSession(null);
-                state.setSelectedStudentForProfile(null);
-
-                ui.renderClassList();
-                ui.showPage('class-management-page');
-                ui.updateDemoModeBanner();
-                closeSideNav(); // Ensure nav is closed if exiting from there
-            },
-            { confirmText: 'خروج', confirmClass: 'btn-success' }
-        );
-    }
 
     // --- Initialize UI Components ---
     initializeAnimatedSearch('.global-search-container .animated-search-container', ui.renderGlobalSearchResults);
@@ -1819,6 +1796,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
+export function closeSideNav() {
+    ui.sideNavMenu.style.width = '0';
+    ui.overlay.classList.add('modal-closing'); // Use the modal's closing class
+
+    setTimeout(() => {
+        // This removes all classes after the animation finishes
+        overlay.classList.remove('modal-visible', 'modal-closing');
+    }, 300); // This duration must match your CSS animation time
+}
 
 exposeToConsole();
 

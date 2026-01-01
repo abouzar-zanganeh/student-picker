@@ -42,7 +42,13 @@ export let sourceClassForMove = null;
 
 // for Demo Mode
 export let isDemoMode = false;
-let originalStateBackup = null;
+export function setIsDemoMode(value) {
+    isDemoMode = value;
+}
+export let originalStateBackup = null;
+export function setOriginalStateBackup(state) {
+    originalStateBackup = state;
+}
 
 export let trashBin = [];
 
@@ -684,21 +690,6 @@ export function permanentlyDeleteNote(classroomName, studentId, noteId) {
     if (noteIndex > -1) {
         student.profile.notes.splice(noteIndex, 1);
     }
-}
-
-// Functions to control the Demo Mode
-export function enterDemoMode() {
-    // Create a deep copy of the current state to prevent any direct mutation.
-    // JSON.stringify turns the live objects into a string, and JSON.parse creates brand new objects from that string.
-    originalStateBackup = JSON.parse(JSON.stringify({ classrooms, trashBin }));
-    isDemoMode = true;
-}
-
-export function exitDemoMode() {
-    isDemoMode = false;
-    // Restore the original state by simply re-running the initial data load process.
-    loadData();
-    originalStateBackup = null;
 }
 
 /**
