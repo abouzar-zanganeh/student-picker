@@ -2,6 +2,8 @@ import * as ui from "./ui";
 import * as state from "./state";
 import * as utils from "./utils";
 import * as db from "./db";
+import * as main from "./main";
+
 
 
 
@@ -17,7 +19,9 @@ export function exposeToConsole() {
                 state,
                 ui,
                 utils,
-                db
+                db,
+                main,
+                developer
             };
 
             console.log("🛠️ Developer Mode Activated! Access modules via the 'dev' object (e.g., dev.state.currentClassroom)");

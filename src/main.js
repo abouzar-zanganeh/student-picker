@@ -1920,10 +1920,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Make it accessible from the console
-    window.cleanupOrphanedData = cleanupOrphanedData;
-
-    // In src/main.js, replace the entire function
     function handleLogClick(action) {
         if (!action || !action.classroomName) return;
 
