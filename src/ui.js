@@ -2247,7 +2247,7 @@ export function showStudentProfile(student) {
 
     if (!profileModal || !modalHeader || !modalContentContainer || !modalCloseBtn) return;
 
-    // 1. Set the student's name in the modal header
+    // Set the student's name in the modal header
     modalHeader.textContent = `پروفایل: ${student.identity.name}`;
 
     modalHeader.style.cursor = 'pointer';
@@ -2260,7 +2260,7 @@ export function showStudentProfile(student) {
         });
     };
 
-    // 2. Clear previous content before rendering
+    // Clear previous content before rendering
     modalContentContainer.innerHTML = '';
 
 
@@ -2334,7 +2334,17 @@ export function showStudentProfile(student) {
         });
     });
 
-    // 2. Create the "Add Note" button and its listener
+    // --- Status Report Button ---
+    const statusReportBtn = document.createElement('button');
+    statusReportBtn.className = 'btn-icon btn-icon-label';
+    statusReportBtn.title = 'گزارش وضعیت دانش‌آموز';
+    statusReportBtn.innerHTML = '<span>📊</span><span>گزارش</span>';
+    statusReportBtn.addEventListener('click', () => {
+        showNotification('🏗️ این قابلیت در نسخه‌های آینده فعال خواهد شد.');
+    });
+    actionButtonsContainer.appendChild(statusReportBtn);
+
+    // Create the "Add Note" button and its listener
     const addNoteBtn = document.createElement('button');
     addNoteBtn.className = 'btn-icon btn-icon-label';
     addNoteBtn.title = 'افزودن یادداشت جدید';
@@ -2376,14 +2386,14 @@ export function showStudentProfile(student) {
     modalContentContainer.appendChild(actionButtonsContainer);
 
 
-    // 3. Render all profile sections into the modal
+    // Render all profile sections into the modal
     renderProfileScoringSection(modalContentContainer);
     renderHistorySection(modalContentContainer);
 
-    // 4. Set up the close button listener
+    // Set up the close button listener
     modalCloseBtn.onclick = () => closeActiveModal();
 
-    // 5. Finally, open the modal
+    // Finally, open the modal
     openModal('student-profile-modal');
 }
 
