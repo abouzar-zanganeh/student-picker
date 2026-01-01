@@ -1532,18 +1532,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // main.js - Update the function signature and body
-    // main.js - Update this function (around line 1250)
     function showOnboardingNotification(addedCount, extraMessage = '') {
         const studentWord = addedCount > 1 ? 'دانش‌آموزان جدید' : 'دانش‌آموز جدید';
 
-        // 1. Start with the success header
+        // success header
         let message = `✅ ${addedCount} ${studentWord} با موفقیت اضافه شدند.\n`;
 
-        // 2. Add the onboarding explanation
+        // onboarding explanation
         message += `💡 چون این کلاس جلسات برگزار شده دارد، برای این افراد آمار پایه‌ای (متناسب با کلاس) ثبت شد تا در فرایند انتخاب اختلالی ایجاد نشود.`;
 
-        // 3. Append duplicate info if any
+        // Appending duplicate info if any
         if (extraMessage) {
             message += `\n${extraMessage}`;
         }
@@ -1559,10 +1557,10 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // Display app version and build count
+    // Displaying app version and build count
     const appVersion = import.meta.env.VITE_APP_VERSION;
 
-    // Check if the build count exists (injected by Vite)
+    // Checking if the build count exists (injected by Vite)
     const buildCount = typeof __APP_BUILD_COUNT__ !== 'undefined' ? __APP_BUILD_COUNT__ : '';
 
     if (appVersion) {
