@@ -1,7 +1,7 @@
 import * as state from './state.js';
-import { addBackupSnapshot, getBackupSnapshots, deleteBackupSnapshot } from './db.js';
+import { getBackupSnapshots, deleteBackupSnapshot } from './db.js';
 
-import { processRestore } from './state.js';
+import { initiateBackupProcess, processRestore } from './backup.js';
 
 import {
     getActiveItems, getSessionDisplayMap, permanentlyDeleteStudent,
@@ -403,7 +403,7 @@ export function showRestoreConfirmModal(plainData) {
     // --- Define button actions ---
     const confirmHandler = () => {
         const isCleanRestore = appendCheckbox.checked;
-        state.processRestore(plainData, isCleanRestore); // Pass the new flag
+        processRestore(plainData, isCleanRestore); // Pass the new flag
 
         // Clean up and provide feedback
         confirmBtn.onclick = null; // Clean listener
@@ -1011,78 +1011,6 @@ export function triggerFileDownload(fileObject) {
             { confirmText: 'بله، ذخیره شد', cancelText: 'خیر', confirmClass: 'btn-success' }
         );
     }, 500);
-}
-
-export async function initiateBackupProcess(classNamesToBackup = []) {
-    // 1. Await the file creation.
-    const fileToShare = await state.prepareBackupData(classNamesToBackup);
-
-    // 1b. Check if file creation succeeded
-    if (!fileToShare) {
-        showNotification("❌ خطا در ایجاد فایل پشتیبان.");
-        return;
-    }
-
-    // Generate Farsi Description
-    let backupDescription = 'پشتیبان کامل سیستم';
-
-    if (classNamesToBackup.length > 0) {
-        // Join names with Persian comma
-        const namesList = classNamesToBackup.join('، ');
-        const label = classNamesToBackup.length === 1 ? 'پشتیبان کلاس:' : 'پشتیبان کلاس‌های:';
-        backupDescription = `${label} ${namesList}`;
-    }
-
-    // Silently save a snapshot to the "Garage" (IndexedDB)
-    addBackupSnapshot(fileToShare, {
-        name: fileToShare.name,
-        description: backupDescription,
-        version: "2.0-b64"
-    }).catch(err => console.error("Failed to save local snapshot:", err));
-
-    // 2. Check for mobile/share capability.
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    if (isTouchDevice && navigator.share && navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
-
-        // 3. Show a confirmation modal.
-        showCustomConfirm(
-            "فایل پشتیبان شما آماده است. آیا مایل به اشتراک‌گذاری آن هستید؟",
-            () => {
-                // 4. Run share logic
-                try {
-                    navigator.share({
-                        title: fileToShare.name,
-                        text: 'فایل پشتیبان داده‌های برنامه',
-                        files: [fileToShare],
-                    })
-                        .then(() => {
-                            showCustomConfirm(
-                                "آیا فایل پشتیبان با موفقیت ارسال/ذخیره شد؟",
-                                () => {
-                                    state.setLastBackupTimestamp();
-                                    renderClassManagementStats();
-                                    showNotification("✅ تاریخ پشتیبان ثبت شد.");
-                                },
-                                { confirmText: 'بله', cancelText: 'خیر', confirmClass: 'btn-success' }
-                            );
-                        })
-                } catch (error) {
-                    console.error('Error during sharing process:', error);
-                    triggerFileDownload(fileToShare);
-                    showNotification("⚠️خطا در فرآیند اشتراک‌گذاری. فایل در حال دانلود است.");
-                }
-            },
-            {
-                confirmText: 'بله',
-                cancelText: 'خیر',
-                confirmClass: 'btn-success'
-            }
-        );
-    } else {
-        // 4b. On desktop, just trigger the download directly.
-        triggerFileDownload(fileToShare);
-        showNotification("✅پشتیبان‌گیری با موفقیت انجام شد.");
-    }
 }
 
 export function openContextMenu(event, menuItems) {

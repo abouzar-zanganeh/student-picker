@@ -1,5 +1,6 @@
 import * as state from './state.js';
 import * as ui from './ui.js';
+import * as backup from './backup.js';
 import * as logManager from './logManager.js';
 import * as utils from './utils.js';
 import * as db from './db.js';
@@ -1291,7 +1292,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         closeSideNav();
-        ui.initiateBackupProcess();
+        backup.initiateBackupProcess();
     });
 
     restoreDataBtn.addEventListener('click', () => {
