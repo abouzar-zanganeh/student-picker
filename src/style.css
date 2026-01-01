@@ -3465,3 +3465,9 @@ label {
 .blink-error {
     animation: blink-red 1s ease-in-out infinite;
 }
+
+#modal-profile-content-container>div.scoring-section>h3,
+#modal-profile-content-container>div.history-section>h4 {
+    display: flex;
+    justify-content: center;
+}
