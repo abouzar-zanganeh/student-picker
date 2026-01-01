@@ -249,3 +249,97 @@ export function scrollToElement(element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 }
+
+// --- Utility function to clean up orphaned data with detailed logging ---
+function cleanupOrphanedData() {
+    console.log("🧹 Starting orphaned data cleanup...");
+    let totalOrphansFound = 0;
+
+    for (const className in state.classrooms) {
+        const classroom = state.classrooms[className];
+        if (classroom.isDeleted) continue;
+
+        let classroomWasAffected = false;
+
+        // List of *good* student IDs
+        const existingStudentIds = new Set(
+            classroom.students.filter(s => !s.isDeleted).map(s => s.identity.studentId)
+        );
+
+        // --- NEW: Map of ALL student IDs (including deleted) to their names ---
+        const studentIdToNameMap = new Map(
+            classroom.students.map(s => [s.identity.studentId, s.identity.name])
+        );
+
+        const classLogs = [];
+
+        classroom.sessions.forEach(session => {
+            if (session.isDeleted) return;
+
+            const sessionLogs = [];
+
+            // 1. Clean session.studentRecords
+            for (const studentId in session.studentRecords) {
+                if (!existingStudentIds.has(studentId)) {
+                    // --- UPDATED LOG ---
+                    const studentName = studentIdToNameMap.get(studentId) || "Unknown/Deleted";
+                    sessionLogs.push(`  - Removed student record for: ${studentName} (ID: ${studentId})`);
+                    delete session.studentRecords[studentId];
+                    totalOrphansFound++;
+                    classroomWasAffected = true;
+                }
+            }
+
+            // 2. Clean session.lastWinnerByCategory
+            for (const categoryName in session.lastWinnerByCategory) {
+                const studentId = session.lastWinnerByCategory[categoryName];
+                if (!existingStudentIds.has(studentId)) {
+                    // --- UPDATED LOG ---
+                    const studentName = studentIdToNameMap.get(studentId) || "Unknown/Deleted";
+                    sessionLogs.push(`  - Removed '${categoryName}' last winner: ${studentName} (ID: ${studentId})`);
+                    delete session.lastWinnerByCategory[categoryName];
+                    totalOrphansFound++;
+                    classroomWasAffected = true;
+                }
+            }
+
+            // 3. Clean session.lastSelectedWinnerId
+            if (session.lastSelectedWinnerId && !existingStudentIds.has(session.lastSelectedWinnerId)) {
+                // --- UPDATED LOG ---
+                const studentId = session.lastSelectedWinnerId;
+                const studentName = studentIdToNameMap.get(studentId) || "Unknown/Deleted";
+                sessionLogs.push(`  - Cleared 'lastSelectedWinnerId': ${studentName} (ID: ${studentId})`);
+                session.lastSelectedWinnerId = null;
+                totalOrphansFound++;
+                classroomWasAffected = true;
+            }
+
+            // If this session had logs, add them to the class log buffer
+            if (sessionLogs.length > 0) {
+                const sessionMap = getSessionDisplayMap(classroom);
+                const displayNum = sessionMap.get(session.sessionNumber) || `(#${session.sessionNumber})`;
+                classLogs.push({ sessionDisplayNumber: displayNum, logs: sessionLogs });
+            }
+        });
+
+        // Now, if the class was affected, print its buffered logs
+        if (classroomWasAffected) {
+            console.group(`➡️ Class: ${className}`); // Start a group for the class
+            classLogs.forEach(sessionLog => {
+                // Start a *collapsed* group for each session
+                console.groupCollapsed(`  Session ${sessionLog.sessionDisplayNumber}`);
+                sessionLog.logs.forEach(log => console.warn(log)); // Use warn to make it stand out
+                console.groupEnd(); // End session group
+            });
+            console.groupEnd(); // End class group
+        }
+    }
+
+    // Final Report
+    if (totalOrphansFound > 0) {
+        state.saveData();
+        console.log(`✅ Cleanup complete! Found and removed ${totalOrphansFound} orphaned references. Data saved.`);
+    } else {
+        console.log("✅ No orphaned data found. Your data is clean!");
+    }
+}

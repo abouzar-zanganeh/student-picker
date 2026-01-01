@@ -1,5 +1,7 @@
 import * as state from './state.js';
+import * as demo from './demo.js';
 import * as ui from './ui.js';
+import * as backup from './backup.js';
 import * as logManager from './logManager.js';
 import * as utils from './utils.js';
 import * as db from './db.js';
@@ -7,7 +9,7 @@ import JSZip from 'jszip';
 
 import {
     resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent,
-    getSessionDisplayMap, isAssessmentModeActive, setIsAssessmentModeActive
+    getSessionDisplayMap, isAssessmentModeActive, setIsAssessmentModeActive, setIsDemoMode
 } from './state.js';
 
 
@@ -22,10 +24,11 @@ import {
     normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound,
     setupKeyboardShortcut, hideKeyboard, setupAutoSelectOnFocus, flashElement, scrollToElement
 } from './utils.js';
+import { exposeToConsole } from './developer.js';
+import { keyDownShortcuts } from './keyboard.js';
+import { testClassHook } from './testclass.js';
 
-
-
-let devModeClicks = 0;
+import { enterDemoMode, handleExitDemoMode } from './demo.js';
 
 let selectBtnLongPressActive = false;
 
@@ -40,6 +43,7 @@ const NAVIGATION_HIERARCHY = {
     'trash-page': 'class-management-page',
     'class-management-page': null // Root
 };
+
 // Navigates and renders without adding a new entry to the browser history
 function navigateSilently(pageId) {
     // 1. Perform state cleanup ONLY when going to the root page
@@ -77,7 +81,7 @@ function navigateSilently(pageId) {
 }
 
 // Centralized function to navigate one level up the hierarchy
-function navigateUpHierarchy(isSilent = false) {
+export function navigateUpHierarchy(isSilent = false) {
     if (state.activeModal) {
         ui.closeActiveModal();
         return;
@@ -353,65 +357,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    classListHeader.addEventListener('click', () => {
-        const now = new Date().getTime();
-        if (now - state.easterEggLastClickTime > 500) {
-            state.setEasterEggClickCount(1);
-        } else {
-            state.setEasterEggClickCount(state.easterEggClickCount + 1);
-        }
-        state.setEasterEggLastClickTime(now);
-
-        if (state.easterEggClickCount === 5) {
-            state.setEasterEggClickCount(0);
-            ui.showCustomConfirm(
-                "آیا از ساخت یک کلاس تستی تصادفی مطمئن هستید؟",
-                () => {
-                    function createRandomClass() {
-                        const testClassName = `کلاس تستی ${Object.keys(state.classrooms).length + 1}`;
-                        const newClass = new Classroom({ name: testClassName, type: 'online' });
-
-                        // Updated to include dots for parsing
-                        const students = ['علی . رضایی', 'مریم . حسینی', 'زهرا . احمدی', 'رضا . محمدی', 'فاطمه . کریمی'];
-
-                        // Use parseStudentName to populate firstName and lastName correctly
-                        students.forEach(name => newClass.addStudent(new Student(parseStudentName(name))));
-
-                        state.classrooms[testClassName] = newClass;
-                        state.saveData();
-                        ui.renderClassList();
-                    }
-                    createRandomClass();
-                    ui.showNotification("کلاس تستی با موفقیت ساخته شد ✅!");
-                },
-                { confirmText: 'بساز', confirmClass: 'btn-success' }
-            );
-        }
-    });
+    testClassHook(classListHeader);
 
 
     // --- Developer Mode Activation ---
     // This developer mode will expose internal modules to the global 'dev' object after 10 clicks on the header.
-    document.querySelector('.app-header h1').addEventListener('click', () => {
-        devModeClicks++;
-
-        if (devModeClicks === 10) {
-            // Expose modules to a global namespace
-            window.dev = {
-                state,
-                ui,
-                utils,
-                db
-            };
-
-            console.log("🛠️ Developer Mode Activated! Access modules via the 'dev' object (e.g., dev.state.currentClassroom)");
-            ui.showNotification("🛠️ حالت توسعه‌دهنده فعال شد.");
-
-            // Visual feedback: brief pulse animation on the header
-            document.querySelector('.app-header h1').style.color = 'var(--color-primary)';
-            document.querySelector('.app-header h1').classList.add('dev-mode-tilt');
-        }
-    });
+    exposeToConsole();
 
     secureConfirmCancelBtn.addEventListener('click', () => {
         ui.closeActiveModal();
@@ -1317,7 +1268,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.showCustomConfirm(
                 "شما در حال ورود به حالت نمایش (Demo) هستید. در این حالت، هیچ‌کدام از تغییرات شما ذخیره نخواهد شد. آیا ادامه می‌دهید؟",
                 () => {
-                    state.enterDemoMode();
+                    enterDemoMode();
                     ui.updateDemoModeBanner();
                     closeSideNav();
                 },
@@ -1344,7 +1295,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         closeSideNav();
-        ui.initiateBackupProcess();
+        backup.initiateBackupProcess();
     });
 
     restoreDataBtn.addEventListener('click', () => {
@@ -1456,135 +1407,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // All keyboard shortcust will be defined here
-    document.addEventListener('keydown', (event) => {
-        // First, determine if the user is typing in any input field.
-        const focusedElement = document.activeElement;
-        const isTyping = ['INPUT', 'TEXTAREA', 'SELECT'].includes(focusedElement.tagName);
+    keyDownShortcuts(selectStudentBtn, attendancePage);
 
-        // If the user is typing, we disable ALL keyboard shortcuts.
-        if (isTyping) {
-            return;
-        }
 
-        // --- Developer shortcut for restoring data ---
-        if (event.key.toLowerCase() === 'o' && event.shiftKey) {
-            // We only want this to work on the main page
-            if (ui.classManagementPage.classList.contains('active')) {
-                event.preventDefault(); // Prevents any default browser action for this shortcut
-                ui.restoreFileInput.click(); // Programmatically clicks the hidden file input
-            }
-        }
 
-        // --- Global 'Escape' key handler ---
-        // This code now only runs if the user is NOT typing.
-        // --- Global 'Escape' key handler ---
-        if (event.key === 'Escape') {
-            // Priority 1: Close context menu if visible
-            if (ui.contextMenu.classList.contains('visible')) {
-                ui.closeContextMenu();
-                return;
-            }
 
-            // Priority 2: Close active modal
-            if (state.activeModal) {
-                ui.closeActiveModal();
-                return;
-            }
-
-            // Priority 3: Hierarchical back navigation
-            // We use 'false' because this is a manual UI action, not a browser back event
-            navigateUpHierarchy(false);
-
-            return; // Stop processing other shortcuts
-        }
-
-        // --- Page-Specific Shortcuts ---
-        // The '!isTyping' check is no longer needed here because of the guard clause above.
-        if (state.selectedSession) {
-            const key = event.key.toLowerCase();
-
-            // Prevent default browser actions for our shortcut keys
-            if (' ascfg'.includes(key)) {
-                event.preventDefault();
-            }
-
-            switch (key) {
-                case ' ':
-                    selectStudentBtn.click();
-                    break;
-
-                case 'a':
-                    if (attendancePage.classList.contains('active')) {
-                        history.back();
-                    } else {
-                        ui.renderAttendancePage();
-                        ui.showPage('attendance-page');
-                    }
-                    break;
-
-                case 's':
-                    if (document.getElementById('session-page').classList.contains('active')) {
-                        history.back();
-                    }
-                    break;
-
-                case 'f':
-                    const searchIcon = document.querySelector('.action-column .search-icon');
-                    if (searchIcon) {
-                        searchIcon.click();
-                    }
-                    break;
-
-                case 'arrowleft': {
-                    const backBtn = document.querySelector('button[title="برنده قبلی"]');
-                    if (backBtn && !backBtn.disabled) {
-                        event.preventDefault(); // Prevent page scrolling
-                        backBtn.click();
-                    }
-                    break;
-                }
-
-                case 'arrowright': {
-                    const forwardBtn = document.querySelector('button[title="برنده بعدی"]');
-                    if (forwardBtn && !forwardBtn.disabled) {
-                        event.preventDefault(); // Prevent page scrolling
-                        forwardBtn.click();
-                    }
-                    break;
-                }
-            }
-        }
-    });
-
-    function closeSideNav() {
-        sideNavMenu.style.width = '0';
-        overlay.classList.add('modal-closing'); // Use the modal's closing class
-
-        setTimeout(() => {
-            // This removes all classes after the animation finishes
-            overlay.classList.remove('modal-visible', 'modal-closing');
-        }, 300); // This duration must match your CSS animation time
-    }
-
-    function handleExitDemoMode() {
-        ui.showCustomConfirm(
-            "آیا از خروج از حالت نمایش (Demo) مطمئن هستید؟ با خروج، تمام تغییرات آزمایشی شما حذف شده و داده‌های اصلی شما بازیابی خواهند شد.",
-            () => {
-                state.exitDemoMode();
-
-                // Reset the navigation state before re-rendering
-                state.setCurrentClassroom(null);
-                state.setSelectedSession(null);
-                state.setSelectedStudentForProfile(null);
-
-                ui.renderClassList();
-                ui.showPage('class-management-page');
-                ui.updateDemoModeBanner();
-                closeSideNav(); // Ensure nav is closed if exiting from there
-            },
-            { confirmText: 'خروج', confirmClass: 'btn-success' }
-        );
-    }
 
     // --- Initialize UI Components ---
     initializeAnimatedSearch('.global-search-container .animated-search-container', ui.renderGlobalSearchResults);
@@ -1683,18 +1510,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // main.js - Update the function signature and body
-    // main.js - Update this function (around line 1250)
     function showOnboardingNotification(addedCount, extraMessage = '') {
         const studentWord = addedCount > 1 ? 'دانش‌آموزان جدید' : 'دانش‌آموز جدید';
 
-        // 1. Start with the success header
+        // success header
         let message = `✅ ${addedCount} ${studentWord} با موفقیت اضافه شدند.\n`;
 
-        // 2. Add the onboarding explanation
+        // onboarding explanation
         message += `💡 چون این کلاس جلسات برگزار شده دارد، برای این افراد آمار پایه‌ای (متناسب با کلاس) ثبت شد تا در فرایند انتخاب اختلالی ایجاد نشود.`;
 
-        // 3. Append duplicate info if any
+        // Appending duplicate info if any
         if (extraMessage) {
             message += `\n${extraMessage}`;
         }
@@ -1710,10 +1535,10 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // Display app version and build count
+    // Displaying app version and build count
     const appVersion = import.meta.env.VITE_APP_VERSION;
 
-    // Check if the build count exists (injected by Vite)
+    // Checking if the build count exists (injected by Vite)
     const buildCount = typeof __APP_BUILD_COUNT__ !== 'undefined' ? __APP_BUILD_COUNT__ : '';
 
     if (appVersion) {
@@ -1721,230 +1546,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('app-version').textContent = `نسخه ${appVersion}${buildText}`;
     }
 
-    // --- Temporary Universal Utility Function ---
-    // This function can be called from the console to fix student data across ALL classes by
-    // assigning a student's highest score to his/her writing skill score.
-    function backfillWritingScoresForAll() {
-        console.log("Starting universal backfill for writing scores...");
-        let totalStudentsUpdated = 0;
-
-        // Loop through every class in the data.
-        for (const className in state.classrooms) {
-            const classroom = state.classrooms[className];
-            if (classroom.isDeleted) continue; // Skip deleted classes
-
-            let studentsUpdatedInClass = 0;
-            const students = state.getActiveItems(classroom.students);
-
-            students.forEach(student => {
-                const scores = student.logs.scores;
-                // Ensure scores object exists before checking for writing
-                const hasWritingScore = scores && scores.writing && scores.writing.length > 0;
-
-                if (!hasWritingScore) {
-                    let highestScoreValue = -1; // Start with -1 to handle scores of 0
-
-                    // Loop through all skill categories for the student
-                    for (const skill in scores) {
-                        if (skill !== 'writing') {
-                            scores[skill].forEach(score => {
-                                if (score.value > highestScoreValue) {
-                                    highestScoreValue = score.value;
-                                }
-                            });
-                        }
-                    }
-
-                    // If a valid highest score was found, add it
-                    if (highestScoreValue > -1) {
-                        const comment = `Automatically assigned based on the highest score (${highestScoreValue}) from other skills.`;
-                        student.addScore('Writing', highestScoreValue, comment);
-                        studentsUpdatedInClass++;
-                    }
-                }
-            });
-
-            if (studentsUpdatedInClass > 0) {
-                console.log(`Updated ${studentsUpdatedInClass} student(s) in class: ${classroom.info.name}.`);
-                totalStudentsUpdated += studentsUpdatedInClass;
-            }
-        }
-
-        if (totalStudentsUpdated > 0) {
-            state.saveData(); // Save all changes at the very end
-            console.log(`Update complete. A total of ${totalStudentsUpdated} student(s) were updated across all classes. Data saved.`);
-            // Optionally re-render the UI if it's visible
-            if (document.getElementById('student-page').classList.contains('active')) {
-                ui.renderStudentStatsList();
-            }
-        } else {
-            console.log("No students needed updating in any class.");
-        }
-    }
-
-    // To make the function accessible from the console:
-    window.backfillWritingScoresForAll = backfillWritingScoresForAll;
-
-    // --- Temporary Backfill Function for 'Exit' Counters ---
-    // This function can be called once from the console to add the new properties
-    // for the 'Exit' feature to all existing data.
-    function backfillExitCounters() {
-        console.log("Starting backfill for 'outOfClassCount' and 'wasOutOfClass' properties...");
-        let studentsUpdated = 0;
-        let sessionRecordsUpdated = 0;
-
-        // We bypass the state module to work directly with the raw stored data.
-        const savedData = localStorage.getItem('teacherAssistantData_v2');
-        if (!savedData) {
-            console.log("No data found in localStorage. Nothing to do.");
-            return;
-        }
-
-        const plainData = JSON.parse(savedData);
-
-        for (const className in plainData) {
-            const classroom = plainData[className];
-
-            // 1. Update Students
-            if (classroom.students) {
-                classroom.students.forEach(student => {
-                    if (student.statusCounters && typeof student.statusCounters.outOfClassCount === 'undefined') {
-                        student.statusCounters.outOfClassCount = 0;
-                        studentsUpdated++;
-                    }
-                });
-            }
-
-            // 2. Update Session Records
-            if (classroom.sessions) {
-                classroom.sessions.forEach(session => {
-                    if (session.studentRecords) {
-                        for (const studentId in session.studentRecords) {
-                            const record = session.studentRecords[studentId];
-                            if (typeof record.wasOutOfClass === 'undefined') {
-                                record.wasOutOfClass = false;
-                                sessionRecordsUpdated++;
-                            }
-                        }
-                    }
-                });
-            }
-        }
-
-        // Save the modified data back to localStorage
-        localStorage.setItem('teacherAssistantData_v2', JSON.stringify(plainData));
-
-        console.log(`Backfill complete. Updated ${studentsUpdated} students and ${sessionRecordsUpdated} session records. Data saved.`);
-
-        // Reload the application's state from the newly updated data
-        state.loadData();
-        // Re-render the UI if a classroom is currently active
-        if (state.currentClassroom) {
-            ui.renderStudentStatsList();
-        }
-    }
-
-    // To make the function accessible from the console:
-    window.backfillExitCounters = backfillExitCounters;
-
-    // --- Utility function to clean up orphaned data with detailed logging ---
-    function cleanupOrphanedData() {
-        console.log("🧹 Starting orphaned data cleanup...");
-        let totalOrphansFound = 0;
-
-        for (const className in state.classrooms) {
-            const classroom = state.classrooms[className];
-            if (classroom.isDeleted) continue;
-
-            let classroomWasAffected = false;
-
-            // List of *good* student IDs
-            const existingStudentIds = new Set(
-                classroom.students.filter(s => !s.isDeleted).map(s => s.identity.studentId)
-            );
-
-            // --- NEW: Map of ALL student IDs (including deleted) to their names ---
-            const studentIdToNameMap = new Map(
-                classroom.students.map(s => [s.identity.studentId, s.identity.name])
-            );
-
-            const classLogs = [];
-
-            classroom.sessions.forEach(session => {
-                if (session.isDeleted) return;
-
-                const sessionLogs = [];
-
-                // 1. Clean session.studentRecords
-                for (const studentId in session.studentRecords) {
-                    if (!existingStudentIds.has(studentId)) {
-                        // --- UPDATED LOG ---
-                        const studentName = studentIdToNameMap.get(studentId) || "Unknown/Deleted";
-                        sessionLogs.push(`  - Removed student record for: ${studentName} (ID: ${studentId})`);
-                        delete session.studentRecords[studentId];
-                        totalOrphansFound++;
-                        classroomWasAffected = true;
-                    }
-                }
-
-                // 2. Clean session.lastWinnerByCategory
-                for (const categoryName in session.lastWinnerByCategory) {
-                    const studentId = session.lastWinnerByCategory[categoryName];
-                    if (!existingStudentIds.has(studentId)) {
-                        // --- UPDATED LOG ---
-                        const studentName = studentIdToNameMap.get(studentId) || "Unknown/Deleted";
-                        sessionLogs.push(`  - Removed '${categoryName}' last winner: ${studentName} (ID: ${studentId})`);
-                        delete session.lastWinnerByCategory[categoryName];
-                        totalOrphansFound++;
-                        classroomWasAffected = true;
-                    }
-                }
-
-                // 3. Clean session.lastSelectedWinnerId
-                if (session.lastSelectedWinnerId && !existingStudentIds.has(session.lastSelectedWinnerId)) {
-                    // --- UPDATED LOG ---
-                    const studentId = session.lastSelectedWinnerId;
-                    const studentName = studentIdToNameMap.get(studentId) || "Unknown/Deleted";
-                    sessionLogs.push(`  - Cleared 'lastSelectedWinnerId': ${studentName} (ID: ${studentId})`);
-                    session.lastSelectedWinnerId = null;
-                    totalOrphansFound++;
-                    classroomWasAffected = true;
-                }
-
-                // If this session had logs, add them to the class log buffer
-                if (sessionLogs.length > 0) {
-                    const sessionMap = getSessionDisplayMap(classroom);
-                    const displayNum = sessionMap.get(session.sessionNumber) || `(#${session.sessionNumber})`;
-                    classLogs.push({ sessionDisplayNumber: displayNum, logs: sessionLogs });
-                }
-            });
-
-            // Now, if the class was affected, print its buffered logs
-            if (classroomWasAffected) {
-                console.group(`➡️ Class: ${className}`); // Start a group for the class
-                classLogs.forEach(sessionLog => {
-                    // Start a *collapsed* group for each session
-                    console.groupCollapsed(`  Session ${sessionLog.sessionDisplayNumber}`);
-                    sessionLog.logs.forEach(log => console.warn(log)); // Use warn to make it stand out
-                    console.groupEnd(); // End session group
-                });
-                console.groupEnd(); // End class group
-            }
-        }
-
-        // Final Report
-        if (totalOrphansFound > 0) {
-            state.saveData();
-            console.log(`✅ Cleanup complete! Found and removed ${totalOrphansFound} orphaned references. Data saved.`);
-        } else {
-            console.log("✅ No orphaned data found. Your data is clean!");
-        }
-    }
-
-    // Make it accessible from the console
-    window.cleanupOrphanedData = cleanupOrphanedData;
-
-    // In src/main.js, replace the entire function
     function handleLogClick(action) {
         if (!action || !action.classroomName) return;
 
@@ -1991,7 +1592,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 300);
     }
 
-    // --- NEW: Mass Comment Event Listeners ---
+    // --- Mass Comment Event Listeners ---
     massCommentBtn.addEventListener('click', () => {
         ui.showMassCommentModal();
     });
@@ -2175,10 +1776,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ui.showNotification(msg);
     });
 
-
-
-
-
     openAddCategoryBtn.addEventListener('click', () => {
         state.setSaveCategoryCallback((name, isGraded, weight) => {
             if (!name) return;
@@ -2199,6 +1796,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
+export function closeSideNav() {
+    ui.sideNavMenu.style.width = '0';
+    ui.overlay.classList.add('modal-closing'); // Use the modal's closing class
+
+    setTimeout(() => {
+        // This removes all classes after the animation finishes
+        overlay.classList.remove('modal-visible', 'modal-closing');
+    }, 300); // This duration must match your CSS animation time
+}
+
+exposeToConsole();
 
 export function handleUndoLastSelection(student, categoryName) {
 
