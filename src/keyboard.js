@@ -61,15 +61,6 @@ export function keyDownShortcuts(selectStudentBtn, attendancePage) {
                     selectStudentBtn.click();
                     break;
 
-                case 'a':
-                    if (attendancePage.classList.contains('active')) {
-                        history.back();
-                    } else {
-                        ui.renderAttendancePage();
-                        ui.showPage('attendance-page');
-                    }
-                    break;
-
                 case 's':
                     if (document.getElementById('session-page').classList.contains('active')) {
                         history.back();
