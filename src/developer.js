@@ -4,9 +4,6 @@ import * as utils from "./utils";
 import * as db from "./db";
 import * as main from "./main";
 
-
-
-
 // ---- Developer Mode Activation Logic ---- //
 export let devModeClicks = 0;
 export function exposeToConsole() {
