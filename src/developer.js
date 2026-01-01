@@ -3,6 +3,7 @@ import * as state from "./state";
 import * as utils from "./utils";
 import * as db from "./db";
 import * as main from "./main";
+import * as developer from "./developer";
 
 // ---- Developer Mode Activation Logic ---- //
 export let devModeClicks = 0;
