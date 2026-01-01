@@ -2896,7 +2896,8 @@ textarea,
 .profile-header-actions {
     display: flex;
     gap: 5px;
-    /* Adds a small space between buttons */
+    margin-top: 2vh;
+    margin-right: 2vh;
 }
 
 /* --- Styles for Icon + Label Buttons --- */
