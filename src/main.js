@@ -22,10 +22,11 @@ import {
     normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound,
     setupKeyboardShortcut, hideKeyboard, setupAutoSelectOnFocus, flashElement, scrollToElement
 } from './utils.js';
+import { exposeToConsole } from './developer-side.js';
 
 
 
-let devModeClicks = 0;
+export let devModeClicks = 0;
 
 let selectBtnLongPressActive = false;
 
@@ -392,26 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Developer Mode Activation ---
     // This developer mode will expose internal modules to the global 'dev' object after 10 clicks on the header.
-    document.querySelector('.app-header h1').addEventListener('click', () => {
-        devModeClicks++;
-
-        if (devModeClicks === 10) {
-            // Expose modules to a global namespace
-            window.dev = {
-                state,
-                ui,
-                utils,
-                db
-            };
-
-            console.log("🛠️ Developer Mode Activated! Access modules via the 'dev' object (e.g., dev.state.currentClassroom)");
-            ui.showNotification("🛠️ حالت توسعه‌دهنده فعال شد.");
-
-            // Visual feedback: brief pulse animation on the header
-            document.querySelector('.app-header h1').style.color = 'var(--color-primary)';
-            document.querySelector('.app-header h1').classList.add('dev-mode-tilt');
-        }
-    });
+    exposeToConsole();
 
     secureConfirmCancelBtn.addEventListener('click', () => {
         ui.closeActiveModal();

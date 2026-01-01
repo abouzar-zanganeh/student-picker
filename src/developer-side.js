@@ -1,0 +1,26 @@
+import { devModeClicks } from "./main";
+import * as ui from "./ui";
+
+
+export function exposeToConsole() {
+    document.querySelector('.app-header h1').addEventListener('click', () => {
+        devModeClicks++;
+
+        if (devModeClicks === 10) {
+            // Expose modules to a global namespace
+            window.dev = {
+                state,
+                ui,
+                utils,
+                db
+            };
+
+            console.log("🛠️ Developer Mode Activated! Access modules via the 'dev' object (e.g., dev.state.currentClassroom)");
+            ui.showNotification("🛠️ حالت توسعه‌دهنده فعال شد.");
+
+            // Visual feedback: brief pulse animation on the header
+            document.querySelector('.app-header h1').style.color = 'var(--color-primary)';
+            document.querySelector('.app-header h1').classList.add('dev-mode-tilt');
+        }
+    });
+}
