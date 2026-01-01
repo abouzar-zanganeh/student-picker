@@ -24,10 +24,6 @@ import {
 } from './utils.js';
 import { exposeToConsole } from './developer-side.js';
 
-
-
-export let devModeClicks = 0;
-
 let selectBtnLongPressActive = false;
 
 // --- Navigation Hierarchy Map which states which page is the parent of which ---
@@ -41,6 +37,7 @@ const NAVIGATION_HIERARCHY = {
     'trash-page': 'class-management-page',
     'class-management-page': null // Root
 };
+
 // Navigates and renders without adding a new entry to the browser history
 function navigateSilently(pageId) {
     // 1. Perform state cleanup ONLY when going to the root page
@@ -2181,6 +2178,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
+exposeToConsole();
 
 export function handleUndoLastSelection(student, categoryName) {
 

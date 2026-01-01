@@ -1,7 +1,12 @@
-import { devModeClicks } from "./main";
 import * as ui from "./ui";
+import * as state from "./state";
+import * as utils from "./utils";
+import * as db from "./db";
 
 
+
+// ---- Developer Mode Activation Logic ---- //
+export let devModeClicks = 0;
 export function exposeToConsole() {
     document.querySelector('.app-header h1').addEventListener('click', () => {
         devModeClicks++;
@@ -24,3 +29,4 @@ export function exposeToConsole() {
         }
     });
 }
+// ---- end of Developer Mode Activation Logic ---- //

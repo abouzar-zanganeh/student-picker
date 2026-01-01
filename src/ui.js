@@ -1865,6 +1865,7 @@ export function renderStudentStatsList() {
     }
 }
 
+
 export function displayWinner(manualWinner = null, manualCategoryName = null) {
     // 1. Resolve State: Determine who the winner is (Manual or History)
     const selectionState = resolveWinnerState(manualWinner, manualCategoryName);
@@ -4866,11 +4867,6 @@ export function closeAddClassModal() {
     // Use the standard app function to close
     closeActiveModal();
 }
-
-// =================================================================
-//  REFACTORING HELPERS (Phase 1)
-// =================================================================
-
 
 /**
  * Determines the winner and category based on manual input or history.
