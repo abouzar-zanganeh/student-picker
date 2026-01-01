@@ -677,6 +677,9 @@ export function openModal(modalId) {
         if (state.activeModal) return;
         modal.classList.add('modal-visible');
         state.setActiveModal(modalId);
+
+        document.body.style.overflow = 'hidden';
+
         // Adds a dummy state to the history to "trap" the back button
         history.pushState(null, '', location.href);
     }

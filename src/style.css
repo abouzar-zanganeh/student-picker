@@ -1062,7 +1062,7 @@ button:disabled:hover {
 .scoring-section,
 .history-section {
     background-color: var(--color-surface);
-    padding: 20px;
+    padding: 7px;
     border-radius: var(--border-radius-main);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
@@ -2804,7 +2804,6 @@ textarea,
     flex-grow: 1;
     overflow-y: auto;
     /* This is crucial for long profiles */
-    padding: 20px;
 }
 
 /* --- Styles for Dashboard Header --- */
