@@ -4648,6 +4648,8 @@ function createQualitativeButtons(student, categoryName) {
         btn.disabled = isLocked;
 
         if (currentRating === btnData.key) {
+
+
             btn.classList.add('active');
         }
 
