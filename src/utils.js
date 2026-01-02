@@ -1,4 +1,6 @@
 import { userSettings } from './state.js';
+import * as ui from './ui.js';
+import { switchDashboardTab } from './ui.js';
 
 export function normalizeText(str) {
     // A safeguard to ensure we're always working with a string
@@ -341,5 +343,70 @@ function cleanupOrphanedData() {
         console.log(`✅ Cleanup complete! Found and removed ${totalOrphansFound} orphaned references. Data saved.`);
     } else {
         console.log("✅ No orphaned data found. Your data is clean!");
+    }
+}
+export function setupSwipeNavigation() {
+    const dashboardPage = document.getElementById('session-dashboard-page');
+    const tableContainer = document.getElementById('student-stats-table-container');
+    if (!dashboardPage) return;
+
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    dashboardPage.addEventListener('touchstart', (event) => {
+        // Check if the touch is inside the table container at all
+        if (tableContainer && tableContainer.contains(event.target)) {
+
+            // Find the specific cell (td or th) that was touched
+            const touchedCell = event.target.closest('td, th');
+
+            // Check if a cell was touched AND if it's the first child (the sticky 'Name' column)
+            if (touchedCell && touchedCell.parentElement.firstElementChild === touchedCell) {
+                // It's the 'Name' column. Treat as a TAB-SWITCH.
+                touchStartX = event.changedTouches[0].screenX;
+            } else {
+                // It's any OTHER column or the scrollbar area. Treat as a SCROLL.
+                touchStartX = 0; // Signal to ignore this swipe for tab switching
+            }
+        } else {
+            // Touch was outside the table. Treat as a TAB-SWITCH.
+            touchStartX = event.changedTouches[0].screenX;
+        }
+    }, { passive: true });
+
+    dashboardPage.addEventListener('touchend', (event) => {
+        if (touchStartX === 0) return; // Do nothing if it was flagged as a scroll
+
+        touchEndX = event.changedTouches[0].screenX;
+        handleSwipe();
+    });
+
+    function handleSwipe() {
+        const minSwipeDistance = 150; // Minimum pixels for a valid swipe
+        const swipeDistance = touchStartX - touchEndX;
+        const absoluteSwipeDistance = Math.abs(swipeDistance);
+
+        // 1. Check if a valid horizontal swipe occurred
+        if (absoluteSwipeDistance > minSwipeDistance) {
+
+            // 2. Check which tab is currently active
+            const selectorTabBtn = document.getElementById('selector-tab-btn');
+            const isSelectorTabActive = selectorTabBtn.classList.contains('active');
+
+            // 3. Toggle to the *other* tab
+            if (isSelectorTabActive) {
+                // If Selector is active, switch to Attendance
+                ui.showPage('session-dashboard-page', { tab: 'attendance' });
+                switchDashboardTab('attendance');
+            } else {
+                // Otherwise (Attendance must be active), switch to Selector
+                ui.showPage('session-dashboard-page', { tab: 'selector' });
+                switchDashboardTab('selector');
+            }
+        }
+
+        // Reset for the next touch
+        touchStartX = 0;
+        touchEndX = 0;
     }
 }
