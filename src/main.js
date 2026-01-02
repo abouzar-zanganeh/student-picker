@@ -1582,28 +1582,8 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.setupLongPress(ui.selectStudentBtn, () => {
 
         selectBtnLongPressActive = true;
+        toggleSelectionModes();
 
-        if (!state.selectedCategory) {
-            ui.showNotification("⚠️ ابتدا یک دسته‌بندی انتخاب کنید.");
-            return;
-        }
-
-        if (!state.selectedCategory.isGradedCategory) {
-            ui.showNotification("⚠️ این دسته‌بندی نمره‌دار نیست.");
-            return;
-        }
-
-        setIsAssessmentModeActive(!isAssessmentModeActive);
-
-        state.setWinnerHistoryIndex(-1);
-        state.setManualSelection(null);
-        ui.displayWinner();
-        ui.updateQuickGradeUIForCategory(state.selectedCategory);
-
-        ui.selectStudentBtnWrapper.classList.toggle('assessment-mode-active', isAssessmentModeActive);
-
-        const msg = isAssessmentModeActive ? "حالت انتخاب برای نمره‌دهی فعال شد." : "حالت انتخاب معمولی فعال شد.";
-        ui.showNotification(msg);
     });
 
     openAddCategoryBtn.addEventListener('click', () => {
@@ -1814,4 +1794,28 @@ export function pickAssessmentWinner(classroom, category) {
     state.markStudentAsScoredInSession(category.id, winnerId);
 
     return classroom.students.find(s => s.identity.studentId === winnerId);
+}
+
+export function toggleSelectionModes() {
+    if (!state.selectedCategory) {
+        ui.showNotification("⚠️ ابتدا یک دسته‌بندی انتخاب کنید.");
+        return;
+    }
+
+    if (!state.selectedCategory.isGradedCategory) {
+        ui.showNotification("⚠️ این دسته‌بندی نمره‌دار نیست.");
+        return;
+    }
+
+    setIsAssessmentModeActive(!isAssessmentModeActive);
+
+    state.setWinnerHistoryIndex(-1);
+    state.setManualSelection(null);
+    ui.displayWinner();
+    ui.updateQuickGradeUIForCategory(state.selectedCategory);
+
+    ui.selectStudentBtnWrapper.classList.toggle('assessment-mode-active', isAssessmentModeActive);
+
+    const msg = isAssessmentModeActive ? "حالت انتخاب برای نمره‌دهی فعال شد." : "حالت انتخاب معمولی فعال شد.";
+    ui.showNotification(msg);
 }

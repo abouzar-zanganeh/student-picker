@@ -16,7 +16,7 @@ import {
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
 import { Category, EDUCATIONAL_SYSTEMS } from './models.js';
-import { handleUndoLastSelection } from './main.js';
+import { handleUndoLastSelection, toggleSelectionModes } from './main.js';
 import JSZip from 'jszip';
 
 import { toJalaali, toGregorian } from 'jalaali-js';
@@ -172,6 +172,8 @@ export const newCategoryModalWeightInput = document.getElementById('new-category
 export const newCategoryModal = document.getElementById('category-modal');
 export const newCategoryModalWeightGroup = document.getElementById('new-category-modal-weight-group');
 export const openAddCategoryBtn = document.getElementById('open-add-category-btn');
+
+export let fromAssessmeToNormalSelection = false;
 
 // Helper for handling Long Press events
 export function setupLongPress(element, callback, duration = 800) {
@@ -1888,6 +1890,11 @@ function renderCategoryPills() {
             pill.classList.add('disabled');
         } else {
             pill.addEventListener('click', () => {
+
+                if (!category.isGradedCategory && state.isAssessmentModeActive) {
+
+                    toggleSelectionModes(); //Because a non-gradable category shouldn't have the assessment mode active
+                }
                 document.querySelectorAll('#category-selection-container .pill').forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
                 setStyleForGradedCategoryPill(category, pill);
