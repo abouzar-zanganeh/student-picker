@@ -1815,7 +1815,15 @@ export function toggleSelectionModes() {
     ui.updateQuickGradeUIForCategory(state.selectedCategory);
 
     ui.selectStudentBtnWrapper.classList.toggle('assessment-mode-active', isAssessmentModeActive);
+    const msg = isAssessmentModeActive ? "حالت «نمره‌دهی» فعال شد." : "حالت «انتخاب» فعال شد.";
 
-    const msg = isAssessmentModeActive ? "حالت انتخاب برای نمره‌دهی فعال شد." : "حالت انتخاب معمولی فعال شد.";
-    ui.showNotification(msg);
+    if (!ui.fromAssessmeToNormalSelection) {
+        ui.clearWinnerDisplay();
+        ui.showNotification(msg);
+    } else {
+        ui.clearWinnerDisplay();
+        ui.showNotification("حالت انتخاب برای نمره‌دهی غیرفعال شد. دسته‌بندی انتخاب شده قابل نمره دهی نیست.⚠️", 4500);
+        ui.setFromAssessmeToNormalSelection(false);
+
+    }
 }

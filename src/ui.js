@@ -174,6 +174,9 @@ export const newCategoryModalWeightGroup = document.getElementById('new-category
 export const openAddCategoryBtn = document.getElementById('open-add-category-btn');
 
 export let fromAssessmeToNormalSelection = false;
+export function setFromAssessmeToNormalSelection(value) {
+    fromAssessmeToNormalSelection = value;
+}
 
 // Helper for handling Long Press events
 export function setupLongPress(element, callback, duration = 800) {
@@ -1795,7 +1798,7 @@ export function renderStudentStatsList() {
     }
 }
 
-function clearWinnerDisplay() {
+export function clearWinnerDisplay() {
     const resultDiv = document.getElementById('selected-student-result');
     if (!resultDiv) return;
 
@@ -1890,13 +1893,16 @@ function renderCategoryPills() {
             pill.classList.add('disabled');
         } else {
             pill.addEventListener('click', () => {
+                pill.classList.add('active');
 
                 if (!category.isGradedCategory && state.isAssessmentModeActive) {
-
+                    fromAssessmeToNormalSelection = true;
                     toggleSelectionModes(); //Because a non-gradable category shouldn't have the assessment mode active
+                    clearWinnerDisplay();
+                    return;
                 }
+
                 document.querySelectorAll('#category-selection-container .pill').forEach(p => p.classList.remove('active'));
-                pill.classList.add('active');
                 setStyleForGradedCategoryPill(category, pill);
                 state.setSelectedCategory(category);
                 updateSelectButtonText(category);
