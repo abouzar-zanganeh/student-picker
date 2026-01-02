@@ -1793,8 +1793,17 @@ export function renderStudentStatsList() {
     }
 }
 
+function clearWinnerDisplay() {
+    const resultDiv = document.getElementById('selected-student-result');
+    if (!resultDiv) return;
+
+    resultDiv.innerHTML = '';
+    resultDiv.classList.remove('absent');
+}
+
 
 export function displayWinner(manualWinner = null, manualCategoryName = null) {
+    clearWinnerDisplay();
     // 1. Resolve State: Determine who the winner is (Manual or History)
     const selectionState = resolveWinnerState(manualWinner, manualCategoryName);
 
@@ -1848,7 +1857,7 @@ function initializeStudentPageUI() {
 
     // Set header and clear containers
     categoryPillsContainer.innerHTML = '';
-    resultDiv.innerHTML = '';
+    clearWinnerDisplay();
 
     // Reset the quick grade form
     quickGradeFormWrapper.classList.add('tooltip-container');
@@ -1864,10 +1873,8 @@ function initializeStudentPageUI() {
 }
 
 function renderCategoryPills() {
-    categoryPillsContainer.innerHTML = ''; // Clear existing pills first
-
+    categoryPillsContainer.innerHTML = '';
     const activeCategories = state.currentClassroom.categories.filter(cat => !cat.isDeleted);
-
     activeCategories.forEach(category => {
         const pill = document.createElement('span');
         pill.className = 'pill';
@@ -1876,7 +1883,6 @@ function renderCategoryPills() {
         if (category.description) {
             pill.dataset.tooltip = category.description;
         }
-
         // --- REGULAR CLICK EVENT ---
         if (state.selectedSession.isFinished) {
             pill.classList.add('disabled');
@@ -1884,9 +1890,7 @@ function renderCategoryPills() {
             pill.addEventListener('click', () => {
                 document.querySelectorAll('#category-selection-container .pill').forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
-
                 setStyleForGradedCategoryPill(category, pill);
-
                 state.setSelectedCategory(category);
                 updateSelectButtonText(category);
                 updateCategoryWeightLabel(category);
@@ -1901,7 +1905,7 @@ function renderCategoryPills() {
                         displayWinner(lastWinner, category.name);
                     }
                 } else {
-                    resultDiv.innerHTML = '';
+                    clearWinnerDisplay();
                     state.setManualSelection(null);
                     state.setWinnerHistoryIndex(-1);
                     selectStudentBtn.disabled = false;
@@ -1974,7 +1978,7 @@ function renderCategoryPills() {
                                 // --- Check if the deleted category was the active one ---
                                 if (state.selectedCategory && state.selectedCategory.id === category.id) {
                                     state.setSelectedCategory(null); // Clear the state
-                                    resultDiv.innerHTML = ''; // Clear the winner display
+                                    clearWinnerDisplay(); // Clear the winner display
                                     updateQuickGradeUIForCategory(null); // Disable the quick-grade form
                                     updateCategoryColumnHighlight(null); // to clear the highlight
                                     selectStudentBtnWrapper.classList.add('disabled-wrapper'); // Disable the main select button
@@ -4833,10 +4837,7 @@ function resolveWinnerState(manualWinner, manualCategoryName) {
  * Handles UI highlights (Table Row, Category Pills, Quick Grade Form).
  */
 function updateWinnerHighlights(winner, categoryName) {
-    const resultDiv = document.getElementById('selected-student-result');
-    resultDiv.innerHTML = ''; // Clear previous content
-    resultDiv.classList.remove('absent');
-
+    clearWinnerDisplay();
     // 1. Table Row Highlight
     const previousWinnerRow = document.querySelector('.current-winner-highlight');
     if (previousWinnerRow) {
