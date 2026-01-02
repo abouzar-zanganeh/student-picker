@@ -1,11 +1,9 @@
 import * as state from './state.js';
 import * as demo from './demo.js';
 import * as ui from './ui.js';
-import * as backup from './backup.js';
 import * as logManager from './logManager.js';
 import * as utils from './utils.js';
 import * as db from './db.js';
-import JSZip from 'jszip';
 
 import {
     resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent,
@@ -29,6 +27,7 @@ import { keyDownShortcuts } from './keyboard.js';
 import { testClassHook } from './testclass.js';
 
 import { prepareDemoModeButtons } from './demo.js';
+import { prepareBackupBtn, prepareRestoreBtn, restoreButtonMainFunction } from './backup.js';
 
 let selectBtnLongPressActive = false;
 
@@ -1157,10 +1156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // execute the callback first
             const result = callback(content);
 
-            // Protocol:
-            // return false -> Validation Failed (Keep Open)
-            // return Function -> Success + Navigation (Close then Run)
-            // return undefined/other -> Success (Close)
+
 
             if (result === false) {
                 // Do not close the modal
@@ -1261,110 +1257,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     prepareDemoModeButtons();
 
-    backupDataBtn.addEventListener('click', () => {
+    prepareBackupBtn(backupDataBtn);
 
-        if (state.isDemoMode) {
-            ui.showNotification("⚠️ پشتیبان‌گیری در حالت نمایش (Demo) غیرفعال است.");
-            closeSideNav();
-            return;
-        }
+    prepareRestoreBtn(restoreDataBtn, restoreFileInput);
 
-        closeSideNav();
-        backup.initiateBackupProcess();
-    });
-
-    restoreDataBtn.addEventListener('click', () => {
-
-        if (state.isDemoMode) {
-            ui.showNotification("⚠️ بازیابی اطلاعات در حالت نمایش (Demo) غیرفعال است.");
-            closeSideNav();
-            return;
-        }
-
-        restoreFileInput.click();
-        closeSideNav();
-    });
-
-    restoreFileInput.addEventListener('change', (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-
-        // Make the onload function ASYNC to handle unzipping
-        reader.onload = async (e) => {
-            const fileContent = e.target.result;
-
-            try {
-                // --- TRY BLOCK: Assumes it's an OLD, plain-text JSON file ---
-                const plainData = JSON.parse(fileContent);
-
-                // Check if it's the NEW metadata format (but uncompressed)
-                if (plainData.metadata && plainData.data) {
-                    // This will handle v2.0 backups that were not Base64
-                    ui.showRestoreConfirmModal(plainData);
-                } else {
-                    // This handles v1.0 backups (the raw classrooms object)
-                    const classroomsDataToRestore = plainData.classrooms || plainData;
-                    const trashDataToRestore = plainData.trashBin || [];
-
-                    ui.showCustomConfirm(
-                        "آیا از بازیابی اطلاعات مطمئن هستید؟ تمام داده‌های فعلی شما بازنویسی خواهد شد.",
-                        () => {
-                            state.rehydrateData(classroomsDataToRestore);
-                            state.setTrashBin(trashDataToRestore);
-                            state.setUserSettings({ lastRestoreTimestamp: new Date().toISOString() });
-                            state.saveData();
-                            ui.renderClassList();
-                            ui.showPage('class-management-page');
-                            ui.showNotification("✅اطلاعات با موفقیت بازیابی شد.");
-                        },
-                        { confirmText: 'بازیابی کن', confirmClass: 'btn-warning' }
-                    );
-                }
-
-            } catch (jsonError) {
-                // --- CATCH BLOCK: Assumes it's a NEW, Base64-compressed file ---
-                // The JSON.parse failed, so it's not a plain JSON file.
-                // Let's try to decompress it as a Base64 zip.
-                try {
-                    const zip = new JSZip();
-
-                    // 1. Load the Base64 string (the fileContent)
-                    const unzipped = await zip.loadAsync(fileContent, { base64: true });
-
-                    // 2. Find the backup.json file inside
-                    const backupFile = unzipped.file("backup.json");
-                    if (!backupFile) {
-                        throw new Error("فایل backup.json در فایل پشتیبان یافت نشد.");
-                    }
-
-                    // 3. Read the content of backup.json as text
-                    const jsonString = await backupFile.async("string");
-
-                    // 4. Parse that text into our data object
-                    const plainData = JSON.parse(jsonString);
-
-                    // 5. Check if it's our new "2.0-b64" format
-                    if (plainData.metadata && plainData.metadata.version === "2.0-b64") {
-                        // Success! Show the restore modal
-                        ui.showRestoreConfirmModal(plainData);
-                    } else {
-                        throw new Error("فایل پشتیبان معتبر نیست (نسخه نامشخص).");
-                    }
-
-                } catch (zipError) {
-                    // This catches errors from zipping or Base64 decoding
-                    ui.showNotification("❌خطا در خواندن فایل. لطفاً فایل پشتیبان معتبر انتخاب کنید.");
-                    console.error("Restore error (zip/base64):", zipError);
-                }
-            }
-        };
-
-        // We must read the file as text for BOTH old JSON and new Base64
-        reader.readAsText(file);
-        event.target.value = null; // Reset input
-    });
+    restoreButtonMainFunction(restoreFileInput);
 
     window.addEventListener('popstate', (event) => {
         // If a modal is open OR we just closed one manually
@@ -1712,17 +1609,7 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeScreenSaver();
     }
 
-    screensaverToggle.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            // Enable
-            state.setUserSettings({ isScreenSaverEnabled: true });
-            initializeScreenSaver();
-        } else {
-            // Disable
-            state.setUserSettings({ isScreenSaverEnabled: false });
-            deinitializeScreenSaver();
-        }
-    });
+    prepareScreenSaverToggle(screensaverToggle, initializeScreenSaver, deinitializeScreenSaver);
 
     ui.setupLongPress(ui.selectStudentBtn, () => {
 
@@ -1771,6 +1658,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
+function prepareScreenSaverToggle(screensaverToggle, initializeScreenSaver, deinitializeScreenSaver) {
+    screensaverToggle.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            // Enable
+            state.setUserSettings({ isScreenSaverEnabled: true });
+            initializeScreenSaver();
+        } else {
+            // Disable
+            state.setUserSettings({ isScreenSaverEnabled: false });
+            deinitializeScreenSaver();
+        }
+    });
+}
 
 export function closeSideNav() {
     ui.sideNavMenu.style.width = '0';
