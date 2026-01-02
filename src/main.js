@@ -28,6 +28,11 @@ import { testClassHook } from './testclass.js';
 
 import { prepareDemoModeButtons } from './demo.js';
 import { prepareBackupBtn, prepareRestoreBtn, restoreButtonMainFunction } from './backup.js';
+import {
+    initializeScreenSaver,
+    deinitializeScreenSaver, prepareScreenSaverToggle
+} from './screensaver.js';
+
 
 let selectBtnLongPressActive = false;
 
@@ -1500,58 +1505,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Screen Saver Logic (v3) ---
-    const screenSaverOverlay = document.getElementById('screen-saver-overlay');
 
-    let inactivityTimer;
-    const INACTIVITY_TIMEOUT = 2 * 60 * 1000; // 2 minutes
-
-    const eventTypes = ['mousemove', 'keypress', 'scroll', 'click', 'touchstart'];
-
-    function showScreenSaver() {
-        screenSaverOverlay.classList.add('visible');
-    }
-
-    function hideScreenSaver() {
-        if (screenSaverOverlay.classList.contains('visible')) {
-            screenSaverOverlay.classList.remove('visible');
-        }
-    }
-
-    function resetInactivityTimer() {
-        hideScreenSaver();
-        clearTimeout(inactivityTimer);
-        inactivityTimer = setTimeout(showScreenSaver, INACTIVITY_TIMEOUT);
-    }
-
-    function handleOverlayInteraction(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        setTimeout(resetInactivityTimer, 0);
-    }
-
-    function initializeScreenSaver() {
-        resetInactivityTimer();
-        eventTypes.forEach(event => window.addEventListener(event, resetInactivityTimer));
-        screenSaverOverlay.addEventListener('click', handleOverlayInteraction);
-        screenSaverOverlay.addEventListener('touchstart', handleOverlayInteraction);
-
-        const appVersionForSaver = import.meta.env.VITE_APP_VERSION;
-        if (appVersionForSaver) {
-            const versionElement = document.getElementById('screen-saver-version');
-            if (versionElement) {
-                versionElement.textContent = `v${appVersionForSaver}`;
-            }
-        }
-    }
-
-    function deinitializeScreenSaver() {
-        clearTimeout(inactivityTimer);
-        hideScreenSaver();
-        eventTypes.forEach(event => window.removeEventListener(event, resetInactivityTimer));
-        screenSaverOverlay.removeEventListener('click', handleOverlayInteraction);
-        screenSaverOverlay.removeEventListener('touchstart', handleOverlayInteraction);
-    }
 
     // --- Initialize based on saved settings ---
     // --- App Settings Logic ---
@@ -1563,6 +1517,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const soundToggle = document.getElementById('setting-sound-toggle');
     const vibrationToggle = document.getElementById('setting-vibration-toggle');
     const screensaverToggle = document.getElementById('setting-screensaver-toggle');
+
+    //screensaver toggle
+    // Initial state
+    if (state.userSettings.isScreenSaverEnabled) {
+        initializeScreenSaver();
+    }
+
+    // Toggle handling
+    prepareScreenSaverToggle(
+        screensaverToggle,
+        initializeScreenSaver,
+        deinitializeScreenSaver
+    );
+
 
     // 1. Open Settings Modal
     if (appSettingsBtn) {
@@ -1609,7 +1577,6 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeScreenSaver();
     }
 
-    prepareScreenSaverToggle(screensaverToggle, initializeScreenSaver, deinitializeScreenSaver);
 
     ui.setupLongPress(ui.selectStudentBtn, () => {
 
@@ -1659,19 +1626,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-function prepareScreenSaverToggle(screensaverToggle, initializeScreenSaver, deinitializeScreenSaver) {
-    screensaverToggle.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            // Enable
-            state.setUserSettings({ isScreenSaverEnabled: true });
-            initializeScreenSaver();
-        } else {
-            // Disable
-            state.setUserSettings({ isScreenSaverEnabled: false });
-            deinitializeScreenSaver();
-        }
-    });
-}
+
 
 export function closeSideNav() {
     ui.sideNavMenu.style.width = '0';
