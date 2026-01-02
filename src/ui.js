@@ -173,9 +173,9 @@ export const newCategoryModal = document.getElementById('category-modal');
 export const newCategoryModalWeightGroup = document.getElementById('new-category-modal-weight-group');
 export const openAddCategoryBtn = document.getElementById('open-add-category-btn');
 
-export let fromAssessmeToNormalSelection = false;
-export function setFromAssessmeToNormalSelection(value) {
-    fromAssessmeToNormalSelection = value;
+export let fromAssessmentToNormalSelection = false;
+export function setFromAssessmentToNormalSelection(value) {
+    fromAssessmentToNormalSelection = value;
 }
 
 // Helper for handling Long Press events
@@ -1896,7 +1896,7 @@ function renderCategoryPills() {
                 pill.classList.add('active');
 
                 if (!category.isGradedCategory && state.isAssessmentModeActive) {
-                    fromAssessmeToNormalSelection = true;
+                    fromAssessmentToNormalSelection = true;
                     toggleSelectionModes(); //Because a non-gradable category shouldn't have the assessment mode active
                     clearWinnerDisplay();
                     return;

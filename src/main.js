@@ -447,6 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const winner = pickAssessmentWinner(state.currentClassroom, state.selectedCategory);
 
             if (winner) {
+                playSuccessSound();
                 // Trigger highlights
                 ui.renderStudentStatsList();
                 ui.displayWinner(winner, state.selectedCategory.name);
@@ -1815,15 +1816,15 @@ export function toggleSelectionModes() {
     ui.updateQuickGradeUIForCategory(state.selectedCategory);
 
     ui.selectStudentBtnWrapper.classList.toggle('assessment-mode-active', isAssessmentModeActive);
-    const msg = isAssessmentModeActive ? "حالت «نمره‌دهی» فعال شد." : "حالت «انتخاب» فعال شد.";
+    const msg = isAssessmentModeActive ? "حالت «نمره‌دهی» فعال شد ✅" : "حالت «انتخاب» فعال شد ✅";
 
-    if (!ui.fromAssessmeToNormalSelection) {
+    if (!ui.fromAssessmentToNormalSelection) {
         ui.clearWinnerDisplay();
         ui.showNotification(msg);
     } else {
         ui.clearWinnerDisplay();
         ui.showNotification("حالت انتخاب برای نمره‌دهی غیرفعال شد. دسته‌بندی انتخاب شده قابل نمره دهی نیست.⚠️", 4500);
-        ui.setFromAssessmeToNormalSelection(false);
+        ui.setFromAssessmentToNormalSelection(false);
 
     }
 }
