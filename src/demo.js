@@ -38,4 +38,32 @@ export function handleExitDemoMode() {
         { confirmText: 'خروج', confirmClass: 'btn-success' }
     );
 }
+export function prepareDemoModeButtons() {
+    const demoModeBtn = document.getElementById('demo-mode-btn'); // for the demo mode (this and the following event listener)
+    demoModeBtn.addEventListener('click', () => {
+        if (state.isDemoMode) {
+            handleExitDemoMode();
+        } else {
+            closeSideNav();
+            ui.showCustomConfirm(
+                "شما در حال ورود به حالت نمایش (Demo) هستید. در این حالت، هیچ‌کدام از تغییرات شما ذخیره نخواهد شد. آیا ادامه می‌دهید؟",
+                () => {
+                    enterDemoMode();
+                    ui.updateDemoModeBanner();
+                    closeSideNav();
+                },
+                { confirmText: 'تایید', confirmClass: 'btn-warning', onCancel: closeSideNav }
+            );
+        }
+    });
+
+    const exitDemoBtn = document.getElementById('exit-demo-btn');
+    if (exitDemoBtn) {
+        exitDemoBtn.addEventListener('click', () => {
+            if (state.isDemoMode) {
+                handleExitDemoMode();
+            }
+        });
+    }
+}
 

@@ -28,7 +28,7 @@ import { exposeToConsole } from './developer.js';
 import { keyDownShortcuts } from './keyboard.js';
 import { testClassHook } from './testclass.js';
 
-import { enterDemoMode, handleExitDemoMode } from './demo.js';
+import { prepareDemoModeButtons } from './demo.js';
 
 let selectBtnLongPressActive = false;
 
@@ -1259,32 +1259,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    const demoModeBtn = document.getElementById('demo-mode-btn'); // for the demo mode (this and the following event listener)
-    demoModeBtn.addEventListener('click', () => {
-        if (state.isDemoMode) {
-            handleExitDemoMode();
-        } else {
-            closeSideNav();
-            ui.showCustomConfirm(
-                "شما در حال ورود به حالت نمایش (Demo) هستید. در این حالت، هیچ‌کدام از تغییرات شما ذخیره نخواهد شد. آیا ادامه می‌دهید؟",
-                () => {
-                    enterDemoMode();
-                    ui.updateDemoModeBanner();
-                    closeSideNav();
-                },
-                { confirmText: 'تایید', confirmClass: 'btn-warning', onCancel: closeSideNav }
-            );
-        }
-    });
-
-    const exitDemoBtn = document.getElementById('exit-demo-btn');
-    if (exitDemoBtn) {
-        exitDemoBtn.addEventListener('click', () => {
-            if (state.isDemoMode) {
-                handleExitDemoMode();
-            }
-        });
-    }
+    prepareDemoModeButtons();
 
     backupDataBtn.addEventListener('click', () => {
 
