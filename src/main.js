@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         massCommentContent, massCommentAppendCheckbox, processMassHomeworkComment,
         attendanceSearchInput, newCategoryModalNameInput, newCategoryModalIsGradedCheckbox,
         newCategoryModalWeightInput, newCategoryModalWeightGroup, openAddCategoryBtn
-    } = ui; // This is a bit of a trick to avoid rewriting all the getElementById calls
+    } = ui;
     const trashNavBtn = document.getElementById('trash-nav-btn');
 
     const globalSearchIcon = document.querySelector('.global-search-container .search-icon');
