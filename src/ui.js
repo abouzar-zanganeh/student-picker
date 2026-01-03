@@ -1018,6 +1018,8 @@ export function triggerFileDownload(fileObject) {
     }, 500);
 }
 
+
+// opens and populates the context menu.
 export function openContextMenu(event, menuItems) {
     event.preventDefault();
 
