@@ -32,8 +32,6 @@ C:\Documents\GitHub\student-picker\src\backup.js
 C:\Documents\GitHub\student-picker\src\screensaver.js
 C:\Documents\GitHub\student-picker\src\demo.js
 )
-; Explicit list of project files to be merged.
-; Each file is read directly from its original location — no intermediate .txt copies are created.
 
 ; =================================================================
 ; HOTKEY ASSIGNMENT
@@ -53,8 +51,7 @@ RunFileAutomation:
     ; Define output file path
     outputFile := DestinationFolder "\Project-student-picker-all-files-combined.txt"
 
-    ; Open output file in write mode
-    ; "w" ensures LF-only line endings (no CRLF translation)
+    ; Open output file in write mode (LF-only, no CRLF translation)
     file := FileOpen(outputFile, "w")
 
     ; -----------------------------------------------------------------
@@ -64,7 +61,7 @@ RunFileAutomation:
     file.Write(disclaimer)
 
     ; -----------------------------------------------------------------
-    ; Append numbered table of contents (list of all files)
+    ; Append numbered table of contents
     ; -----------------------------------------------------------------
     file.Write("`nTABLE OF CONTENTS:`n")
     index := 0
@@ -81,6 +78,7 @@ RunFileAutomation:
     ; -----------------------------------------------------------------
     ; Loop through each file in FileList and merge contents
     ; -----------------------------------------------------------------
+    index := 0
     Loop, Parse, FileList, `n, `r
     {
         OriginalFullPath := A_LoopField
@@ -94,6 +92,9 @@ RunFileAutomation:
             continue
         }
 
+        ; Increment section number
+        index++
+
         ; Extract original filename (with extension)
         SplitPath, OriginalFullPath, OutFileName
 
@@ -104,14 +105,14 @@ RunFileAutomation:
         StringReplace, fileContent, fileContent, `r`n, `n, All
         StringReplace, fileContent, fileContent, `r, , All
 
-        ; Header with original filename
-        file.Write("`n=========== " OutFileName " ===========`n")
+        ; Header with number + filename
+        file.Write("`n=========== " index ". " OutFileName " ===========`n")
 
         ; File contents
         file.Write(fileContent)
 
-        ; Separator with original filename
-        file.Write("`n-------- END OF " OutFileName " --------`n")
+        ; Separator with number + filename
+        file.Write("`n-------- END OF " index ". " OutFileName " --------`n")
     }
 
     ; Close output file
