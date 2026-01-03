@@ -412,7 +412,8 @@ export function setupSwipeNavigation() {
     }
 }
 
-// Context Menu Helper: Opens a context menu at the event's position with the provided menu items
+// Context Menu Helper: Opens a context menu at the event's position with the provided menu items 
+//which unifies, Windows, Mac, iOS, and Android interactions.
 export function attachUniversalContextMenu(target, getMenuItems) {
     let longPressTimer = null;
     const LONG_PRESS_TIME = 500; // tweak if needed
