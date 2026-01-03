@@ -43,7 +43,7 @@ C:\Documents\GitHub\student-picker\src\demo.js
 return
 
 ; =================================================================
-; MAIN FUNCTION: COPY + MERGE ENGINE
+; MAIN FUNCTION: MERGE ENGINE
 ; =================================================================
 RunFileAutomation:
     ; Ensure destination folder exists
@@ -64,7 +64,22 @@ RunFileAutomation:
     file.Write(disclaimer)
 
     ; -----------------------------------------------------------------
-    ; Loop through each file in FileList
+    ; Append numbered table of contents (list of all files)
+    ; -----------------------------------------------------------------
+    file.Write("`nTABLE OF CONTENTS:`n")
+    index := 0
+    Loop, Parse, FileList, `n, `r
+    {
+        if (A_LoopField = "")
+            continue
+        index++
+        SplitPath, A_LoopField, OutFileName
+        file.Write(index ". " OutFileName "`n")
+    }
+    file.Write("=================`n")
+
+    ; -----------------------------------------------------------------
+    ; Loop through each file in FileList and merge contents
     ; -----------------------------------------------------------------
     Loop, Parse, FileList, `n, `r
     {
@@ -86,19 +101,16 @@ RunFileAutomation:
         FileRead, fileContent, %OriginalFullPath%
 
         ; Normalize line endings to LF only
-        ; Replace CRLF with LF, and remove stray CR characters
         StringReplace, fileContent, fileContent, `r`n, `n, All
         StringReplace, fileContent, fileContent, `r, , All
 
-        ; -----------------------------------------------------------------
-        ; Write section header with original filename
-        ; -----------------------------------------------------------------
+        ; Header with original filename
         file.Write("`n=========== " OutFileName " ===========`n")
 
-        ; Write file contents
+        ; File contents
         file.Write(fileContent)
 
-        ; Write section footer (separator) with original filename
+        ; Separator with original filename
         file.Write("`n-------- END OF " OutFileName " --------`n")
     }
 
@@ -106,5 +118,5 @@ RunFileAutomation:
     file.Close()
 
     ; Final confirmation message
-    MsgBox, 64, Process Complete, All listed files have been merged directly into Project-student-picker-all-files-combined.txt with LF-only line endings. Headers and separators show the original filenames with extensions.
+    MsgBox, 64, Process Complete, All listed files have been merged directly into Project-student-picker-all-files-combined.txt with LF-only line endings. Headers, separators, and a numbered table of contents show the original filenames with extensions.
 return
