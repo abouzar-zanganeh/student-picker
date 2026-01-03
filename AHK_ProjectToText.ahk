@@ -11,18 +11,16 @@ DestinationFolder := "D:\ILI\My Student-Picker App Summer 1404\Student-Picker-Ap
 
 FileList =
 (
+C:\Documents\GitHub\student-picker\GEMINI.md
 C:\Documents\GitHub\student-picker\index.html
-C:\Documents\GitHub\student-picker\src\logManager.js
-C:\Documents\GitHub\student-picker\src\main.js
 C:\Documents\GitHub\student-picker\src\models.js
+C:\Documents\GitHub\student-picker\src\main.js
 C:\Documents\GitHub\student-picker\src\state.js
-C:\Documents\GitHub\student-picker\src\style.css
 C:\Documents\GitHub\student-picker\src\ui.js
 C:\Documents\GitHub\student-picker\src\utils.js
+C:\Documents\GitHub\student-picker\src\logManager.js
 C:\Documents\GitHub\student-picker\src\compression.worker.js
 C:\Documents\GitHub\student-picker\src\db.js
-C:\Documents\GitHub\student-picker\GEMINI.md
-C:\Documents\GitHub\student-picker\package.json
 C:\Documents\GitHub\student-picker\src\developer.js
 C:\Documents\GitHub\student-picker\src\testclass.js
 C:\Documents\GitHub\student-picker\src\keyboard.js
@@ -31,6 +29,8 @@ C:\Documents\GitHub\student-picker\src\reports.js
 C:\Documents\GitHub\student-picker\src\backup.js
 C:\Documents\GitHub\student-picker\src\screensaver.js
 C:\Documents\GitHub\student-picker\src\demo.js
+C:\Documents\GitHub\student-picker\src\style.css
+C:\Documents\GitHub\student-picker\package.json
 )
 
 ; =================================================================
