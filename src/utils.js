@@ -1,5 +1,6 @@
 import { userSettings } from './state.js';
 import * as ui from './ui.js';
+import { openContextMenu } from './ui.js';
 import { switchDashboardTab } from './ui.js';
 
 export function normalizeText(str) {
@@ -409,4 +410,39 @@ export function setupSwipeNavigation() {
         touchStartX = 0;
         touchEndX = 0;
     }
+}
+
+// Context Menu Helper: Opens a context menu at the event's position with the provided menu items
+export function attachUniversalContextMenu(target, getMenuItems) {
+    let longPressTimer = null;
+    const LONG_PRESS_TIME = 500; // tweak if needed
+
+    // ---- Desktop (right-click, Mac ctrl-click) ----
+    target.addEventListener("contextmenu", (e) => {
+        e.preventDefault();
+        openContextMenu(e, getMenuItems(target));
+    });
+
+    // ---- Touch long-press (iOS / Android) ----
+    target.addEventListener("touchstart", (e) => {
+        if (e.touches.length !== 1) return;
+
+        const touch = e.touches[0];
+
+        longPressTimer = setTimeout(() => {
+            // Create a synthetic event-like object so your existing logic works
+            const fakeEvent = {
+                preventDefault: () => { },
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+                target
+            };
+
+            openContextMenu(fakeEvent, getMenuItems(target));
+        }, LONG_PRESS_TIME);
+    });
+
+    ["touchend", "touchmove", "touchcancel"].forEach((ev) => {
+        target.addEventListener(ev, () => clearTimeout(longPressTimer));
+    });
 }

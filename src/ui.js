@@ -11,7 +11,7 @@ import {
     detectTextDirection, renderMultiLineText,
     parseStudentName, sortStudents, setupDoubleAction,
     setupKeyboardShortcut, hideKeyboard,
-    setupAutoSelectOnFocus, flashElement, scrollToElement
+    setupAutoSelectOnFocus, flashElement, scrollToElement, attachUniversalContextMenu
 } from './utils.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
@@ -1932,95 +1932,101 @@ function renderCategoryPills() {
 
         // --- NEW CONTEXT MENU (RIGHT-CLICK) EVENT ---
         if (!state.selectedSession.isFinished) {
-            pill.addEventListener('contextmenu', (event) => {
-                const menuItems = [{
-                    label: 'تغییر نام',
-                    icon: '✏️',
-                    action: () => {
-                        syncWeightGroupVisibility();
-                        showCategoryModal((newName, newIsGraded, newWeight) => {
-                            const result = state.renameCategory(state.currentClassroom, category, newName);
-                            if (result.success) {
-                                category.isGradedCategory = newIsGraded;
-                                category.weight = newWeight;
-                                state.saveData();
-                                logManager.addLog(state.currentClassroom.info.name, `نام دسته‌بندی «${category.name}» به «${newName}» تغییر یافت.`);
-                                renderCategoryPills();
-                                renderStudentStatsList();
-                                updateCategoryWeightLabel(category);
-                                showNotification(`✅ نام دسته‌بندی به «${newName}» تغییر یافت.`);
-                            } else {
-                                showNotification(`⚠️ ${result.message}`);
-                            }
-                        }, {
-                            title: 'ویرایش دسته‌بندی',
-                            initialName: category.name,
-                            initialIsGraded: category.isGradedCategory,
-                            initialWeight: category.weight || 1,
-                            saveButtonText: 'ذخیره تغییرات'
-                        });
-                    }
-                }, {
-                    label: 'حذف دسته‌بندی',
-                    icon: '🗑️',
-                    className: 'danger',
-                    action: () => {
-                        showCustomConfirm(
-                            `آیا از انتقال دسته‌بندی «${category.name}» به سطل زباله مطمئن هستید؟`,
-                            () => {
-                                const trashEntry = {
-                                    id: `trash_${Date.now()}_${Math.random()}`,
-                                    timestamp: new Date().toISOString(),
-                                    type: 'category',
-                                    description: `دسته‌بندی «${category.name}» از کلاس «${state.currentClassroom.info.name}»`,
-                                    restoreData: { categoryId: category.id, classId: state.currentClassroom.info.scheduleCode }
-                                };
+            attachUniversalContextMenu(pill, () => {
+                return [
+                    {
+                        label: 'تغییر نام',
+                        icon: '✏️',
+                        action: () => {
+                            syncWeightGroupVisibility();
+                            showCategoryModal((newName, newIsGraded, newWeight) => {
+                                const result = state.renameCategory(state.currentClassroom, category, newName);
 
-                                state.addToTrashBin(trashEntry);
-
-                                //Mark all associated scores as deleted ---
-                                const skillKey = category.name.toLowerCase();
-                                state.currentClassroom.students.forEach(student => {
-                                    if (student.logs.scores && student.logs.scores[skillKey]) {
-                                        student.logs.scores[skillKey].forEach(score => {
-                                            score.isDeleted = true;
-                                        });
-                                    }
-                                });
-
-                                // --- Check if the deleted category was the active one ---
-                                if (state.selectedCategory && state.selectedCategory.id === category.id) {
-                                    state.setSelectedCategory(null); // Clear the state
-                                    clearWinnerDisplay(); // Clear the winner display
-                                    updateQuickGradeUIForCategory(null); // Disable the quick-grade form
-                                    updateCategoryColumnHighlight(null); // to clear the highlight
-                                    selectStudentBtnWrapper.classList.add('disabled-wrapper'); // Disable the main select button
-                                    selectStudentBtn.disabled = true;
-
-                                    // Clear the winner highlight from the stats table
-                                    const previousWinnerRow = document.querySelector('.current-winner-highlight');
-                                    if (previousWinnerRow) {
-                                        previousWinnerRow.classList.remove('current-winner-highlight');
-                                    }
+                                if (result.success) {
+                                    category.isGradedCategory = newIsGraded;
+                                    category.weight = newWeight;
+                                    state.saveData();
+                                    logManager.addLog(
+                                        state.currentClassroom.info.name,
+                                        `نام دسته‌بندی «${category.name}» به «${newName}» تغییر یافت.`
+                                    );
+                                    renderCategoryPills();
+                                    renderStudentStatsList();
+                                    updateCategoryWeightLabel(category);
+                                    showNotification(`✅ نام دسته‌بندی به «${newName}» تغییر یافت.`);
+                                } else {
+                                    showNotification(`⚠️ ${result.message}`);
                                 }
-
-                                category.isDeleted = true;
-                                logManager.addLog(state.currentClassroom.info.name, `دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`, {
-                                    type: 'VIEW_TRASH'
-                                });
-                                state.saveData();
-                                renderCategoryPills();
-                                renderStudentStatsList();
-                                showNotification(`✅ دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`);
                             }, {
-                            confirmText: 'بله',
-                            confirmClass: 'btn-warning'
+                                title: 'ویرایش دسته‌بندی',
+                                initialName: category.name,
+                                initialIsGraded: category.isGradedCategory,
+                                initialWeight: category.weight || 1,
+                                saveButtonText: 'ذخیره تغییرات'
+                            });
                         }
-                        );
+                    },
+                    {
+                        label: 'حذف دسته‌بندی',
+                        icon: '🗑️',
+                        className: 'danger',
+                        action: () => {
+                            showCustomConfirm(
+                                `آیا از انتقال دسته‌بندی «${category.name}» به سطل زباله مطمئن هستید؟`,
+                                () => {
+                                    const trashEntry = {
+                                        id: `trash_${Date.now()}_${Math.random()}`,
+                                        timestamp: new Date().toISOString(),
+                                        type: 'category',
+                                        description: `دسته‌بندی «${category.name}» از کلاس «${state.currentClassroom.info.name}»`,
+                                        restoreData: {
+                                            categoryId: category.id,
+                                            classId: state.currentClassroom.info.scheduleCode
+                                        }
+                                    };
+
+                                    state.addToTrashBin(trashEntry);
+
+                                    // Mark all associated scores deleted
+                                    const skillKey = category.name.toLowerCase();
+                                    state.currentClassroom.students.forEach(student => {
+                                        if (student.logs.scores?.[skillKey]) {
+                                            student.logs.scores[skillKey].forEach(score => score.isDeleted = true);
+                                        }
+                                    });
+
+                                    // Handle if this category is currently selected
+                                    if (state.selectedCategory?.id === category.id) {
+                                        state.setSelectedCategory(null);
+                                        clearWinnerDisplay();
+                                        updateQuickGradeUIForCategory(null);
+                                        updateCategoryColumnHighlight(null);
+                                        selectStudentBtnWrapper.classList.add('disabled-wrapper');
+                                        selectStudentBtn.disabled = true;
+
+                                        const previousWinnerRow = document.querySelector('.current-winner-highlight');
+                                        if (previousWinnerRow) previousWinnerRow.classList.remove('current-winner-highlight');
+                                    }
+
+                                    category.isDeleted = true;
+                                    logManager.addLog(
+                                        state.currentClassroom.info.name,
+                                        `دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`,
+                                        { type: 'VIEW_TRASH' }
+                                    );
+
+                                    state.saveData();
+                                    renderCategoryPills();
+                                    renderStudentStatsList();
+                                    showNotification(`✅ دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`);
+                                },
+                                { confirmText: 'بله', confirmClass: 'btn-warning' }
+                            );
+                        }
                     }
-                }];
-                openContextMenu(event, menuItems);
+                ];
             });
+
         }
 
         categoryPillsContainer.appendChild(pill);
@@ -3109,9 +3115,9 @@ function createClassListItem(classroom) {
     li.appendChild(leftColumnWrapper);
 
     // --- 4. Add the right-click context menu ---
-    li.addEventListener('contextmenu', (event) => {
+    attachUniversalContextMenu(li, () => {
 
-        // This block defines the backup option and then immediately adjusts it for multi-selection.
+        // ---------- Backup item (single vs multi) ----------
         const backupItem = {
             label: 'پشتیبان‌گیری از این کلاس',
             icon: '📤',
@@ -3121,18 +3127,17 @@ function createClassListItem(classroom) {
         };
 
         const selectedCount = state.selectedClassIds.length;
-        // If more than one class is checked AND the right-clicked class is one of them...
+
         if (selectedCount > 1 && state.selectedClassIds.includes(classroom.info.name)) {
-            // ...update the label and the action for the multi-backup case.
             backupItem.label = `پشتیبان‌گیری از ${selectedCount} کلاس`;
             backupItem.action = () => {
                 initiateBackupProcess(state.selectedClassIds);
-                state.setSelectedClassIds([]); // Clear the selection
-                renderClassList(); // Re-render to uncheck the boxes
+                state.setSelectedClassIds([]);
+                renderClassList();
             };
         }
 
-        // --- 1. Define Default Single Delete Item ---
+        // ---------- Delete item (single vs multi) ----------
         const deleteItem = {
             label: 'حذف کلاس',
             icon: '🗑️',
@@ -3149,11 +3154,15 @@ function createClassListItem(classroom) {
                             restoreData: { name: classroom.info.name }
                         };
 
-                        // USE THE NEW FUNCTION
                         state.addToTrashBin(trashEntry);
-
                         classroom.isDeleted = true;
-                        logManager.addLog(classroom.info.name, `کلاس «${classroom.info.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+
+                        logManager.addLog(
+                            classroom.info.name,
+                            `کلاس «${classroom.info.name}» به سطل زباله منتقل شد.`,
+                            { type: 'VIEW_TRASH' }
+                        );
+
                         state.saveData();
                         renderClassList();
                         showNotification(`✅ کلاس «${classroom.info.name}» به سطل زباله منتقل شد.`);
@@ -3163,7 +3172,6 @@ function createClassListItem(classroom) {
             }
         };
 
-        // --- 2. Override for Batch Deletion ---
         if (selectedCount > 1 && state.selectedClassIds.includes(classroom.info.name)) {
             deleteItem.label = `حذف ${selectedCount} کلاس`;
             deleteItem.action = () => {
@@ -3181,11 +3189,14 @@ function createClassListItem(classroom) {
                                     restoreData: { name: cls.info.name }
                                 };
 
-                                // USE THE NEW FUNCTION
                                 state.addToTrashBin(trashEntry);
-
                                 cls.isDeleted = true;
-                                logManager.addLog(cls.info.name, `کلاس «${cls.info.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+
+                                logManager.addLog(
+                                    cls.info.name,
+                                    `کلاس «${cls.info.name}» به سطل زباله منتقل شد.`,
+                                    { type: 'VIEW_TRASH' }
+                                );
                             }
                         });
 
@@ -3199,19 +3210,22 @@ function createClassListItem(classroom) {
             };
         }
 
-        const menuItems = [
+        // ---------- Full menu ----------
+        return [
             {
                 label: 'چاپ گزارش کلاس',
                 icon: '🖨️',
-                action: () => {
-                    showReportConfigModal(classroom);
-                }
+                action: () => showReportConfigModal(classroom)
             },
             {
-                label: classListUl.classList.contains('selection-mode-active') ? 'لغو انتخاب' : 'انتخاب چند کلاس',
+                label: classListUl.classList.contains('selection-mode-active')
+                    ? 'لغو انتخاب'
+                    : 'انتخاب چند کلاس',
                 icon: '✔️',
                 action: () => {
-                    const wasSelectionMode = classListUl.classList.contains('selection-mode-active');
+                    const wasSelectionMode =
+                        classListUl.classList.contains('selection-mode-active');
+
                     classListUl.classList.toggle('selection-mode-active');
 
                     if (wasSelectionMode) {
@@ -3224,23 +3238,17 @@ function createClassListItem(classroom) {
             {
                 label: 'یادداشت کلاس',
                 icon: '📝',
-                action: () => {
-                    showClassNoteModal(classroom);
-                }
+                action: () => showClassNoteModal(classroom)
             },
             {
                 label: 'تنظیمات کلاس',
                 icon: '⚙️',
-                action: () => {
-                    showSettingsPage(classroom);
-                }
+                action: () => showSettingsPage(classroom)
             },
             {
                 label: 'گزارش فعالیت‌ها',
                 icon: '📋',
-                action: () => {
-                    renderLogModal(classroom.info.name);
-                }
+                action: () => renderLogModal(classroom.info.name)
             },
             {
                 label: 'تغییر نام',
@@ -3258,7 +3266,11 @@ function createClassListItem(classroom) {
                             const result = state.renameClassroom(oldName, trimmedNewName);
                             if (result.success) {
                                 logManager.renameClassroomLog(oldName, trimmedNewName);
-                                logManager.addLog(trimmedNewName, `نام کلاس از «${oldName}» به «${trimmedNewName}» تغییر یافت.`, { type: 'VIEW_SESSIONS' });
+                                logManager.addLog(
+                                    trimmedNewName,
+                                    `نام کلاس از «${oldName}» به «${trimmedNewName}» تغییر یافت.`,
+                                    { type: 'VIEW_SESSIONS' }
+                                );
                                 state.saveData();
                                 renderClassList();
                                 showNotification(`✅نام کلاس به «${trimmedNewName}» تغییر یافت.`);
@@ -3266,9 +3278,11 @@ function createClassListItem(classroom) {
                                 showNotification(result.message);
                             }
                         }
+
                         modalTitle.textContent = 'ثبت یادداشت جدید';
                         newNoteContent.rows = 4;
                     });
+
                     openModal('add-note-modal');
                     newNoteContent.focus();
                     newNoteContent.select();
@@ -3276,8 +3290,8 @@ function createClassListItem(classroom) {
             },
             deleteItem
         ];
-        openContextMenu(event, menuItems);
     });
+
 
     return li;
 }
@@ -3415,8 +3429,8 @@ export function renderSettingsStudentList() {
 
 
         // Context Menu
-        li.addEventListener('contextmenu', (event) => {
-            const menuItems = [
+        attachUniversalContextMenu(li, () => {
+            return [
                 {
                     label: 'تغییر نام',
                     icon: '✏️',
@@ -3444,17 +3458,25 @@ export function renderSettingsStudentList() {
                                     timestamp: new Date().toISOString(),
                                     type: 'student',
                                     description: `دانش‌آموز «${student.identity.name}» از کلاس «${state.currentClassroom.info.name}»`,
-                                    restoreData: { studentId: student.identity.studentId, classId: state.currentClassroom.info.scheduleCode }
+                                    restoreData: {
+                                        studentId: student.identity.studentId,
+                                        classId: state.currentClassroom.info.scheduleCode
+                                    }
                                 };
 
-                                // NEW LOGIC: Use the central function
                                 state.addToTrashBin(trashEntry);
 
                                 student.isDeleted = true;
-                                logManager.addLog(state.currentClassroom.info.name, `دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+
+                                logManager.addLog(
+                                    state.currentClassroom.info.name,
+                                    `دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`,
+                                    { type: 'VIEW_TRASH' }
+                                );
+
                                 state.saveData();
 
-                                // Refresh all relevant UI parts
+                                // Refresh UI
                                 renderSettingsStudentList();
                                 renderStudentStatsList();
                                 renderAttendancePage();
@@ -3466,8 +3488,8 @@ export function renderSettingsStudentList() {
                     }
                 }
             ];
-            openContextMenu(event, menuItems);
         });
+
 
         li.appendChild(nameSpan);
         // Note: deleteBtn is gone
@@ -3788,8 +3810,8 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
     li.appendChild(buttonsContainer);
 
     // --- Add the right-click context menu ---
-    li.addEventListener('contextmenu', (event) => {
-        const menuItems = [
+    attachUniversalContextMenu(li, () => {
+        return [
             {
                 label: 'یادداشت جلسه',
                 icon: '📝',
@@ -3803,21 +3825,37 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                 icon: '❌',
                 action: () => {
                     const actionText = session.isCancelled ? 'بازگردانی جلسه' : 'لغو جلسه';
-                    const confirmMsg = session.isCancelled ?
-                        `آیا از بازگردانی این جلسه مطمئن هستید؟` :
-                        `آیا از لغو این جلسه مطمئن هستید؟ جلسه لغو شده در آمار تاثیری ندارد اما قابل بازگردانی است.`;
-                    showCustomConfirm(confirmMsg, () => {
-                        session.isCancelled = !session.isCancelled;
 
-                        const logMessage = session.isCancelled
-                            ? `جلسه ${displaySessionNumber} لغو شد.`
-                            : `جلسه لغو شده (تاریخ: ${new Date(session.startTime).toLocaleDateString('fa-IR')}) بازگردانی شد.`;
-                        logManager.addLog(state.currentClassroom.info.name, logMessage, { type: 'VIEW_SESSIONS' });
+                    const confirmMsg = session.isCancelled
+                        ? `آیا از بازگردانی این جلسه مطمئن هستید؟`
+                        : `آیا از لغو این جلسه مطمئن هستید؟ جلسه لغو شده در آمار تاثیری ندارد اما قابل بازگردانی است.`;
 
-                        state.saveData();
-                        renderSessions();
-                        showNotification(session.isCancelled ? '✅جلسه لغو شد.' : '✅جلسه بازگردانی شد.');
-                    }, { confirmText: actionText, confirmClass: 'btn-warning' });
+                    showCustomConfirm(
+                        confirmMsg,
+                        () => {
+                            session.isCancelled = !session.isCancelled;
+
+                            const logMessage = session.isCancelled
+                                ? `جلسه ${displaySessionNumber} لغو شد.`
+                                : `جلسه لغو شده (تاریخ: ${new Date(session.startTime).toLocaleDateString('fa-IR')}) بازگردانی شد.`;
+
+                            logManager.addLog(
+                                state.currentClassroom.info.name,
+                                logMessage,
+                                { type: 'VIEW_SESSIONS' }
+                            );
+
+                            state.saveData();
+                            renderSessions();
+
+                            showNotification(
+                                session.isCancelled
+                                    ? '✅جلسه لغو شد.'
+                                    : '✅جلسه بازگردانی شد.'
+                            );
+                        },
+                        { confirmText: actionText, confirmClass: 'btn-warning' }
+                    );
                 }
             },
 
@@ -3831,17 +3869,24 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                     const logMessage = session.isMakeup
                         ? `جلسه ${displaySessionNumber} به عنوان جبرانی علامت‌گذاری شد.`
                         : `جلسه ${displaySessionNumber} از حالت جبرانی خارج شد.`;
-                    logManager.addLog(state.currentClassroom.info.name, logMessage, { type: 'VIEW_SESSIONS' });
+
+                    logManager.addLog(
+                        state.currentClassroom.info.name,
+                        logMessage,
+                        { type: 'VIEW_SESSIONS' }
+                    );
 
                     renderSessions();
                 }
             },
+
             {
                 label: 'حذف جلسه',
                 icon: '🗑️',
-                className: 'danger', // This will style the item in red
+                className: 'danger',
                 action: () => {
                     const displayNumText = session.isCancelled ? 'لغو شده' : displaySessionNumber;
+
                     showCustomConfirm(
                         `آیا از انتقال جلسه ${displayNumText} به سطل زباله مطمئن هستید؟`,
                         () => {
@@ -3850,16 +3895,25 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                                 timestamp: new Date().toISOString(),
                                 type: 'session',
                                 description: `جلسه ${displayNumText} از کلاس «${state.currentClassroom.info.name}»`,
-                                restoreData: { sessionNumber: session.sessionNumber, classId: state.currentClassroom.info.scheduleCode }
+                                restoreData: {
+                                    sessionNumber: session.sessionNumber,
+                                    classId: state.currentClassroom.info.scheduleCode
+                                }
                             };
 
-                            // NEW LOGIC
                             state.addToTrashBin(trashEntry);
 
                             session.isDeleted = true;
-                            logManager.addLog(state.currentClassroom.info.name, `جلسه ${displayNumText} به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
+
+                            logManager.addLog(
+                                state.currentClassroom.info.name,
+                                `جلسه ${displayNumText} به سطل زباله منتقل شد.`,
+                                { type: 'VIEW_TRASH' }
+                            );
+
                             state.saveData();
                             renderSessions();
+
                             showNotification(`✅ جلسه ${displayNumText} به سطل زباله منتقل شد.`);
                         },
                         { confirmText: 'بله', confirmClass: 'btn-warning', isDelete: true }
@@ -3867,7 +3921,6 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                 }
             },
 
-            // [!code ++] New "Change Date" Item
             {
                 label: 'تغییر تاریخ',
                 icon: '📅',
@@ -3876,11 +3929,9 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                     const monthSelect = document.getElementById('dp-month');
                     const yearSelect = document.getElementById('dp-year');
 
-                    // 1. Convert Current Gregorian Date to Jalaali
                     const jDate = toJalaali(session.startTime);
 
-                    // 2. Populate Dropdowns (Dynamically)
-                    // -- Days (1-31)
+                    // Days
                     daySelect.innerHTML = '';
                     for (let i = 1; i <= 31; i++) {
                         const option = document.createElement('option');
@@ -3890,52 +3941,54 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                         daySelect.appendChild(option);
                     }
 
-                    // -- Months (Names)
+                    // Months
                     const persianMonths = [
                         'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
                         'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
                     ];
+
                     monthSelect.innerHTML = '';
                     persianMonths.forEach((name, index) => {
                         const option = document.createElement('option');
-                        option.value = index + 1; // 1-based
+                        option.value = index + 1;
                         option.textContent = name;
                         if (index + 1 === jDate.jm) option.selected = true;
                         monthSelect.appendChild(option);
                     });
 
-                    // -- Years (Current +/- 5 years)
+                    // Years
                     yearSelect.innerHTML = '';
                     const currentYear = jDate.jy;
+
                     for (let i = currentYear - 5; i <= currentYear + 5; i++) {
                         const option = document.createElement('option');
                         option.value = i;
-                        option.textContent = i.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); // Farsi digits
+                        option.textContent = i.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
                         if (i === jDate.jy) option.selected = true;
                         yearSelect.appendChild(option);
                     }
 
-                    // 3. Define Callback (Receives Jalaali Object from Main.js)
                     state.setDatePickerCallback((dateObj) => {
                         if (!dateObj) return;
 
-                        // Convert Jalaali -> Gregorian
-                        const gDate = toGregorian(parseInt(dateObj.jy), parseInt(dateObj.jm), parseInt(dateObj.jd));
+                        const gDate = toGregorian(
+                            parseInt(dateObj.jy),
+                            parseInt(dateObj.jm),
+                            parseInt(dateObj.jd)
+                        );
 
-                        // Create JS Date (Note: JS Month is 0-indexed)
                         const updatedDate = new Date(gDate.gy, gDate.gm - 1, gDate.gd);
 
-                        // MERGE TIME: Keep original hours/minutes
                         updatedDate.setHours(session.startTime.getHours());
                         updatedDate.setMinutes(session.startTime.getMinutes());
                         updatedDate.setSeconds(session.startTime.getSeconds());
 
-                        // Log & Save
                         const oldDateStr = session.startTime.toLocaleDateString('fa-IR');
                         session.startTime = updatedDate;
                         const newDateStr = session.startTime.toLocaleDateString('fa-IR');
 
-                        logManager.addLog(state.currentClassroom.info.name,
+                        logManager.addLog(
+                            state.currentClassroom.info.name,
                             `تاریخ جلسه ${displaySessionNumber} از ${oldDateStr} به ${newDateStr} تغییر یافت.`,
                             { type: 'VIEW_SESSIONS' }
                         );
@@ -3949,9 +4002,8 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                 }
             }
         ];
-
-        openContextMenu(event, menuItems);
     });
+
 
     return li;
 }
