@@ -4725,6 +4725,7 @@ function createQualitativeButtons(student, categoryName) {
         }
 
         btn.addEventListener('click', () => {
+
             const newRating = btnData.key;
 
             // A. Update Global Stats (Student Model)
@@ -4740,18 +4741,24 @@ function createQualitativeButtons(student, categoryName) {
             }
 
             // B. Update The Source of Truth (History or Session)
-            const finalRating = (currentRating === newRating) ? null : newRating; // Toggle logic
-
+            const finalRating = (currentRating === newRating) ? null : newRating;
             if (isHistoryMode) {
                 historyEntry.rating = finalRating;
             } else {
-                // Fallback for manual selection
                 if (finalRating) sessionRecord.performanceRatings[categoryName] = finalRating;
                 else delete sessionRecord.performanceRatings[categoryName];
             }
 
             state.saveData();
-            displayWinner(); // Re-render
+
+            // Fix: If we are in Manual/Assessment mode (not history), 
+            // we must explicitly pass the student back to displayWinner 
+            // to prevent the screen from clearing.
+            if (isHistoryMode) {
+                displayWinner();
+            } else {
+                displayWinner(student, categoryName);
+            }
         });
 
         container.appendChild(btn);
