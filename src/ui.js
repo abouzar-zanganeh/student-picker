@@ -1895,6 +1895,7 @@ function renderCategoryPills() {
             pill.classList.add('disabled');
         } else {
             pill.addEventListener('click', () => {
+                document.querySelectorAll('#category-selection-container .pill').forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
 
                 if (!category.isGradedCategory && state.isAssessmentModeActive) {
@@ -1904,7 +1905,6 @@ function renderCategoryPills() {
                     return;
                 }
 
-                document.querySelectorAll('#category-selection-container .pill').forEach(p => p.classList.remove('active'));
                 setStyleForGradedCategoryPill(category, pill);
                 state.setSelectedCategory(category);
                 updateSelectButtonText(category);
