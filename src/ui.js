@@ -941,7 +941,6 @@ export function showSettingsPage(classroom) {
     renderSettingsCategories();
     renderSettingsOther();
     showPage('settings-page');
-    setDisplayedWinnerID(null);
 }
 
 export function renderLogModal(classroomName) {
@@ -3640,6 +3639,7 @@ export function renderSettingsOther() {
 }
 
 export function _internalShowPage(pageId) {
+    setDisplayedWinnerID(null);
     // 1. Visual Toggle: Hide all pages and show the target
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
@@ -4046,7 +4046,6 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
 
 export function renderSessions() {
 
-    setDisplayedWinnerID(null);
     const sessionListUl = document.getElementById('session-list');
 
     if (!state.currentClassroom) return;
