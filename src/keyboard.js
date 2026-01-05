@@ -95,3 +95,28 @@ export function keyDownShortcuts(selectStudentBtn, attendancePage) {
         }
     });
 }
+// This function sets up a keyboard shortcut on a given input element whether it is 
+// an input or textarea.
+
+export function setupKeyboardShortcutOnElement(element, key, callback) {
+    if (!element) return;
+
+    element.addEventListener('keydown', (event) => {
+        // 1. Special handling for TEXTAREA with 'Enter' key
+        if (element.tagName === 'TEXTAREA' && key === 'Enter') {
+            // Require Ctrl (or Meta/Command on Mac) + Enter to trigger
+            if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+                callback(event);
+            }
+            return; // Exit here so we don't trigger the default behavior below
+        }
+
+        // 2. Standard handling for INPUTs (or other keys)
+        // This preserves your existing check to ignore Shift+Enter on regular inputs
+        if (event.shiftKey && key === 'Enter') return;
+
+        if (event.key === key) {
+            callback(event);
+        }
+    });
+}

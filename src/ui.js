@@ -11,10 +11,11 @@ import {
 import {
     detectTextDirection, renderMultiLineText,
     parseStudentName, sortStudents, setupDoubleAction,
-    setupKeyboardShortcut, hideKeyboard,
+    hideKeyboard,
     setupAutoSelectOnFocus, flashElement, scrollToElement, attachUniversalContextMenu,
     getCurrentView
 } from './utils.js';
+import { setupKeyboardShortcutOnElement } from './keyboard.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
 import { Category, EDUCATIONAL_SYSTEMS } from './models.js';
@@ -2428,14 +2429,14 @@ function renderProfileScoringSection(container) {
     const scoreInput = scoringSection.querySelector('#modal-new-score-value');
     const commentTextarea = scoringSection.querySelector('#modal-new-score-comment');
 
-    setupKeyboardShortcut(scoreInput, 'Enter', () => {
+    setupKeyboardShortcutOnElement(scoreInput, 'Enter', () => {
         addScoreBtn.click();
         hideKeyboard(scoreInput);
     });
 
     setupAutoSelectOnFocus(scoreInput);
 
-    setupKeyboardShortcut(commentTextarea, 'Enter', () => {
+    setupKeyboardShortcutOnElement(commentTextarea, 'Enter', () => {
         addScoreBtn.click();
         hideKeyboard(commentTextarea);
     });

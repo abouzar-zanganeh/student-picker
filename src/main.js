@@ -20,9 +20,10 @@ import {
 import { Classroom, Student, Category } from './models.js';
 import {
     normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound,
-    setupKeyboardShortcut, hideKeyboard, setupAutoSelectOnFocus, flashElement, scrollToElement,
+    hideKeyboard, setupAutoSelectOnFocus, flashElement, scrollToElement,
     setupSwipeNavigation
 } from './utils.js';
+import { setupKeyboardShortcutOnElement } from './keyboard.js';
 import { activateDeveloperAccessOnConsole } from './developer.js';
 import { keyDownShortcuts } from './keyboard.js';
 import { testClassHook } from './testclass.js';
@@ -166,7 +167,6 @@ function restoreStateFromURL() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-
 
     // --- HTML Elements (from ui.js, but needed for event listeners) ---
     const {
@@ -1150,14 +1150,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    setupKeyboardShortcut(quickScoreInput, 'Enter', () => {
+    setupKeyboardShortcutOnElement(quickScoreInput, 'Enter', () => {
         hideKeyboard(quickScoreInput);
         quickGradeSubmitBtn.click();
     });
 
     setupAutoSelectOnFocus(quickScoreInput);
 
-    setupKeyboardShortcut(quickNoteTextarea, 'Enter', () => {
+    setupKeyboardShortcutOnElement(quickNoteTextarea, 'Enter', () => {
         hideKeyboard(quickNoteTextarea);
         quickGradeSubmitBtn.click();
     });
