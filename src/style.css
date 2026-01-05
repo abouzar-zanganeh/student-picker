@@ -3482,13 +3482,6 @@ label {
     direction: rtl;
 }
 
-.weight-label {
-    display: block;
-    color: var(--color-primary);
-    margin-top: 2px;
-    visibility: visible;
-}
-
 /* Color classes for the stats numbers */
 
 /* Blue */

@@ -61,6 +61,7 @@ export let userSettings = {
     isScreenSaverEnabled: true,
     isSoundEnabled: true,
     isVibrationEnabled: true,
+    isDeveloperMode: false,
     lastRestoreTimestamp: null,
     lastBackupTimestamp: null,
 };

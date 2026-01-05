@@ -199,6 +199,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initial Load ---
     state.loadData();
+
+    if (state.userSettings.isDeveloperMode) {
+        import('./developer.js').then(devModule => {
+            devModule.bootstrapDeveloperMode();
+        });
+    }
+
     ui.updateDemoModeBanner();
 
     // Try to restore the state from the URL
@@ -1624,7 +1631,6 @@ export function closeSideNav() {
     }, 300); // This duration must match your CSS animation time
 }
 
-activateDeveloperAccessOnConsole();
 
 export function handleUndoLastSelection(student, categoryName) {
 
