@@ -3471,3 +3471,34 @@ label {
     display: flex;
     justify-content: center;
 }
+
+/* Styles for qualitative stats tags under next student button */
+.qualitative-stats-tag {
+    font-size: 0.85rem;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+    padding: 2px 8px;
+    direction: rtl;
+}
+
+/* Color classes for the stats numbers */
+
+/* Blue */
+.stat-excellent {
+    color: var(--color-primary);
+    font-weight: bold;
+}
+
+/* Green */
+.stat-good {
+    color: var(--color-success);
+    font-weight: bold;
+}
+
+/* Orange */
+.stat-effort {
+    color: var(--color-warning);
+    font-weight: bold;
+}
+
+/* end of styles for qualitative stats tags */

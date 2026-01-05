@@ -2122,6 +2122,36 @@ function updateCategoryWeightLabel(category) {
     }
 }
 
+export function updateQualitativeStatsLabel(student, currentCategory) {
+    const label = document.getElementById('qualitative-stats-label');
+    if (!label) return;
+
+    if (!student) {
+        label.textContent = '...';
+        return;
+    }
+
+    // 1. Calculate stats for the current selected category
+    const catStats = student.qualitativeStats[currentCategory.name] || { excellent: 0, good: 0, effort: 0 };
+
+    // 2. Calculate total stats across all categories
+    const totalStats = Object.values(student.qualitativeStats).reduce((acc, curr) => {
+        acc.excellent += (curr.excellent || 0);
+        acc.good += (curr.good || 0);
+        acc.effort += (curr.effort || 0);
+        return acc;
+    }, { excellent: 0, good: 0, effort: 0 });
+
+    // 3. Helper to format the numbers with spans
+    const format = (stats) => `
+        <span class="stat-excellent">${stats.excellent}</span>، 
+        <span class="stat-good">${stats.good}</span>، 
+        <span class="stat-effort">${stats.effort}</span>
+    `;
+
+    label.innerHTML = `این دسته‌بندی: ${format(catStats)} | کل: ${format(totalStats)}`;
+}
+
 export function updateQuickGradeUIForCategory(category) {
 
     if (state.selectedSession.isFinished) {
@@ -4934,6 +4964,7 @@ function updateWinnerHighlights(winner, categoryName) {
         // Update UI Components
         updateSelectButtonText(correspondingCategory);
         updateCategoryWeightLabel(correspondingCategory);
+        updateQualitativeStatsLabel(winner, state.selectedCategory);
         updateQuickGradeUIForCategory(correspondingCategory);
         updateCategoryColumnHighlight(correspondingCategory.name);
 

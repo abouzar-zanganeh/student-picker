@@ -451,6 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Trigger highlights
                 ui.renderStudentStatsList();
                 ui.displayWinner(winner, state.selectedCategory.name);
+                updateQualitativeStatsLabel(winner, state.selectedCategory);
                 ui.updateCategoryColumnHighlight(state.selectedCategory.name);
                 state.saveData();
             } else {
@@ -499,7 +500,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.selectedSession.lastSelectedWinnerId = winner.identity.studentId;
 
                 ui.renderStudentStatsList();
-                setTimeout(() => ui.displayWinner(), 0);
+                setTimeout(() => {
+                    ui.displayWinner();
+                    updateQualitativeStatsLabel(winner, state.selectedCategory);
+                }, 0);
                 state.saveData();
             } else {
                 ui.showNotification("❌دانش‌آموز واجد شرایطی برای انتخاب یافت نشد.");
