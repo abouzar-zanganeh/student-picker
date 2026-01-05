@@ -2115,7 +2115,7 @@ function updateSelectButtonText(category) {
 function updateCategoryWeightLabel(category) {
     if (category && category.isGradedCategory) {
         categoryWeightLabel.textContent = `ضریب: ${category.weight || 1}`;
-        categoryWeightLabel.style.display = 'block';
+        categoryWeightLabel.style.display = 'inline-block';
         categoryWeightLabel.style.visibility = 'visible';
     } else {
         categoryWeightLabel.style.visibility = 'hidden';

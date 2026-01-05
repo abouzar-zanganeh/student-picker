@@ -3474,11 +3474,19 @@ label {
 
 /* Styles for qualitative stats tags under next student button */
 .qualitative-stats-tag {
+    display: inline-block;
     font-size: 0.85rem;
     color: var(--color-text-secondary);
     margin-top: 4px;
     padding: 2px 8px;
     direction: rtl;
+}
+
+.weight-label {
+    display: block;
+    color: var(--color-primary);
+    margin-top: 2px;
+    visibility: visible;
 }
 
 /* Color classes for the stats numbers */
