@@ -12,7 +12,8 @@ import {
     detectTextDirection, renderMultiLineText,
     parseStudentName, sortStudents, setupDoubleAction,
     setupKeyboardShortcut, hideKeyboard,
-    setupAutoSelectOnFocus, flashElement, scrollToElement, attachUniversalContextMenu
+    setupAutoSelectOnFocus, flashElement, scrollToElement, attachUniversalContextMenu,
+    getCurrentView
 } from './utils.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
@@ -940,6 +941,7 @@ export function showSettingsPage(classroom) {
     renderSettingsCategories();
     renderSettingsOther();
     showPage('settings-page');
+    setDisplayedWinnerID(null);
 }
 
 export function renderLogModal(classroomName) {
@@ -1807,6 +1809,7 @@ export function clearWinnerDisplay() {
 
     resultDiv.innerHTML = '';
     resultDiv.classList.remove('absent');
+    setDisplayedWinnerID(null);
 }
 
 
@@ -4042,6 +4045,8 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
 }
 
 export function renderSessions() {
+
+    setDisplayedWinnerID(null);
     const sessionListUl = document.getElementById('session-list');
 
     if (!state.currentClassroom) return;

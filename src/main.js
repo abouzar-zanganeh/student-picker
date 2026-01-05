@@ -196,9 +196,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const trashNavBtn = document.getElementById('trash-nav-btn');
 
     const globalSearchIcon = document.querySelector('.global-search-container .search-icon');
-
+    
     // --- Initial Load ---
     state.loadData();
+<<<<<<< Updated upstream
+=======
+
+    state.setDisplayedWinnerID(null);
+
+    if (state.userSettings.isDeveloperMode) {
+        import('./developer.js').then(devModule => {
+            devModule.bootstrapDeveloperMode();
+        });
+    }
+
+>>>>>>> Stashed changes
     ui.updateDemoModeBanner();
 
     // Try to restore the state from the URL
