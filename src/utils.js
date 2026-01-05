@@ -447,3 +447,49 @@ export function attachUniversalContextMenu(target, getMenuItems) {
         target.addEventListener(ev, () => clearTimeout(longPressTimer));
     });
 }
+
+
+/**
+ * Resolves a student's full name using only their ID by searching all classrooms.
+ * @param {string} id - The unique studentId.
+ * @param {Object} classrooms - The global classrooms object from state.
+ * @returns {string|null} - The student's name or null if not found.
+ */
+export function getStudentNameById(id, classrooms) {
+    for (const classroom of Object.values(classrooms)) {
+        const student = classroom.students.find(s => s.identity.studentId === id);
+        if (student) {
+            return student.identity.name;
+        }
+    }
+    return null;
+}
+
+// a function to get where the user currently is in the app
+// 1. The Registry: Maps view names to their corresponding element IDs
+const VIEW_REGISTRY = {
+    'dashboard-attendance': 'attendance-pane',
+    'dashboard-selector': 'selector-pane',
+    'column-mapping-page': 'column-mapping-page',
+    'csv-preview-page': 'csv-preview-page',
+    'restore-points-page': 'restore-points-page',
+    'session-page': 'session-page',
+    'settings-page': 'settings-page',
+    'trash-page': 'trash-page',
+    'class-management-page': 'class-management-page'
+};
+
+// 2. The Helper: Dynamically identifies the active view
+export function getCurrentView() {
+    for (const [viewName, elementId] of Object.entries(VIEW_REGISTRY)) {
+        const el = document.getElementById(elementId);
+
+        // Check 1: Does the element exist?
+        // Check 2: Does it have the .active class?
+        // Check 3: Is it actually rendered/visible on screen? (offsetParent check)
+        if (el && el.classList.contains('active') && el.offsetParent !== null) {
+            return viewName;
+        }
+    }
+    return null;
+}

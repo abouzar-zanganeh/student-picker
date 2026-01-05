@@ -12,7 +12,8 @@ import {
     detectTextDirection, renderMultiLineText,
     parseStudentName, sortStudents, setupDoubleAction,
     setupKeyboardShortcut, hideKeyboard,
-    setupAutoSelectOnFocus, flashElement, scrollToElement, attachUniversalContextMenu
+    setupAutoSelectOnFocus, flashElement, scrollToElement, attachUniversalContextMenu,
+    getCurrentView
 } from './utils.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
@@ -1807,6 +1808,7 @@ export function clearWinnerDisplay() {
 
     resultDiv.innerHTML = '';
     resultDiv.classList.remove('absent');
+    setDisplayedWinnerID(null);
 }
 
 
@@ -3637,6 +3639,7 @@ export function renderSettingsOther() {
 }
 
 export function _internalShowPage(pageId) {
+    setDisplayedWinnerID(null);
     // 1. Visual Toggle: Hide all pages and show the target
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
@@ -4042,6 +4045,7 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
 }
 
 export function renderSessions() {
+
     const sessionListUl = document.getElementById('session-list');
 
     if (!state.currentClassroom) return;
