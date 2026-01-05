@@ -3,6 +3,12 @@ import LZString from 'lz-string';
 import CompressionWorker from './compression.worker.js?worker';
 
 // --- وضعیت کلی برنامه (Global State) ---
+
+export let displayedWinnerID = null;
+export function setDisplayedWinnerID(id) {
+    displayedWinnerID = id;
+}
+
 export let classrooms = {}; // آبجکتی برای نگهداری تمام کلاس‌ها بر اساس نام آنها
 export let currentClassroom = null; // کلاسی که کاربر در حال کار با آن است
 export let liveSession = null; // جلسه زنده‌ای که در حال برگزاری است

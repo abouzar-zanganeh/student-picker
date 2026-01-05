@@ -5,7 +5,8 @@ import { initiateBackupProcess, processRestore } from './backup.js';
 
 import {
     getActiveItems, getSessionDisplayMap, permanentlyDeleteStudent,
-    permanentlyDeleteSession, permanentlyDeleteCategory, permanentlyDeleteScore, permanentlyDeleteNote
+    permanentlyDeleteSession, permanentlyDeleteCategory,
+    permanentlyDeleteScore, permanentlyDeleteNote, setDisplayedWinnerID, displayedWinnerID
 } from './state.js';
 import {
     detectTextDirection, renderMultiLineText,
@@ -5009,6 +5010,7 @@ function renderWinnerHeader(winner, categoryName, isHistoryMode) {
     const winnerNameEl = document.createElement('div');
     winnerNameEl.className = 'winner-name';
     winnerNameEl.innerHTML = `✨ <strong>${winner.identity.name}</strong>✨`;
+    setDisplayedWinnerID(winner.identity.studentId);
     winnerNameEl.classList.add('heartbeat-animation');
 
     // Initial Styling based on status
