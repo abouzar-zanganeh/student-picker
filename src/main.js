@@ -13,7 +13,7 @@ import {
 
 import {
     renderRestorePointsPage, newCategoryModalIsGradedCheckbox,
-    quickGradeSubmitBtn, quickScoreInput, quickNoteTextarea
+    quickGradeSubmitBtn, quickScoreInput, quickNoteTextarea, updateQualitativeStatsLabel
 } from './ui.js';
 
 
@@ -427,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     ui.selectStudentBtn.addEventListener('click', () => {
-
+        scrollToElement(selectStudentBtn);
         if (selectBtnLongPressActive) {
             selectBtnLongPressActive = false;
             return;

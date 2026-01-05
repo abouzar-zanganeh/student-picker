@@ -2118,7 +2118,7 @@ function updateCategoryWeightLabel(category) {
         categoryWeightLabel.style.display = 'inline-block';
         categoryWeightLabel.style.visibility = 'visible';
     } else {
-        categoryWeightLabel.style.visibility = 'hidden';
+        categoryWeightLabel.style.display = 'none';
     }
 }
 
