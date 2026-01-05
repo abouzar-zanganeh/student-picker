@@ -11,3 +11,4 @@ src/.tmp.driveupload/1300
 /src/.tmp.driveupload
 /Shortcuts
 /.VSCodeCounter
+.vscode/launch.json
