@@ -7,7 +7,7 @@ import * as developer from "./developer";
 
 // ---- Developer Mode Activation Logic ---- //
 export let devModeClicks = 0;
-export function exposeToConsole() {
+export function activateDeveloperAccessOnConsole() {
     document.querySelector('.app-header h1').addEventListener('click', () => {
         devModeClicks++;
 

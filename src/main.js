@@ -23,7 +23,7 @@ import {
     setupKeyboardShortcut, hideKeyboard, setupAutoSelectOnFocus, flashElement, scrollToElement,
     setupSwipeNavigation
 } from './utils.js';
-import { exposeToConsole } from './developer.js';
+import { activateDeveloperAccessOnConsole } from './developer.js';
 import { keyDownShortcuts } from './keyboard.js';
 import { testClassHook } from './testclass.js';
 
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Developer Mode Activation ---
     // This developer mode will expose internal modules to the global 'dev' object after 10 clicks on the header.
-    exposeToConsole();
+    activateDeveloperAccessOnConsole();
 
     secureConfirmCancelBtn.addEventListener('click', () => {
         ui.closeActiveModal();
@@ -1624,7 +1624,7 @@ export function closeSideNav() {
     }, 300); // This duration must match your CSS animation time
 }
 
-exposeToConsole();
+activateDeveloperAccessOnConsole();
 
 export function handleUndoLastSelection(student, categoryName) {
 
