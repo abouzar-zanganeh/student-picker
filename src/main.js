@@ -204,6 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     state.setDisplayedWinnerID(null);
 
+    state.setDisplayedWinnerID(null);
+
     if (state.userSettings.isDeveloperMode) {
         import('./developer.js').then(devModule => {
             devModule.bootstrapDeveloperMode();
