@@ -11,6 +11,7 @@ DestinationFolder := "D:\ILI\My Student-Picker App Summer 1404\Student-Picker-Ap
 
 FileList =
 (
+D:\My Programming\Things_AI_Needs_to_Know_About_Me.md
 C:\Documents\GitHub\student-picker\GEMINI.md
 C:\Documents\GitHub\student-picker\index.html
 C:\Documents\GitHub\student-picker\src\models.js
