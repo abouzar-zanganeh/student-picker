@@ -13,7 +13,8 @@ import {
     parseStudentName, sortStudents, setupDoubleAction,
     hideKeyboard,
     setupAutoSelectOnFocus, flashElement, scrollToElement, attachUniversalContextMenu,
-    getCurrentView
+    getCurrentView,
+    setupLongPress
 } from './utils.js';
 import { setupKeyboardShortcutOnElement } from './keyboard.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
@@ -181,35 +182,6 @@ export function setFromAssessmentToNormalSelection(value) {
     fromAssessmentToNormalSelection = value;
 }
 
-// Helper for handling Long Press events
-export function setupLongPress(element, callback, duration = 800) {
-    let timer;
-    let longPressDuration = duration;
-
-    const start = (e) => {
-        // Prevent default only if necessary? No, keep it simple for now.
-        timer = setTimeout(() => {
-            if (state.userSettings.isVibrationEnabled && navigator.vibrate) {
-                navigator.vibrate(50);
-            }
-            callback(e);
-        }, longPressDuration);
-    };
-
-    const cancel = () => {
-        clearTimeout(timer);
-    };
-
-    // Support both Touch and Mouse
-    element.addEventListener('touchstart', start, { passive: true });
-    element.addEventListener('touchend', cancel);
-    element.addEventListener('touchmove', cancel);
-
-    element.addEventListener('mousedown', start);
-    element.addEventListener('mouseup', cancel);
-    element.addEventListener('mouseleave', cancel);
-}
-
 // Renders the session dashboard page with the specified initial tab
 export function renderSessionDashboard(initialTab = 'selector') {
     if (!state.currentClassroom || !state.selectedSession) {
@@ -288,23 +260,6 @@ export function setupDashboardTabs() {
             }
         }, 100);
     });
-}
-
-export function showUndoToast(message) {
-
-    clearTimeout(state.undoTimeout);
-
-    if (!state.previousState) {
-        state.setPreviousState(JSON.stringify(state.classrooms));
-    }
-
-    undoMessage.textContent = message;
-    undoToast.classList.add('show');
-
-    state.setUndoTimeout(setTimeout(() => {
-        undoToast.classList.remove('show');
-        state.setPreviousState(null);
-    }, 5000));
 }
 
 export function handleUndo() {

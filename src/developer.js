@@ -52,7 +52,7 @@ export function activateDeveloperAccessOnConsole() {
     });
 
     // 2. Deactivation: Long Press
-    ui.setupLongPress(header, () => {
+    utils.setupLongPress(header, () => {
         if (!state.userSettings.isDeveloperMode) return;
 
         ui.showCustomConfirm("آیا از خروج از حالت توسعه‌دهنده مطمئن هستید؟", () => {

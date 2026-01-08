@@ -1,3 +1,4 @@
+import * as state from './state.js';
 import { userSettings } from './state.js';
 import * as ui from './ui.js';
 import { openContextMenu } from './ui.js';
@@ -442,7 +443,7 @@ export function getStudentNameById(id, classrooms) {
 
 // a function to get where the user currently is in the app
 // 1. The Registry: Maps view names to their corresponding element IDs
-const VIEW_REGISTRY = {
+const PAGE_VIEW_REGISTRY = {
     'dashboard-attendance': 'attendance-pane',
     'dashboard-selector': 'selector-pane',
     'column-mapping-page': 'column-mapping-page',
@@ -456,7 +457,7 @@ const VIEW_REGISTRY = {
 
 // 2. The Helper: Dynamically identifies the active view
 export function getCurrentView() {
-    for (const [viewName, elementId] of Object.entries(VIEW_REGISTRY)) {
+    for (const [viewName, elementId] of Object.entries(PAGE_VIEW_REGISTRY)) {
         const el = document.getElementById(elementId);
 
         // Check 1: Does the element exist?
@@ -468,3 +469,38 @@ export function getCurrentView() {
     }
     return null;
 }
+// Calculates total scores for a student in a specific category across all history
+export function getTotalScoresForCategory(student, categoryName) {
+    const skillKey = categoryName.toLowerCase();
+    const scores = student.logs.scores[skillKey] || [];
+    return scores.filter(s => !s.isDeleted).length;
+}// Helper for handling Long Press events
+
+export function setupLongPress(element, callback, duration = 800) {
+    let timer;
+    let longPressDuration = duration;
+
+    const start = (e) => {
+        // Prevent default only if necessary? No, keep it simple for now.
+        timer = setTimeout(() => {
+            if (state.userSettings.isVibrationEnabled && navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+            callback(e);
+        }, longPressDuration);
+    };
+
+    const cancel = () => {
+        clearTimeout(timer);
+    };
+
+    // Support both Touch and Mouse
+    element.addEventListener('touchstart', start, { passive: true });
+    element.addEventListener('touchend', cancel);
+    element.addEventListener('touchmove', cancel);
+
+    element.addEventListener('mousedown', start);
+    element.addEventListener('mouseup', cancel);
+    element.addEventListener('mouseleave', cancel);
+}
+

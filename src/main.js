@@ -21,7 +21,8 @@ import { Classroom, Student, Category } from './models.js';
 import {
     normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound,
     hideKeyboard, setupAutoSelectOnFocus, flashElement, scrollToElement,
-    setupSwipeNavigation
+    setupSwipeNavigation,
+    getTotalScoresForCategory
 } from './utils.js';
 import { setupKeyboardShortcutOnElement } from './keyboard.js';
 import { activateDeveloperAccessOnConsole } from './developer.js';
@@ -1591,7 +1592,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    ui.setupLongPress(ui.selectStudentBtn, () => {
+    utils.setupLongPress(ui.selectStudentBtn, () => {
 
         selectBtnLongPressActive = true;
         toggleSelectionModes();
@@ -1750,13 +1751,6 @@ export function handleUndoLastSelection(student, categoryName) {
         },
         { confirmText: 'بله', confirmClass: 'btn-warning' }
     );
-}
-
-// Calculates total scores for a student in a specific category across all history
-function getTotalScoresForCategory(student, categoryName) {
-    const skillKey = categoryName.toLowerCase();
-    const scores = student.logs.scores[skillKey] || [];
-    return scores.filter(s => !s.isDeleted).length;
 }
 
 // Generates or refreshes the toBeScored pool based on minimum score counts
