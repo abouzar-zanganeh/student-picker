@@ -1,3 +1,11 @@
+/* ==========================================================================
+   compression.worker.js introduction
+   --------------------------------------------------------------------------
+   This JS file contains the background worker that handles data 
+   compression/decompression to prevent UI blocking during large save operations.
+   ========================================================================== */
+
+
 import LZString from 'lz-string';
 
 self.onmessage = (e) => {

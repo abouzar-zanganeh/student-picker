@@ -1,3 +1,11 @@
+/* ==========================================================================
+   backfill.js introduction
+   --------------------------------------------------------------------------
+   This JS file Contains temporary scripts for migrating data structures or batch-updating existing 
+   records across the app.
+   ========================================================================== */
+
+
 // --- Temporary Universal Utility Function ---
 // This function can be called from the console to fix student data across ALL classes by
 // assigning a student's highest score to his/her writing skill score.

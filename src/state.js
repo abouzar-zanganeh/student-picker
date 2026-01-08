@@ -1,3 +1,11 @@
+/* ==========================================================================
+   state.js introduction
+   --------------------------------------------------------------------------
+   This JS file manages global application state, data persistence 
+   (loading/saving), and reactivity references.
+   ========================================================================== */
+
+
 import { Classroom, Student, Session, Category, Homework, Note } from './models.js';
 import LZString from 'lz-string';
 import CompressionWorker from './compression.worker.js?worker';

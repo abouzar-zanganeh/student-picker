@@ -1,3 +1,11 @@
+/* ==========================================================================
+   backup.js introduction
+   --------------------------------------------------------------------------
+   This JS file manages the logic for creating (exporting) and restoring (importing) 
+   application backup files.
+   ========================================================================== */
+
+
 import JSZip from "jszip";
 import { classrooms, rehydrateData, saveData, setTrashBin, setUserSettings, trashBin, userSettings } from "./state";
 import { addBackupSnapshot } from "./db";

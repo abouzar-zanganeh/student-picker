@@ -1,3 +1,11 @@
+/* ==========================================================================
+   reports.js introduction
+   --------------------------------------------------------------------------
+   This JS file handles the generation and layout logic for printable reports 
+   and class lists.
+   ========================================================================== */
+
+
 import * as state from "./state";
 import { closeActiveModal, openModal, reportCancelBtn, reportColumnsContainer, reportPrintBtn, showNotification } from "./ui";
 import { sortStudents } from "./utils";

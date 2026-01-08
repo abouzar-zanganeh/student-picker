@@ -1,3 +1,11 @@
+/* ==========================================================================
+   ui.js introduction
+   --------------------------------------------------------------------------
+   This JS file handles all direct DOM manipulation, UI rendering, and 
+   specific user interface event interactions.
+   ========================================================================== */
+
+
 import * as state from './state.js';
 import { getBackupSnapshots, deleteBackupSnapshot } from './db.js';
 
@@ -8,14 +16,16 @@ import {
     permanentlyDeleteSession, permanentlyDeleteCategory,
     permanentlyDeleteScore, permanentlyDeleteNote, setDisplayedWinnerID, displayedWinnerID
 } from './state.js';
+
 import {
     detectTextDirection, renderMultiLineText,
     parseStudentName, sortStudents, setupDoubleAction,
-    hideKeyboard,
     setupAutoSelectOnFocus, flashElement, scrollToElement, attachUniversalContextMenu,
     getCurrentView,
     setupLongPress
 } from './utils.js';
+import { hideKeyboard } from './keyboard.js';
+
 import { setupKeyboardShortcutOnElement } from './keyboard.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';

@@ -1,3 +1,11 @@
+/* ==========================================================================
+   keyboard.js introduction
+   --------------------------------------------------------------------------
+   This JS file Centralizes configuration and handling of keyboard shortcuts 
+   and accessibility navigation across the application.
+   ========================================================================== */
+
+
 import { navigateUpHierarchy } from "./main";
 import * as state from "./state";
 import * as ui from "./ui";
@@ -119,4 +127,11 @@ export function setupKeyboardShortcutOnElement(element, key, callback) {
             callback(event);
         }
     });
+}// This function hides the on-screen keyboard by blurring the focused input element.
+
+export function hideKeyboard(element) {
+    if (element && typeof element.blur === 'function' && element?.tagName === 'INPUT') {
+        element.blur();
+    }
 }
+

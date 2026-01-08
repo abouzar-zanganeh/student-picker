@@ -1,3 +1,11 @@
+/* ==========================================================================
+   screensaver.js introduction
+   --------------------------------------------------------------------------
+   This JS file controls the idle screen saver functionality, including 
+   activation timers and UI overlay management.
+   ========================================================================== */
+
+
 import * as state from './state.js';
 
 let inactivityTimer = null;

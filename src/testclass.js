@@ -1,3 +1,11 @@
+/* ==========================================================================
+   testclass.js introduction
+   --------------------------------------------------------------------------
+   This JS file utility for generating random test classrooms and 
+   students to facilitate rapid testing and development.
+   ========================================================================== */
+
+
 import { Classroom, Student } from "./models";
 import * as state from "./state";
 import * as ui from "./ui";

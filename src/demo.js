@@ -1,3 +1,12 @@
+/* ==========================================================================
+   demo.js introduction
+   --------------------------------------------------------------------------
+   This JS file Configures the application for "Demo Mode" by disabling 
+   persistence and setting up safe mock interactions.
+   ========================================================================== */
+
+
+
 import * as state from "./state";
 import { classrooms, trashBin, setOriginalStateBackup, loadData, originalStateBackup } from "./state";
 import * as ui from "./ui.js";

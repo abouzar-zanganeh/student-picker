@@ -1,3 +1,11 @@
+/* ==========================================================================
+   db.js introduction
+   --------------------------------------------------------------------------
+   This JS file contains interfaces with IndexedDB for efficiently storing and retrieving 
+   large binary backup snapshots (The Garage).
+   ========================================================================== */
+
+
 const DB_NAME = 'TeacherAssistantDB';
 const DB_VERSION = 1;
 const STORE_NAME = 'backups';

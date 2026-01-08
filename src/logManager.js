@@ -1,3 +1,10 @@
+/* ==========================================================================
+   logManager.js introduction
+   --------------------------------------------------------------------------
+   This JS file manages logs created for the creation, storage, and retrieval 
+   of application activities mostly for classes and students.
+   ========================================================================== */
+
 const LOG_STORAGE_KEY = 'teacherAssistantLogs_v2';
 const MAX_LOG_ITEMS = 100;
 

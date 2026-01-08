@@ -1,3 +1,10 @@
+/* ==========================================================================
+   notifyingMessaging.js introduction
+   --------------------------------------------------------------------------
+   This JS file manages notification and user alerting logic
+   ========================================================================== */
+
+
 import * as state from "./state";
 import { undoMessage, undoToast } from "./ui";
 

@@ -1,3 +1,11 @@
+/* ==========================================================================
+   main.js introduction
+   --------------------------------------------------------------------------
+   This JS file is the application entry point; orchestrates initialization, global 
+   event listeners, and high-level module coordination.
+   ========================================================================== */
+
+
 import * as state from './state.js';
 import * as demo from './demo.js';
 import * as ui from './ui.js';
@@ -20,10 +28,11 @@ import {
 import { Classroom, Student, Category } from './models.js';
 import {
     normalizeText, normalizeKeyboard, parseStudentName, playSuccessSound,
-    hideKeyboard, setupAutoSelectOnFocus, flashElement, scrollToElement,
+    setupAutoSelectOnFocus, flashElement, scrollToElement,
     setupSwipeNavigation,
     getTotalScoresForCategory
 } from './utils.js';
+import { hideKeyboard } from './keyboard.js';
 import { setupKeyboardShortcutOnElement } from './keyboard.js';
 import { activateDeveloperAccessOnConsole } from './developer.js';
 import { keyDownShortcuts } from './keyboard.js';

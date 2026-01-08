@@ -1,3 +1,11 @@
+/* ==========================================================================
+   developer.js introduction
+   --------------------------------------------------------------------------
+   This JS file contains debugging tools and logic for the 
+   internal "Developer Mode" to expose state for inspection.
+   ========================================================================== */
+
+
 import * as state from './state.js';
 import * as ui from './ui.js';
 import * as utils from './utils.js';

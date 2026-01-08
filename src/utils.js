@@ -1,3 +1,11 @@
+/* ==========================================================================
+   utils.js introduction
+   --------------------------------------------------------------------------
+   This JS file provides general-purpose helper functions for text processing, 
+   formatting, sound effects, class-student data, and device interactions.
+   ========================================================================== */
+
+
 import * as state from './state.js';
 import { userSettings } from './state.js';
 import * as ui from './ui.js';
@@ -190,13 +198,6 @@ export function setupDoubleAction(element, callback) {
         }
         lastTap = currentTime;
     });
-}
-
-// This function hides the on-screen keyboard by blurring the focused input element.
-export function hideKeyboard(element) {
-    if (element && typeof element.blur === 'function' && element?.tagName === 'INPUT') {
-        element.blur();
-    }
 }
 
 // Sets up an input or textarea to auto-select all text on focus
