@@ -12,6 +12,8 @@ import CompressionWorker from './compression.worker.js?worker';
 
 // --- وضعیت کلی برنامه (Global State) ---
 
+// This variable @displayedWinnerID is a signal variable that shows if a winner is
+// already shown on the page to the user.
 export let displayedWinnerID = null;
 export function setDisplayedWinnerID(id) {
     displayedWinnerID = id;
