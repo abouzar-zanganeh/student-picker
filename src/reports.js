@@ -7,7 +7,8 @@
 
 
 import * as state from "./state";
-import { closeActiveModal, openModal, reportCancelBtn, reportColumnsContainer, reportPrintBtn, showNotification } from "./ui";
+import { closeActiveModal, openModal, reportCancelBtn, reportColumnsContainer, reportPrintBtn } from "./ui";
+import { showNotification } from './notifyingMessaging';
 import { sortStudents } from "./utils";
 
 

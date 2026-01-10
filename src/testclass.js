@@ -9,6 +9,7 @@
 import { Classroom, Student } from "./models";
 import * as state from "./state";
 import * as ui from "./ui";
+import * as notifyingMessaging from './notifyingMessaging';
 import { parseStudentName } from "./utils";
 
 
@@ -24,7 +25,7 @@ export function testClassHook(classListHeader) {
 
         if (state.easterEggClickCount === 5) {
             state.setEasterEggClickCount(0);
-            ui.showCustomConfirm(
+            notifyingMessaging.showCustomConfirm(
                 "آیا از ساخت یک کلاس تستی تصادفی مطمئن هستید؟",
                 () => {
                     function createRandomClass() {
@@ -42,7 +43,7 @@ export function testClassHook(classListHeader) {
                         ui.renderClassList();
                     }
                     createRandomClass();
-                    ui.showNotification("کلاس تستی با موفقیت ساخته شد ✅!");
+                    notifyingMessaging.showNotification("کلاس تستی با موفقیت ساخته شد ✅!");
                 },
                 { confirmText: 'بساز', confirmClass: 'btn-success' }
             );

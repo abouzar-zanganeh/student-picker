@@ -31,7 +31,7 @@ export let importedFileContent = null; // برای نگهداری محتوای �
 export let notificationTimeout = null;
 export let selectedCategory = null;
 
-export let assessmentPools = {}; // Tracks { categoryId: { toBeScored: [], scoredThisSession: [] } }
+export let assessmentPools = {}; // Tracks { categoryId: { assessmentCandidates: [], pickedCandidatesThisSession: [] } }
 
 export let easterEggClickCount = 0;
 export let easterEggLastClickTime = 0;
@@ -82,8 +82,6 @@ export let userSettings = {
     lastBackupTimestamp: null,
 };
 
-export let assessmentSessionExclusions = new Set(); // Stores IDs of students picked in Assessment Mode
-
 export let isAssessmentModeActive = false;
 export function setIsAssessmentModeActive(value) {
     isAssessmentModeActive = value;
@@ -94,8 +92,6 @@ export function setIsModalTransitioning(value) {
     isModalTransitioning = value;
 }
 //-----------------------
-
-
 
 // --- توابع اصلی داده‌ها (Data Functions) ---
 
@@ -175,7 +171,6 @@ export function loadData() {
         plainData = JSON.parse(savedData);
     }
 
-    // The rest of your loading logic remains exactly the same...
     if (plainData.classrooms !== undefined && plainData.trashBin !== undefined) {
         rehydrateData(plainData.classrooms);
         trashBin = plainData.trashBin || [];
@@ -248,8 +243,10 @@ function _rehydrateStudent(plainStudent) {
     return studentInstance;
 }
 
-// تابع کلیدی برای تبدیل داده‌های ساده به نمونه‌های کلاس
+
 export function rehydrateData(plainClassrooms) {
+    //Function Description: Main function to rehydrate data from plain data
+
     classrooms = {};
     for (const className in plainClassrooms) {
         const plainClass = plainClassrooms[className];
@@ -524,10 +521,6 @@ export function moveStudent(studentToMove, sourceClassroom, destinationClassroom
     return { success: true };
 }
 
-
-
-
-
 export function resetAllStudentCounters() {
     for (const className in classrooms) {
         const classroom = classrooms[className];
@@ -551,8 +544,11 @@ export function resetAllStudentCounters() {
     saveData();
 }
 
-// This function filters those students who are not deleted and return an array of them.
+
 export function getActiveItems(items) {
+    // This function filters those items (students, sessions, categories, etc) who are not deleted and return an array of them.
+    // ----------------
+
     // A safeguard to ensure we're always working with an array.
     if (!Array.isArray(items)) {
         return [];
@@ -812,18 +808,14 @@ export function setLastBackupTimestamp() {
 
 export function setDatePickerCallback(callback) { datePickerCallback = callback; }
 
-export function resetAssessmentExclusions() {
-    assessmentSessionExclusions.clear();
-}
-
 export function setAssessmentPools(pools) { assessmentPools = pools; }
 export function resetAssessmentPools() { assessmentPools = {}; }
 
-export function markStudentAsScoredInSession(categoryId, studentId) {
+export function markStudentAsPickedForAssessmentInSession(categoryId, studentId) {
     if (!assessmentPools[categoryId]) {
-        assessmentPools[categoryId] = { toBeScored: [], scoredThisSession: [] };
+        assessmentPools[categoryId] = { assessmentCandidates: [], pickedCandidatesThisSession: [] };
     }
-    if (!assessmentPools[categoryId].scoredThisSession.includes(studentId)) {
-        assessmentPools[categoryId].scoredThisSession.push(studentId);
+    if (!assessmentPools[categoryId].pickedCandidatesThisSession.includes(studentId)) {
+        assessmentPools[categoryId].pickedCandidatesThisSession.push(studentId);
     }
 }

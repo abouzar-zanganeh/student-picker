@@ -9,8 +9,9 @@
 import * as state from './state.js';
 import * as demo from './demo.js';
 import * as ui from './ui.js';
-import * as logManager from './logManager.js';
+import * as notifyingMessaging from './notifyingMessaging.js';
 import * as utils from './utils.js';
+import * as logManager from './logManager.js';
 import * as db from './db.js';
 
 import {
@@ -216,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    ui.updateDemoModeBanner();
+    demo.updateDemoModeBanner();
 
     // Try to restore the state from the URL
     const wasRestored = restoreStateFromURL();
@@ -301,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!categoryName) {
             flashElement(newCategoryModalNameInput, 3000);
-            ui.showNotification('⚠️ نام دسته‌بندی نمی‌تواند خالی باشد.');
+            notifyingMessaging.showNotification('⚠️ نام دسته‌بندی نمی‌تواند خالی باشد.');
             return;
         }
 
@@ -311,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         ui.closeActiveModal();
-        ui.showNotification(`✅ دسته‌بندی جدید ${categoryName} با موفقیت اضافه شد.`);
+        notifyingMessaging.showNotification(`✅ دسته‌بندی جدید ${categoryName} با موفقیت اضافه شد.`);
         ui.renderSettingsCategories(); // Refresh list
         ui.renderStudentStatsList();
     });
@@ -364,15 +365,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         state.setResetEasterEggLastClickTime(now);
 
-        if (state.resetEasterEggClickCount === 5) {
+        if (state.resetEasterEggClickCount === 10) {
             state.setResetEasterEggClickCount(0);
-            ui.showCustomConfirm(
+            notifyingMessaging.showCustomConfirm(
                 "آیا از صفر کردن تمام شمارنده‌های دانش‌آموزان مطمئن هستید؟ این عمل غیرقابل بازگشت است.",
                 () => {
 
                     resetAllStudentCounters();
                     ui.renderStudentStatsList();
-                    ui.showNotification("تمام آمارها صفر شدند ✅.");
+                    notifyingMessaging.showNotification("تمام آمارها صفر شدند ✅.");
                 },
                 { confirmText: 'بله', confirmClass: 'btn-warning' }
             );
@@ -410,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.datePickerCallback({ jy, jm, jd });
             ui.closeActiveModal();
         } else {
-            ui.showNotification("⚠️ خطا در انتخاب تاریخ.");
+            notifyingMessaging.showNotification("⚠️ خطا در انتخاب تاریخ.");
         }
         state.setDatePickerCallback(null);
     });
@@ -452,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 1. Guard check: Prevent selection if there's unsaved data (Applies to both modes)
         if (ui.quickScoreInput.value.trim() !== '' || ui.quickNoteTextarea.value.trim() !== '') {
-            ui.showNotification("⚠️لطفاً ابتدا با دکمه «ثبت»، تغییرات را ذخیره کنید و یا نمره و یادداشت را پاک کنید.", 4200);
+            notifyingMessaging.showNotification("⚠️لطفاً ابتدا با دکمه «ثبت»، تغییرات را ذخیره کنید و یا نمره و یادداشت را پاک کنید.", 4200);
 
             flashElement(ui.quickScoreInput);
             flashElement(ui.quickNoteTextarea);
@@ -473,12 +474,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 state.saveData();
             } else {
                 // THE DETECTION: This runs when pickAssessmentWinner returns null
-                ui.showCustomConfirm(
+                notifyingMessaging.showCustomConfirm(
                     "برای تمام دانش‌آموزان در این جلسه یک بار فرصت نمره‌گیری فراهم شده؛ آیا می‌خواهید برای بار دوم این کار را تکرار کنید؟",
                     () => {
                         const categoryId = state.selectedCategory.id;
                         // Reset the round for this category
-                        state.assessmentPools[categoryId].scoredThisSession = [];
+                        state.assessmentPools[categoryId].pickedCandidatesThisSession = [];
 
                         // Automatically trigger the first selection of the new round
                         ui.selectStudentBtn.click();
@@ -523,7 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 0);
                 state.saveData();
             } else {
-                ui.showNotification("❌دانش‌آموز واجد شرایطی برای انتخاب یافت نشد.");
+                notifyingMessaging.showNotification("❌دانش‌آموز واجد شرایطی برای انتخاب یافت نشد.");
             }
         }
     });
@@ -547,7 +548,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const newTypeText = typeText(newType);
 
             // Show confirmation modal
-            ui.showCustomConfirm(
+            notifyingMessaging.showCustomConfirm(
                 `آیا از تغییر نوع کلاس از «${oldTypeText}» به «${newTypeText}» مطمئن هستید؟`,
                 () => {
                     // --- ON CONFIRM ---
@@ -557,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     logManager.addLog(state.currentClassroom.info.name, `نوع کلاس به «${newTypeText}» تغییر یافت.`, { type: 'VIEW_CLASS_SETTINGS' });
                     ui.renderClassList();
-                    ui.showNotification(`✅ نوع کلاس به «${newTypeText}» تغییر یافت.`);
+                    notifyingMessaging.showNotification(`✅ نوع کلاس به «${newTypeText}» تغییر یافت.`);
                 },
                 {
                     confirmText: 'بله',
@@ -609,7 +610,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     confirmColumnBtn.addEventListener('click', () => {
         if (!state.importedFileContent) {
-            ui.showNotification("❌خطایی رخ داده است. لطفاً فایل را دوباره انتخاب کنید.");
+            notifyingMessaging.showNotification("❌خطایی رخ داده است. لطفاً فایل را دوباره انتخاب کنید.");
             ui.showPage('settings-page');
             return;
         }
@@ -626,7 +627,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.renderImportPreview();
             ui.showPage('csv-preview-page');
         } else {
-            ui.showNotification("هیچ نامی در ستون انتخاب شده پیدا نشد. لطفاً ستون دیگری را امتحان کنید یا فایل خود را بررسی کنید.");
+            notifyingMessaging.showNotification("هیچ نامی در ستون انتخاب شده پیدا نشد. لطفاً ستون دیگری را امتحان کنید یا فایل خود را بررسی کنید.");
         }
         state.setImportedFileContent(null);
     });
@@ -724,7 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? `✅ ${addedCount} دانش‌آموز با موفقیت اضافه شدند.\n${duplicateInfo}`
                 : duplicateInfo;
 
-            ui.showCustomConfirm(finalMsg, () => { }, {
+            notifyingMessaging.showCustomConfirm(finalMsg, () => { }, {
                 confirmText: 'متوجه شدم',
                 confirmClass: 'btn-success',
                 onCancel: null
@@ -750,7 +751,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const dotIndex = currentLine.indexOf('.');
             if (currentLine && (dotIndex <= 0 || dotIndex >= currentLine.length - 1)) {
                 e.preventDefault(); // Prevents the new line from being created
-                ui.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید.⚠️ مثال: علی . احمدی", 5000);
+                notifyingMessaging.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید.⚠️ مثال: علی . احمدی", 5000);
             }
         }
     });
@@ -759,7 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = pasteArea.value.trim();
         if (!text) {
             flashElement(pasteArea, 3000);
-            ui.showNotification("کادر متنی خالی است. لطفاً اسامی را وارد کنید.");
+            notifyingMessaging.showNotification("کادر متنی خالی است. لطفاً اسامی را وارد کنید.");
             return;
         }
         const names = text.split('\n').map(name => name.trim()).filter(name => name.length > 0);
@@ -771,7 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (invalidName) {
-            ui.showNotification(`فرمت نام «${invalidName}» صحیح نیست. لطفا نام و نام خانوادگی را با نقطه جدا کنید⚠️.`, 5000);
+            notifyingMessaging.showNotification(`فرمت نام «${invalidName}» صحیح نیست. لطفا نام و نام خانوادگی را با نقطه جدا کنید⚠️.`, 5000);
             return;
         }
 
@@ -780,7 +781,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.renderImportPreview();
             ui.showPage('csv-preview-page');
         } else {
-            ui.showNotification("هیچ نام معتبری برای ورود پیدا نشد.");
+            notifyingMessaging.showNotification("هیچ نام معتبری برای ورود پیدا نشد.");
         }
     });
 
@@ -795,12 +796,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const studentName = newStudentNameInput.value.trim();
         if (!studentName) {
             flashElement(newStudentNameInput, 3000);
-            ui.showNotification("لطفاً نام دانش‌آموز را وارد کنید.");
+            notifyingMessaging.showNotification("لطفاً نام دانش‌آموز را وارد کنید.");
             return;
         }
         const dotIndex = studentName.indexOf('.');
         if (dotIndex <= 0 || dotIndex >= studentName.length - 1) {
-            ui.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید.⚠️ مثال: علی . احمدی", 5000);
+            notifyingMessaging.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید.⚠️ مثال: علی . احمدی", 5000);
             return;
         }
 
@@ -812,7 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         if (isDuplicate) {
-            ui.showNotification(`دانش‌آموز «${parsed.name}» قبلاً در لیست وجود دارد.`, 4000);
+            notifyingMessaging.showNotification(`دانش‌آموز «${parsed.name}» قبلاً در لیست وجود دارد.`, 4000);
             return;
         }
 
@@ -852,7 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.currentClassroom) {
             const unfinishedSession = state.currentClassroom.sessions.find(session => !session.isFinished && !session.isCancelled && !session.isDeleted);
             if (unfinishedSession) {
-                ui.showNotification(`⚠️ جلسه ${unfinishedSession.sessionNumber} هنوز تمام نشده است. لطفاً ابتدا با دکمه «پایان جلسه» آن را خاتمه دهید.`, 4500);
+                notifyingMessaging.showNotification(`⚠️ جلسه ${unfinishedSession.sessionNumber} هنوز تمام نشده است. لطفاً ابتدا با دکمه «پایان جلسه» آن را خاتمه دهید.`, 4500);
                 const endSessionBtn = document.querySelector('#session-list > li:nth-child(1) > div.list-item-buttons > button.btn-success');
                 if (endSessionBtn) {
                     flashElement(endSessionBtn);
@@ -882,7 +883,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // 3. Navigate to the tabbed dashboard
                     ui.renderSessionDashboard(takeAttendance ? 'attendance' : 'selector');
                 };
-                ui.showCustomConfirm(
+                notifyingMessaging.showCustomConfirm(
                     "آیا تمایل به انجام فرآیند حضور و غیاب دارید؟",
                     () => startSession(true),
                     {
@@ -896,7 +897,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             //checks if a session exists for today.
             if (state.currentClassroom.hasSessionToday()) {
-                ui.showCustomConfirm(
+                notifyingMessaging.showCustomConfirm(
                     "شما امروز یک جلسه برای این کلاس ثبت کرده‌اید. آیا از شروع یک جلسه جدید دیگر مطمئن هستید؟",
                     askAboutAttendanceAndStart, // On confirm, it proceeds to ask about attendance.
                     { confirmText: 'بله', confirmClass: 'btn-warning' }
@@ -943,12 +944,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Basic Validation
             if (!name) {
                 flashElement(nameInput, 3000);
-                ui.showNotification('لطفاً نام کلاس را وارد کنید.');
+                notifyingMessaging.showNotification('لطفاً نام کلاس را وارد کنید.');
                 return;
             }
             if (state.classrooms[name]) {
                 flashElement(nameInput, 3000);
-                ui.showNotification('کلاسی با این نام قبلاً ایجاد شده است.');
+                notifyingMessaging.showNotification('کلاسی با این نام قبلاً ایجاد شده است.');
                 return;
             }
 
@@ -956,11 +957,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // --- Read & validate class name ---
                 const newClassName = ui.modalNewClassNameInput.value.trim();
                 if (!newClassName) {
-                    ui.showNotification('⚠️ لطفاً نام کلاس را وارد کنید.');
+                    notifyingMessaging.showNotification('⚠️ لطفاً نام کلاس را وارد کنید.');
                     return;
                 }
                 if (state.classrooms[newClassName]) {
-                    ui.showNotification('⚠️ کلاسی با این نام وجود دارد.');
+                    notifyingMessaging.showNotification('⚠️ کلاسی با این نام وجود دارد.');
                     return;
                 }
 
@@ -1004,11 +1005,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // --- Update UI (ONCE) ---
                 ui.renderClassList();
                 ui.closeAddClassModal();
-                ui.showNotification(`✅ کلاس «${newClassName}» ایجاد شد.`);
+                notifyingMessaging.showNotification(`✅ کلاس «${newClassName}» ایجاد شد.`);
 
             } catch (error) {
                 console.error('CRASH ERROR:', error);
-                ui.showNotification('خطایی رخ داد: ' + error.message);
+                notifyingMessaging.showNotification('خطایی رخ داد: ' + error.message);
             }
         });
     } else {
@@ -1119,23 +1120,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!student) {
-            ui.showNotification("❌خطا: دانش‌آموز معتبری برای ثبت نمره یافت نشد.");
+            notifyingMessaging.showNotification("❌خطا: دانش‌آموز معتبری برای ثبت نمره یافت نشد.");
             return;
         }
         const category = state.selectedCategory;
 
         if (!student || !category) {
-            ui.showNotification("⚠️لطفاً ابتدا یک دانش‌آموز و یک دسته‌بندی را انتخاب کنید.");
+            notifyingMessaging.showNotification("⚠️لطفاً ابتدا یک دانش‌آموز و یک دسته‌بندی را انتخاب کنید.");
             return;
         }
 
         if (!scoreValue) {
-            ui.showNotification("⚠️لطفاً مقدار نمره را وارد کنید.");
+            notifyingMessaging.showNotification("⚠️لطفاً مقدار نمره را وارد کنید.");
             return;
         }
 
         if (scoreValue > 100 || scoreValue < 0) {
-            ui.showNotification("❌نمره نباید از ۱۰۰ بیشتر و از صفر کمتر باشد");
+            notifyingMessaging.showNotification("❌نمره نباید از ۱۰۰ بیشتر و از صفر کمتر باشد");
             return;
         }
 
@@ -1149,8 +1150,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             state.saveData();
             ui.renderStudentStatsList(); // Refreshes the stats table to show the new score.
-            ui.showNotification(`✅نمره برای ${student.identity.name} در مهارت ${category.name} ثبت شد.`);
-            state.markStudentAsScoredInSession(state.selectedCategory.id, student.identity.studentId);
+            notifyingMessaging.showNotification(`✅نمره برای ${student.identity.name} در مهارت ${category.name} ثبت شد.`);
+            state.markStudentAsPickedForAssessmentInSession(state.selectedCategory.id, student.identity.studentId);
             // Clear inputs for the next entry
             ui.quickScoreInput.value = '';
             ui.quickNoteTextarea.value = '';
@@ -1215,7 +1216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { studentToMove, sourceClassForMove } = state;
 
         if (!studentToMove || !sourceClassForMove || !destinationClassroom) {
-            ui.showNotification('خطایی رخ داد. لطفاً دوباره امتحان کنید⚠️.', 'error');
+            notifyingMessaging.showNotification('خطایی رخ داد. لطفاً دوباره امتحان کنید⚠️.', 'error');
             ui.closeActiveModal();
             return;
         }
@@ -1231,9 +1232,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.renderSettingsStudentList();
             ui.renderStudentStatsList();
             ui.renderAttendancePage();
-            ui.showNotification(`دانش‌آموز «${studentToMove.identity.name}» با موفقیت به کلاس «${destinationClassName}» منتقل شد✅.`);
+            notifyingMessaging.showNotification(`دانش‌آموز «${studentToMove.identity.name}» با موفقیت به کلاس «${destinationClassName}» منتقل شد✅.`);
         } else {
-            ui.showNotification(result.message, 'error');
+            notifyingMessaging.showNotification(result.message, 'error');
         }
 
         ui.closeActiveModal();
@@ -1329,7 +1330,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     textareasToMonitor.forEach(textarea => {
         if (textarea) { // A small check to ensure the element exists
-            ui.setAutoDirectionOnInput(textarea);
+            utils.setAutoDirectionOnInput(textarea);
         }
     });
 
@@ -1424,7 +1425,7 @@ document.addEventListener('DOMContentLoaded', () => {
             message += `\n${extraMessage}`;
         }
 
-        ui.showCustomConfirm(
+        notifyingMessaging.showCustomConfirm(
             message,
             () => { },
             {
@@ -1451,7 +1452,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const classroom = state.classrooms[action.classroomName];
         if (!classroom) {
-            ui.showNotification('⚠️ کلاس مربوط به این گزارش یافت نشد.');
+            notifyingMessaging.showNotification('⚠️ کلاس مربوط به این گزارش یافت نشد.');
             return;
         }
 
@@ -1467,7 +1468,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (student) {
                         ui.showStudentProfile(student);
                     } else {
-                        ui.showNotification('⚠️ دانش‌آموز مورد نظر یافت نشد.');
+                        notifyingMessaging.showNotification('⚠️ دانش‌آموز مورد نظر یافت نشد.');
                     }
                     break;
                 }
@@ -1508,7 +1509,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!commentText) {
             // Confirmation for clearing existing comments
             if (ui.massCommentAppendCheckbox.style.display === 'flex') {
-                ui.showCustomConfirm(
+                notifyingMessaging.showCustomConfirm(
                     'کادر یادداشت خالی است. آیا مطمئنید که می‌خواهید یادداشت‌های قبلی دانش‌آموزان انتخاب‌شده را پاک کنید؟',
                     () => {
                         ui.closeActiveModal();
@@ -1517,7 +1518,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     { confirmText: 'پاک کردن', confirmClass: 'btn-warning' }
                 );
             } else {
-                ui.showNotification('⚠️ لطفاً متن یادداشت را وارد کنید.');
+                notifyingMessaging.showNotification('⚠️ لطفاً متن یادداشت را وارد کنید.');
             }
             return;
         }
@@ -1612,7 +1613,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.setSaveCategoryCallback((name, isGraded, weight) => {
             if (!name) return;
             if (state.currentClassroom.categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
-                ui.showNotification('⚠️ این دسته‌بندی قبلاً اضافه شده است.');
+                notifyingMessaging.showNotification('⚠️ این دسته‌بندی قبلاً اضافه شده است.');
                 return;
             }
             state.currentClassroom.categories.push(new Category(name, '', isGraded, weight));
@@ -1646,20 +1647,20 @@ export function handleUndoLastSelection(student, categoryName) {
 
     // 1. Check if we are in a valid state
     if (!state.selectedSession || state.selectedSession.isFinished) {
-        ui.showNotification("⚠️ امکان لغو انتخاب در جلسه خاتمه یافته وجود ندارد.");
+        notifyingMessaging.showNotification("⚠️ امکان لغو انتخاب در جلسه خاتمه یافته وجود ندارد.");
         return;
     }
 
     // --- Assessment Mode Undo Logic ---
     if (isAssessmentModeActive) {
-        ui.showCustomConfirm(`آیا از لغو وضعیت نمره‌دهی «${student.identity.name}» مطمئن هستید؟ این دانش‌آموز به لیست انتظار بازمی‌گردد.`, () => {
+        notifyingMessaging.showCustomConfirm(`آیا از لغو وضعیت نمره‌دهی «${student.identity.name}» مطمئن هستید؟ این دانش‌آموز به لیست انتظار بازمی‌گردد.`, () => {
             const categoryId = state.selectedCategory.id;
             const poolData = state.assessmentPools[categoryId];
 
             if (poolData) {
                 // Simply remove them from this list; refreshAssessmentPool will naturally 
                 // include them again on the next click because their score didn't increase.
-                poolData.scoredThisSession = poolData.scoredThisSession.filter(id => id !== student.identity.studentId);
+                poolData.pickedCandidatesThisSession = poolData.pickedCandidatesThisSession.filter(id => id !== student.identity.studentId);
             }
 
             // 3. Reset UI state
@@ -1668,7 +1669,7 @@ export function handleUndoLastSelection(student, categoryName) {
             ui.displayWinner(); // Clears the display because there is no history entry to show.
 
             state.saveData();
-            ui.showNotification(`✅ «${student.identity.name}» به لیست انتظار نمره بازگشت.`);
+            notifyingMessaging.showNotification(`✅ «${student.identity.name}» به لیست انتظار نمره بازگشت.`);
         });
         return; // Stop here so we don't run the standard history undo logic.
     }
@@ -1679,7 +1680,7 @@ export function handleUndoLastSelection(student, categoryName) {
     const isLastWinner = state.winnerHistoryIndex === history.length - 1;
 
     if (!isLastWinner || history.length === 0) {
-        ui.showNotification("⚠️ فقط آخرین انتخاب قابل لغو است.");
+        notifyingMessaging.showNotification("⚠️ فقط آخرین انتخاب قابل لغو است.");
         return;
     }
 
@@ -1690,7 +1691,7 @@ export function handleUndoLastSelection(student, categoryName) {
     }
 
     // --- Confirmation ---
-    ui.showCustomConfirm(
+    notifyingMessaging.showCustomConfirm(
         `آیا از حذف انتخاب «${student.identity.name}» برای «${categoryName}» مطمئن هستید؟ آمار این انتخاب بازگردانی خواهد شد.`,
         () => {
             const history = state.selectedSession.winnerHistory;
@@ -1756,28 +1757,28 @@ export function handleUndoLastSelection(student, categoryName) {
 
             // 7. Save and notify
             state.saveData();
-            ui.showNotification(`✅ انتخاب «${student.identity.name}» لغو شد.`);
+            notifyingMessaging.showNotification(`✅ انتخاب «${student.identity.name}» لغو شد.`);
         },
         { confirmText: 'بله', confirmClass: 'btn-warning' }
     );
 }
 
-// Generates or refreshes the toBeScored pool based on minimum score counts
+// Generates or refreshes the assessmentCandidates pool based on minimum score counts
 function refreshAssessmentPool(classroom, category) {
     const categoryId = category.id;
     // 1. Initialize state object if missing
     if (!state.assessmentPools[categoryId]) {
-        state.assessmentPools[categoryId] = { toBeScored: [], scoredThisSession: [] };
+        state.assessmentPools[categoryId] = { assessmentCandidates: [], pickedCandidatesThisSession: [] };
     }
 
     const poolData = state.assessmentPools[categoryId];
     const activeStudents = state.getActiveItems(classroom.students);
 
     // 2. Filter students not yet scored this session
-    const eligibleStudents = activeStudents.filter(s => !poolData.scoredThisSession.includes(s.identity.studentId));
+    const eligibleStudents = activeStudents.filter(s => !poolData.pickedCandidatesThisSession.includes(s.identity.studentId));
 
     if (eligibleStudents.length === 0) {
-        poolData.toBeScored = [];
+        poolData.assessmentCandidates = [];
         return [];
     }
 
@@ -1786,11 +1787,11 @@ function refreshAssessmentPool(classroom, category) {
     const minScores = Math.min(...scoreCounts);
 
     // 4. Update the state property so you can see it in the console
-    poolData.toBeScored = eligibleStudents
+    poolData.assessmentCandidates = eligibleStudents
         .filter(s => getTotalScoresForCategory(s, category.name) === minScores)
         .map(s => s.identity.studentId);
 
-    return poolData.toBeScored;
+    return poolData.assessmentCandidates;
 }
 
 export function pickAssessmentWinner(classroom, category) {
@@ -1805,19 +1806,19 @@ export function pickAssessmentWinner(classroom, category) {
     const winnerId = pool[randomIndex];
 
     // 3. Mark as scored for this session
-    state.markStudentAsScoredInSession(category.id, winnerId);
+    state.markStudentAsPickedForAssessmentInSession(category.id, winnerId);
 
     return classroom.students.find(s => s.identity.studentId === winnerId);
 }
 
 export function toggleSelectionModes() {
     if (!state.selectedCategory) {
-        ui.showNotification("⚠️ ابتدا یک دسته‌بندی انتخاب کنید.");
+        notifyingMessaging.showNotification("⚠️ ابتدا یک دسته‌بندی انتخاب کنید.");
         return;
     }
 
     if (!state.selectedCategory.isGradedCategory) {
-        ui.showNotification("⚠️ این دسته‌بندی نمره‌دار نیست.");
+        notifyingMessaging.showNotification("⚠️ این دسته‌بندی نمره‌دار نیست.");
         return;
     }
 
@@ -1833,10 +1834,10 @@ export function toggleSelectionModes() {
 
     if (!ui.fromAssessmentToNormalSelection) {
         ui.clearWinnerDisplay();
-        ui.showNotification(msg);
+        notifyingMessaging.showNotification(msg);
     } else {
         ui.clearWinnerDisplay();
-        ui.showNotification("حالت انتخاب برای نمره‌دهی غیرفعال شد. دسته‌بندی انتخاب شده قابل نمره دهی نیست.⚠️", 4500);
+        notifyingMessaging.showNotification("حالت انتخاب برای نمره‌دهی غیرفعال شد. دسته‌بندی انتخاب شده قابل نمره دهی نیست.⚠️", 4500);
         ui.setFromAssessmentToNormalSelection(false);
 
     }

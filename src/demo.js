@@ -10,6 +10,7 @@
 import * as state from "./state";
 import { classrooms, trashBin, setOriginalStateBackup, loadData, originalStateBackup } from "./state";
 import * as ui from "./ui.js";
+import * as notifyingMessaging from './notifyingMessaging.js';
 import { closeSideNav } from "./main.js";
 
 
@@ -29,7 +30,7 @@ export function exitDemoMode() {
     setOriginalStateBackup(null);
 }
 export function handleExitDemoMode() {
-    ui.showCustomConfirm(
+    notifyingMessaging.showCustomConfirm(
         "آیا از خروج از حالت نمایش (Demo) مطمئن هستید؟ با خروج، تمام تغییرات آزمایشی شما حذف شده و داده‌های اصلی شما بازیابی خواهند شد.",
         () => {
             exitDemoMode();
@@ -54,7 +55,7 @@ export function prepareDemoModeButtons() {
             handleExitDemoMode();
         } else {
             closeSideNav();
-            ui.showCustomConfirm(
+            notifyingMessaging.showCustomConfirm(
                 "شما در حال ورود به حالت نمایش (Demo) هستید. در این حالت، هیچ‌کدام از تغییرات شما ذخیره نخواهد شد. آیا ادامه می‌دهید؟",
                 () => {
                     enterDemoMode();
@@ -73,6 +74,19 @@ export function prepareDemoModeButtons() {
                 handleExitDemoMode();
             }
         });
+    }
+}
+//for demo mode appearance of banner
+export function updateDemoModeBanner() {
+    const banner = document.getElementById('demo-mode-banner');
+    if (!banner) return;
+
+    if (state.isDemoMode) {
+        banner.classList.add('visible');
+        document.body.classList.add('demo-mode-active');
+    } else {
+        banner.classList.remove('visible');
+        document.body.classList.remove('demo-mode-active');
     }
 }
 

@@ -25,36 +25,6 @@ export function normalizeText(str) {
         .replace(/[\s\u200c]/g, ''); // Removes all whitespace (\s) and the zero-width non-joiner (\u200c)
 }
 
-export function detectTextDirection(str) {
-    if (typeof str !== 'string' || str.length === 0) {
-        return 'ltr'; // Default to LTR for empty or invalid input
-    }
-
-    const rtlRegex = /[\u0590-\u07FF]/;
-    return rtlRegex.test(str) ? 'rtl' : 'ltr';
-}
-
-export function renderMultiLineText(textContent) {
-    // If the input is empty or just whitespace, return an empty string.
-    if (!textContent || !textContent.trim()) {
-        return '';
-    }
-
-    // 1. Split the text into an array of individual lines.
-    const lines = textContent.split('\n');
-
-    // 2. Map each line to a <div> with the correct direction.
-    const htmlLines = lines.map(line => {
-        const direction = detectTextDirection(line);
-        // Using '&nbsp;' ensures that empty lines still take up space.
-        const content = line || '&nbsp;';
-        return `<div dir="${direction}">${content}</div>`;
-    });
-
-    // 3. Join the array of HTML strings into a single block.
-    return htmlLines.join('');
-}
-
 export function normalizeKeyboard(str) {
     if (typeof str !== 'string') {
         return '';
@@ -504,4 +474,40 @@ export function setupLongPress(element, callback, duration = 800) {
     element.addEventListener('mouseup', cancel);
     element.addEventListener('mouseleave', cancel);
 }
+export function setAutoDirectionOnInput(inputElement) {
+    inputElement.addEventListener('input', () => {
+        const text = inputElement.value;
+        const direction = detectTextDirection(text);
+        inputElement.setAttribute('dir', direction);
+    });
+}
 
+export function detectTextDirection(str) {
+    if (typeof str !== 'string' || str.length === 0) {
+        return 'ltr'; // Default to LTR for empty or invalid input
+    }
+
+    const rtlRegex = /[\u0590-\u07FF]/;
+    return rtlRegex.test(str) ? 'rtl' : 'ltr';
+}
+
+export function renderMultiLineText(textContent) {
+    // If the input is empty or just whitespace, return an empty string.
+    if (!textContent || !textContent.trim()) {
+        return '';
+    }
+
+    // 1. Split the text into an array of individual lines.
+    const lines = textContent.split('\n');
+
+    // 2. Map each line to a <div> with the correct direction.
+    const htmlLines = lines.map(line => {
+        const direction = detectTextDirection(line);
+        // Using '&nbsp;' ensures that empty lines still take up space.
+        const content = line || '&nbsp;';
+        return `<div dir="${direction}">${content}</div>`;
+    });
+
+    // 3. Join the array of HTML strings into a single block.
+    return htmlLines.join('');
+}

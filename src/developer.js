@@ -8,6 +8,7 @@
 
 import * as state from './state.js';
 import * as ui from './ui.js';
+import * as notifyingMessaging from './notifyingMessaging.js';
 import * as utils from './utils.js';
 import * as db from './db.js';
 import * as main from './main.js';
@@ -54,7 +55,7 @@ export function activateDeveloperAccessOnConsole() {
         if (devModeClicks === 10) {
             state.setUserSettings({ isDeveloperMode: true });
             bootstrapDeveloperMode();
-            ui.showNotification("🛠️ حالت توسعه‌دهنده فعال شد.");
+            notifyingMessaging.showNotification("🛠️ حالت توسعه‌دهنده فعال شد.");
             devModeClicks = 0;
         }
     });
@@ -63,7 +64,7 @@ export function activateDeveloperAccessOnConsole() {
     utils.setupLongPress(header, () => {
         if (!state.userSettings.isDeveloperMode) return;
 
-        ui.showCustomConfirm("آیا از خروج از حالت توسعه‌دهنده مطمئن هستید؟", () => {
+        notifyingMessaging.showCustomConfirm("آیا از خروج از حالت توسعه‌دهنده مطمئن هستید؟", () => {
             state.setUserSettings({ isDeveloperMode: false });
             state.saveData(true);
             // Refresh to cleanly wipe global objects and reset styles

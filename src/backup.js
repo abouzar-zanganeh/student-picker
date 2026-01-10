@@ -10,9 +10,12 @@ import JSZip from "jszip";
 import { classrooms, rehydrateData, saveData, setTrashBin, setUserSettings, trashBin, userSettings } from "./state";
 import { addBackupSnapshot } from "./db";
 import * as state from "./state";
-import { showNotification, showCustomConfirm, renderClassManagementStats, triggerFileDownload } from "./ui";
+import { renderClassManagementStats } from "./ui";
+import { showCustomConfirm } from './notifyingMessaging';
+import { showNotification } from './notifyingMessaging';
 import { closeSideNav } from "./main";
 import * as ui from "./ui";
+import * as notifyingMessaging from './notifyingMessaging';
 
 export async function prepareBackupData(classNames = []) {
     const dataToBackup = {};
@@ -275,7 +278,7 @@ export function prepareBackupBtn(backupDataBtn) {
     backupDataBtn.addEventListener('click', () => {
 
         if (state.isDemoMode) {
-            ui.showNotification("⚠️ پشتیبان‌گیری در حالت نمایش (Demo) غیرفعال است.");
+            notifyingMessaging.showNotification("⚠️ پشتیبان‌گیری در حالت نمایش (Demo) غیرفعال است.");
             closeSideNav();
             return;
         }
@@ -288,7 +291,7 @@ export function prepareRestoreBtn(restoreDataBtn, restoreFileInput) {
     restoreDataBtn.addEventListener('click', () => {
 
         if (state.isDemoMode) {
-            ui.showNotification("⚠️ بازیابی اطلاعات در حالت نمایش (Demo) غیرفعال است.");
+            notifyingMessaging.showNotification("⚠️ بازیابی اطلاعات در حالت نمایش (Demo) غیرفعال است.");
             closeSideNav();
             return;
         }
@@ -321,7 +324,7 @@ export function restoreButtonMainFunction(restoreFileInput) {
                     const classroomsDataToRestore = plainData.classrooms || plainData;
                     const trashDataToRestore = plainData.trashBin || [];
 
-                    ui.showCustomConfirm(
+                    notifyingMessaging.showCustomConfirm(
                         "آیا از بازیابی اطلاعات مطمئن هستید؟ تمام داده‌های فعلی شما بازنویسی خواهد شد.",
                         () => {
                             state.rehydrateData(classroomsDataToRestore);
@@ -330,7 +333,7 @@ export function restoreButtonMainFunction(restoreFileInput) {
                             state.saveData();
                             ui.renderClassList();
                             ui.showPage('class-management-page');
-                            ui.showNotification("✅اطلاعات با موفقیت بازیابی شد.");
+                            notifyingMessaging.showNotification("✅اطلاعات با موفقیت بازیابی شد.");
                         },
                         { confirmText: 'بازیابی کن', confirmClass: 'btn-warning' }
                     );
@@ -368,7 +371,7 @@ export function restoreButtonMainFunction(restoreFileInput) {
 
                 } catch (zipError) {
                     // This catches errors from zipping or Base64 decoding
-                    ui.showNotification("❌خطا در خواندن فایل. لطفاً فایل پشتیبان معتبر انتخاب کنید.");
+                    notifyingMessaging.showNotification("❌خطا در خواندن فایل. لطفاً فایل پشتیبان معتبر انتخاب کنید.");
                     console.error("Restore error (zip/base64):", zipError);
                 }
             }
@@ -378,5 +381,33 @@ export function restoreButtonMainFunction(restoreFileInput) {
         reader.readAsText(file);
         event.target.value = null;
     });
+}
+export function triggerFileDownload(fileObject) {
+    // This creates a temporary URL for the file object.
+    const url = URL.createObjectURL(fileObject);
+
+    // This creates a hidden link, sets its properties, and clicks it programmatically.
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileObject.name;
+    document.body.appendChild(link);
+    link.click();
+
+    // This cleans up by removing the link and revoking the temporary URL.
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    // --- CHANGED: Ask for confirmation instead of auto-updating ---
+    setTimeout(() => {
+        showCustomConfirm(
+            "آیا فایل پشتیبان با موفقیت ذخیره شد؟",
+            () => {
+                state.setLastBackupTimestamp();
+                renderClassManagementStats();
+                showNotification("✅ تاریخ پشتیبان ثبت شد.");
+            },
+            { confirmText: 'بله، ذخیره شد', cancelText: 'خیر', confirmClass: 'btn-success' }
+        );
+    }, 500);
 }
 
