@@ -5244,3 +5244,15 @@ export function syncWeightGroupVisibility() {
 
     }
 }
+/**
+ * A utility to focus an input, select its content, and ensure it's visible.
+ * Useful for mobile UX to trigger the keyboard and scroll to the field.
+ */
+export function focusAndPrepareInput(element) {
+    if (!element) return;
+    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    element.focus();
+    if (typeof element.select === 'function') {
+        element.select();
+    }
+}
