@@ -540,3 +540,43 @@ export function focusAndPrepareInput(element) {
         element.select();
     }
 }
+
+/**
+ * AI_COMMENT: Adds a press effect that stays active for a minimum duration
+ * to prevent flickering during quick taps on mobile.
+ */
+export function addClickEffect(element) {
+    if (!element) return;
+
+    element.classList.add('btn-pressing-effect');
+    let pressStartTime = 0;
+    const MIN_DURATION = 100; // ms
+
+    const startEffect = (e) => {
+        if (e.type === 'mousedown' && 'ontouchstart' in window) return;
+
+        pressStartTime = Date.now();
+        element.classList.add('btn-is-pressed');
+    };
+
+    const endEffect = () => {
+        const elapsed = Date.now() - pressStartTime;
+        const remaining = MIN_DURATION - elapsed;
+
+        // AI_COMMENT: If the tap was too fast, wait a bit before removing the class
+        if (remaining > 0) {
+            setTimeout(() => {
+                element.classList.remove('btn-is-pressed');
+            }, remaining);
+        } else {
+            element.classList.remove('btn-is-pressed');
+        }
+    };
+
+    element.addEventListener('mousedown', startEffect);
+    element.addEventListener('touchstart', startEffect, { passive: true });
+
+    window.addEventListener('mouseup', endEffect);
+    window.addEventListener('touchend', endEffect);
+    window.addEventListener('touchcancel', endEffect);
+}

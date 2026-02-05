@@ -22,7 +22,8 @@ import {
 
 import {
     renderRestorePointsPage, newCategoryModalIsGradedCheckbox,
-    quickGradeSubmitBtn, quickScoreInput, quickNoteTextarea, updateQualitativeStatsLabel
+    quickGradeSubmitBtn, quickScoreInput, quickNoteTextarea, updateQualitativeStatsLabel,
+    newSessionBtn
 } from './ui.js';
 
 
@@ -209,6 +210,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initial Load ---
     state.loadData();
+
+    utils.addClickEffect(selectStudentBtn);
+    utils.addClickEffect(newSessionBtn);
 
     if (state.userSettings.isDeveloperMode) {
         import('./developer.js').then(devModule => {
@@ -843,7 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
         newStudentNameInput.focus();
     });
 
-    document.getElementById('new-session-btn').addEventListener('click', () => {
+    newSessionBtn.addEventListener('click', () => {
 
         if (state.currentClassroom) {
             const unfinishedSession = state.currentClassroom.sessions.find(session => !session.isFinished && !session.isCancelled && !session.isDeleted);
@@ -1597,7 +1601,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    utils.setupLongPress(ui.selectStudentBtn, () => {
+    utils.setupLongPress(selectStudentBtn, () => {
 
         toggleSelectionModes();
 

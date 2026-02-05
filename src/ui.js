@@ -78,6 +78,9 @@ export const cancelImportBtn = document.getElementById('cancel-import-btn');
 
 export const appHeader = document.querySelector('.app-header');
 export const selectStudentBtn = document.getElementById('select-student-btn');
+
+export const newSessionBtn = document.getElementById('new-session-btn');
+
 export const selectStudentBtnWrapper = document.getElementById('select-student-btn-wrapper');
 
 export const assessmentModeLabel = document.getElementById('assessment-mode-label');

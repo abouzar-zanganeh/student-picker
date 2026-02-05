@@ -3503,3 +3503,14 @@ label {
 }
 
 /* end of styles for qualitative stats tags */
+
+/* Add smooth transition to any button using the click effect */
+.btn-pressing-effect {
+    transition: transform 0.05s ease, opacity 0.05s ease;
+}
+
+.btn-pressing-effect:active,
+.btn-is-pressed {
+    transform: scale(0.98);
+    opacity: 0.8;
+}
