@@ -1753,6 +1753,8 @@ function renderCategoryPills() {
             pill.classList.add('disabled');
         } else {
             pill.addEventListener('click', () => {
+                state.setIsAssessmentModeActive(false); // Disable assessment mode on category change
+                syncAssessmentModeUI();
                 document.querySelectorAll('#category-selection-container .pill').forEach(p => p.classList.remove('active'));
                 pill.classList.add('active');
 

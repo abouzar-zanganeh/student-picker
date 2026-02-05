@@ -193,7 +193,7 @@ export function flashElement(element, duration = 4000, shouldScroll = true) {
     }, duration);
 }
 
-// Smoothly scrolls the given element into the center of the viewport
+// Smoothly scrolls the given element into a specified position within the viewport
 // Expanded to support standard strings ('center', 'start') or a numeric ratio (0 to 1)
 export function scrollToElement(element, position = 'center') {
     if (!element) return;
