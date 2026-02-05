@@ -1735,7 +1735,6 @@ function initializeStudentPageUI() {
     // Reset the main action button
     selectStudentBtnWrapper.classList.add('disabled-wrapper');
     selectStudentBtn.disabled = true;
-
 }
 
 function renderCategoryPills() {

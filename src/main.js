@@ -1837,6 +1837,7 @@ export function toggleSelectionModes() {
     }
 }
 
+//adds the styling of 
 export function syncAssessmentModeUI() {
 
     if (ui.selectStudentBtnWrapper) {
