@@ -23,7 +23,8 @@ import {
     setupAutoSelectOnFocus, flashElement, scrollToElement, attachUniversalContextMenu,
     getCurrentView,
     setupLongPress,
-    setAutoDirectionOnInput
+    setAutoDirectionOnInput,
+    focusAndPrepareInput
 } from './utils.js';
 import { hideKeyboard } from './keyboard.js';
 
@@ -2264,6 +2265,8 @@ function renderProfileScoringSection(container) {
     const pillsContainer = scoringSection.querySelector('#modal-graded-pills');
     const gradedCategories = getActiveItems(state.currentClassroom.categories).filter(c => c.isGradedCategory);
 
+
+    const scoreInput = scoringSection.querySelector('#modal-new-score-value');
     gradedCategories.forEach(category => {
         const pill = document.createElement('span');
         pill.className = 'pill';
@@ -2273,13 +2276,16 @@ function renderProfileScoringSection(container) {
             pillsContainer.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
             setStyleForGradedCategoryPill(category, pill);
+
+            // Automatically focus and prepare the score input for the user
+            focusAndPrepareInput(scoreInput);
         });
         pillsContainer.appendChild(pill);
     });
 
     // 4. Attach the "Add Score" button's event listener directly
     const addScoreBtn = scoringSection.querySelector('#modal-add-score-btn');
-    const scoreInput = scoringSection.querySelector('#modal-new-score-value');
+
     const commentTextarea = scoringSection.querySelector('#modal-new-score-comment');
 
     setupKeyboardShortcutOnElement(scoreInput, 'Enter', () => {
@@ -5242,17 +5248,5 @@ export function syncWeightGroupVisibility() {
 
         newCategoryModalWeightGroup.style.visibility = isGraded ? 'visible' : 'hidden';
 
-    }
-}
-/**
- * A utility to focus an input, select its content, and ensure it's visible.
- * Useful for mobile UX to trigger the keyboard and scroll to the field.
- */
-export function focusAndPrepareInput(element) {
-    if (!element) return;
-    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    element.focus();
-    if (typeof element.select === 'function') {
-        element.select();
     }
 }
