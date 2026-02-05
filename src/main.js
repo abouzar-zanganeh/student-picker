@@ -47,7 +47,6 @@ import {
 } from './screensaver.js';
 
 
-let selectBtnLongPressActive = false;
 
 // --- Navigation Hierarchy Map which states which page is the parent of which ---
 const NAVIGATION_HIERARCHY = {
@@ -446,10 +445,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ui.selectStudentBtn.addEventListener('click', () => {
         scrollToElement(selectStudentBtn);
-        if (selectBtnLongPressActive) {
-            selectBtnLongPressActive = false;
-            return;
-        }
 
         // 1. Guard check: Prevent selection if there's unsaved data (Applies to both modes)
         if (ui.quickScoreInput.value.trim() !== '' || ui.quickNoteTextarea.value.trim() !== '') {
@@ -1604,7 +1599,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     utils.setupLongPress(ui.selectStudentBtn, () => {
 
-        selectBtnLongPressActive = true;
         toggleSelectionModes();
 
     });
