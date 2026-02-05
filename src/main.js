@@ -444,7 +444,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     ui.selectStudentBtn.addEventListener('click', () => {
-        scrollToElement(selectStudentBtn);
+        scrollToElement(ui.categoryWeightLabel);
 
         // 1. Guard check: Prevent selection if there's unsaved data (Applies to both modes)
         if (ui.quickScoreInput.value.trim() !== '' || ui.quickNoteTextarea.value.trim() !== '') {

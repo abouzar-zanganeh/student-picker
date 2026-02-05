@@ -132,7 +132,7 @@ export const quickScoreInput = document.getElementById('quick-score-input');
 export const quickNoteTextarea = document.getElementById('quick-note-textarea');
 export const quickGradeSubmitBtn = document.getElementById('quick-grade-submit-btn');
 const categoryPillsContainer = document.getElementById('category-selection-container');
-const resultDiv = document.getElementById('selected-student-result');
+export const resultDiv = document.getElementById('selected-student-result');
 export const contextMenu = document.getElementById('custom-context-menu');
 export const breadcrumbContainer = document.getElementById('breadcrumb-container');
 
