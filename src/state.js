@@ -85,6 +85,7 @@ export let userSettings = {
 export let isAssessmentModeActive = false;
 export function setIsAssessmentModeActive(value) {
     isAssessmentModeActive = value;
+    saveData();
 }
 
 export let isModalTransitioning = false; // New flag to track modal transitions
@@ -120,7 +121,8 @@ export function saveData(immediate = false) {
     const appState = {
         classrooms,
         trashBin,
-        userSettings
+        userSettings,
+        isAssessmentModeActive
     };
     const jsonString = JSON.stringify(appState);
 
@@ -175,6 +177,7 @@ export function loadData() {
         rehydrateData(plainData.classrooms);
         trashBin = plainData.trashBin || [];
         userSettings = { ...userSettings, ...plainData.userSettings };
+        isAssessmentModeActive = plainData.isAssessmentModeActive || false;
     } else {
         rehydrateData(plainData);
         migratePreTrashBinDeletions();

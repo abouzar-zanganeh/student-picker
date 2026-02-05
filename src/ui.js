@@ -32,7 +32,7 @@ import { setupKeyboardShortcutOnElement } from './keyboard.js';
 import { getLogsForClass, renameClassroomLog } from './logManager.js';
 import * as logManager from './logManager.js';
 import { Category, EDUCATIONAL_SYSTEMS } from './models.js';
-import { handleUndoLastSelection, toggleSelectionModes } from './main.js';
+import { handleUndoLastSelection, toggleSelectionModes, syncAssessmentModeUI } from './main.js';
 import JSZip from 'jszip';
 
 import { toJalaali, toGregorian } from 'jalaali-js';
@@ -1717,7 +1717,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 }
 
 function initializeStudentPageUI() {
-
+    syncAssessmentModeUI();
     updateSelectButtonText(null);
 
     // Set header and clear containers
@@ -1735,6 +1735,7 @@ function initializeStudentPageUI() {
     // Reset the main action button
     selectStudentBtnWrapper.classList.add('disabled-wrapper');
     selectStudentBtn.disabled = true;
+
 }
 
 function renderCategoryPills() {

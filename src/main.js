@@ -1823,7 +1823,7 @@ export function toggleSelectionModes() {
     ui.displayWinner();
     ui.updateQuickGradeUIForCategory(state.selectedCategory);
 
-    ui.selectStudentBtnWrapper.classList.toggle('assessment-mode-active', isAssessmentModeActive);
+    syncAssessmentModeUI();
     const msg = isAssessmentModeActive ? "حالت «نمره‌دهی» فعال شد ✅" : "حالت «انتخاب» فعال شد ✅";
 
     if (!ui.fromAssessmentToNormalSelection) {
@@ -1833,6 +1833,14 @@ export function toggleSelectionModes() {
         ui.clearWinnerDisplay();
         notifyingMessaging.showNotification("حالت انتخاب برای نمره‌دهی غیرفعال شد. دسته‌بندی انتخاب شده قابل نمره دهی نیست.⚠️", 4500);
         ui.setFromAssessmentToNormalSelection(false);
+
+    }
+}
+
+export function syncAssessmentModeUI() {
+
+    if (ui.selectStudentBtnWrapper) {
+        ui.selectStudentBtnWrapper.classList.toggle('assessment-mode-active', isAssessmentModeActive);
 
     }
 }
