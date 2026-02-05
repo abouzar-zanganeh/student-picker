@@ -194,9 +194,26 @@ export function flashElement(element, duration = 4000, shouldScroll = true) {
 }
 
 // Smoothly scrolls the given element into the center of the viewport
-export function scrollToElement(element) {
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+// Expanded to support standard strings ('center', 'start') or a numeric ratio (0 to 1)
+export function scrollToElement(element, position = 'center') {
+    if (!element) return;
+
+    // If position is a number (e.g., 0.16 for 1/6th), use precision scrolling
+    if (typeof position === 'number') {
+        const viewportHeight = window.innerHeight;
+        const elementRect = element.getBoundingClientRect();
+        const absoluteElementTop = elementRect.top + window.scrollY;
+
+        // Calculate the scroll target so the element sits at the specified ratio of the screen
+        const targetY = absoluteElementTop - (viewportHeight * position);
+
+        window.scrollTo({
+            top: targetY,
+            behavior: 'smooth'
+        });
+    } else {
+        // Fallback to standard browser behavior ('start', 'center', 'end')
+        element.scrollIntoView({ behavior: 'smooth', block: position });
     }
 }
 
