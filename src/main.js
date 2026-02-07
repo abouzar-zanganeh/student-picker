@@ -1647,11 +1647,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Toggle handling
-    prepareScreenSaverToggle(
-        screensaverToggle,
-        initializeScreenSaver,
-        deinitializeScreenSaver
-    );
+    prepareScreenSaverToggle(screensaverToggle);
 
 
     // 1. Open Settings Modal

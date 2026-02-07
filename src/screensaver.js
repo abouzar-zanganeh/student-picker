@@ -49,6 +49,7 @@ export function initializeScreenSaver() {
 
     screenSaverOverlay.addEventListener('click', handleOverlayInteraction);
     screenSaverOverlay.addEventListener('touchstart', handleOverlayInteraction);
+    // @ts-ignore
 
     const version = import.meta.env.VITE_APP_VERSION;
     if (version) {
