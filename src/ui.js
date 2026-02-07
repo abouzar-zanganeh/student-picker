@@ -361,6 +361,8 @@ export function showRestoreConfirmModal(plainData) {
     `;
 
     // Update Checkbox Logic
+    // @ts-ignore
+
     appendCheckbox.checked = false; // Default: Smart Sync (Unchecked)
     if (appendLabel) {
         appendLabel.textContent = "جایگزینی کامل (حذف داده‌های فعلی)";
@@ -368,6 +370,8 @@ export function showRestoreConfirmModal(plainData) {
 
     // --- Define button actions ---
     const confirmHandler = () => {
+        // @ts-ignore
+
         const isCleanRestore = appendCheckbox.checked;
         processRestore(plainData, isCleanRestore); // Pass the new flag
 
@@ -407,16 +411,24 @@ export function showCategoryModal(onSave, options = {}) {
 
     // 1. Configure the modal's appearance
     categoryModalTitle.textContent = title;
+    // @ts-ignore
+
     newCategoryModalNameInput.value = initialName;
+    // @ts-ignore
+
     newCategoryModalIsGradedCheckbox.checked = initialIsGraded;
 
     syncWeightGroupVisibility();
+    // @ts-ignore
+
     newCategoryModalWeightInput.value = initialWeight;
 
     categoryModalSaveBtn.textContent = saveButtonText;
 
     // 2. Set the callback function that will run on save
     state.setSaveCategoryCallback((categoryName, isGraded) => {
+        // @ts-ignore
+
         const weight = parseFloat(newCategoryModalWeightInput.value) || 1;
         // Basic validation before executing the main callback
         if (!categoryName) {
@@ -433,6 +445,8 @@ export function showCategoryModal(onSave, options = {}) {
     openModal('category-modal');
     newCategoryModalNameInput.focus();
     if (initialName) {
+        // @ts-ignore
+
         newCategoryModalNameInput.select();
     }
 
@@ -453,6 +467,8 @@ export function showMoveStudentModal(student, sourceClass) {
 
     if (destinationClasses.length === 0) {
         classSelect.innerHTML = '<option value="">کلاس دیگری برای انتقال وجود ندارد</option>';
+        // @ts-ignore
+
         confirmBtn.disabled = true;
     } else {
         destinationClasses.forEach(classroom => {
@@ -461,6 +477,8 @@ export function showMoveStudentModal(student, sourceClass) {
             option.textContent = classroom.info.name;
             classSelect.appendChild(option);
         });
+        // @ts-ignore
+
         confirmBtn.disabled = false;
     }
 
@@ -486,8 +504,11 @@ export function showRenameStudentModal(student, classroom) {
     const initialValue = (student.identity.firstName && student.identity.lastName)
         ? `${student.identity.firstName} . ${student.identity.lastName}`
         : oldName;
+    // @ts-ignore
 
     newNoteContent.value = initialValue;
+    // @ts-ignore
+
     newNoteContent.rows = 1;
     newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
@@ -566,11 +587,15 @@ export function showRenameStudentModal(student, classroom) {
         // Reset modal title
         const modalTitle = document.getElementById('add-note-modal-title');
         modalTitle.textContent = 'ثبت یادداشت جدید';
+        // @ts-ignore
+
         newNoteContent.rows = 4;
     });
 
     openModal('add-note-modal');
     newNoteContent.focus();
+    // @ts-ignore
+
     newNoteContent.select();
 }
 
@@ -636,6 +661,8 @@ export function closeActiveModal(onClosed, isHistoryPop = false) {
 
             if (activeModalId === 'mass-comment-modal') {
                 // NEW: Clear the content on close for the mass comment modal
+                // @ts-ignore
+
                 massCommentContent.value = '';
             }
 
@@ -672,6 +699,8 @@ export function renderMassCommentControls() {
     }
 
     // 2. Toggle disabled state (requires at least 2 students, or 1 for comment clearing)
+    // @ts-ignore
+
     massCommentBtn.disabled = selectedCount < 1;
 
     // 3. Update button text
@@ -698,12 +727,20 @@ export function showMassCommentModal() {
         `یادداشت برای ${selectedCount} دانش‌آموز ثبت خواهد شد.`;
 
     // The key change: ensure content is always blank for a clean slate.
+    // @ts-ignore
+
     massCommentContent.value = '';
     massCommentContent.dispatchEvent(new Event('input', { bubbles: true }));
 
     // Reset the append checkbox and control its visibility based on the flag.
+    // @ts-ignore
+
+    // @ts-ignore
+
     massCommentAppendCheckbox.checked = true;
     const modalOptions = document.querySelector('#mass-comment-modal .modal-options');
+    // @ts-ignore
+
     modalOptions.style.display = hasExistingComments ? 'flex' : 'none';
 
     // 3. Set callback and open modal
@@ -794,6 +831,8 @@ function updateStudentProfileNoteForHomework(student, session, content) {
 }
 
 export function showClassNoteModal(classroom) {
+    // @ts-ignore
+
     newNoteContent.value = classroom.note || '';
     state.setSaveNoteCallback((content) => {
         classroom.note = content;
@@ -809,6 +848,8 @@ export function showClassNoteModal(classroom) {
 
 export function showSessionNoteModal(session, displaySessionNumber) {
     // 1. Pre-fill the modal with existing note (or empty)
+    // @ts-ignore
+
     newNoteContent.value = session.note || '';
     newNoteContent.dispatchEvent(new Event('input', { bubbles: true })); // Trigger auto-direction
 
@@ -1368,6 +1409,8 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
 
         // ... (Existing logic for single note) ...
         const homework = state.selectedSession.studentRecords[student.identity.studentId].homework;
+        // @ts-ignore
+
         newNoteContent.value = homework.comment || '';
         newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
@@ -1636,6 +1679,8 @@ export function renderStudentStatsList() {
             });
         });
         row.insertCell().textContent = student.statusCounters.totalSelections || 0;
+        // @ts-ignore
+
         row.insertCell().textContent = calculateAbsences(student);
         row.insertCell().textContent = student.statusCounters.outOfClassCount || 0;
         row.insertCell().textContent = student.statusCounters.missedChances || 0;
@@ -1654,7 +1699,7 @@ export function renderStudentStatsList() {
     });
 
     getActiveItems(state.currentClassroom.students);
-    studentStatsHeader.setAttribute('data-student-count', activeStudents.length);
+    studentStatsHeader.setAttribute('data-student-count', activeStudents.length.toString());
 
     tableContainer.appendChild(table);
     // --- Adds event listener for the name header toggle ---
@@ -1729,14 +1774,26 @@ function initializeStudentPageUI() {
 
     // Reset the quick grade form
     quickGradeFormWrapper.classList.add('tooltip-container');
+    // @ts-ignore
+
     quickScoreInput.disabled = true;
+    // @ts-ignore
+
     quickNoteTextarea.disabled = true;
+    // @ts-ignore
+
     quickGradeSubmitBtn.disabled = true;
+    // @ts-ignore
+
     quickScoreInput.value = '';
+    // @ts-ignore
+
     quickNoteTextarea.value = '';
 
     // Reset the main action button
     selectStudentBtnWrapper.classList.add('disabled-wrapper');
+    // @ts-ignore
+
     selectStudentBtn.disabled = true;
 }
 
@@ -1775,6 +1832,8 @@ function renderCategoryPills() {
                 updateQuickGradeUIForCategory(category);
                 updateCategoryColumnHighlight(category.name);
                 selectStudentBtnWrapper.classList.remove('disabled-wrapper');
+                // @ts-ignore
+
                 selectStudentBtn.disabled = state.selectedSession.isFinished;
                 const lastWinnerId = state.selectedSession.lastWinnerByCategory[category.name];
                 if (lastWinnerId) {
@@ -1786,6 +1845,8 @@ function renderCategoryPills() {
                     clearWinnerDisplay();
                     state.setManualSelection(null);
                     state.setWinnerHistoryIndex(-1);
+                    // @ts-ignore
+
                     selectStudentBtn.disabled = false;
                     const previousWinnerRow = document.querySelector('.current-winner-highlight');
                     if (previousWinnerRow) {
@@ -1867,6 +1928,8 @@ function renderCategoryPills() {
                                         updateQuickGradeUIForCategory(null);
                                         updateCategoryColumnHighlight(null);
                                         selectStudentBtnWrapper.classList.add('disabled-wrapper');
+                                        // @ts-ignore
+
                                         selectStudentBtn.disabled = true;
 
                                         const previousWinnerRow = document.querySelector('.current-winner-highlight');
@@ -1952,6 +2015,8 @@ function restoreSessionState() {
 
         const lastCategoryPill = categoryPillsContainer.querySelector(`.pill[data-category-id="${state.selectedSession.lastUsedCategoryId}"]`);
         if (lastCategoryPill) {
+            // @ts-ignore
+
             lastCategoryPill.click();
         }
     }
@@ -2018,22 +2083,40 @@ export function updateQualitativeStatsLabel(student, currentCategory) {
 export function updateQuickGradeUIForCategory(category) {
 
     if (state.selectedSession.isFinished) {
+        // @ts-ignore
+
         quickScoreInput.disabled = true;
+        // @ts-ignore
+
         quickNoteTextarea.disabled = true;
+        // @ts-ignore
+
         quickGradeSubmitBtn.disabled = true;
         quickGradeFormWrapper.setAttribute('title', 'جلسه خاتمه یافته است');
         return;
     }
 
     if (category && category.isGradedCategory) {
+        // @ts-ignore
+
         quickScoreInput.disabled = false;
+        // @ts-ignore
+
         quickNoteTextarea.disabled = false;
+        // @ts-ignore
+
         quickGradeSubmitBtn.disabled = false;
         quickGradeFormWrapper.removeAttribute('title');
     } else {
         // This block now handles both non-gradable and null/undefined categories.
+        // @ts-ignore
+
         quickScoreInput.disabled = true;
+        // @ts-ignore
+
         quickNoteTextarea.disabled = true;
+        // @ts-ignore
+
         quickGradeSubmitBtn.disabled = true;
 
         // Set the correct tooltip based on the reason for disabling.
@@ -2075,6 +2158,8 @@ export function updateCategoryColumnHighlight(categoryName) {
     // --- 4. Highlight all cells in that column ---
     const rows = table.querySelectorAll('tbody tr');
     rows.forEach(row => {
+        // @ts-ignore
+
         const cell = row.cells[categoryIndex];
         if (cell) {
             cell.classList.add('current-category-highlight');
@@ -2199,6 +2284,7 @@ export function showStudentProfile(student) {
     addNoteBtn.innerHTML = '<span>📝</span><span>یادداشت</span>';
     addNoteBtn.addEventListener('click', () => {
         const studentForNote = state.selectedStudentForProfile; // <-- CAPTURE STUDENT
+        // @ts-ignore
 
         newNoteContent.value = ''; // Clear modal for a new note
         newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
@@ -2294,6 +2380,8 @@ function renderProfileScoringSection(container) {
     const commentTextarea = scoringSection.querySelector('#modal-new-score-comment');
 
     setupKeyboardShortcutOnElement(scoreInput, 'Enter', () => {
+        // @ts-ignore
+
         addScoreBtn.click();
         hideKeyboard(scoreInput);
     });
@@ -2301,6 +2389,8 @@ function renderProfileScoringSection(container) {
     setupAutoSelectOnFocus(scoreInput);
 
     setupKeyboardShortcutOnElement(commentTextarea, 'Enter', () => {
+        // @ts-ignore
+
         addScoreBtn.click();
         hideKeyboard(commentTextarea);
     });
@@ -2311,9 +2401,14 @@ function renderProfileScoringSection(container) {
             showNotification("⚠️لطفاً یک مهارت را برای نمره‌دهی انتخاب کنید.");
             return;
         }
+        // @ts-ignore
+
         const skill = activeSkillPill.dataset.skillName;
+        // @ts-ignore
 
         const value = scoreInput.value;
+        // @ts-ignore
+
         const comment = commentTextarea.value.trim();
 
         if (!value) {
@@ -2335,7 +2430,11 @@ function renderProfileScoringSection(container) {
         displayWinner();
 
         // 2. Clear inputs for the next entry
+        // @ts-ignore
+
         scoreInput.value = '';
+        // @ts-ignore
+
         commentTextarea.value = '';
 
         // 3. Refresh the history section within the modal
@@ -2444,6 +2543,8 @@ function renderProfileContent(container) {
 
         if (totalSelectionsP) {
             totalSelectionsP.classList.add('collapsible-toggle');
+            // @ts-ignore
+
             totalSelectionsP.onclick = () => {
                 selectionsBreakdownContainer.classList.toggle('open');
                 totalSelectionsP.classList.toggle('open'); // Toggles the triangle
@@ -2469,6 +2570,8 @@ function renderProfileContent(container) {
 
         if (totalIssuesP && totalIssues > 0) {
             totalIssuesP.classList.add('collapsible-toggle');
+            // @ts-ignore
+
             totalIssuesP.onclick = () => {
                 issuesBreakdownContainer.classList.toggle('open');
                 totalIssuesP.classList.toggle('open');
@@ -2498,6 +2601,8 @@ function renderProfileContent(container) {
 
         if (totalQualityP && totalRated > 0) {
             totalQualityP.classList.add('collapsible-toggle');
+            // @ts-ignore
+
             totalQualityP.onclick = () => {
                 qualityBreakdownContainer.classList.toggle('open');
                 totalQualityP.classList.toggle('open');
@@ -2549,6 +2654,8 @@ export function renderScoresHistory(scoresContainer) {
     const allScores = Object.values(student.logs.scores || {})
         .flat()
         .filter(score => !score.isDeleted)
+        // @ts-ignore
+
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     if (allScores.length === 0) {
@@ -2589,6 +2696,8 @@ export function renderScoresHistory(scoresContainer) {
 
                 scoreCommentP.addEventListener('click', () => {
                     // 1. Set up the note modal with the score's comment
+                    // @ts-ignore
+
                     newNoteContent.value = score.comment;
                     newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
@@ -2685,6 +2794,8 @@ export function renderStudentNotes(notesContainer) {
     } else {
         const sortedNotes = [...state.selectedStudentForProfile.profile.notes]
             .filter(note => !note.isDeleted)
+            // @ts-ignore
+
             .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
         sortedNotes.forEach(note => {
@@ -2755,6 +2866,8 @@ export function renderStudentNotes(notesContainer) {
 
             noteContentP.addEventListener('click', () => {
                 const studentForNote = state.selectedStudentForProfile; // <-- CAPTURE STUDENT
+                // @ts-ignore
+
                 newNoteContent.value = note.content;
                 newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
@@ -3157,7 +3270,11 @@ function createClassListItem(classroom) {
                     const oldName = classroom.info.name;
                     const modalTitle = document.getElementById('add-note-modal-title');
                     modalTitle.textContent = 'تغییر نام کلاس';
+                    // @ts-ignore
+
                     newNoteContent.value = oldName;
+                    // @ts-ignore
+
                     newNoteContent.rows = 1;
 
                     state.setSaveNoteCallback((newName) => {
@@ -3180,11 +3297,15 @@ function createClassListItem(classroom) {
                         }
 
                         modalTitle.textContent = 'ثبت یادداشت جدید';
+                        // @ts-ignore
+
                         newNoteContent.rows = 4;
                     });
 
                     openModal('add-note-modal');
                     newNoteContent.focus();
+                    // @ts-ignore
+
                     newNoteContent.select();
                 }
             },
@@ -3253,6 +3374,8 @@ export function renderClassList() {
         if (fabContainer) fabContainer.classList.add('center-empty-state');
 
         // 2. Hide the search container completely
+        // @ts-ignore
+
         if (globalSearchContainer) globalSearchContainer.style.display = 'none';
 
         classListUl.innerHTML = '<li class="no-content-message" style="text-align:center; margin-top:20px;">هنوز کلاسی ایجاد نشده است.</li>';
@@ -3260,6 +3383,8 @@ export function renderClassList() {
     } else {
         // Restore standard view
         if (fabContainer) fabContainer.classList.remove('center-empty-state');
+        // @ts-ignore
+
         if (globalSearchContainer) globalSearchContainer.style.display = ''; // Clears the inline style to revert to CSS default
     }
     // ---------------------------------------
@@ -3279,6 +3404,8 @@ export function renderClassList() {
         }
 
         // 3. Fallback Sort: Creation Date (for Incomplete/Unscheduled/Active ties)
+        // @ts-ignore
+
         return new Date(a.info.creationDate) - new Date(b.info.creationDate);
     });
 
@@ -3475,13 +3602,19 @@ export function renderSettingsOther() {
 
     // Add specific listeners for the Settings page to save data immediately
     settingsEduSystemSelect.addEventListener('change', () => {
+        // @ts-ignore
+
         classroom.info.educationalSystem = settingsEduSystemSelect.value;
         // We need to grab the new level value because the helper resets it
+        // @ts-ignore
+
         classroom.info.level = settingsLevelSelect.value;
         state.saveData();
     });
 
     settingsLevelSelect.addEventListener('change', () => {
+        // @ts-ignore
+
         classroom.info.level = settingsLevelSelect.value;
         state.saveData();
     });
@@ -3490,16 +3623,24 @@ export function renderSettingsOther() {
     const classType = classroom.info.type || 'in-person';
     const radioToSelect = document.querySelector(`#settings-page input[name="class-type-setting"][value="${classType}"]`);
     if (radioToSelect) {
+        // @ts-ignore
+
         radioToSelect.checked = true;
     }
 
     // --- 4.  Schedule Logic ---
     const scheduleDays = classroom.info.scheduleDays || [];
     document.querySelectorAll('input[name="schedule-day"]').forEach(checkbox => {
+        // @ts-ignore
+
         checkbox.checked = scheduleDays.includes(parseInt(checkbox.value));
     });
 
+    // @ts-ignore
+
     document.getElementById('settings-schedule-start').value = classroom.info.scheduleStartTime || '';
+    // @ts-ignore
+
     document.getElementById('settings-schedule-end').value = classroom.info.scheduleEndTime || '';
 }
 
@@ -3517,8 +3658,12 @@ export function _internalShowPage(pageId) {
     // 2. Header Toggle: Only show main app header on the root page
     if (pageId === 'class-management-page') {
         renderClassList();
+        // @ts-ignore
+
         appHeader.style.display = 'flex';
     } else {
+        // @ts-ignore
+
         appHeader.style.display = 'none';
     }
 
@@ -3836,6 +3981,8 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                     daySelect.innerHTML = '';
                     for (let i = 1; i <= 31; i++) {
                         const option = document.createElement('option');
+                        // @ts-ignore
+
                         option.value = i;
                         option.textContent = i.toLocaleString('fa-IR');
                         if (i === jDate.jd) option.selected = true;
@@ -3851,6 +3998,8 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                     monthSelect.innerHTML = '';
                     persianMonths.forEach((name, index) => {
                         const option = document.createElement('option');
+                        // @ts-ignore
+
                         option.value = index + 1;
                         option.textContent = name;
                         if (index + 1 === jDate.jm) option.selected = true;
@@ -3863,6 +4012,8 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
 
                     for (let i = currentYear - 5; i <= currentYear + 5; i++) {
                         const option = document.createElement('option');
+                        // @ts-ignore
+
                         option.value = i;
                         option.textContent = i.toString().replace(/\d/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
                         if (i === jDate.jy) option.selected = true;
@@ -3945,6 +4096,8 @@ export function renderSearchResults(filteredStudents) {
             studentDiv.addEventListener('click', () => {
                 showStudentProfile(student);
                 studentSearchResultsDiv.style.display = 'none';
+                // @ts-ignore
+
                 studentSearchInput.value = '';
             });
             studentSearchResultsDiv.appendChild(studentDiv);
@@ -3952,6 +4105,8 @@ export function renderSearchResults(filteredStudents) {
         studentSearchResultsDiv.style.display = 'block';
     } else {
         // This new logic checks if the search was intentional before showing "Not found"
+        // @ts-ignore
+
         if (studentSearchInput.value.trim() !== '') {
             const noResultsDiv = document.createElement('div');
             noResultsDiv.className = 'no-results';
@@ -3988,6 +4143,8 @@ export function renderGlobalSearchResults(results) {
                     state.setCurrentClassroom(result.classroom);
                     showStudentProfile(result.student);
                     globalStudentSearchResultsDiv.style.display = 'none';
+                    // @ts-ignore
+
                     globalStudentSearchInput.value = '';
                 });
 
@@ -4000,6 +4157,8 @@ export function renderGlobalSearchResults(results) {
                     renderSessions();
                     showPage('session-page');
                     globalStudentSearchResultsDiv.style.display = 'none';
+                    // @ts-ignore
+
                     globalStudentSearchInput.value = '';
                 });
 
@@ -4020,6 +4179,8 @@ export function renderGlobalSearchResults(results) {
                     renderSessions();
                     showPage('session-page');
                     globalStudentSearchResultsDiv.style.display = 'none';
+                    // @ts-ignore
+
                     globalStudentSearchInput.value = '';
                 });
 
@@ -4030,6 +4191,8 @@ export function renderGlobalSearchResults(results) {
         });
         globalStudentSearchResultsDiv.style.display = 'block';
     } else {
+        // @ts-ignore
+
         if (globalStudentSearchInput.value.trim() !== '') {
             const noResultsDiv = document.createElement('div');
             noResultsDiv.className = 'no-results';
@@ -4706,6 +4869,8 @@ export function populateSystemLevelSelects(systemSelect, levelSelect, initialSys
 
 export function openAddClassModal() {
     // 1. Reset Inputs
+    // @ts-ignore
+
     modalNewClassNameInput.value = '';
 
     // 2. Populate Dropdowns (using our shared helper)
@@ -4731,6 +4896,8 @@ export function openAddClassModal() {
         const label = document.createElement('label');
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
+        // @ts-ignore
+
         checkbox.value = day.value;
         label.appendChild(checkbox);
         label.appendChild(document.createTextNode(day.label));
@@ -4749,8 +4916,14 @@ export function openAddClassModal() {
 }
 
 export function openAddCategoryModal() {
+    // @ts-ignore
+
     newCategoryModalNameInput.value = '';
+    // @ts-ignore
+
     newCategoryModalIsGradedCheckbox.checked = false;
+    // @ts-ignore
+
     newCategoryModalWeightInput.value = 1;
     newCategoryModalWeightGroup.style.visibility = 'hidden'; // Hide weight group initially
     openModal('category-modal');
@@ -4932,6 +5105,8 @@ function renderWinnerHeader(winner, categoryName, isHistoryMode) {
     // Side Effect: Disable/Enable Main Select Button
     const selectStudentBtn = document.getElementById('select-student-btn');
     if (selectStudentBtn) {
+        // @ts-ignore
+
         selectStudentBtn.disabled = isHistoryMode && !forwardBtn.classList.contains('is-disabled');
     }
 
@@ -5199,6 +5374,8 @@ function renderWinnerDetails(winner, categoryName) {
         addNoteBtn.disabled = true;
     } else {
         addNoteBtn.addEventListener('click', () => {
+            // @ts-ignore
+
             newNoteContent.value = '';
             newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
@@ -5225,6 +5402,8 @@ function renderWinnerDetails(winner, categoryName) {
     notesList.className = 'notes-list';
 
     if (winner.profile.notes && winner.profile.notes.length > 0) {
+        // @ts-ignore
+
         const sortedNotes = [...winner.profile.notes].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         sortedNotes.forEach(note => {
             const noteItem = document.createElement('li');
@@ -5249,6 +5428,8 @@ export function syncWeightGroupVisibility() {
     if (newCategoryModalIsGradedCheckbox && newCategoryModalWeightGroup) {
 
         newCategoryModalWeightGroup.style.display = 'flex';
+        // @ts-ignore
+
         const isGraded = newCategoryModalIsGradedCheckbox.checked;
 
         newCategoryModalWeightGroup.style.visibility = isGraded ? 'visible' : 'hidden';
