@@ -59,7 +59,7 @@ export function prepareDemoModeButtons() {
                 "شما در حال ورود به حالت نمایش (Demo) هستید. در این حالت، هیچ‌کدام از تغییرات شما ذخیره نخواهد شد. آیا ادامه می‌دهید؟",
                 () => {
                     enterDemoMode();
-                    ui.updateDemoModeBanner();
+                    updateDemoModeBanner();
                     closeSideNav();
                 },
                 { confirmText: 'تایید', confirmClass: 'btn-warning', onCancel: closeSideNav }
