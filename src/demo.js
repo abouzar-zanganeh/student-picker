@@ -42,7 +42,7 @@ export function handleExitDemoMode() {
 
             ui.renderClassList();
             ui.showPage('class-management-page');
-            ui.updateDemoModeBanner();
+            updateDemoModeBanner();
             closeSideNav(); // Ensure nav is closed if exiting from there
         },
         { confirmText: 'خروج', confirmClass: 'btn-success' }
