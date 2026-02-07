@@ -283,7 +283,7 @@ function cleanupOrphanedData() {
 
             // If this session had logs, add them to the class log buffer
             if (sessionLogs.length > 0) {
-                const sessionMap = getSessionDisplayMap(classroom);
+                const sessionMap = state.getSessionDisplayMap(classroom);
                 const displayNum = sessionMap.get(session.sessionNumber) || `(#${session.sessionNumber})`;
                 classLogs.push({ sessionDisplayNumber: displayNum, logs: sessionLogs });
             }

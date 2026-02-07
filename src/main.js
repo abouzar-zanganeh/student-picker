@@ -158,8 +158,8 @@ function restoreStateFromURL() {
             break;
 
         case 'session-dashboard-page':
-            // Determine the correct tab to show.
-            const effectiveTab = (pageId === 'attendance-page') ? 'attendance' : tab;
+            // AI_COMMENT: Simplified logic since we are already inside the 'session-dashboard-page' case
+            const effectiveTab = tab;
 
             ui.renderSessionDashboard(effectiveTab);
             break;
@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         processPasteBtn, csvPreviewPage, csvPreviewList, csvConfirmBtn,
         csvCancelBtn, importCsvBtn, csvFileInput, columnMappingPage,
         columnSelectDropdown, confirmColumnBtn, cancelImportBtn,
-        selectStudentBtn, attendancePage, attendanceClassNameHeader,
+        selectStudentBtn, attendancePage,
         attendanceListUl, finishAttendanceBtn,
         classListHeader, studentStatsHeader, hamburgerMenuBtn,
         sideNavMenu, closeNavBtn, overlay, backupDataBtn, restoreDataBtn,
@@ -197,8 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         secureConfirmCancelBtn, secureConfirmConfirmBtn, addNoteModal,
         newNoteContent, classSaveNoteBtn, cancelNoteBtn, studentSearchInput,
         studentSearchResultsDiv, profileStatsSummaryDiv,
-        profileScoresListUl, backupOptionsModal, backupDownloadBtn,
-        backupShareBtn, backupOptionsCancelBtn, categoryModalSaveBtn, categoryModalCancelBtn,
+        profileScoresListUl, categoryModalSaveBtn, categoryModalCancelBtn,
         massCommentBtn, massCommentCancelBtn, massCommentSaveBtn,
         massCommentContent, massCommentAppendCheckbox, processMassHomeworkComment,
         attendanceSearchInput, newCategoryModalNameInput, newCategoryModalIsGradedCheckbox,
@@ -1636,7 +1635,7 @@ export function closeSideNav() {
 
     setTimeout(() => {
         // This removes all classes after the animation finishes
-        overlay.classList.remove('modal-visible', 'modal-closing');
+        ui.overlay.classList.remove('modal-visible', 'modal-closing');
     }, 300); // This duration must match your CSS animation time
 }
 
