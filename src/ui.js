@@ -1856,12 +1856,12 @@ function renderCategoryPills() {
             });
         }
 
-        // --- NEW CONTEXT MENU (RIGHT-CLICK) EVENT ---
+        // --- CONTEXT MENU (RIGHT-CLICK) EVENT ---
         if (!state.selectedSession.isFinished) {
             attachUniversalContextMenu(pill, () => {
                 return [
                     {
-                        label: 'تغییر نام',
+                        label: 'ویرایش',
                         icon: '✏️',
                         action: () => {
                             syncWeightGroupVisibility();
