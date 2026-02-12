@@ -1689,7 +1689,7 @@ export function renderStudentStatsList() {
         const totalIssues = Object.values(student.categoryIssues || {}).reduce((sum, count) => sum + count, 0);
         row.insertCell().textContent = totalIssues;
 
-        const overallAverage = student.getOverallAverageScore();
+        const overallAverage = student.getOverallAverageScore(state.currentClassroom?.categories || []);
         row.insertCell().textContent = overallAverage !== null ? overallAverage : '-';
 
         const finalScore = state.currentClassroom.calculateFinalStudentScore(student);
@@ -2635,7 +2635,7 @@ export function renderScoresHistory(scoresContainer) {
     scoresHeader.textContent = 'تاریخچه نمرات:';
     scoresHeader.style.marginTop = '20px';
 
-    const avgValue = student.getOverallAverageScore();
+    const avgValue = student.getOverallAverageScore(state.currentClassroom?.categories || []);
     const avgSpan = document.createElement('span');
     avgSpan.className = 'profile-avg-badge';
     avgSpan.textContent = ` (میانگین: ${avgValue !== null ? avgValue : '-'})`;

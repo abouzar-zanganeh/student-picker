@@ -175,25 +175,35 @@ export class Student {
         this.profile.notes.push(newNote);
     }
 
-    getOverallAverageScore() {
-        let totalValue = 0;
-        let scoreCount = 0;
+    getOverallAverageScore(categories = []) {
+        // AI_COMMENT: We now use weights. If no weights are provided (fallback), we treat them as 1.
+        let totalWeightedScore = 0;
+        let totalWeight = 0;
+        let hasAnyScore = false;
 
-        for (const skill in this.logs.scores) {
-            this.logs.scores[skill].forEach(score => {
-                if (!score.isDeleted) {
-                    totalValue += score.value;
-                    scoreCount++;
-                }
-            });
+        for (const skillKey in this.logs.scores) {
+            const scores = this.logs.scores[skillKey].filter(s => !s.isDeleted);
+            if (scores.length === 0) continue;
+
+            hasAnyScore = true;
+
+            // Find the weight for this skill from the provided categories list
+            const categoryMatch = categories.find(c => c.name.toLowerCase() === skillKey);
+            const weight = (categoryMatch && categoryMatch.isGradedCategory) ? (categoryMatch.weight || 1) : 0;
+
+            // If the category is not graded (weight 0), we ignore it in this "Overall Average"
+            if (weight === 0) continue;
+
+            const categoryAvg = scores.reduce((sum, s) => sum + s.value, 0) / scores.length;
+            totalWeightedScore += (categoryAvg * weight);
+            totalWeight += weight;
         }
 
-        // To avoid dividing by zero...
-        if (scoreCount === 0) {
+        if (!hasAnyScore || totalWeight === 0) {
             return null;
         }
 
-        const average = totalValue / scoreCount;
+        const average = totalWeightedScore / totalWeight;
         return Math.trunc(average * 10) / 10;
     }
 }
