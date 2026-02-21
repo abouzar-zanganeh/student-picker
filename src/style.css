@@ -3518,17 +3518,15 @@ label {
 /* Absence warning – small yet obtrusive */
 .absent-warning {
     display: none;
-    font-size: 0.85rem;
+    font-size: 0.60rem;
     font-weight: 700;
-    color: #ffffff;
-    background-color: #ef4444;
+    color: var(--color-strong-warning);
     padding: 6px 14px;
     border-radius: 9999px;
     margin: 8px 0 10px 0;
     width: fit-content;
     align-items: center;
     gap: 6px;
-    box-shadow: 0 3px 8px rgba(239, 68, 68, 0.45);
     letter-spacing: 0.4px;
     animation: warning-pulse 1.8s infinite ease-in-out;
 }

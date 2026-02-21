@@ -5110,8 +5110,8 @@ function renderWinnerHeader(winner, categoryName, isHistoryMode) {
     const currentSessionNum = state.selectedSession.sessionNumber;
     const prevSessionNum = currentSessionNum - 1;
 
-    if (prevSessionNum > 0 && state.sessions && Array.isArray(state.sessions)) {
-        const prevSession = state.sessions.find(s => s.sessionNumber === prevSessionNum);
+    if (prevSessionNum > 0 && state.currentClassroom && state.currentClassroom.sessions) {
+        const prevSession = state.currentClassroom.sessions.find(s => s.sessionNumber === prevSessionNum);
         if (prevSession && prevSession.studentRecords) {
             const prevRecord = prevSession.studentRecords[winner.identity.studentId];
             wasAbsentInPreviousSession = prevRecord?.attendance === 'absent';
