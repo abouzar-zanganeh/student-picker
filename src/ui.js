@@ -5108,7 +5108,9 @@ function renderWinnerHeader(winner, categoryName, isHistoryMode) {
     // Determine if the student was absent in the immediately previous session
     let wasAbsentInPreviousSession = false;
     const currentSessionNum = state.selectedSession.sessionNumber;
-    const prevSessionNum = currentSessionNum - 1;
+    const prevSessionNum = state.currentClassroom.sessions
+        .filter(s => s.sessionNumber < currentSessionNum && !s.isDeleted && !s.isCancelled)
+        .sort((a, b) => b.sessionNumber - a.sessionNumber)[0]?.sessionNumber ?? -1;
 
     if (prevSessionNum > 0 && state.currentClassroom && state.currentClassroom.sessions) {
         const prevSession = state.currentClassroom.sessions.find(s => s.sessionNumber === prevSessionNum);

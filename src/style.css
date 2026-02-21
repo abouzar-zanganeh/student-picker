@@ -3518,7 +3518,7 @@ label {
 /* Absence warning – small yet obtrusive */
 .absent-warning {
     display: none;
-    font-size: 0.60rem;
+    font-size: 0.70rem;
     font-weight: 700;
     color: var(--color-strong-warning);
     padding: 6px 14px;
