@@ -5100,13 +5100,36 @@ function renderWinnerHeader(winner, categoryName, isHistoryMode) {
         nameContainer.appendChild(newStudentBadge);
     }
 
+    // === Absence Warning – غیبت در جلسه قبل ===
+    const absentWarning = document.createElement('div');
+    absentWarning.className = 'absent-warning';
+    absentWarning.innerHTML = '⚠️ غیبت در جلسه قبل';
+
+    // Determine if the student was absent in the immediately previous session
+    let wasAbsentInPreviousSession = false;
+    const currentSessionNum = state.selectedSession.sessionNumber;
+    const prevSessionNum = currentSessionNum - 1;
+
+    if (prevSessionNum > 0 && state.sessions && Array.isArray(state.sessions)) {
+        const prevSession = state.sessions.find(s => s.sessionNumber === prevSessionNum);
+        if (prevSession && prevSession.studentRecords) {
+            const prevRecord = prevSession.studentRecords[winner.identity.studentId];
+            wasAbsentInPreviousSession = prevRecord?.attendance === 'absent';
+        }
+    }
+
+    if (wasAbsentInPreviousSession) {
+        absentWarning.classList.add('show');
+    }
+
+    nameContainer.appendChild(absentWarning);
+
     nameContainer.appendChild(backBtn);
 
     // Side Effect: Disable/Enable Main Select Button
     const selectStudentBtn = document.getElementById('select-student-btn');
     if (selectStudentBtn) {
         // @ts-ignore
-
         selectStudentBtn.disabled = isHistoryMode && !forwardBtn.classList.contains('is-disabled');
     }
 
