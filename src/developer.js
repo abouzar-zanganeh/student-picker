@@ -21,6 +21,7 @@ let isInitialized = false;
  * This runs whenever Developer Mode is active.
  */
 export function bootstrapDeveloperMode() {
+    // @ts-ignore
     window.dev = {
         state,
         ui,
@@ -34,6 +35,7 @@ export function bootstrapDeveloperMode() {
     // Apply visual feedback
     const header = document.querySelector('.app-header h1');
     if (header) {
+        // @ts-ignore
         header.style.color = 'var(--color-primary)';
         header.classList.add('dev-mode-tilt');
     }

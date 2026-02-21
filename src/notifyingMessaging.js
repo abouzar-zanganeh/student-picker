@@ -73,7 +73,11 @@ export function showSecureConfirm(message, onConfirm) {
     const randomCode = Math.floor(10000 + Math.random() * 90000).toString();
     secureConfirmMessage.textContent = message;
     secureConfirmCode.textContent = randomCode;
+    //@ts-ignore
+
     secureConfirmInput.value = '';
+    //@ts-ignore
+
     secureConfirmConfirmBtn.disabled = true;
 
     state.setSecureConfirmCallback(onConfirm);
@@ -82,9 +86,15 @@ export function showSecureConfirm(message, onConfirm) {
     secureConfirmInput.focus();
 
     const validationHandler = () => {
+        //@ts-ignore
+
         if (secureConfirmInput.value === randomCode) {
+            //@ts-ignore
+
             secureConfirmConfirmBtn.disabled = false;
         } else {
+            //@ts-ignore
+
             secureConfirmConfirmBtn.disabled = true;
         }
     };

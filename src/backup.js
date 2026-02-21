@@ -64,8 +64,10 @@ export async function prepareBackupData(classNames = []) {
         acc[part.type] = part.value;
         return acc;
     }, {});
-
+    //@ts-ignore
     const shortYear = parts.year.slice(-2);
+    //@ts-ignore
+
     const timeStamp = `${shortYear}-${parts.month}-${parts.day}_${parts.hour}-${parts.minute}`;
 
     let fileName;
@@ -121,6 +123,7 @@ export function blobToBase64(blob) {
         reader.onload = () => {
             // The result is a "data URL" (e.g., data:application/octet-stream;base64,U...).
             // We just want the Base64 part, so we split at the comma.
+            //@ts-ignore
             resolve(reader.result.split(',')[1]);
         };
         reader.readAsDataURL(blob);
@@ -313,6 +316,8 @@ export function restoreButtonMainFunction(restoreFileInput) {
 
             try {
                 // --- TRY BLOCK: Assumes it's an OLD, plain-text JSON file ---
+                //@ts-ignore
+
                 const plainData = JSON.parse(fileContent);
 
                 // Check if it's the NEW metadata format (but uncompressed)

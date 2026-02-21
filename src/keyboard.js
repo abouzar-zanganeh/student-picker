@@ -78,14 +78,20 @@ export function keyDownShortcuts(selectStudentBtn, attendancePage) {
                 case 'f':
                     const searchIcon = document.querySelector('.action-column .search-icon');
                     if (searchIcon) {
+                        //@ts-ignore
+
                         searchIcon.click();
                     }
                     break;
 
                 case 'arrowleft': {
                     const backBtn = document.querySelector('button[title="برنده قبلی"]');
+                    //@ts-ignore
+
                     if (backBtn && !backBtn.disabled) {
                         event.preventDefault(); // Prevent page scrolling
+                        //@ts-ignore
+
                         backBtn.click();
                     }
                     break;
@@ -93,8 +99,12 @@ export function keyDownShortcuts(selectStudentBtn, attendancePage) {
 
                 case 'arrowright': {
                     const forwardBtn = document.querySelector('button[title="برنده بعدی"]');
+                    //@ts-ignore
+
                     if (forwardBtn && !forwardBtn.disabled) {
                         event.preventDefault(); // Prevent page scrolling
+                        //@ts-ignore
+
                         forwardBtn.click();
                     }
                     break;

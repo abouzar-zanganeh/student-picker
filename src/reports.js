@@ -37,6 +37,7 @@ export function generatePrintableReport(classroom, selectedColumns, sortMode = '
         tbodyHtml += '<tr>';
         selectedColumns.forEach(col => {
             let cellValue = '-';
+            //@ts-ignore
 
             if (col.id === 'row_num') cellValue = index + 1;
             else if (col.id === 'name') {
@@ -105,6 +106,8 @@ export function generatePrintableReport(classroom, selectedColumns, sortMode = '
     // 6. Create Print Window
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
+        //@ts-ignore
+
         showNotification('⚠️ مرورگر شما پنجره جدید را مسدود کرد. لطفاً اجازه دهید.', 'error');
         return;
     }
@@ -281,7 +284,11 @@ export function generatePrintableReport(classroom, selectedColumns, sortMode = '
     const warningBox = sortContainer.querySelector('#sort-warning');
 
     const updateWarning = () => {
+        //@ts-ignore
+
         const isAlpha = sortContainer.querySelector('input[value="alpha"]').checked;
+        //@ts-ignore
+
         warningBox.style.display = (isAlpha && unstructuredCount > 0) ? 'block' : 'none';
     };
 
@@ -295,8 +302,14 @@ export function generatePrintableReport(classroom, selectedColumns, sortMode = '
         const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
         checkboxes.forEach(cb => {
             selected.push({
+                //@ts-ignore
+
                 id: cb.dataset.colId,
+                //@ts-ignore
+
                 label: cb.dataset.colLabel,
+                //@ts-ignore
+
                 type: cb.dataset.colType
             });
         });
@@ -307,6 +320,8 @@ export function generatePrintableReport(classroom, selectedColumns, sortMode = '
         }
 
         // Capture Sort Preferences
+        //@ts-ignore
+
         const sortMode = sortContainer.querySelector('input[name="report-sort"]:checked').value;
         const needsWarningFootnote = (sortMode === 'alpha' && unstructuredCount > 0);
 

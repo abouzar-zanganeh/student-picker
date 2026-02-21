@@ -5,6 +5,8 @@
    records across the app.
    ========================================================================== */
 
+import * as state from "./state.js";
+import * as ui from "./ui.js";
 
 // --- Temporary Universal Utility Function ---
 // This function can be called from the console to fix student data across ALL classes by

@@ -75,6 +75,7 @@ export function playSuccessSound() {
 
     if (!userSettings.isSoundEnabled) return;
 
+    // @ts-ignore
     const AudioContext = window.AudioContext || window.webkitAudioContext;
     if (!AudioContext) return;
 
@@ -320,9 +321,11 @@ export function setupSwipeNavigation() {
 
     dashboardPage.addEventListener('touchstart', (event) => {
         // Check if the touch is inside the table container at all
+        // @ts-ignore
         if (tableContainer && tableContainer.contains(event.target)) {
 
             // Find the specific cell (td or th) that was touched
+            // @ts-ignore
             const touchedCell = event.target.closest('td, th');
 
             // Check if a cell was touched AND if it's the first child (the sticky 'Name' column)

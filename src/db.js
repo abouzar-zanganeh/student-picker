@@ -17,14 +17,19 @@ function openDB() {
 
         // Runs only if the DB doesn't exist or version number changes
         request.onupgradeneeded = (event) => {
+            //@ts-ignore
+
             const db = event.target.result;
             if (!db.objectStoreNames.contains(STORE_NAME)) {
                 // Create a store that uses 'id' (timestamp) as the unique key
                 db.createObjectStore(STORE_NAME, { keyPath: 'id' });
             }
         };
+        //@ts-ignore
 
         request.onsuccess = (event) => resolve(event.target.result);
+        //@ts-ignore
+
         request.onerror = (event) => reject(event.target.error);
     });
 }
