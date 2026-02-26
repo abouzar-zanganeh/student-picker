@@ -293,6 +293,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    setupAutoSelectOnFocus(attendanceSearchInput);
+    setupAutoSelectOnFocus(quickNoteTextarea);
+
     categoryModalCancelBtn.addEventListener('click', () => {
 
         ui.closeActiveModal();
@@ -838,6 +841,8 @@ document.addEventListener('DOMContentLoaded', () => {
             addStudentBtn.click();
         }
     });
+
+    setupAutoSelectOnFocus(newStudentNameInput);
 
     addStudentBtn.addEventListener('click', () => {
         if (!state.currentClassroom) return;

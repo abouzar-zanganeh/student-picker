@@ -2351,6 +2351,7 @@ function renderProfileScoringSection(container) {
 
     // Enable auto-direction for the new comment input
     setAutoDirectionOnInput(scoringSection.querySelector('#modal-new-score-comment'));
+    setupAutoSelectOnFocus(scoringSection.querySelector('#modal-new-score-comment'));
 
     // 3. Populate the graded category pills
     const pillsContainer = scoringSection.querySelector('#modal-graded-pills');
