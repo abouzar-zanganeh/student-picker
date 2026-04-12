@@ -926,7 +926,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     state.setLiveSession(newSession);
                     state.setSelectedSession(newSession);
                     state.currentClassroom.students.forEach(student => {
-                        state.liveSession.setAttendance(student.identity.studentId, 'present');
+                        state.liveSession.setAttendance(student.identity.studentId, 'unknown');
                     });
 
                     // --- CORRECT ORDER ---

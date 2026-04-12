@@ -1282,9 +1282,13 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         if (status === 'present') {
             attendanceToggleBtn.textContent = 'حاضر';
             attendanceToggleBtn.className = 'attendance-status-btn present active';
-        } else {
+        } else if (status === 'absent') {
             attendanceToggleBtn.textContent = 'غایب';
             attendanceToggleBtn.className = 'attendance-status-btn absent active';
+        } else {
+            // AI_COMMENT: Default/unknown state — neutral appearance
+            attendanceToggleBtn.textContent = '؟';
+            attendanceToggleBtn.className = 'attendance-status-btn unknown active';
         }
     };
     updateButtonUI(currentStatus);
@@ -1293,8 +1297,10 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     attendanceToggleBtn.addEventListener('click', (e) => {
         if (attLongPress) { e.stopPropagation(); return; } // Block if long press occurred
 
-        const oldStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
-        const newStatus = oldStatus === 'present' ? 'absent' : 'present';
+        const oldStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'unknown';
+        // Cycle through 3 states: unknown → present → absent → unknown
+        const cycleMap = { 'unknown': 'present', 'present': 'absent', 'absent': 'unknown' };
+        const newStatus = cycleMap[oldStatus] ?? 'unknown';
 
         state.selectedSession.setAttendance(student.identity.studentId, newStatus);
         if (newStatus === 'absent') {
@@ -1311,8 +1317,11 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     // Long Press (Mass Action)
     setupLongPress(attendanceToggleBtn, () => {
         attLongPress = true;
-        const targetStatus = currentStatus === 'present' ? 'absent' : 'present';
-        const targetLabel = targetStatus === 'present' ? 'حاضر' : 'غایب';
+
+        // Cycle bulk action through 3 states: unknown → present → absent → unknown
+        const cycleMap = { 'unknown': 'present', 'present': 'absent', 'absent': 'unknown' };
+        const targetStatus = cycleMap[currentStatus] ?? 'unknown';
+        const targetLabel = targetStatus === 'present' ? 'حاضر' : targetStatus === 'absent' ? 'غایب' : '؟ (نامشخص)';
 
         showCustomConfirm(
             `آیا مطمئن هستید که می‌خواهید وضعیت حضور تمام دانش‌آموزان را به «${targetLabel}» تغییر دهید؟`,
@@ -4428,7 +4437,11 @@ function renderAbsenteesSummary() {
     // --- NEW LOGIC START ---
     const allActiveStudents = getActiveItems(state.currentClassroom.students);
     const totalAbsent = absentStudents.length;
-    const totalPresent = allActiveStudents.length - totalAbsent;
+    // Count each state explicitly now that 'unknown' is a third state
+    const totalPresent = allActiveStudents.filter(s => {
+        const record = state.selectedSession.studentRecords[s.identity.studentId];
+        return record && record.attendance === 'present';
+    }).length;
 
     const presentEl = document.getElementById('present-count');
     const absentEl = document.getElementById('absent-count');

@@ -993,6 +993,12 @@ button:disabled:hover {
     color: var(--color-text-dark);
 }
 
+.attendance-status-btn.unknown.active {
+    background-color: #8a8a8a;
+    color: white;
+    border-color: #6c6c6c;
+}
+
 .makeup-absence {
     color: var(--color-warning);
     font-weight: bold;
