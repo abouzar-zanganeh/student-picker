@@ -1,6 +1,6 @@
 {
   "name": "student-picker",
-  "version": "23.7.5",
+  "version": "23.8.0",
   "description": "A modern, client-side tool for teachers to manage classroom activities.",
   "type": "module",
   "scripts": {
