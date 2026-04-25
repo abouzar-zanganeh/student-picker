@@ -24,7 +24,8 @@ import {
     getCurrentView,
     setupLongPress,
     setAutoDirectionOnInput,
-    focusAndPrepareInput
+    focusAndPrepareInput,
+    formatPersianDate
 } from './utils.js';
 import { hideKeyboard } from './keyboard.js';
 
@@ -4530,6 +4531,8 @@ function setupAbsenteesCopyButton() {
         const totalPresent = allActiveStudents.length - totalAbsent;
 
         let textToCopy = `گزارش حضور و غیاب جلسه شماره ${getRealSessionNumber()}:\n`;
+        textToCopy += `کلاس ${state.currentClassroom.info.name}\n`;
+        textToCopy += `به تاریخ ${formatPersianDate(state.selectedSession.createdAt)}\n`;
         textToCopy += `✅ حاضرین: ${totalPresent.toLocaleString('fa-IR')}\n`;
         textToCopy += `❌ غایبین: ${totalAbsent.toLocaleString('fa-IR')}\n\n`;
         textToCopy += `لیست اسامی غایبین:\n`;

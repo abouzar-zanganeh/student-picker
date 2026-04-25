@@ -11,6 +11,7 @@ import { userSettings } from './state.js';
 import * as ui from './ui.js';
 import { openContextMenu } from './ui.js';
 import { switchDashboardTab } from './ui.js';
+import * as jalaali from 'jalaali-js';
 
 export function normalizeText(str) {
     // A safeguard to ensure we're always working with a string
@@ -582,4 +583,27 @@ export function addClickEffect(element) {
     window.addEventListener('mouseup', endEffect);
     window.addEventListener('touchend', endEffect);
     window.addEventListener('touchcancel', endEffect);
+}
+
+export function formatPersianDate(date) {
+    // Convert Gregorian date to Jalaali
+    const gregorianDate = new Date(date);
+    const jalaaliDate = jalaali.toJalaali(
+        gregorianDate.getFullYear(),
+        gregorianDate.getMonth() + 1,
+        gregorianDate.getDate()
+    );
+
+    // Day names in Persian
+    const weekDays = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنج‌شنبه', 'جمعه', 'شنبه'];
+    const persianWeekDay = weekDays[gregorianDate.getDay()];
+
+    // Month names in Persian
+    const monthNames = [
+        'فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور',
+        'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'
+    ];
+
+    // Format the date
+    return `${persianWeekDay} ${jalaaliDate.jd} ${monthNames[jalaaliDate.jm - 1]} ${jalaaliDate.jy}`;
 }
