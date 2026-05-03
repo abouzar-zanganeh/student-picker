@@ -28,13 +28,7 @@ export function bootstrapDeveloperMode() {
         utils,
         db,
         main,
-        getCurrentStudents: () => {
-            const classroom = state.currentClassroom;
-            if (!classroom) return console.error("❌ No class selected");
-
-            const names = state.getActiveItems(classroom.students).map(s => s.identity.name);
-            console.log(names.join('\n'));
-        }
+        getCurrentStudents
     };
 
     console.log("🛠️ Developer Mode Active! Modules exposed to 'window.dev'");
@@ -46,6 +40,16 @@ export function bootstrapDeveloperMode() {
         header.style.color = 'var(--color-primary)';
         header.classList.add('dev-mode-tilt');
     }
+
+
+}
+
+function getCurrentStudents() {
+    const classroom = state.currentClassroom;
+    if (!classroom) return console.error("❌ No class selected");
+
+    const names = state.getActiveItems(classroom.students).map(s => s.identity.name);
+    console.log(names.join('\n'));
 }
 
 export function activateDeveloperAccessOnConsole() {
