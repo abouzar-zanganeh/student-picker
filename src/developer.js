@@ -27,7 +27,14 @@ export function bootstrapDeveloperMode() {
         ui,
         utils,
         db,
-        main
+        main,
+        getCurrentStudents: () => {
+            const classroom = state.currentClassroom;
+            if (!classroom) return console.error("❌ No class selected");
+
+            const names = state.getActiveItems(classroom.students).map(s => s.identity.name);
+            console.log(names.join('\n'));
+        }
     };
 
     console.log("🛠️ Developer Mode Active! Modules exposed to 'window.dev'");
