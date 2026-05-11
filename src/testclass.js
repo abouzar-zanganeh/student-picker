@@ -10,7 +10,7 @@ import { Classroom, Student } from "./models";
 import * as state from "./state";
 import * as ui from "./ui";
 import * as notifyingMessaging from './notifyingMessaging';
-import { parseStudentName } from "./utils";
+import { parseStudentName } from "./otherUtils";
 
 
 export function testClassHook(classListHeader) {

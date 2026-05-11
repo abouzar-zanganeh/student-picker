@@ -9,7 +9,7 @@
 import * as state from "./state";
 import { closeActiveModal, openModal, reportCancelBtn, reportColumnsContainer, reportPrintBtn } from "./ui";
 import { showNotification } from './notifyingMessaging';
-import { sortStudents } from "./utils";
+import { sortStudents } from "./otherUtils";
 
 
 export function generatePrintableReport(classroom, selectedColumns, sortMode = 'default', needsWarningFootnote = false) {

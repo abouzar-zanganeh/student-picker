@@ -10,7 +10,7 @@ import * as state from './state.js';
 import * as demo from './demo.js';
 import * as ui from './ui.js';
 import * as notifyingMessaging from './notifyingMessaging.js';
-import * as utils from './utils.js';
+import * as utils from './otherUtils.js';
 import * as logManager from './logManager.js';
 import * as db from './db.js';
 
@@ -33,7 +33,7 @@ import {
     setupAutoSelectOnFocus, flashElement, scrollToElement,
     setupSwipeNavigation,
     getTotalScoresForCategory
-} from './utils.js';
+} from './otherUtils.js';
 import { hideKeyboard } from './keyboard.js';
 import { setupKeyboardShortcutOnElement } from './keyboard.js';
 import { activateDeveloperAccessOnConsole } from './developer.js';

@@ -9,7 +9,7 @@
 import * as state from './state.js';
 import * as ui from './ui.js';
 import * as notifyingMessaging from './notifyingMessaging.js';
-import * as utils from './utils.js';
+import * as utils from './otherUtils.js';
 import * as db from './db.js';
 import * as main from './main.js';
 

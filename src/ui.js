@@ -5,7 +5,6 @@
    specific user interface event interactions.
    ========================================================================== */
 
-
 import * as state from './state.js';
 import { getBackupSnapshots, deleteBackupSnapshot } from './db.js';
 
@@ -26,7 +25,7 @@ import {
     setAutoDirectionOnInput,
     focusAndPrepareInput,
     formatPersianDate
-} from './utils.js';
+} from './otherUtils.js';
 import { hideKeyboard } from './keyboard.js';
 
 import { setupKeyboardShortcutOnElement } from './keyboard.js';
@@ -39,6 +38,7 @@ import JSZip from 'jszip';
 import { toJalaali, toGregorian } from 'jalaali-js';
 import { showReportConfigModal } from './reports.js';
 import { showCustomConfirm, showNotification } from './notifyingMessaging.js';
+import { getAbsentStudents, getPresentStudents } from './classroomUtils.js';
 
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');
@@ -4504,18 +4504,7 @@ function setupAbsenteesCopyButton() {
     copyBtn.addEventListener('click', () => {
         if (!state.currentClassroom || !state.selectedSession) return;
 
-        // Get the list of absent students
-        const absentStudents = getActiveItems(state.currentClassroom.students).filter(student => {
-            const record = state.selectedSession.studentRecords[student.identity.studentId];
-            return record && record.attendance === 'absent';
-        });
-
-        const presentStudents = getActiveItems(state.currentClassroom.students).filter(student => {
-            const record = state.selectedSession.studentRecords[student.identity.studentId];
-            return record && record.attendance === 'present';
-        });
-
-        if (absentStudents.length === 0) {
+        if (getAbsentStudents().length === 0) {
             showNotification('⚠️لیست غایبین خالی است.');
             return;
         }
@@ -4532,7 +4521,7 @@ function setupAbsenteesCopyButton() {
         // Build the formatted string for the clipboard
         // Build the formatted string for the clipboard
         const allActiveStudents = getActiveItems(state.currentClassroom.students);
-        const totalAbsent = absentStudents.length;
+        const totalAbsent = getAbsentStudents().length;
         const totalPresent = allActiveStudents.length - totalAbsent;
 
         let textToCopy = `گزارش حضور و غیاب جلسه شماره ${getRealSessionNumber()}:\n\n`;
@@ -4542,14 +4531,14 @@ function setupAbsenteesCopyButton() {
         textToCopy += `❌ غایبین: ${totalAbsent.toLocaleString('fa-IR')}\n\n`;
         textToCopy += `لیست اسامی غایبین:\n\n`;
 
-        absentStudents.forEach(student => {
+        getAbsentStudents().forEach(student => {
             const totalAbsences = calculateTotalAbsences(student);
             textToCopy += `❌ ${student.identity.name} (تعداد غیبت‌ها: ${totalAbsences})\n`;
         });
 
         textToCopy += `\nلیست اسامی حاضرین:\n\n`;
 
-        presentStudents.forEach(student => {
+        getPresentStudents().forEach(student => {
             const totalAbsences = calculateTotalAbsences(student);
             textToCopy += `✅ ${student.identity.name} (تعداد غیبت‌ها: ${totalAbsences})\n`;
         });
