@@ -4539,7 +4539,7 @@ function setupAbsenteesCopyButton() {
 
         absentStudents.forEach(student => {
             const totalAbsences = calculateTotalAbsences(student);
-            textToCopy += `- ${student.identity.name} (تعداد غیبت‌ها: ${totalAbsences})\n`;
+            textToCopy += `❌ ${student.identity.name} (تعداد غیبت‌ها: ${totalAbsences})\n`;
         });
 
         // Use the modern Clipboard API to copy the text
