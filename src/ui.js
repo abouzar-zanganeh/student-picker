@@ -4510,6 +4510,11 @@ function setupAbsenteesCopyButton() {
             return record && record.attendance === 'absent';
         });
 
+        const presentStudents = getActiveItems(state.currentClassroom.students).filter(student => {
+            const record = state.selectedSession.studentRecords[student.identity.studentId];
+            return record && record.attendance === 'present';
+        });
+
         if (absentStudents.length === 0) {
             showNotification('⚠️لیست غایبین خالی است.');
             return;
@@ -4541,6 +4546,15 @@ function setupAbsenteesCopyButton() {
             const totalAbsences = calculateTotalAbsences(student);
             textToCopy += `❌ ${student.identity.name} (تعداد غیبت‌ها: ${totalAbsences})\n`;
         });
+
+        textToCopy += `\nلیست اسامی حاضرین:\n\n`;
+
+        presentStudents.forEach(student => {
+            const totalAbsences = calculateTotalAbsences(student);
+            textToCopy += `✅ ${student.identity.name} (تعداد غیبت‌ها: ${totalAbsences})\n`;
+        });
+
+
 
         // Use the modern Clipboard API to copy the text
         navigator.clipboard.writeText(textToCopy).then(() => {
