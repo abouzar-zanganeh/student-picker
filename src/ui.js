@@ -4530,12 +4530,12 @@ function setupAbsenteesCopyButton() {
         const totalAbsent = absentStudents.length;
         const totalPresent = allActiveStudents.length - totalAbsent;
 
-        let textToCopy = `گزارش حضور و غیاب جلسه شماره ${getRealSessionNumber()}:\n`;
+        let textToCopy = `گزارش حضور و غیاب جلسه شماره ${getRealSessionNumber()}:\n\n`;
         textToCopy += `کلاس ${state.currentClassroom.info.name}\n`;
-        textToCopy += `به تاریخ ${formatPersianDate(state.selectedSession.createdAt)}\n`;
+        textToCopy += ` تاریخ ${formatPersianDate(state.selectedSession.createdAt)}\n\n`;
         textToCopy += `✅ حاضرین: ${totalPresent.toLocaleString('fa-IR')}\n`;
         textToCopy += `❌ غایبین: ${totalAbsent.toLocaleString('fa-IR')}\n\n`;
-        textToCopy += `لیست اسامی غایبین:\n`;
+        textToCopy += `لیست اسامی غایبین:\n\n`;
 
         absentStudents.forEach(student => {
             const totalAbsences = calculateTotalAbsences(student);
