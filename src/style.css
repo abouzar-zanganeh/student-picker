@@ -944,7 +944,6 @@ button:disabled:hover {
     padding: 8px 15px;
     background-color: #fafafa;
     /* Subtle contrast for data area */
-    border-top: 1px solid #f0f0f0;
 }
 
 .attendance-list-item .absence-info,
@@ -3563,7 +3562,7 @@ body.dark-mode {
     --color-border: #2c3e66;
     --color-text-dark: #e0e0e0;
     --color-text-muted: #a0a0a0;
-    --color-primary: #4a9eff;
+    --color-primary: #3a79c0;
     --color-primary-hover: #1e88e5;
     --color-secondary: #5c6bc0;
     --color-secondary-hover: #3f51b5;
@@ -3579,7 +3578,7 @@ body.dark-mode {
 /* Additional overrides for specific elements in dark mode */
 body.dark-mode .pill {
     background-color: #2c3e66;
-    color: #e0e0e0;
+    color: #eeeeee;
 }
 
 body.dark-mode .pill.active {
@@ -3687,6 +3686,217 @@ body.dark-mode .tab-btn:hover {
     background-color: #1a2a4a;
 }
 
+/* Dark mode list item hover states */
+body.dark-mode .list-container li:hover,
+body.dark-mode #class-list li:hover,
+body.dark-mode #session-list li:hover,
+body.dark-mode #settings-student-list li:hover,
+body.dark-mode #category-list li:hover {
+    background-color: #2a3a5c;
+    cursor: pointer;
+}
 
+/* Also fix the context menu target highlight */
+body.dark-mode .list-container li.context-menu-target {
+    background-color: #2a3a5c;
+}
+
+/* Fix for attendance list items on hover */
+body.dark-mode .attendance-list-item:hover {
+    background-color: #2a3a5c;
+}
+
+/* Fix for stats table row hover (already had a rule, just ensuring consistency) */
+body.dark-mode .student-stats-table tbody tr:hover {
+    background-color: #2a3a5c;
+}
+
+body.dark-mode .student-stats-table tbody tr:hover td:first-child {
+    background-color: #2a3a5c;
+}
+
+/* Fix for section titles in dark mode */
+body.dark-mode .action-column h3,
+body.dark-mode .info-column h3,
+body.dark-mode .section-title,
+body.dark-mode .dashboard-tabs .tab-btn,
+body.dark-mode .action-column-header h3,
+body.dark-mode h2,
+body.dark-mode h4 {
+    color: #e0e0e0;
+}
+
+/* Ensure tab buttons have proper contrast */
+body.dark-mode .tab-btn {
+    color: #a0a0a0;
+}
+
+body.dark-mode .tab-btn.active {
+    color: var(--color-primary);
+}
+
+/* Fix for the "آمار عملکرد" header */
+body.dark-mode #student-stats-header {
+    color: #e0e0e0;
+}
+
+/* Fix for student names on attendance page */
+body.dark-mode .att-row-1 .student-name {
+    color: #e0e0e0;
+}
+
+/* Also ensure the attendance list header labels are visible */
+body.dark-mode .attendance-list-header .header-label {
+    color: #a0a0a0;
+}
+
+/* Fix for the inline search input text */
+body.dark-mode .inline-search-input {
+    color: #e0e0e0;
+}
+
+body.dark-mode .inline-search-input::placeholder {
+    color: #6c757d;
+}
+
+body.dark-mode .att-row-3 {
+
+    background-color: #3a3a3a;
+
+}
+
+/* Fix for input placeholders in dark mode - make them more visible */
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: #e9e6e6;
+    opacity: 1;
+    /* Ensures the color is fully applied */
+}
+
+/* WebKit-specific for broader compatibility */
+body.dark-mode input::-webkit-input-placeholder,
+body.dark-mode textarea::-webkit-input-placeholder {
+    color: #e9e6e6;
+}
+
+/* Firefox-specific */
+body.dark-mode input::-moz-placeholder,
+body.dark-mode textarea::-moz-placeholder {
+    color: #e9e6e6;
+    opacity: 1;
+}
+
+/* Specific override for the animated search input placeholder */
+body.dark-mode .animated-search-input::placeholder {
+    color: #e9e6e6;
+}
+
+/* Quick grade form inputs */
+body.dark-mode #quick-score-input::placeholder,
+body.dark-mode #quick-note-textarea::placeholder {
+    color: #e9e6e6;
+}
+
+/* Fix for statistics table text in dark mode */
+body.dark-mode .student-stats-table td,
+body.dark-mode .student-stats-table th {
+    color: #eeeeee;
+}
+
+/* Ensure the student name links in the stats table also use the new color */
+body.dark-mode .student-stats-table .student-name-link {
+    color: #eeeeee;
+}
+
+body.dark-mode .student-stats-table .student-name-link:hover {
+    color: var(--color-primary);
+}
+
+/* Fix for winner highlight row in dark mode */
+body.dark-mode .student-stats-table tbody tr.current-winner-highlight {
+    background-color: #1e3a2f;
+    /* Darker green that contrasts with dark background */
+}
+
+body.dark-mode .student-stats-table tbody tr.current-winner-highlight td:first-child {
+    background-color: #1e3a2f;
+}
+
+body.dark-mode .student-stats-table tbody tr.current-winner-highlight:hover {
+    background-color: #2a4a3c;
+    /* Slightly lighter on hover */
+}
+
+body.dark-mode .student-stats-table tbody tr.current-winner-highlight:hover td:first-child {
+    background-color: #2a4a3c;
+}
+
+/* Fix for category column highlight in dark mode */
+body.dark-mode .student-stats-table th.current-category-highlight,
+body.dark-mode .student-stats-table td.current-category-highlight {
+    background-color: #1a3a5c;
+    /* Dark blue instead of light green */
+}
+
+body.dark-mode .student-stats-table tbody tr:hover th.current-category-highlight,
+body.dark-mode .student-stats-table tbody tr:hover td.current-category-highlight {
+    background-color: #2a4a6c;
+}
+
+/* Fix for qualitative stats label text in dark mode */
+body.dark-mode .qualitative-stats-tag {
+    color: #eeeeee;
+}
+
+/* Fix for all settings page text in dark mode */
+body.dark-mode #settings-page,
+body.dark-mode #settings-page .section-title,
+body.dark-mode #settings-page .accordion-toggle,
+body.dark-mode #settings-page .input-group label,
+body.dark-mode #settings-page .divider-text,
+body.dark-mode #settings-page .list-container li span:not(.category-badge):not(.weight-badge),
+body.dark-mode .class-type-selection label span,
+body.dark-mode .class-type-selection label {
+    color: #eeeeee;
+}
+
+/* Fix for the student list in settings */
+body.dark-mode #settings-student-list .student-name-link {
+    color: #eeeeee;
+}
+
+body.dark-mode #settings-student-list .student-name-link:hover {
+    color: var(--color-primary);
+}
+
+/* Fix for category list in settings */
+body.dark-mode .name-and-badge-container span:first-child {
+    color: #eeeeee;
+}
+
+/* Fix for radio button labels (حضوری / آنلاین) */
+body.dark-mode .class-type-selection label span {
+    color: #eeeeee;
+}
+
+/* Fix for schedule section text */
+body.dark-mode #settings-page label {
+    color: #eeeeee;
+}
+
+body.dark-mode #settings-page .list-container li div,
+body.dark-mode #settings-page .list-container li div label {
+    color: #eeeeee;
+}
+
+/* Fix for educational system and level selects labels */
+body.dark-mode .settings-section label {
+    color: #eeeeee;
+}
+
+/* Fix for any remaining spans in settings list items */
+body.dark-mode #settings-page .list-container li>span {
+    color: #eeeeee;
+}
 
 /* End of Dark Mode */
