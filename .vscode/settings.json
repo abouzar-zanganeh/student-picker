@@ -1,3 +1,6 @@
 {
-  "liveServer.settings.port": 5500
+  "liveServer.settings.port": 5500,
+  "window.autoDetectColorScheme": true,
+  "workbench.preferredDarkTheme": "Default Dark+",
+  "workbench.preferredLightTheme": "Default Light+"
 }
