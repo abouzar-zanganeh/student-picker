@@ -11,14 +11,14 @@ DestinationFolder := "D:\ILI\My Student-Picker App Summer 1404\Student-Picker-Ap
 
 FileList =
 (
-D:\My Programming\Things_AI_Needs_to_Know_About_Me.md
-C:\Documents\GitHub\student-picker\GEMINI.md
+D:\ILI\My Student-Picker App Summer 1404\Student-Picker-App-Data-Backup\ForNotebookLLM\Things_AI_Needs_to_Know_About_Me_For_Student-Picker.md
 C:\Documents\GitHub\student-picker\index.html
 C:\Documents\GitHub\student-picker\src\models.js
 C:\Documents\GitHub\student-picker\src\main.js
 C:\Documents\GitHub\student-picker\src\state.js
 C:\Documents\GitHub\student-picker\src\ui.js
-C:\Documents\GitHub\student-picker\src\utils.js
+C:\Documents\GitHub\student-picker\src\otherUtils.js
+C:\Documents\GitHub\student-picker\src\classroomUtils.js
 C:\Documents\GitHub\student-picker\src\logManager.js
 C:\Documents\GitHub\student-picker\src\compression.worker.js
 C:\Documents\GitHub\student-picker\src\db.js
