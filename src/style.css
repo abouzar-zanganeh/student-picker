@@ -3554,3 +3554,139 @@ label {
 }
 
 /* End of absence warning */
+
+/* Dark Mode */
+/* --- Dark Mode Styles --- */
+body.dark-mode {
+    --color-background: #1a1a2e;
+    --color-surface: #16213e;
+    --color-border: #2c3e66;
+    --color-text-dark: #e0e0e0;
+    --color-text-muted: #a0a0a0;
+    --color-primary: #4a9eff;
+    --color-primary-hover: #1e88e5;
+    --color-secondary: #5c6bc0;
+    --color-secondary-hover: #3f51b5;
+    --color-success: #2e7d32;
+    --color-success-hover: #1b5e20;
+    --color-warning: #ffb74d;
+    --color-warning-hover: #ffa726;
+    --color-strong-warning: #ef5350;
+    --color-toast-bg: #2d2d44;
+    --color-toast-action: #bb86fc;
+}
+
+/* Additional overrides for specific elements in dark mode */
+body.dark-mode .pill {
+    background-color: #2c3e66;
+    color: #e0e0e0;
+}
+
+body.dark-mode .pill.active {
+    background-color: var(--color-primary);
+}
+
+body.dark-mode .list-container li {
+    background-color: var(--color-surface);
+}
+
+body.dark-mode .status-button {
+    background-color: #2c3e66;
+    color: #e0e0e0;
+    border-color: #1a2a4a;
+}
+
+body.dark-mode .attendance-list-item .absence-info,
+body.dark-mode .attendance-list-item .homework-info {
+    color: #b0b0b0;
+}
+
+body.dark-mode .student-stats-table th {
+    background-color: #0f1a2e;
+}
+
+body.dark-mode .student-stats-table tbody tr:hover {
+    background-color: #1a2a4a;
+}
+
+body.dark-mode .student-stats-table th:first-child,
+body.dark-mode .student-stats-table td:first-child {
+    background-color: var(--color-surface);
+}
+
+body.dark-mode .student-stats-table tbody tr:hover td:first-child {
+    background-color: #1a2a4a;
+}
+
+body.dark-mode .modal-content {
+    background-color: var(--color-surface);
+}
+
+body.dark-mode .search-results-dropdown {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+body.dark-mode .search-results-dropdown div:hover {
+    background-color: #1a2a4a;
+}
+
+body.dark-mode .stats-summary-box {
+    background-color: #0f1a2e;
+    border-color: var(--color-border);
+}
+
+body.dark-mode .scores-list,
+body.dark-mode .notes-list {
+    background-color: #0f1a2e;
+}
+
+body.dark-mode .context-menu {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+body.dark-mode .context-menu li:hover {
+    background-color: #1a2a4a;
+}
+
+body.dark-mode .side-nav {
+    background-color: var(--color-surface);
+}
+
+body.dark-mode .side-nav .nav-btn:hover {
+    background-color: #1a2a4a;
+}
+
+body.dark-mode input[type="text"]:not(.animated-search-input),
+body.dark-mode input[type="number"],
+body.dark-mode textarea,
+body.dark-mode select {
+    background-color: #0f1a2e;
+    border-color: var(--color-border);
+    color: var(--color-text-dark);
+}
+
+body.dark-mode .animated-search-input {
+    color: var(--color-text-dark);
+}
+
+body.dark-mode .btn-icon {
+    color: #a0a0a0;
+}
+
+body.dark-mode .btn-icon:hover {
+    color: #ffffff;
+}
+
+body.dark-mode .dashboard-tabs {
+    background-color: var(--color-background);
+}
+
+body.dark-mode .tab-btn:hover {
+    background-color: #1a2a4a;
+}
+
+
+
+/* End of Dark Mode */
