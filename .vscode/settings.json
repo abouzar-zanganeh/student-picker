@@ -1,5 +1,6 @@
 {
   "liveServer.settings.port": 5500,
+  // Forces app to use system theme
   "window.autoDetectColorScheme": true,
   "workbench.preferredDarkTheme": "Default Dark+",
   "workbench.preferredLightTheme": "Default Light+"
