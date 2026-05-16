@@ -1130,7 +1130,7 @@ function renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan)
             }
         });
     } else {
-        absenceSpan.textContent = 'جلسات غایب: بدون غیبت';
+        absenceSpan.textContent = 'جلسات غایب: بدون غیبت ⭐';
     }
 }
 
