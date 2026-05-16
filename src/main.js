@@ -1988,3 +1988,13 @@ function applyDarkMode(enabled) {
         document.body.classList.remove('dark-mode');
     }
 }
+
+// Syncs the dark mode checkbox UI and applies the theme (Designed to be used after file restore to apply 
+// the darkmode if the backup file has it on)
+export function syncDarkModeUI() {
+    const darkModeToggle = document.getElementById('setting-darkmode-toggle');
+    if (darkModeToggle) {
+        darkModeToggle.checked = state.userSettings.isDarkModeEnabled;
+        applyDarkMode(state.userSettings.isDarkModeEnabled);
+    }
+}

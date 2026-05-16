@@ -16,6 +16,7 @@ import { showNotification } from './notifyingMessaging';
 import { closeSideNav } from "./main";
 import * as ui from "./ui";
 import * as notifyingMessaging from './notifyingMessaging';
+import { syncDarkModeUI } from './main.js';
 
 export async function prepareBackupData(classNames = []) {
     const dataToBackup = {};
@@ -201,6 +202,9 @@ export function processRestore(plainData, isCleanRestore) {
     if (plainData.data.userSettings) {
         setUserSettings(plainData.data.userSettings);
     }
+
+    // Sync dark mode UI after settings are restored
+    syncDarkModeUI();
 
     // --- Final Steps ---
     setUserSettings({ lastRestoreTimestamp: new Date().toISOString() });
