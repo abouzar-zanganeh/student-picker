@@ -1407,11 +1407,11 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     homeworkNoteBtn.addEventListener('touchstart', () => hwNoteLongPress = false, { passive: true });
 
     homeworkNoteBtn.className = 'btn-icon';
-    homeworkNoteBtn.innerHTML = '📝';
+    homeworkNoteBtn.innerHTML = '✍️';
     homeworkNoteBtn.title = 'افزودن یادداشت برای تکلیف';
 
     const homeworkComment = state.selectedSession.studentRecords[student.identity.studentId]?.homework.comment;
-    if (!homeworkComment) homeworkNoteBtn.style.opacity = '0.3';
+    if (!homeworkComment) homeworkNoteBtn.innerHTML = '🧾';
 
     // Normal Click
     homeworkNoteBtn.addEventListener('click', (e) => {
@@ -1444,7 +1444,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
 
             state.saveData();
             showNotification("✅یادداشت تکلیف ذخیره شد.");
-            homeworkNoteBtn.style.opacity = content ? '1' : '0.3';
+            homeworkNoteBtn.innerHTML = content ? '✍️' : '🧾';
             renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
         });
 
