@@ -3918,4 +3918,44 @@ body.dark-mode .student-stats-table tbody tr.absent-row-highlight:hover td:first
     background-color: #4d3520;
 }
 
+/* Fix for absentees summary box in dark mode */
+body.dark-mode .absentees-summary {
+    background-color: #2a1a0a;
+    /* Dark amber/brown background */
+    border-color: #8a6d3b;
+    /* Warmer border for visibility */
+}
+
+body.dark-mode .absentees-summary-header h4 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .absentees-summary .summary-name {
+    background-color: #3d2a1a;
+    color: #e0e0e0;
+}
+
+body.dark-mode .absentees-summary .summary-name:hover {
+    background-color: #8a6d3b;
+    color: #ffffff;
+}
+
+body.dark-mode .absentees-summary .attendance-counters {
+    color: #a0a0a0;
+    border-top-color: #4a3520;
+}
+
+body.dark-mode .absentees-summary .attendance-counters strong {
+    color: #ffb74d;
+    /* Warm orange for emphasis */
+}
+
+body.dark-mode #copy-absentees-btn {
+    color: #a0a0a0;
+}
+
+body.dark-mode #copy-absentees-btn:hover {
+    color: #ffffff;
+}
+
 /* End of Dark Mode */
