@@ -4155,4 +4155,207 @@ body.dark-mode .modal-content h3 {
     color: #eeeeee;
 }
 
+/* Fix for profile page action buttons in dark mode */
+body.dark-mode .btn-icon-label {
+    background-color: #2a3a5c;
+    border-color: #3a5a8a;
+    color: #eeeeee;
+}
+
+body.dark-mode .btn-icon-label:hover {
+    background-color: #3a5a8a;
+    color: #ffffff;
+}
+
+/* Specific style for delete button in dark mode */
+body.dark-mode .btn-icon-label[title="حذف دانش‌آموز"] {
+    background-color: #3a1a1a;
+    border-color: #8a3a3a;
+    color: #ffaaaa;
+}
+
+body.dark-mode .btn-icon-label[title="حذف دانش‌آموز"]:hover {
+    background-color: #5a2a2a;
+    color: #ffcccc;
+}
+
+/* Fix for profile modal scrollbar in dark mode */
+body.dark-mode #modal-profile-content-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode #modal-profile-content-container::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 4px;
+}
+
+body.dark-mode #modal-profile-content-container::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 4px;
+}
+
+body.dark-mode #modal-profile-content-container::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox scrollbar support */
+body.dark-mode #modal-profile-content-container {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
+/* Fix for profile page pill hover in dark mode */
+body.dark-mode .scoring-section .pill {
+    background-color: #2a3a5c;
+    color: #eeeeee;
+}
+
+body.dark-mode .scoring-section .pill:hover {
+    background-color: #3a5a8a;
+}
+
+body.dark-mode .scoring-section .pill.active {
+    background-color: var(--color-primary);
+    color: #ffffff;
+}
+
+/* Fix for selector tab category pills in dark mode */
+body.dark-mode .category-pills .pill {
+    background-color: #2a3a5c;
+    color: #eeeeee;
+}
+
+body.dark-mode .category-pills .pill:hover {
+    background-color: #3a5a8a;
+}
+
+body.dark-mode .category-pills .pill.active {
+    background-color: var(--color-primary);
+    color: #ffffff;
+}
+
+body.dark-mode .category-pills .pill.active.graded-category-pill {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+}
+
+body.dark-mode .category-pills .add-category-pill {
+    background-color: var(--color-success);
+    color: #ffffff;
+}
+
+body.dark-mode .category-pills .add-category-pill:hover {
+    background-color: var(--color-success-hover);
+}
+
+/* Fix for restore confirm modal in dark mode */
+body.dark-mode #restore-confirm-modal .modal-content {
+    background-color: var(--color-surface);
+}
+
+body.dark-mode #restore-confirm-modal p,
+body.dark-mode #restore-confirm-modal div:not(.modal-options) {
+    color: #eeeeee;
+}
+
+/* Fix for the class list inside restore modal message */
+body.dark-mode #restore-confirm-modal ul {
+    background-color: #1a2a4a !important;
+    border-color: #3a5a8a;
+}
+
+body.dark-mode #restore-confirm-modal ul li {
+    color: #eeeeee;
+    background-color: #1a2a4a;
+    /* Explicit background instead of transparent */
+    border-bottom-color: #2a3a5c;
+}
+
+/* Fix for modal options text (جایگزینی کامل) */
+body.dark-mode .modal-options label {
+    color: #eeeeee;
+}
+
+body.dark-mode .modal-options input[type="checkbox"] {
+    accent-color: var(--color-primary);
+}
+
+/* Fix for warning text (if shown) */
+body.dark-mode #restore-modal-warning {
+    color: #ffb74d;
+}
+
+/* Fix for restore modal buttons in dark mode */
+body.dark-mode #restore-confirm-modal .btn-secondary {
+    background-color: #2a3a5c;
+    color: #eeeeee;
+    border: 1px solid #3a5a8a;
+}
+
+body.dark-mode #restore-confirm-modal .btn-secondary:hover {
+    background-color: #3a5a8a;
+    color: #ffffff;
+}
+
+body.dark-mode #restore-confirm-modal .btn-warning {
+    background-color: #5a2a2a;
+    color: #ffaaaa;
+    border: 1px solid #8a3a3a;
+}
+
+body.dark-mode #restore-confirm-modal .btn-warning:hover {
+    background-color: #7a3a3a;
+    color: #ffcccc;
+}
+
+/* Fix for restore modal scrollbars in dark mode */
+body.dark-mode #restore-confirm-modal .modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode #restore-confirm-modal .modal-content::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 4px;
+}
+
+body.dark-mode #restore-confirm-modal .modal-content::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 4px;
+}
+
+body.dark-mode #restore-confirm-modal .modal-content::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox support for modal scrollbar */
+body.dark-mode #restore-confirm-modal .modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
+/* Fix for the message div inner scrollbar (the ul container) */
+body.dark-mode #restore-modal-message::-webkit-scrollbar {
+    width: 6px;
+}
+
+body.dark-mode #restore-modal-message::-webkit-scrollbar-track {
+    background: #0f1a2e;
+    border-radius: 3px;
+}
+
+body.dark-mode #restore-modal-message::-webkit-scrollbar-thumb {
+    background: #2a3a5c;
+    border-radius: 3px;
+}
+
+body.dark-mode #restore-modal-message::-webkit-scrollbar-thumb:hover {
+    background: #4a6a8c;
+}
+
+/* Firefox support for message div */
+body.dark-mode #restore-modal-message {
+    scrollbar-width: thin;
+    scrollbar-color: #2a3a5c #0f1a2e;
+}
+
 /* End of Dark Mode */
