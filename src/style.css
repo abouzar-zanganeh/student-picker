@@ -378,14 +378,20 @@ button:disabled:hover {
 .status-button.issue-btn.active {
     background-color: var(--color-warning);
     border-color: var(--color-warning);
-    color: var(--color-text-dark);
+    color: var(--color-text-light);
 
+}
+
+.status-button.absent-btn.active {
+    background-color: #8B6B9D;
+    color: var(--color-text-light);
+    border-color: var(--color-secondary-hover);
 }
 
 .status-button.exit-btn.active {
     background-color: var(--color-strong-warning);
     border-color: var(--color-strong-warning);
-    color: var(--color-text-dark);
+    color: var(--color-text-light);
 }
 
 .hidden-input {
@@ -3552,6 +3558,13 @@ label {
     }
 }
 
+.qualitative-btn:disabled {
+    opacity: 0.6;
+    background-color: #2a3a5c;
+    color: #a0a0a0;
+    border-color: #3a4a6c;
+}
+
 /* End of absence warning */
 
 /* Dark Mode */
@@ -3956,6 +3969,190 @@ body.dark-mode #copy-absentees-btn {
 
 body.dark-mode #copy-absentees-btn:hover {
     color: #ffffff;
+}
+
+/* Fix for active status buttons in dark mode */
+body.dark-mode .status-button.active {
+    background-color: #5a3a2a;
+    color: #ffffff;
+    border-color: #8a6d3b;
+}
+
+/* Specifically for the absent button when active */
+body.dark-mode .status-button.absent-btn.active {
+    /* Purple for absence */
+    background-color: #8e44ad;
+    /* Dark red for absent */
+    color: #ffffff;
+    border-color: #9b59b6;
+}
+
+/* Keep issue button distinctive */
+body.dark-mode .status-button.issue-btn.active {
+    background-color: #e67e22;
+    /* Orange for issue */
+    border-color: #f39c12;
+    color: #ffffff;
+}
+
+/* Keep exit button distinctive */
+body.dark-mode .status-button.exit-btn.active {
+    background-color: #c0392b;
+    /* Dark amber/brown for exit */
+    border-color: #e74c3c;
+    color: #ffffff;
+}
+
+/* Profile button active state (if ever needed) */
+body.dark-mode .status-button.profile-btn.active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary-hover);
+    color: #ffffff;
+}
+
+/* Fix for disabled qualitative buttons in dark mode */
+body.dark-mode .qualitative-btn:disabled {
+    opacity: 0.6;
+    background-color: #2a3a5c;
+    color: #a0a0a0;
+    border-color: #3a4a6c;
+}
+
+/* Fix for active class card highlight in dark mode */
+body.dark-mode .active-class-card {
+    background-color: #1a3a2f !important;
+    /* Dark green matching winner highlight */
+    border-left: 5px solid var(--color-success) !important;
+}
+
+body.dark-mode .active-class-card:hover {
+    background-color: #2a4a3c !important;
+    /* Slightly lighter on hover */
+}
+
+/* Fix for main page search field in dark mode */
+body.dark-mode .global-search-container .animated-search-input {
+    color: #eeeeee;
+    background-color: #1a2a4a;
+    border-bottom-color: #3a5a8a;
+}
+
+body.dark-mode .global-search-container .animated-search-input::placeholder {
+    color: #8a9aba;
+}
+
+body.dark-mode .global-search-container .search-icon {
+    color: #8a9aba;
+}
+
+body.dark-mode .animated-search-container .search-icon:hover {
+    background-color: #68759e;
+}
+
+/* Fix for search results dropdown */
+body.dark-mode .global-search-container .search-results-dropdown {
+    background-color: #1a2a4a;
+    border-color: #3a5a8a;
+}
+
+body.dark-mode .global-search-container .search-results-dropdown div {
+    color: #eeeeee;
+}
+
+body.dark-mode .global-search-container .search-results-dropdown div:hover {
+    background-color: #2a3a5c;
+}
+
+body.dark-mode .global-search-container .search-results-dropdown .no-results {
+    color: #a0a0a0;
+}
+
+/* Fix for the global search result items */
+body.dark-mode .global-search-result .student-name {
+    color: #eeeeee;
+}
+
+body.dark-mode .global-search-result .class-name {
+    color: #8a9aba;
+}
+
+body.dark-mode .global-search-result .class-name:hover {
+    color: var(--color-primary);
+}
+
+/* Fix for student profile page text in dark mode */
+body.dark-mode .scoring-section h3,
+body.dark-mode .history-section h3,
+body.dark-mode .history-section h4 {
+    color: #eeeeee;
+}
+
+/* Fix for score values in profile */
+body.dark-mode .score-value {
+    color: #eeeeee;
+}
+
+body.dark-mode .score-skill-badge {
+    background-color: #2a3a5c;
+    color: #eeeeee;
+}
+
+body.dark-mode .score-date {
+    color: #a0a0a0;
+}
+
+body.dark-mode .score-comment {
+    color: #cccccc;
+    background-color: transparent;
+}
+
+/* Fix for note content hover - too bright */
+body.dark-mode .score-comment:hover,
+body.dark-mode .note-content:hover {
+    background-color: #2a3a5c;
+    cursor: pointer;
+}
+
+/* Fix for note history items */
+body.dark-mode .note-history-item {
+    background-color: #1a2a3a;
+}
+
+body.dark-mode .note-info {
+    color: #a0a0a0;
+}
+
+body.dark-mode .note-content {
+    color: #eeeeee;
+}
+
+/* Fix for stats summary box in profile */
+body.dark-mode .stats-summary-box {
+    background-color: #0f1a2e;
+    border-color: var(--color-border);
+}
+
+body.dark-mode .stats-summary-box p {
+    color: #eeeeee;
+}
+
+body.dark-mode .stats-summary-box strong {
+    color: #bbccff;
+}
+
+/* Fix for stats breakdown items */
+body.dark-mode .stats-breakdown .stats-breakdown-item {
+    color: #cccccc;
+}
+
+/* Fix for no content message */
+body.dark-mode .no-content-message {
+    color: #a0a0a0;
+}
+
+/* Fix for modal titles in dark mode */
+body.dark-mode .modal-content h3 {
+    color: #eeeeee;
 }
 
 /* End of Dark Mode */
