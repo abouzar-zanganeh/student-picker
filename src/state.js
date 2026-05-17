@@ -636,7 +636,7 @@ export function permanentlyDeleteSession(classroomName, sessionNumber) {
             if (student.profile.notes && student.profile.notes.length > 0) {
                 student.profile.notes = student.profile.notes.filter(note =>
                     !note.source ||
-                    note.source.type !== 'fromAttendance' ||
+                    note.source.type !== 'fromSession' ||
                     note.source.sessionNumber !== sessionNumber
                 );
             }

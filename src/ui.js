@@ -811,12 +811,12 @@ export function processMassHomeworkComment(commentText, append) {
 function updateStudentProfileNoteForHomework(student, session, content) {
     const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
     const displayNumber = sessionDisplayNumberMap.get(session.sessionNumber);
-    const noteSource = { type: 'fromAttendance', sessionNumber: session.sessionNumber };
+    const noteSource = { type: 'fromSession', sessionNumber: session.sessionNumber };
     const notePrefix = `یادداشت جلسه ${displayNumber}:\n`;
     const existingNote = student.profile.notes.find(n =>
         !n.isDeleted &&
         n.source &&
-        n.source.type === 'fromAttendance' &&
+        n.source.type === 'fromSession' &&
         n.source.sessionNumber === noteSource.sessionNumber
     );
 
@@ -1431,10 +1431,10 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
             // Logic to sync with profile note
             const sessionDisplayNumberMap = getSessionDisplayMap(state.currentClassroom);
             const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
-            const noteSource = { type: 'fromAttendance', sessionNumber: state.selectedSession.sessionNumber };
+            const noteSource = { type: 'fromSession', sessionNumber: state.selectedSession.sessionNumber };
             const notePrefix = `یادداشت جلسه ${displayNumber}:\n`;
 
-            const existingNote = student.profile.notes.find(n => !n.isDeleted && n.source && n.source.type === 'fromAttendance' && n.source.sessionNumber === noteSource.sessionNumber);
+            const existingNote = student.profile.notes.find(n => !n.isDeleted && n.source && n.source.type === 'fromSession' && n.source.sessionNumber === noteSource.sessionNumber);
 
             if (existingNote) {
                 if (content) existingNote.content = notePrefix + content;
@@ -2293,17 +2293,29 @@ export function showStudentProfile(student) {
     addNoteBtn.className = 'btn-icon btn-icon-label';
     addNoteBtn.title = 'افزودن یادداشت جدید';
     addNoteBtn.innerHTML = '<span>📝</span><span>یادداشت</span>';
-    addNoteBtn.addEventListener('click', () => {
-        const studentForNote = state.selectedStudentForProfile; // <-- CAPTURE STUDENT
-        // @ts-ignore
 
-        newNoteContent.value = ''; // Clear modal for a new note
+    //Disable button if no session is selected (profile opened from settings/class list)
+    if (!state.selectedSession) {
+        addNoteBtn.disabled = true;
+        addNoteBtn.title = 'یادداشت فقط در هنگام برگزاری جلسه قابل ثبت است';
+        addNoteBtn.style.opacity = '0.5';
+        addNoteBtn.style.cursor = 'not-allowed';
+    }
+
+    addNoteBtn.addEventListener('click', () => {
+        const studentForNote = state.selectedStudentForProfile;
+        //Capture the current session context before modal closes
+        const currentSession = state.selectedSession;
+        const sessionNumber = currentSession ? currentSession.sessionNumber : null;
+
+        newNoteContent.value = '';
         newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
-        // Inside addNoteBtn.addEventListener...
         state.setSaveNoteCallback((content) => {
             if (content) {
-                studentForNote.addNote(content);
+                //Create source object if we're in a session context
+                const source = sessionNumber ? { type: 'fromSession', sessionNumber } : null;
+                studentForNote.addNote(content, source);
                 state.saveData();
 
                 logManager.addLog(state.currentClassroom.info.name, `یادداشت جدیدی برای دانش‌آموز «${studentForNote.identity.name}» ثبت شد.`, { type: 'VIEW_STUDENT_PROFILE', studentId: studentForNote.identity.studentId });
@@ -2820,14 +2832,15 @@ export function renderStudentNotes(notesContainer) {
             const noteInfoDiv = document.createElement('div');
             noteInfoDiv.className = 'note-info';
 
-            // Build date display with optional session number
+            //Build date display with optional session number
             const dateSpan = document.createElement('span');
             dateSpan.className = 'note-date';
 
             let dateText = new Date(note.timestamp).toLocaleDateString('fa-IR');
 
-            // Check if this note came from an attendance session and has sessionNumber
-            if (note.source?.type === 'fromAttendance' && note.source.sessionNumber) {
+            // Check if this note is linked to a session (supports both old and new type names)
+            const isSessionNote = note.source?.type === 'fromSession' || note.source?.type === 'fromAttendance';
+            if (isSessionNote && note.source?.sessionNumber) {
                 const sessionDisplayMap = getSessionDisplayMap(state.currentClassroom);
                 const displayNumber = sessionDisplayMap.get(note.source.sessionNumber);
                 if (displayNumber) {
@@ -5426,17 +5439,21 @@ function renderWinnerDetails(winner, categoryName) {
     if (state.selectedSession.isFinished) {
         addNoteBtn.disabled = true;
     } else {
-        addNoteBtn.addEventListener('click', () => {
-            // @ts-ignore
+        // Capture current session (we're definitely in one on selector tab)
+        const currentSession = state.selectedSession;
+        const sessionNumber = currentSession ? currentSession.sessionNumber : null;
 
+        addNoteBtn.addEventListener('click', () => {
             newNoteContent.value = '';
             newNoteContent.dispatchEvent(new Event('input', { bubbles: true }));
 
             state.setSaveNoteCallback((content) => {
                 if (content) {
-                    winner.addNote(content);
+                    //Attach session source if available
+                    const source = sessionNumber ? { type: 'fromSession', sessionNumber } : null;
+                    winner.addNote(content, source);
                     state.saveData();
-                    displayWinner(); // Refresh to show new note
+                    displayWinner();
                     showNotification('✅ یادداشت با موفقیت ثبت شد.');
                 }
             });
