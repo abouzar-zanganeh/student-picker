@@ -1406,7 +1406,7 @@ button:disabled:hover {
 .homework-status-btn.none::before {
     content: '❌';
     filter: grayscale(0.1);
-    opacity: 0.6;
+
 }
 
 /* Container for student and session counts */
