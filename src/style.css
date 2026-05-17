@@ -1548,7 +1548,7 @@ button:disabled:hover {
     transition: opacity 0.4s;
 }
 
-/* Fix for side nav menu position on wider screens. */
+/*  side nav menu position on wider screens. */
 @media screen and (min-width: 640px) {
     .side-nav {
         right: calc((100vw - 640px) / 2);
@@ -3222,7 +3222,7 @@ textarea,
 
 /* end of report modal styles */
 
-/* Fix for Report Modal Overflow */
+/*  Report Modal Overflow */
 #report-config-modal .modal-content {
     max-height: 85vh;
     /* Limit height to 85% of the viewport */
@@ -3714,12 +3714,12 @@ body.dark-mode .list-container li.context-menu-target {
     background-color: #2a3a5c;
 }
 
-/* Fix for attendance list items on hover */
+/*  attendance list items on hover */
 body.dark-mode .attendance-list-item:hover {
     background-color: #2a3a5c;
 }
 
-/* Fix for stats table row hover (already had a rule, just ensuring consistency) */
+/*  stats table row hover (already had a rule, just ensuring consistency) */
 body.dark-mode .student-stats-table tbody tr:hover {
     background-color: #2a3a5c;
 }
@@ -3728,7 +3728,7 @@ body.dark-mode .student-stats-table tbody tr:hover td:first-child {
     background-color: #2a3a5c;
 }
 
-/* Fix for section titles in dark mode */
+/*  section titles in dark mode */
 body.dark-mode .action-column h3,
 body.dark-mode .info-column h3,
 body.dark-mode .section-title,
@@ -3748,12 +3748,12 @@ body.dark-mode .tab-btn.active {
     color: var(--color-primary);
 }
 
-/* Fix for the "آمار عملکرد" header */
+/*  the "آمار عملکرد" header */
 body.dark-mode #student-stats-header {
     color: #e0e0e0;
 }
 
-/* Fix for student names on attendance page */
+/*  student names on attendance page */
 body.dark-mode .att-row-1 .student-name {
     color: #e0e0e0;
 }
@@ -3763,7 +3763,7 @@ body.dark-mode .attendance-list-header .header-label {
     color: #a0a0a0;
 }
 
-/* Fix for the inline search input text */
+/*  the inline search input text */
 body.dark-mode .inline-search-input {
     color: #e0e0e0;
 }
@@ -3778,7 +3778,7 @@ body.dark-mode .att-row-3 {
 
 }
 
-/* Fix for input placeholders in dark mode - make them more visible */
+/*  input placeholders in dark mode - make them more visible */
 body.dark-mode input::placeholder,
 body.dark-mode textarea::placeholder {
     color: #e9e6e6;
@@ -3810,7 +3810,7 @@ body.dark-mode #quick-note-textarea::placeholder {
     color: #e9e6e6;
 }
 
-/* Fix for statistics table text in dark mode */
+/*  statistics table text in dark mode */
 body.dark-mode .student-stats-table td,
 body.dark-mode .student-stats-table th {
     color: #eeeeee;
@@ -3825,7 +3825,7 @@ body.dark-mode .student-stats-table .student-name-link:hover {
     color: var(--color-primary);
 }
 
-/* Fix for winner highlight row in dark mode */
+/*  winner highlight row in dark mode */
 body.dark-mode .student-stats-table tbody tr.current-winner-highlight {
     background-color: #1e3a2f;
     /* Darker green that contrasts with dark background */
@@ -3844,7 +3844,7 @@ body.dark-mode .student-stats-table tbody tr.current-winner-highlight:hover td:f
     background-color: #2a4a3c;
 }
 
-/* Fix for category column highlight in dark mode */
+/*  category column highlight in dark mode */
 body.dark-mode .student-stats-table th.current-category-highlight,
 body.dark-mode .student-stats-table td.current-category-highlight {
     background-color: #1a3a5c;
@@ -3856,12 +3856,12 @@ body.dark-mode .student-stats-table tbody tr:hover td.current-category-highlight
     background-color: #2a4a6c;
 }
 
-/* Fix for qualitative stats label text in dark mode */
+/*  qualitative stats label text in dark mode */
 body.dark-mode .qualitative-stats-tag {
     color: #eeeeee;
 }
 
-/* Fix for all settings page text in dark mode */
+/*  all settings page text in dark mode */
 body.dark-mode #settings-page,
 body.dark-mode #settings-page .section-title,
 body.dark-mode #settings-page .accordion-toggle,
@@ -3873,7 +3873,7 @@ body.dark-mode .class-type-selection label {
     color: #eeeeee;
 }
 
-/* Fix for the student list in settings */
+/*  the student list in settings */
 body.dark-mode #settings-student-list .student-name-link {
     color: #eeeeee;
 }
@@ -3882,17 +3882,17 @@ body.dark-mode #settings-student-list .student-name-link:hover {
     color: var(--color-primary);
 }
 
-/* Fix for category list in settings */
+/*  category list in settings */
 body.dark-mode .name-and-badge-container span:first-child {
     color: #eeeeee;
 }
 
-/* Fix for radio button labels (حضوری / آنلاین) */
+/*  radio button labels (حضوری / آنلاین) */
 body.dark-mode .class-type-selection label span {
     color: #eeeeee;
 }
 
-/* Fix for schedule section text */
+/*  schedule section text */
 body.dark-mode #settings-page label {
     color: #eeeeee;
 }
@@ -3902,17 +3902,17 @@ body.dark-mode #settings-page .list-container li div label {
     color: #eeeeee;
 }
 
-/* Fix for educational system and level selects labels */
+/*  educational system and level selects labels */
 body.dark-mode .settings-section label {
     color: #eeeeee;
 }
 
-/* Fix for any remaining spans in settings list items */
+/*  any remaining spans in settings list items */
 body.dark-mode #settings-page .list-container li>span {
     color: #eeeeee;
 }
 
-/* Fix for absent row highlight in dark mode */
+/*  absent row highlight in dark mode */
 body.dark-mode .student-stats-table tbody tr.absent-row-highlight {
     background-color: #3d2a1a;
     /* Dark amber/brown instead of bright yellow */
@@ -3931,7 +3931,7 @@ body.dark-mode .student-stats-table tbody tr.absent-row-highlight:hover td:first
     background-color: #4d3520;
 }
 
-/* Fix for absentees summary box in dark mode */
+/*  absentees summary box in dark mode */
 body.dark-mode .absentees-summary {
     background-color: #2a1a0a;
     /* Dark amber/brown background */
@@ -3971,7 +3971,7 @@ body.dark-mode #copy-absentees-btn:hover {
     color: #ffffff;
 }
 
-/* Fix for active status buttons in dark mode */
+/*  active status buttons in dark mode */
 body.dark-mode .status-button.active {
     background-color: #5a3a2a;
     color: #ffffff;
@@ -4010,7 +4010,7 @@ body.dark-mode .status-button.profile-btn.active {
     color: #ffffff;
 }
 
-/* Fix for disabled qualitative buttons in dark mode */
+/*  disabled qualitative buttons in dark mode */
 body.dark-mode .qualitative-btn:disabled {
     opacity: 0.6;
     background-color: #2a3a5c;
@@ -4018,7 +4018,7 @@ body.dark-mode .qualitative-btn:disabled {
     border-color: #3a4a6c;
 }
 
-/* Fix for active class card highlight in dark mode */
+/*  active class card highlight in dark mode */
 body.dark-mode .active-class-card {
     background-color: #1a3a2f !important;
     /* Dark green matching winner highlight */
@@ -4030,7 +4030,7 @@ body.dark-mode .active-class-card:hover {
     /* Slightly lighter on hover */
 }
 
-/* Fix for main page search field in dark mode */
+/*  main page search field in dark mode */
 body.dark-mode .global-search-container .animated-search-input {
     color: #eeeeee;
     background-color: #1a2a4a;
@@ -4049,7 +4049,7 @@ body.dark-mode .animated-search-container .search-icon:hover {
     background-color: #68759e;
 }
 
-/* Fix for search results dropdown */
+/*  search results dropdown */
 body.dark-mode .global-search-container .search-results-dropdown {
     background-color: #1a2a4a;
     border-color: #3a5a8a;
@@ -4067,7 +4067,7 @@ body.dark-mode .global-search-container .search-results-dropdown .no-results {
     color: #a0a0a0;
 }
 
-/* Fix for the global search result items */
+/*  the global search result items */
 body.dark-mode .global-search-result .student-name {
     color: #eeeeee;
 }
@@ -4080,14 +4080,14 @@ body.dark-mode .global-search-result .class-name:hover {
     color: var(--color-primary);
 }
 
-/* Fix for student profile page text in dark mode */
+/*  student profile page text in dark mode */
 body.dark-mode .scoring-section h3,
 body.dark-mode .history-section h3,
 body.dark-mode .history-section h4 {
     color: #eeeeee;
 }
 
-/* Fix for score values in profile */
+/*  score values in profile */
 body.dark-mode .score-value {
     color: #eeeeee;
 }
@@ -4106,14 +4106,14 @@ body.dark-mode .score-comment {
     background-color: transparent;
 }
 
-/* Fix for note content hover - too bright */
+/*  note content hover - too bright */
 body.dark-mode .score-comment:hover,
 body.dark-mode .note-content:hover {
     background-color: #2a3a5c;
     cursor: pointer;
 }
 
-/* Fix for note history items */
+/*  note history items */
 body.dark-mode .note-history-item {
     background-color: #1a2a3a;
 }
@@ -4126,7 +4126,7 @@ body.dark-mode .note-content {
     color: #eeeeee;
 }
 
-/* Fix for stats summary box in profile */
+/*  stats summary box in profile */
 body.dark-mode .stats-summary-box {
     background-color: #0f1a2e;
     border-color: var(--color-border);
@@ -4140,22 +4140,22 @@ body.dark-mode .stats-summary-box strong {
     color: #bbccff;
 }
 
-/* Fix for stats breakdown items */
+/*  stats breakdown items */
 body.dark-mode .stats-breakdown .stats-breakdown-item {
     color: #cccccc;
 }
 
-/* Fix for no content message */
+/*  no content message */
 body.dark-mode .no-content-message {
     color: #a0a0a0;
 }
 
-/* Fix for modal titles in dark mode */
+/*  modal titles in dark mode */
 body.dark-mode .modal-content h3 {
     color: #eeeeee;
 }
 
-/* Fix for profile page action buttons in dark mode */
+/*  profile page action buttons in dark mode */
 body.dark-mode .btn-icon-label {
     background-color: #2a3a5c;
     border-color: #3a5a8a;
@@ -4179,7 +4179,7 @@ body.dark-mode .btn-icon-label[title="حذف دانش‌آموز"]:hover {
     color: #ffcccc;
 }
 
-/* Fix for profile modal scrollbar in dark mode */
+/*  profile modal scrollbar in dark mode */
 body.dark-mode #modal-profile-content-container::-webkit-scrollbar {
     width: 8px;
 }
@@ -4204,7 +4204,7 @@ body.dark-mode #modal-profile-content-container {
     scrollbar-color: #3a5a8a #1a2a4a;
 }
 
-/* Fix for profile page pill hover in dark mode */
+/*  profile page pill hover in dark mode */
 body.dark-mode .scoring-section .pill {
     background-color: #2a3a5c;
     color: #eeeeee;
@@ -4219,7 +4219,7 @@ body.dark-mode .scoring-section .pill.active {
     color: #ffffff;
 }
 
-/* Fix for selector tab category pills in dark mode */
+/*  selector tab category pills in dark mode */
 body.dark-mode .category-pills .pill {
     background-color: #2a3a5c;
     color: #eeeeee;
@@ -4248,7 +4248,7 @@ body.dark-mode .category-pills .add-category-pill:hover {
     background-color: var(--color-success-hover);
 }
 
-/* Fix for restore confirm modal in dark mode */
+/*  restore confirm modal in dark mode */
 body.dark-mode #restore-confirm-modal .modal-content {
     background-color: var(--color-surface);
 }
@@ -4258,7 +4258,7 @@ body.dark-mode #restore-confirm-modal div:not(.modal-options) {
     color: #eeeeee;
 }
 
-/* Fix for the class list inside restore modal message */
+/*  the class list inside restore modal message */
 body.dark-mode #restore-confirm-modal ul {
     background-color: #1a2a4a !important;
     border-color: #3a5a8a;
@@ -4271,7 +4271,7 @@ body.dark-mode #restore-confirm-modal ul li {
     border-bottom-color: #2a3a5c;
 }
 
-/* Fix for modal options text (جایگزینی کامل) */
+/*  modal options text (جایگزینی کامل) */
 body.dark-mode .modal-options label {
     color: #eeeeee;
 }
@@ -4280,12 +4280,12 @@ body.dark-mode .modal-options input[type="checkbox"] {
     accent-color: var(--color-primary);
 }
 
-/* Fix for warning text (if shown) */
+/*  warning text (if shown) */
 body.dark-mode #restore-modal-warning {
     color: #ffb74d;
 }
 
-/* Fix for restore modal buttons in dark mode */
+/*  restore modal buttons in dark mode */
 body.dark-mode #restore-confirm-modal .btn-secondary {
     background-color: #2a3a5c;
     color: #eeeeee;
@@ -4308,7 +4308,7 @@ body.dark-mode #restore-confirm-modal .btn-warning:hover {
     color: #ffcccc;
 }
 
-/* Fix for restore modal scrollbars in dark mode */
+/*  restore modal scrollbars in dark mode */
 body.dark-mode #restore-confirm-modal .modal-content::-webkit-scrollbar {
     width: 8px;
 }
@@ -4333,7 +4333,7 @@ body.dark-mode #restore-confirm-modal .modal-content {
     scrollbar-color: #3a5a8a #1a2a4a;
 }
 
-/* Fix for the message div inner scrollbar (the ul container) */
+/*  the message div inner scrollbar (the ul container) */
 body.dark-mode #restore-modal-message::-webkit-scrollbar {
     width: 6px;
 }
@@ -4356,6 +4356,44 @@ body.dark-mode #restore-modal-message::-webkit-scrollbar-thumb:hover {
 body.dark-mode #restore-modal-message {
     scrollbar-width: thin;
     scrollbar-color: #2a3a5c #0f1a2e;
+}
+
+/*  schedule time inputs on settings page */
+body.dark-mode #settings-schedule-start,
+body.dark-mode #settings-schedule-end {
+    background-color: #1a2a4a;
+    color: #eeeeee;
+    border-color: #3a5a8a;
+}
+
+body.dark-mode #settings-schedule-start::-webkit-calendar-picker-indicator,
+body.dark-mode #settings-schedule-end::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+/*  trash icons on settings page in dark mode */
+body.dark-mode #settings-student-list .btn-icon,
+body.dark-mode #category-list .btn-icon {
+    opacity: 0.6;
+}
+
+body.dark-mode #settings-student-list .btn-icon:hover,
+body.dark-mode #category-list .btn-icon:hover {
+    opacity: 1;
+}
+
+/* Fix for buttons on settings page in dark mode */
+body.dark-mode #settings-page .btn-secondary,
+body.dark-mode #settings-page .btn-success,
+body.dark-mode #settings-page .btn-icon:not(.delete-item-btn) {
+    opacity: 0.85;
+}
+
+body.dark-mode #settings-page .btn-secondary:hover,
+body.dark-mode #settings-page .btn-success:hover,
+body.dark-mode #settings-page .btn-icon:not(.delete-item-btn):hover {
+    opacity: 1;
 }
 
 /* End of Dark Mode */
