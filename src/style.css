@@ -3899,4 +3899,23 @@ body.dark-mode #settings-page .list-container li>span {
     color: #eeeeee;
 }
 
+/* Fix for absent row highlight in dark mode */
+body.dark-mode .student-stats-table tbody tr.absent-row-highlight {
+    background-color: #3d2a1a;
+    /* Dark amber/brown instead of bright yellow */
+}
+
+body.dark-mode .student-stats-table tbody tr.absent-row-highlight td:first-child {
+    background-color: #3d2a1a;
+}
+
+body.dark-mode .student-stats-table tbody tr.absent-row-highlight:hover {
+    background-color: #4d3520;
+    /* Slightly lighter on hover */
+}
+
+body.dark-mode .student-stats-table tbody tr.absent-row-highlight:hover td:first-child {
+    background-color: #4d3520;
+}
+
 /* End of Dark Mode */
