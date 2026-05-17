@@ -3745,7 +3745,7 @@ body.dark-mode .tab-btn {
 }
 
 body.dark-mode .tab-btn.active {
-    color: var(--color-primary);
+    color: #5ed615;
 }
 
 /*  the "آمار عملکرد" header */
@@ -4394,6 +4394,268 @@ body.dark-mode #settings-page .btn-secondary:hover,
 body.dark-mode #settings-page .btn-success:hover,
 body.dark-mode #settings-page .btn-icon:not(.delete-item-btn):hover {
     opacity: 1;
+}
+
+/* Fix for CSV preview page in dark mode */
+body.dark-mode #csv-preview-page h2,
+body.dark-mode #csv-preview-page p {
+    color: #eeeeee;
+}
+
+body.dark-mode .preview-item {
+    background-color: #1a2a4a;
+}
+
+body.dark-mode .preview-item label {
+    color: #eeeeee;
+}
+
+body.dark-mode .preview-item input[type="checkbox"] {
+    accent-color: var(--color-primary);
+}
+
+/* Fix for buttons on CSV preview page */
+body.dark-mode #csv-confirm-btn,
+body.dark-mode #csv-cancel-btn {
+    opacity: 0.85;
+}
+
+body.dark-mode #csv-confirm-btn:hover,
+body.dark-mode #csv-cancel-btn:hover {
+    opacity: 1;
+}
+
+/* Fix for column mapping page (related to CSV import) */
+body.dark-mode #column-mapping-page h2,
+body.dark-mode #column-mapping-page p {
+    color: #eeeeee;
+}
+
+body.dark-mode #column-select-dropdown {
+    background-color: #1a2a4a;
+    color: #eeeeee;
+    border-color: #3a5a8a;
+}
+
+/* Fix for dropdown scrollbar on CSV column mapping page */
+body.dark-mode #column-select-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode #column-select-dropdown::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 4px;
+}
+
+body.dark-mode #column-select-dropdown::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 4px;
+}
+
+body.dark-mode #column-select-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox support */
+body.dark-mode #column-select-dropdown {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
+body.dark-mode .attendance-status-btn.absent.active {
+    color: #9c0606;
+}
+
+/* Fix for selector tab search field in dark mode - match main page style */
+body.dark-mode .action-column-header .animated-search-input {
+    color: #eeeeee;
+    background-color: #1a2a4a;
+    border-bottom-color: #3a5a8a;
+}
+
+body.dark-mode .action-column-header .animated-search-input::placeholder {
+    color: #8a9aba;
+}
+
+body.dark-mode .action-column-header .search-icon {
+    color: #8a9aba;
+}
+
+body.dark-mode .action-column-header .search-icon:hover {
+    color: #bbccff;
+}
+
+/* Fix for search results dropdown on selector tab */
+body.dark-mode .action-column-header .search-results-dropdown {
+    background-color: #1a2a4a;
+    border-color: #3a5a8a;
+}
+
+body.dark-mode .action-column-header .search-results-dropdown div {
+    color: #eeeeee;
+}
+
+body.dark-mode .action-column-header .search-results-dropdown div:hover {
+    background-color: #2a3a5c;
+}
+
+body.dark-mode .action-column-header .search-results-dropdown .no-results {
+    color: #a0a0a0;
+}
+
+/* Fix for scrollbars in search dropdowns on main page and selector tab */
+body.dark-mode .global-search-container .search-results-dropdown::-webkit-scrollbar,
+body.dark-mode .action-column-header .search-results-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+body.dark-mode .global-search-container .search-results-dropdown::-webkit-scrollbar-track,
+body.dark-mode .action-column-header .search-results-dropdown::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 3px;
+}
+
+body.dark-mode .global-search-container .search-results-dropdown::-webkit-scrollbar-thumb,
+body.dark-mode .action-column-header .search-results-dropdown::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 3px;
+}
+
+body.dark-mode .global-search-container .search-results-dropdown::-webkit-scrollbar-thumb:hover,
+body.dark-mode .action-column-header .search-results-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox support for both search dropdowns */
+body.dark-mode .global-search-container .search-results-dropdown,
+body.dark-mode .action-column-header .search-results-dropdown {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
+/* Fix for app settings modal text in dark mode */
+body.dark-mode #app-settings-modal .modal-content h3 {
+    color: #eeeeee;
+}
+
+body.dark-mode #app-settings-modal .list-container li span {
+    color: #eeeeee;
+}
+
+body.dark-mode #app-settings-modal .checkbox-label {
+    color: #eeeeee;
+}
+
+body.dark-mode #app-settings-modal .checkbox-label input[type="checkbox"] {
+    accent-color: var(--color-primary);
+}
+
+body.dark-mode #app-settings-modal .modal-actions button {
+    opacity: 0.85;
+}
+
+body.dark-mode #app-settings-modal .modal-actions button:hover {
+    opacity: 1;
+}
+
+/* Fix for add class modal text in dark mode */
+body.dark-mode #add-class-modal .modal-content h3 {
+    color: #eeeeee;
+}
+
+body.dark-mode #add-class-modal .input-group label {
+    color: #eeeeee;
+}
+
+body.dark-mode #add-class-modal .input-group input,
+body.dark-mode #add-class-modal .input-group select,
+body.dark-mode #add-class-modal .input-group .class-type-selection label span {
+    color: #eeeeee;
+}
+
+body.dark-mode #add-class-modal .input-group input,
+body.dark-mode #add-class-modal .input-group select {
+    background-color: #1a2a4a;
+    border-color: #3a5a8a;
+}
+
+body.dark-mode #add-class-modal .class-type-selection label {
+    color: #eeeeee;
+}
+
+body.dark-mode #add-class-modal .class-type-selection input[type="radio"] {
+    accent-color: var(--color-primary);
+}
+
+body.dark-mode #add-class-modal .checkbox-group-in-add-class-modal label {
+    color: #eeeeee;
+}
+
+body.dark-mode #add-class-modal .checkbox-group-in-add-class-modal input[type="checkbox"] {
+    accent-color: var(--color-primary);
+}
+
+body.dark-mode #add-class-modal .modal-actions button {
+    opacity: 0.85;
+}
+
+body.dark-mode #add-class-modal .modal-actions button:hover {
+    opacity: 1;
+}
+
+/* Fix for schedule accordion toggle */
+body.dark-mode #modal-schedule-toggle {
+    color: #eeeeee;
+}
+
+/* Fix for add class modal scrollbar in dark mode */
+body.dark-mode #add-class-modal .modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode #add-class-modal .modal-content::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 4px;
+}
+
+body.dark-mode #add-class-modal .modal-content::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 4px;
+}
+
+body.dark-mode #add-class-modal .modal-content::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox support */
+body.dark-mode #add-class-modal .modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
+/* Fix for level select dropdown scrollbar in add class modal */
+body.dark-mode #modal-add-class-level::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode #modal-add-class-level::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 4px;
+}
+
+body.dark-mode #modal-add-class-level::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 4px;
+}
+
+body.dark-mode #modal-add-class-level::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox support */
+body.dark-mode #modal-add-class-level {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
 }
 
 /* End of Dark Mode */
