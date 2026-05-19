@@ -578,6 +578,27 @@
         </div>
     </div>
 
+    <div id="past-attendance-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>تعیین وضعیت حضور در جلسات گذشته</h3>
+            <p style="margin-bottom: 15px; font-size: 14px; color: #666;">
+                این کلاس دارای جلسات برگزار شده است. لطفاً وضعیت حضور دانش‌آموز جدید را برای تمام جلسات گذشته مشخص کنید:
+            </p>
+            <div class="input-group centered-input-group" style="justify-content: center; margin-bottom: 20px;">
+                <select id="past-attendance-select" class="settings-select"
+                    style="width: auto; min-width: 150px; text-align: center;">
+                    <option value="present">✅ حاضر</option>
+                    <option value="absent">❌ غایب</option>
+                    <option value="unknown">❓ نامشخص</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button id="past-attendance-cancel-btn" class="btn-secondary">لغو</button>
+                <button id="past-attendance-confirm-btn" class="btn-success">تایید</button>
+            </div>
+        </div>
+    </div>
+
 
 
 
