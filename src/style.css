@@ -4658,4 +4658,32 @@ body.dark-mode #modal-add-class-level {
     scrollbar-color: #3a5a8a #1a2a4a;
 }
 
+/* Fix for statistics table scrollbar in dark mode */
+body.dark-mode #student-stats-table-container::-webkit-scrollbar {
+    height: 10px;
+    /* Height for horizontal scrollbar */
+    width: 8px;
+    /* Width for vertical scrollbar */
+}
+
+body.dark-mode #student-stats-table-container::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 5px;
+}
+
+body.dark-mode #student-stats-table-container::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 5px;
+}
+
+body.dark-mode #student-stats-table-container::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox support */
+body.dark-mode #student-stats-table-container {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
 /* End of Dark Mode */
