@@ -1,3 +1,4 @@
+// @ts-nocheck
 /* ==========================================================================
    notifyingMessaging.js introduction
    --------------------------------------------------------------------------
@@ -7,6 +8,8 @@
 
 import * as state from "./state";
 import { confirmModalCancelBtn, confirmModalConfirmBtn, confirmModalMessage, openModal, secureConfirmCode, secureConfirmConfirmBtn, secureConfirmInput, secureConfirmMessage, undoMessage, undoToast } from "./ui";
+import { setPastAttendanceCallback, setPastAttendanceCancelCallback } from './state.js';
+import { setActiveModal } from './state.js';
 
 
 export function showUndoToast(message) {
@@ -106,3 +109,47 @@ export function showSecureConfirm(message, onConfirm) {
     };
 }
 
+/**
+ * Shows a modal asking the teacher to choose attendance status for all past sessions.
+ * @param {Function} onConfirm - Callback that receives the chosen status ('present', 'absent', or 'unknown')
+ * @param {Function} onCancel - Optional callback if user cancels
+ */
+export function showPastAttendanceChoiceModal(onConfirm, onCancel = null) {
+    const modal = document.getElementById('past-attendance-modal');
+    const confirmBtn = document.getElementById('past-attendance-confirm-btn');
+    const cancelBtn = document.getElementById('past-attendance-cancel-btn');
+    const select = document.getElementById('past-attendance-select');
+
+    if (!modal) {
+        console.error("past-attendance-modal not found in DOM");
+        return;
+    }
+
+    // Store callbacks in state (similar to other modals)
+    setPastAttendanceCallback(onConfirm);
+    setPastAttendanceCancelCallback(onCancel);
+
+    // Clean up and open modal
+    confirmBtn.onclick = () => {
+        const chosenStatus = select.value;
+        if (typeof onConfirm === 'function') {
+            onConfirm(chosenStatus);
+        }
+        closeModal(modal);
+    };
+
+    cancelBtn.onclick = () => {
+        if (typeof onCancel === 'function') {
+            onCancel();
+        }
+        closeModal(modal);
+    };
+
+    openModal('past-attendance-modal');
+}
+
+function closeModal(modal) {
+    modal.classList.remove('modal-visible');
+    setActiveModal(null);
+    document.body.style.overflow = 'auto';
+}

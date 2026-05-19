@@ -771,6 +771,27 @@ export function permanentlyDeleteFromTrash(entry) {
     }
 }
 
+/**
+ * Checks if a classroom has any finished, non-cancelled sessions.
+ */
+export function hasPastFinishedSessions(classroom) {
+    if (!classroom || !classroom.sessions) return false;
+    return getActiveItems(classroom.sessions).some(s => s.isFinished && !s.isCancelled);
+}
+
+/**
+ * Applies the same attendance status to a student for all past finished sessions.
+ */
+export function applyAttendanceToPastSessions(studentId, classroom, status) {
+    if (!classroom || !studentId) return;
+
+    getActiveItems(classroom.sessions)
+        .filter(s => s.isFinished && !s.isCancelled)
+        .forEach(session => {
+            session.setAttendance(studentId, status);
+        });
+}
+
 export function setCurrentClassroom(classroom) { currentClassroom = classroom; }
 export function setLiveSession(session) { liveSession = session; }
 export function setSelectedSession(session) { selectedSession = session; }
@@ -827,3 +848,9 @@ export function markStudentAsPickedForAssessmentInSession(categoryId, studentId)
         assessmentPools[categoryId].pickedCandidatesThisSession.push(studentId);
     }
 }
+
+export let pastAttendanceCallback = null;
+export let pastAttendanceCancelCallback = null;
+
+export function setPastAttendanceCallback(callback) { pastAttendanceCallback = callback; }
+export function setPastAttendanceCancelCallback(callback) { pastAttendanceCancelCallback = callback; }

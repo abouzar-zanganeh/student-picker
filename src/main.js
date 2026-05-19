@@ -701,14 +701,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     csvConfirmBtn.addEventListener('click', () => {
-        const selectedCheckboxes = csvPreviewList.querySelectorAll('input[type="checkbox"]:checked');
+        const checkboxes = Array.from(csvPreviewList.querySelectorAll('input[type="checkbox"]:checked'));
         let addedCount = 0;
         let skippedNames = [];
         let onboardingOccurred = false;
 
-        selectedCheckboxes.forEach(checkbox => {
-            // @ts-ignore
+        // Get the current index (start at 0)
+        let currentIndex = 0;
 
+        function processNextStudent() {
+            if (currentIndex >= checkboxes.length) {
+                // All done - finalize
+                finalizeImport(addedCount, skippedNames, onboardingOccurred);
+                return;
+            }
+
+            const checkbox = checkboxes[currentIndex];
             const name = checkbox.dataset.name;
             const parsedName = parseStudentName(name);
             const normalizedNewName = normalizeText(parsedName.name);
@@ -720,11 +728,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (existingStudent) {
                 if (existingStudent.isDeleted) {
-                    // پاک‌سازی دانش‌آموز حذف شده برای جایگزینی با نسخه جدید
                     permanentlyDeleteStudent(existingStudent, state.currentClassroom);
                 } else {
-                    // افزودن به لیست تکراری‌ها و پرش از این مرحله
                     skippedNames.push(parsedName.name);
+                    currentIndex++;
+                    processNextStudent(); // Continue to next
                     return;
                 }
             }
@@ -732,54 +740,76 @@ document.addEventListener('DOMContentLoaded', () => {
             const newStudent = new Student(parsedName);
             state.currentClassroom.addStudent(newStudent);
 
-            // مدیریت دانش‌آموز جدید در کلاسی که جلسات قدیمی دارد
-            if (state.currentClassroom.sessions.length > 0) {
-                getActiveItems(state.currentClassroom.sessions)
-                    .filter(s => s.isFinished && !s.isCancelled)
-                    .forEach(session => {
-                        session.setAttendance(newStudent.identity.studentId, 'absent');
-                    });
-
+            if (state.hasPastFinishedSessions(state.currentClassroom)) {
+                // Show modal, then continue in callback
+                notifyingMessaging.showPastAttendanceChoiceModal(
+                    (chosenStatus) => {
+                        state.applyAttendanceToPastSessions(
+                            newStudent.identity.studentId,
+                            state.currentClassroom,
+                            chosenStatus
+                        );
+                        onboardNewStudent(newStudent, state.currentClassroom);
+                        onboardingOccurred = true;
+                        addedCount++;
+                        state.saveData();
+                        currentIndex++;
+                        processNextStudent(); // Continue to next student
+                    },
+                    () => {
+                        // User cancelled - skip this student
+                        // Remove the student that was added
+                        const index = state.currentClassroom.students.findIndex(s => s.identity.studentId === newStudent.identity.studentId);
+                        if (index > -1) state.currentClassroom.students.splice(index, 1);
+                        currentIndex++;
+                        processNextStudent(); // Continue to next student
+                    }
+                );
+                return; // Wait for modal callback
+            } else {
                 onboardNewStudent(newStudent, state.currentClassroom);
                 onboardingOccurred = true;
+                addedCount++;
+                state.saveData();
+                currentIndex++;
+                processNextStudent(); // Continue to next
             }
-            addedCount++;
-        });
-
-        state.saveData();
-
-        // ثبت در گزارش فعالیت‌ها
-        if (addedCount > 0) {
-            logManager.addLog(state.currentClassroom.info.name,
-                `${addedCount} دانش‌آموز جدید از لیست ورودی به کلاس اضافه شدند.`,
-                { type: 'VIEW_SESSIONS' });
         }
 
-        ui.showSettingsPage(state.currentClassroom);
+        function finalizeImport(addedCount, skippedNames, onboardingOccurred) {
+            // ثبت در گزارش فعالیت‌ها
+            if (addedCount > 0) {
+                logManager.addLog(state.currentClassroom.info.name,
+                    `${addedCount} دانش‌آموز جدید از لیست ورودی به کلاس اضافه شدند.`,
+                    { type: 'VIEW_SESSIONS' });
+            }
 
-        // آماده‌سازی بخش "تکراری‌ها" در پیام
-        let duplicateInfo = skippedNames.length > 0
-            ? `⚠️ موارد زیر به دلیل تکراری بودن نادیده گرفته شدند:\n- ${skippedNames.join('\n- ')}`
-            : '';
+            ui.showSettingsPage(state.currentClassroom);
 
-        // نمایش گزارش نهایی با استفاده از تابع به‌روز شده
-        if (onboardingOccurred) {
-            showOnboardingNotification(addedCount, duplicateInfo);
-        } else if (skippedNames.length > 0 || addedCount > 0) {
-            const finalMsg = addedCount > 0
-                ? `✅ ${addedCount} دانش‌آموز با موفقیت اضافه شدند.\n${duplicateInfo}`
-                : duplicateInfo;
+            let duplicateInfo = skippedNames.length > 0
+                ? `⚠️ موارد زیر به دلیل تکراری بودن نادیده گرفته شدند:\n- ${skippedNames.join('\n- ')}`
+                : '';
 
-            notifyingMessaging.showCustomConfirm(finalMsg, () => { }, {
-                confirmText: 'متوجه شدم',
-                confirmClass: 'btn-success',
-                onCancel: null
-            });
+            if (onboardingOccurred) {
+                showOnboardingNotification(addedCount, duplicateInfo);
+            } else if (skippedNames.length > 0 || addedCount > 0) {
+                const finalMsg = addedCount > 0
+                    ? `✅ ${addedCount} دانش‌آموز با موفقیت اضافه شدند.\n${duplicateInfo}`
+                    : duplicateInfo;
+
+                notifyingMessaging.showCustomConfirm(finalMsg, () => { }, {
+                    confirmText: 'متوجه شدم',
+                    confirmClass: 'btn-success',
+                    onCancel: null
+                });
+            }
+
+            pasteArea.value = '';
+            state.setNamesToImport([]);
         }
-        // @ts-ignore
 
-        pasteArea.value = '';
-        state.setNamesToImport([]);
+        // Start processing
+        processNextStudent();
     });
 
     csvCancelBtn.addEventListener('click', () => {
@@ -848,7 +878,6 @@ document.addEventListener('DOMContentLoaded', () => {
     addStudentBtn.addEventListener('click', () => {
         if (!state.currentClassroom) return;
         // @ts-ignore
-
         const studentName = newStudentNameInput.value.trim();
         if (!studentName) {
             flashElement(newStudentNameInput, 3000);
@@ -861,7 +890,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         // @ts-ignore
-
         const parsed = parseStudentName(newStudentNameInput.value);
         const normalizedNewName = normalizeText(parsed.name);
 
@@ -876,35 +904,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Use the helper to parse the name (looks for dot signal)
         const parsedIdentity = parseStudentName(studentName);
-        const newStudent = new Student(parsedIdentity); state.currentClassroom.addStudent(newStudent);
+        const newStudent = new Student(parsedIdentity);
+        state.currentClassroom.addStudent(newStudent);
 
-        if (state.currentClassroom.sessions.length > 0) {
-
-            // Manually set absence for all finished sessions
-            getActiveItems(state.currentClassroom.sessions)
-                .filter(s => s.isFinished && !s.isCancelled)
-                .forEach(session => {
-                    session.setAttendance(newStudent.identity.studentId, 'absent');
-                });
-
+        if (state.hasPastFinishedSessions(state.currentClassroom)) {
+            notifyingMessaging.showPastAttendanceChoiceModal(
+                (chosenStatus) => {
+                    state.applyAttendanceToPastSessions(
+                        newStudent.identity.studentId,
+                        state.currentClassroom,
+                        chosenStatus
+                    );
+                    onboardNewStudent(newStudent, state.currentClassroom);
+                    showOnboardingNotification(1);
+                    completeStudentAddition(newStudent, newStudentNameInput);
+                },
+                () => {
+                    // User cancelled - don't add the student, clean up
+                    notifyingMessaging.showNotification("❌ افزودن دانش‌آموز لغو شد.");
+                    // Remove the student that was already added to the classroom
+                    const index = state.currentClassroom.students.findIndex(s => s.identity.studentId === newStudent.identity.studentId);
+                    if (index > -1) state.currentClassroom.students.splice(index, 1);
+                }
+            );
+            return; // Exit early, wait for modal
+        } else {
             onboardNewStudent(newStudent, state.currentClassroom);
             showOnboardingNotification(1);
+            completeStudentAddition(newStudent, newStudentNameInput);
         }
-
-        state.saveData();
-
-        logManager.addLog(state.currentClassroom.info.name,
-            `دانش‌آموز «${studentName}» به کلاس اضافه شد.`, {
-            type: 'VIEW_STUDENT_PROFILE',
-            studentId: newStudent.identity.studentId
-        });
-
-        ui.renderSettingsStudentList();
-        ui.renderStudentStatsList();
-        // @ts-ignore
-
-        newStudentNameInput.value = '';
-        newStudentNameInput.focus();
     });
 
     newSessionBtn.addEventListener('click', () => {
@@ -1507,6 +1535,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const noteContent = `${noteHeader}\n${reason}\n\n- ${details.join('\n- ')}`;
             newStudent.addNote(noteContent);
         }
+    }
+
+    function completeStudentAddition(student, nameInputElement) {
+        state.saveData();
+        logManager.addLog(state.currentClassroom.info.name,
+            `دانش‌آموز «${student.identity.name}» به کلاس اضافه شد.`, {
+            type: 'VIEW_STUDENT_PROFILE',
+            studentId: student.identity.studentId
+        });
+        ui.renderSettingsStudentList();
+        ui.renderStudentStatsList();
+        nameInputElement.value = '';
+        nameInputElement.focus();
     }
 
     function showOnboardingNotification(addedCount, extraMessage = '') {
