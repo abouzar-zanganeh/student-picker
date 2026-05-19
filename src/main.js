@@ -1715,18 +1715,24 @@ document.addEventListener('DOMContentLoaded', () => {
         initializeScreenSaver();
     }
 
-    // 6. Handle Dark Mode Toggle
-    const darkModeToggle = document.getElementById('setting-darkmode-toggle');
-    if (darkModeToggle) {
+    // 6. Handle Dark Mode Preference (System-aware)
+    const darkModeSelect = document.getElementById('setting-darkmode-preference');
+    if (darkModeSelect) {
         // Set initial state from saved settings
-        darkModeToggle.checked = state.userSettings.isDarkModeEnabled;
-        applyDarkMode(state.userSettings.isDarkModeEnabled);
+        darkModeSelect.value = state.userSettings.darkModePreference || 'system';
+        applyDarkMode();
+        watchSystemTheme();
 
         // Add change listener
-        darkModeToggle.addEventListener('change', (e) => {
-            const enabled = e.target.checked;
-            state.setUserSettings({ isDarkModeEnabled: enabled });
-            applyDarkMode(enabled);
+        darkModeSelect.addEventListener('change', (e) => {
+            const preference = e.target.value;
+            state.setUserSettings({ darkModePreference: preference });
+            applyDarkMode();
+
+            // Re-watch system theme if needed (cleanup and reattach)
+            if (preference === 'system') {
+                watchSystemTheme();
+            }
         });
     }
 
@@ -1980,8 +1986,23 @@ export function syncAssessmentModeUI() {
     }
 }
 
-// Applies or removes dark mode based on userSettings
-function applyDarkMode(enabled) {
+// AI_COMMENT: Gets the effective dark mode value based on preference and OS
+function getEffectiveDarkMode() {
+    const preference = state.userSettings.darkModePreference || 'system';
+
+    if (preference === 'light') {
+        return false;
+    }
+    if (preference === 'dark') {
+        return true;
+    }
+    // preference === 'system' - check OS preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+// AI_COMMENT: Applies or removes dark mode based on effective value
+function applyDarkMode() {
+    const enabled = getEffectiveDarkMode();
     if (enabled) {
         document.body.classList.add('dark-mode');
     } else {
@@ -1989,12 +2010,33 @@ function applyDarkMode(enabled) {
     }
 }
 
-// Syncs the dark mode checkbox UI and applies the theme (Designed to be used after file restore to apply 
-// the darkmode if the backup file has it on)
+// Syncs the dark mode dropdown UI and applies the theme
 export function syncDarkModeUI() {
-    const darkModeToggle = document.getElementById('setting-darkmode-toggle');
-    if (darkModeToggle) {
-        darkModeToggle.checked = state.userSettings.isDarkModeEnabled;
-        applyDarkMode(state.userSettings.isDarkModeEnabled);
+    const darkModeSelect = document.getElementById('setting-darkmode-preference');
+    if (darkModeSelect) {
+        darkModeSelect.value = state.userSettings.darkModePreference || 'system';
+        applyDarkMode();
     }
+}
+
+// Listens to OS theme changes when preference is 'system'
+let systemThemeListener = null;
+
+function watchSystemTheme() {
+    // Remove existing listener if any
+    if (systemThemeListener) {
+        systemThemeListener.removeEventListener('change', systemThemeListener.callback);
+    }
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const callback = (e) => {
+        if (state.userSettings.darkModePreference === 'system') {
+            applyDarkMode();
+        }
+    };
+
+    // Store callback for cleanup
+    systemThemeListener = mediaQuery;
+    systemThemeListener.callback = callback;
+    mediaQuery.addEventListener('change', callback);
 }
