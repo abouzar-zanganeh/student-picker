@@ -1508,7 +1508,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // --- 5. Generate the updated onboarding note ---
         const pastSessions = getActiveItems(classroom.sessions).filter(s => s.isFinished && !s.isCancelled);
         const noteHeader = '📝 یادداشت خودکار سیستم';
-        const sessionCount = pastSessions.length;
+        const sessionCount = pastSessions.length + 1;
         const reason = `این دانش‌آموز  از جلسه شماره ${sessionCount} به کلاس اضافه شد. آمار مشارکت او بر اساس فعال‌ترین دانش‌آموز و آمار «فرصت از دست رفته» او بر اساس میانگین کلاس ثبت گردید:`;
 
         const details = [];
