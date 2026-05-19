@@ -11,8 +11,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="دستیار معلم">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="icon" href="images/icon-192.png" type="image/png">
-  <script type="module" crossorigin src="/assets/index-C2h4Xqpw.js"></script>
+    <link rel="icon" href="images/icon-192.png" type="image/png">
+  <script type="module" crossorigin src="/assets/index-T73WhijH.js"></script>
   <link rel="stylesheet" crossorigin href="/assets/index-BU79WZV9.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
@@ -71,10 +71,13 @@
                     </label>
                 </li>
                 <li>
-                    <span>🌙 حالت تاریک (Dark Mode)</span>
-                    <label class="checkbox-label">
-                        <input type="checkbox" id="setting-darkmode-toggle">
-                    </label>
+                    <span>🌙 حالت تاریک</span>
+                    <select id="setting-darkmode-preference" class="settings-select"
+                        style="width: auto; min-width: 120px;">
+                        <option value="light">☀️ روشن</option>
+                        <option value="dark">🌙 تاریک</option>
+                        <option value="system">💻 پیروی از سیستم</option>
+                    </select>
                 </li>
             </ul>
             <div class="modal-actions">
