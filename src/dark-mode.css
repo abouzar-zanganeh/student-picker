@@ -1117,4 +1117,9 @@ body.dark-mode #student-stats-table-container {
     scrollbar-color: #3a5a8a #1a2a4a;
 }
 
+#past-attendance-modal>div>p {
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
 /* End of Dark Mode */
