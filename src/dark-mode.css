@@ -1,0 +1,1120 @@
+/* Dark Mode */
+/* --- Dark Mode Styles --- */
+body.dark-mode {
+    --color-background: #1a1a2e;
+    --color-surface: #16213e;
+    --color-border: #2c3e66;
+    --color-text-dark: #e0e0e0;
+    --color-text-muted: #a0a0a0;
+    --color-primary: #3a79c0;
+    --color-primary-hover: #1e88e5;
+    --color-secondary: #5c6bc0;
+    --color-secondary-hover: #3f51b5;
+    --color-success: #2e7d32;
+    --color-success-hover: #1b5e20;
+    --color-warning: #ffb74d;
+    --color-warning-hover: #ffa726;
+    --color-strong-warning: #ef5350;
+    --color-toast-bg: #2d2d44;
+    --color-toast-action: #bb86fc;
+}
+
+/* Additional overrides for specific elements in dark mode */
+body.dark-mode .pill {
+    background-color: #2c3e66;
+    color: #eeeeee;
+}
+
+body.dark-mode .pill.active {
+    background-color: var(--color-primary);
+}
+
+body.dark-mode .list-container li {
+    background-color: var(--color-surface);
+}
+
+body.dark-mode .status-button {
+    background-color: #2c3e66;
+    color: #e0e0e0;
+    border-color: #1a2a4a;
+}
+
+body.dark-mode .attendance-list-item .absence-info,
+body.dark-mode .attendance-list-item .homework-info {
+    color: #b0b0b0;
+}
+
+body.dark-mode .student-stats-table th {
+    background-color: #0f1a2e;
+}
+
+body.dark-mode .student-stats-table tbody tr:hover {
+    background-color: #1a2a4a;
+}
+
+body.dark-mode .student-stats-table th:first-child,
+body.dark-mode .student-stats-table td:first-child {
+    background-color: var(--color-surface);
+}
+
+body.dark-mode .student-stats-table tbody tr:hover td:first-child {
+    background-color: #1a2a4a;
+}
+
+body.dark-mode .modal-content {
+    background-color: var(--color-surface);
+}
+
+body.dark-mode .search-results-dropdown {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+body.dark-mode .search-results-dropdown div:hover {
+    background-color: #1a2a4a;
+}
+
+body.dark-mode .stats-summary-box {
+    background-color: #0f1a2e;
+    border-color: var(--color-border);
+}
+
+body.dark-mode .scores-list,
+body.dark-mode .notes-list {
+    background-color: #0f1a2e;
+}
+
+body.dark-mode .context-menu {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+}
+
+body.dark-mode .context-menu li:hover {
+    background-color: #1a2a4a;
+}
+
+body.dark-mode .side-nav {
+    background-color: var(--color-surface);
+}
+
+body.dark-mode .side-nav .nav-btn:hover {
+    background-color: #1a2a4a;
+}
+
+body.dark-mode input[type="text"]:not(.animated-search-input),
+body.dark-mode input[type="number"],
+body.dark-mode textarea,
+body.dark-mode select {
+    background-color: #0f1a2e;
+    border-color: var(--color-border);
+    color: var(--color-text-dark);
+}
+
+body.dark-mode .animated-search-input {
+    color: var(--color-text-dark);
+}
+
+body.dark-mode .btn-icon {
+    color: #a0a0a0;
+}
+
+body.dark-mode .btn-icon:hover {
+    color: #ffffff;
+}
+
+body.dark-mode .dashboard-tabs {
+    background-color: var(--color-background);
+}
+
+body.dark-mode .tab-btn:hover {
+    background-color: #1a2a4a;
+}
+
+/* Dark mode list item hover states */
+body.dark-mode .list-container li:hover,
+body.dark-mode #class-list li:hover,
+body.dark-mode #session-list li:hover,
+body.dark-mode #settings-student-list li:hover,
+body.dark-mode #category-list li:hover {
+    background-color: #2a3a5c;
+    cursor: pointer;
+}
+
+/* Also fix the context menu target highlight */
+body.dark-mode .list-container li.context-menu-target {
+    background-color: #2a3a5c;
+}
+
+/*  attendance list items on hover */
+body.dark-mode .attendance-list-item:hover {
+    background-color: #2a3a5c;
+}
+
+/*  stats table row hover (already had a rule, just ensuring consistency) */
+body.dark-mode .student-stats-table tbody tr:hover {
+    background-color: #2a3a5c;
+}
+
+body.dark-mode .student-stats-table tbody tr:hover td:first-child {
+    background-color: #2a3a5c;
+}
+
+/*  section titles in dark mode */
+body.dark-mode .action-column h3,
+body.dark-mode .info-column h3,
+body.dark-mode .section-title,
+body.dark-mode .dashboard-tabs .tab-btn,
+body.dark-mode .action-column-header h3,
+body.dark-mode h2,
+body.dark-mode h4 {
+    color: #e0e0e0;
+}
+
+/* Ensure tab buttons have proper contrast */
+body.dark-mode .tab-btn {
+    color: #a0a0a0;
+}
+
+body.dark-mode .tab-btn.active {
+    color: #5ed615;
+}
+
+/*  the "آمار عملکرد" header */
+body.dark-mode #student-stats-header {
+    color: #e0e0e0;
+}
+
+/*  student names on attendance page */
+body.dark-mode .att-row-1 .student-name {
+    color: #e0e0e0;
+}
+
+/* Also ensure the attendance list header labels are visible */
+body.dark-mode .attendance-list-header .header-label {
+    color: #a0a0a0;
+}
+
+/*  the inline search input text */
+body.dark-mode .inline-search-input {
+    color: #e0e0e0;
+}
+
+body.dark-mode .inline-search-input::placeholder {
+    color: #6c757d;
+}
+
+body.dark-mode .att-row-3 {
+
+    background-color: #3a3a3a3f;
+
+}
+
+/*  input placeholders in dark mode - make them more visible */
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: #e9e6e6;
+    opacity: 1;
+    /* Ensures the color is fully applied */
+}
+
+/* WebKit-specific for broader compatibility */
+body.dark-mode input::-webkit-input-placeholder,
+body.dark-mode textarea::-webkit-input-placeholder {
+    color: #e9e6e6;
+}
+
+/* Firefox-specific */
+body.dark-mode input::-moz-placeholder,
+body.dark-mode textarea::-moz-placeholder {
+    color: #e9e6e6;
+    opacity: 1;
+}
+
+/* Specific override for the animated search input placeholder */
+body.dark-mode .animated-search-input::placeholder {
+    color: #e9e6e6;
+}
+
+/* Quick grade form inputs */
+body.dark-mode #quick-score-input::placeholder,
+body.dark-mode #quick-note-textarea::placeholder {
+    color: #e9e6e6;
+}
+
+/*  statistics table text in dark mode */
+body.dark-mode .student-stats-table td,
+body.dark-mode .student-stats-table th {
+    color: #eeeeee;
+}
+
+/* Ensure the student name links in the stats table also use the new color */
+body.dark-mode .student-stats-table .student-name-link {
+    color: #eeeeee;
+}
+
+body.dark-mode .student-stats-table .student-name-link:hover {
+    color: var(--color-primary);
+}
+
+/*  winner highlight row in dark mode */
+body.dark-mode .student-stats-table tbody tr.current-winner-highlight {
+    background-color: #1e3a2f;
+    /* Darker green that contrasts with dark background */
+}
+
+body.dark-mode .student-stats-table tbody tr.current-winner-highlight td:first-child {
+    background-color: #1e3a2f;
+}
+
+body.dark-mode .student-stats-table tbody tr.current-winner-highlight:hover {
+    background-color: #2a4a3c;
+    /* Slightly lighter on hover */
+}
+
+body.dark-mode .student-stats-table tbody tr.current-winner-highlight:hover td:first-child {
+    background-color: #2a4a3c;
+}
+
+/*  category column highlight in dark mode */
+body.dark-mode .student-stats-table th.current-category-highlight,
+body.dark-mode .student-stats-table td.current-category-highlight {
+    background-color: #1a3a5c;
+    /* Dark blue instead of light green */
+}
+
+body.dark-mode .student-stats-table tbody tr:hover th.current-category-highlight,
+body.dark-mode .student-stats-table tbody tr:hover td.current-category-highlight {
+    background-color: #2a4a6c;
+}
+
+/*  qualitative stats label text in dark mode */
+body.dark-mode .qualitative-stats-tag {
+    color: #eeeeee;
+}
+
+/*  all settings page text in dark mode */
+body.dark-mode #settings-page,
+body.dark-mode #settings-page .section-title,
+body.dark-mode #settings-page .accordion-toggle,
+body.dark-mode #settings-page .input-group label,
+body.dark-mode #settings-page .divider-text,
+body.dark-mode #settings-page .list-container li span:not(.category-badge):not(.weight-badge),
+body.dark-mode .class-type-selection label span,
+body.dark-mode .class-type-selection label {
+    color: #eeeeee;
+}
+
+/*  the student list in settings */
+body.dark-mode #settings-student-list .student-name-link {
+    color: #eeeeee;
+}
+
+body.dark-mode #settings-student-list .student-name-link:hover {
+    color: var(--color-primary);
+}
+
+/*  category list in settings */
+body.dark-mode .name-and-badge-container span:first-child {
+    color: #eeeeee;
+}
+
+/*  radio button labels (حضوری / آنلاین) */
+body.dark-mode .class-type-selection label span {
+    color: #eeeeee;
+}
+
+/*  schedule section text */
+body.dark-mode #settings-page label {
+    color: #eeeeee;
+}
+
+body.dark-mode #settings-page .list-container li div,
+body.dark-mode #settings-page .list-container li div label {
+    color: #eeeeee;
+}
+
+/*  educational system and level selects labels */
+body.dark-mode .settings-section label {
+    color: #eeeeee;
+}
+
+/*  any remaining spans in settings list items */
+body.dark-mode #settings-page .list-container li>span {
+    color: #eeeeee;
+}
+
+/*  absent row highlight in dark mode */
+body.dark-mode .student-stats-table tbody tr.absent-row-highlight {
+    background-color: #3d2a1a;
+    /* Dark amber/brown instead of bright yellow */
+}
+
+body.dark-mode .student-stats-table tbody tr.absent-row-highlight td:first-child {
+    background-color: #3d2a1a;
+}
+
+body.dark-mode .student-stats-table tbody tr.absent-row-highlight:hover {
+    background-color: #4d3520;
+    /* Slightly lighter on hover */
+}
+
+body.dark-mode .student-stats-table tbody tr.absent-row-highlight:hover td:first-child {
+    background-color: #4d3520;
+}
+
+/*  absentees summary box in dark mode */
+body.dark-mode .absentees-summary {
+    background-color: #2a1a0a;
+    /* Dark amber/brown background */
+    border-color: #8a6d3b;
+    /* Warmer border for visibility */
+}
+
+body.dark-mode .absentees-summary-header h4 {
+    color: #e0e0e0;
+}
+
+body.dark-mode .absentees-summary .summary-name {
+    background-color: #3d2a1a;
+    color: #e0e0e0;
+}
+
+body.dark-mode .absentees-summary .summary-name:hover {
+    background-color: #8a6d3b;
+    color: #ffffff;
+}
+
+body.dark-mode .absentees-summary .attendance-counters {
+    color: #a0a0a0;
+    border-top-color: #4a3520;
+}
+
+body.dark-mode .absentees-summary .attendance-counters strong {
+    color: #ffb74d;
+    /* Warm orange for emphasis */
+}
+
+body.dark-mode #copy-absentees-btn {
+    color: #a0a0a0;
+}
+
+body.dark-mode #copy-absentees-btn:hover {
+    color: #ffffff;
+}
+
+/*  active status buttons in dark mode */
+body.dark-mode .status-button.active {
+    background-color: #5a3a2a;
+    color: #ffffff;
+    border-color: #8a6d3b;
+}
+
+/* Specifically for the absent button when active */
+body.dark-mode .status-button.absent-btn.active {
+    /* Purple for absence */
+    background-color: #8e44ad;
+    /* Dark red for absent */
+    color: #ffffff;
+    border-color: #9b59b6;
+}
+
+/* Keep issue button distinctive */
+body.dark-mode .status-button.issue-btn.active {
+    background-color: #e67e22;
+    /* Orange for issue */
+    border-color: #f39c12;
+    color: #ffffff;
+}
+
+/* Keep exit button distinctive */
+body.dark-mode .status-button.exit-btn.active {
+    background-color: #c0392b;
+    /* Dark amber/brown for exit */
+    border-color: #e74c3c;
+    color: #ffffff;
+}
+
+/* Profile button active state (if ever needed) */
+body.dark-mode .status-button.profile-btn.active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary-hover);
+    color: #ffffff;
+}
+
+/*  disabled qualitative buttons in dark mode */
+body.dark-mode .qualitative-btn:disabled {
+    opacity: 0.6;
+    background-color: #2a3a5c;
+    color: #a0a0a0;
+    border-color: #3a4a6c;
+}
+
+/*  active class card highlight in dark mode */
+body.dark-mode .active-class-card {
+    background-color: #1a3a2f !important;
+    /* Dark green matching winner highlight */
+    border-left: 5px solid var(--color-success) !important;
+}
+
+body.dark-mode .active-class-card:hover {
+    background-color: #2a4a3c !important;
+    /* Slightly lighter on hover */
+}
+
+/*  main page search field in dark mode */
+body.dark-mode .global-search-container .animated-search-input {
+    color: #eeeeee;
+    background-color: #1a2a4a;
+    border-bottom-color: #3a5a8a;
+}
+
+body.dark-mode .global-search-container .animated-search-input::placeholder {
+    color: #8a9aba;
+}
+
+body.dark-mode .global-search-container .search-icon {
+    color: #8a9aba;
+}
+
+body.dark-mode .animated-search-container .search-icon:hover {
+    background-color: #68759e;
+}
+
+/*  search results dropdown */
+body.dark-mode .global-search-container .search-results-dropdown {
+    background-color: #1a2a4a;
+    border-color: #3a5a8a;
+}
+
+body.dark-mode .global-search-container .search-results-dropdown div {
+    color: #eeeeee;
+}
+
+body.dark-mode .global-search-container .search-results-dropdown div:hover {
+    background-color: #2a3a5c;
+}
+
+body.dark-mode .global-search-container .search-results-dropdown .no-results {
+    color: #a0a0a0;
+}
+
+/*  the global search result items */
+body.dark-mode .global-search-result .student-name {
+    color: #eeeeee;
+}
+
+body.dark-mode .global-search-result .class-name {
+    color: #8a9aba;
+}
+
+body.dark-mode .global-search-result .class-name:hover {
+    color: var(--color-primary);
+}
+
+/*  student profile page text in dark mode */
+body.dark-mode .scoring-section h3,
+body.dark-mode .history-section h3,
+body.dark-mode .history-section h4 {
+    color: #eeeeee;
+}
+
+/*  score values in profile */
+body.dark-mode .score-value {
+    color: #eeeeee;
+}
+
+body.dark-mode .score-skill-badge {
+    background-color: #2a3a5c;
+    color: #eeeeee;
+}
+
+body.dark-mode .score-date {
+    color: #a0a0a0;
+}
+
+body.dark-mode .score-comment {
+    color: #cccccc;
+    background-color: transparent;
+}
+
+/*  note content hover - too bright */
+body.dark-mode .score-comment:hover,
+body.dark-mode .note-content:hover {
+    background-color: #2a3a5c;
+    cursor: pointer;
+}
+
+/*  note history items */
+body.dark-mode .note-history-item {
+    background-color: #1a2a3a;
+}
+
+body.dark-mode .note-info {
+    color: #a0a0a0;
+}
+
+body.dark-mode .note-content {
+    color: #eeeeee;
+}
+
+/*  stats summary box in profile */
+body.dark-mode .stats-summary-box {
+    background-color: #0f1a2e;
+    border-color: var(--color-border);
+}
+
+body.dark-mode .stats-summary-box p {
+    color: #eeeeee;
+}
+
+body.dark-mode .stats-summary-box strong {
+    color: #bbccff;
+}
+
+/*  stats breakdown items */
+body.dark-mode .stats-breakdown .stats-breakdown-item {
+    color: #cccccc;
+}
+
+/*  no content message */
+body.dark-mode .no-content-message {
+    color: #a0a0a0;
+}
+
+/*  modal titles in dark mode */
+body.dark-mode .modal-content h3 {
+    color: #eeeeee;
+}
+
+/*  profile page action buttons in dark mode */
+body.dark-mode .btn-icon-label {
+    background-color: #2a3a5c;
+    border-color: #3a5a8a;
+    color: #eeeeee;
+}
+
+body.dark-mode .btn-icon-label:hover {
+    background-color: #3a5a8a;
+    color: #ffffff;
+}
+
+/* Specific style for delete button in dark mode */
+body.dark-mode .btn-icon-label[title="حذف دانش‌آموز"] {
+    background-color: #3a1a1a;
+    border-color: #8a3a3a;
+    color: #ffaaaa;
+}
+
+body.dark-mode .btn-icon-label[title="حذف دانش‌آموز"]:hover {
+    background-color: #5a2a2a;
+    color: #ffcccc;
+}
+
+/*  profile modal scrollbar in dark mode */
+body.dark-mode #modal-profile-content-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode #modal-profile-content-container::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 4px;
+}
+
+body.dark-mode #modal-profile-content-container::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 4px;
+}
+
+body.dark-mode #modal-profile-content-container::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox scrollbar support */
+body.dark-mode #modal-profile-content-container {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
+/*  profile page pill hover in dark mode */
+body.dark-mode .scoring-section .pill {
+    background-color: #2a3a5c;
+    color: #eeeeee;
+}
+
+body.dark-mode .scoring-section .pill:hover {
+    background-color: #3a5a8a;
+}
+
+body.dark-mode .scoring-section .pill.active {
+    background-color: var(--color-primary);
+    color: #ffffff;
+}
+
+/*  selector tab category pills in dark mode */
+body.dark-mode .category-pills .pill {
+    background-color: #2a3a5c;
+    color: #eeeeee;
+}
+
+body.dark-mode .category-pills .pill:hover {
+    background-color: #3a5a8a;
+}
+
+body.dark-mode .category-pills .pill.active {
+    background-color: var(--color-primary);
+    color: #ffffff;
+}
+
+body.dark-mode .category-pills .pill.active.graded-category-pill {
+    background-color: #6f42c1;
+    border-color: #6f42c1;
+}
+
+body.dark-mode .category-pills .add-category-pill {
+    background-color: var(--color-success);
+    color: #ffffff;
+}
+
+body.dark-mode .category-pills .add-category-pill:hover {
+    background-color: var(--color-success-hover);
+}
+
+/*  restore confirm modal in dark mode */
+body.dark-mode #restore-confirm-modal .modal-content {
+    background-color: var(--color-surface);
+}
+
+body.dark-mode #restore-confirm-modal p,
+body.dark-mode #restore-confirm-modal div:not(.modal-options) {
+    color: #eeeeee;
+}
+
+/*  the class list inside restore modal message */
+body.dark-mode #restore-confirm-modal ul {
+    background-color: #1a2a4a !important;
+    border-color: #3a5a8a;
+}
+
+body.dark-mode #restore-confirm-modal ul li {
+    color: #eeeeee;
+    background-color: #1a2a4a;
+    /* Explicit background instead of transparent */
+    border-bottom-color: #2a3a5c;
+}
+
+/*  modal options text (جایگزینی کامل) */
+body.dark-mode .modal-options label {
+    color: #eeeeee;
+}
+
+body.dark-mode .modal-options input[type="checkbox"] {
+    accent-color: var(--color-primary);
+}
+
+/*  warning text (if shown) */
+body.dark-mode #restore-modal-warning {
+    color: #ffb74d;
+}
+
+/*  restore modal buttons in dark mode */
+body.dark-mode #restore-confirm-modal .btn-secondary {
+    background-color: #2a3a5c;
+    color: #eeeeee;
+    border: 1px solid #3a5a8a;
+}
+
+body.dark-mode #restore-confirm-modal .btn-secondary:hover {
+    background-color: #3a5a8a;
+    color: #ffffff;
+}
+
+body.dark-mode #restore-confirm-modal .btn-warning {
+    background-color: #5a2a2a;
+    color: #ffaaaa;
+    border: 1px solid #8a3a3a;
+}
+
+body.dark-mode #restore-confirm-modal .btn-warning:hover {
+    background-color: #7a3a3a;
+    color: #ffcccc;
+}
+
+/*  restore modal scrollbars in dark mode */
+body.dark-mode #restore-confirm-modal .modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode #restore-confirm-modal .modal-content::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 4px;
+}
+
+body.dark-mode #restore-confirm-modal .modal-content::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 4px;
+}
+
+body.dark-mode #restore-confirm-modal .modal-content::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox support for modal scrollbar */
+body.dark-mode #restore-confirm-modal .modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
+/*  the message div inner scrollbar (the ul container) */
+body.dark-mode #restore-modal-message::-webkit-scrollbar {
+    width: 6px;
+}
+
+body.dark-mode #restore-modal-message::-webkit-scrollbar-track {
+    background: #0f1a2e;
+    border-radius: 3px;
+}
+
+body.dark-mode #restore-modal-message::-webkit-scrollbar-thumb {
+    background: #2a3a5c;
+    border-radius: 3px;
+}
+
+body.dark-mode #restore-modal-message::-webkit-scrollbar-thumb:hover {
+    background: #4a6a8c;
+}
+
+/* Firefox support for message div */
+body.dark-mode #restore-modal-message {
+    scrollbar-width: thin;
+    scrollbar-color: #2a3a5c #0f1a2e;
+}
+
+/*  schedule time inputs on settings page */
+body.dark-mode #settings-schedule-start,
+body.dark-mode #settings-schedule-end {
+    background-color: #1a2a4a;
+    color: #eeeeee;
+    border-color: #3a5a8a;
+}
+
+body.dark-mode #settings-schedule-start::-webkit-calendar-picker-indicator,
+body.dark-mode #settings-schedule-end::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+/*  trash icons on settings page in dark mode */
+body.dark-mode #settings-student-list .btn-icon,
+body.dark-mode #category-list .btn-icon {
+    opacity: 0.6;
+}
+
+body.dark-mode #settings-student-list .btn-icon:hover,
+body.dark-mode #category-list .btn-icon:hover {
+    opacity: 1;
+}
+
+/* Fix for buttons on settings page in dark mode */
+body.dark-mode #settings-page .btn-secondary,
+body.dark-mode #settings-page .btn-success,
+body.dark-mode #settings-page .btn-icon:not(.delete-item-btn) {
+    opacity: 0.85;
+}
+
+body.dark-mode #settings-page .btn-secondary:hover,
+body.dark-mode #settings-page .btn-success:hover,
+body.dark-mode #settings-page .btn-icon:not(.delete-item-btn):hover {
+    opacity: 1;
+}
+
+/* Fix for CSV preview page in dark mode */
+body.dark-mode #csv-preview-page h2,
+body.dark-mode #csv-preview-page p {
+    color: #eeeeee;
+}
+
+body.dark-mode .preview-item {
+    background-color: #1a2a4a;
+}
+
+body.dark-mode .preview-item label {
+    color: #eeeeee;
+}
+
+body.dark-mode .preview-item input[type="checkbox"] {
+    accent-color: var(--color-primary);
+}
+
+/* Fix for buttons on CSV preview page */
+body.dark-mode #csv-confirm-btn,
+body.dark-mode #csv-cancel-btn {
+    opacity: 0.85;
+}
+
+body.dark-mode #csv-confirm-btn:hover,
+body.dark-mode #csv-cancel-btn:hover {
+    opacity: 1;
+}
+
+/* Fix for column mapping page (related to CSV import) */
+body.dark-mode #column-mapping-page h2,
+body.dark-mode #column-mapping-page p {
+    color: #eeeeee;
+}
+
+body.dark-mode #column-select-dropdown {
+    background-color: #1a2a4a;
+    color: #eeeeee;
+    border-color: #3a5a8a;
+}
+
+/* Fix for dropdown scrollbar on CSV column mapping page */
+body.dark-mode #column-select-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode #column-select-dropdown::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 4px;
+}
+
+body.dark-mode #column-select-dropdown::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 4px;
+}
+
+body.dark-mode #column-select-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox support */
+body.dark-mode #column-select-dropdown {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
+body.dark-mode .attendance-status-btn.absent.active {
+    color: #9c0606;
+}
+
+/* Fix for selector tab search field in dark mode - match main page style */
+body.dark-mode .action-column-header .animated-search-input {
+    color: #eeeeee;
+    background-color: #1a2a4a;
+    border-bottom-color: #3a5a8a;
+}
+
+body.dark-mode .action-column-header .animated-search-input::placeholder {
+    color: #8a9aba;
+}
+
+body.dark-mode .action-column-header .search-icon {
+    color: #8a9aba;
+}
+
+body.dark-mode .action-column-header .search-icon:hover {
+    color: #bbccff;
+}
+
+/* Fix for search results dropdown on selector tab */
+body.dark-mode .action-column-header .search-results-dropdown {
+    background-color: #1a2a4a;
+    border-color: #3a5a8a;
+}
+
+body.dark-mode .action-column-header .search-results-dropdown div {
+    color: #eeeeee;
+}
+
+body.dark-mode .action-column-header .search-results-dropdown div:hover {
+    background-color: #2a3a5c;
+}
+
+body.dark-mode .action-column-header .search-results-dropdown .no-results {
+    color: #a0a0a0;
+}
+
+/* Fix for scrollbars in search dropdowns on main page and selector tab */
+body.dark-mode .global-search-container .search-results-dropdown::-webkit-scrollbar,
+body.dark-mode .action-column-header .search-results-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+body.dark-mode .global-search-container .search-results-dropdown::-webkit-scrollbar-track,
+body.dark-mode .action-column-header .search-results-dropdown::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 3px;
+}
+
+body.dark-mode .global-search-container .search-results-dropdown::-webkit-scrollbar-thumb,
+body.dark-mode .action-column-header .search-results-dropdown::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 3px;
+}
+
+body.dark-mode .global-search-container .search-results-dropdown::-webkit-scrollbar-thumb:hover,
+body.dark-mode .action-column-header .search-results-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox support for both search dropdowns */
+body.dark-mode .global-search-container .search-results-dropdown,
+body.dark-mode .action-column-header .search-results-dropdown {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
+/* Fix for app settings modal text in dark mode */
+body.dark-mode #app-settings-modal .modal-content h3 {
+    color: #eeeeee;
+}
+
+body.dark-mode #app-settings-modal .list-container li span {
+    color: #eeeeee;
+}
+
+body.dark-mode #app-settings-modal .checkbox-label {
+    color: #eeeeee;
+}
+
+body.dark-mode #app-settings-modal .checkbox-label input[type="checkbox"] {
+    accent-color: var(--color-primary);
+}
+
+body.dark-mode #app-settings-modal .modal-actions button {
+    opacity: 0.85;
+}
+
+body.dark-mode #app-settings-modal .modal-actions button:hover {
+    opacity: 1;
+}
+
+/* Fix for add class modal text in dark mode */
+body.dark-mode #add-class-modal .modal-content h3 {
+    color: #eeeeee;
+}
+
+body.dark-mode #add-class-modal .input-group label {
+    color: #eeeeee;
+}
+
+body.dark-mode #add-class-modal .input-group input,
+body.dark-mode #add-class-modal .input-group select,
+body.dark-mode #add-class-modal .input-group .class-type-selection label span {
+    color: #eeeeee;
+}
+
+body.dark-mode #add-class-modal .input-group input,
+body.dark-mode #add-class-modal .input-group select {
+    background-color: #1a2a4a;
+    border-color: #3a5a8a;
+}
+
+body.dark-mode #add-class-modal .class-type-selection label {
+    color: #eeeeee;
+}
+
+body.dark-mode #add-class-modal .class-type-selection input[type="radio"] {
+    accent-color: var(--color-primary);
+}
+
+body.dark-mode #add-class-modal .checkbox-group-in-add-class-modal label {
+    color: #eeeeee;
+}
+
+body.dark-mode #add-class-modal .checkbox-group-in-add-class-modal input[type="checkbox"] {
+    accent-color: var(--color-primary);
+}
+
+body.dark-mode #add-class-modal .modal-actions button {
+    opacity: 0.85;
+}
+
+body.dark-mode #add-class-modal .modal-actions button:hover {
+    opacity: 1;
+}
+
+/* Fix for schedule accordion toggle */
+body.dark-mode #modal-schedule-toggle {
+    color: #eeeeee;
+}
+
+/* Fix for add class modal scrollbar in dark mode */
+body.dark-mode #add-class-modal .modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode #add-class-modal .modal-content::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 4px;
+}
+
+body.dark-mode #add-class-modal .modal-content::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 4px;
+}
+
+body.dark-mode #add-class-modal .modal-content::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox support */
+body.dark-mode #add-class-modal .modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
+/* Fix for level select dropdown scrollbar in add class modal */
+body.dark-mode #modal-add-class-level::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode #modal-add-class-level::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 4px;
+}
+
+body.dark-mode #modal-add-class-level::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 4px;
+}
+
+body.dark-mode #modal-add-class-level::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox support */
+body.dark-mode #modal-add-class-level {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
+/* Fix for statistics table scrollbar in dark mode */
+body.dark-mode #student-stats-table-container::-webkit-scrollbar {
+    height: 10px;
+    /* Height for horizontal scrollbar */
+    width: 8px;
+    /* Width for vertical scrollbar */
+}
+
+body.dark-mode #student-stats-table-container::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 5px;
+}
+
+body.dark-mode #student-stats-table-container::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 5px;
+}
+
+body.dark-mode #student-stats-table-container::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox support */
+body.dark-mode #student-stats-table-container {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
+/* End of Dark Mode */
