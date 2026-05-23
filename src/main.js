@@ -1556,8 +1556,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // success header
         let message = `✅ ${addedCount} ${studentWord} با موفقیت اضافه شدند.\n`;
 
+
+
         // onboarding explanation
-        message += `💡 چون این کلاس جلسات برگزار شده دارد، برای این افراد آمار پایه‌ای (متناسب با کلاس) ثبت شد تا در فرایند انتخاب اختلالی ایجاد نشود.`;
+        if (state.hasPastFinishedSessions(state.currentClassroom)) {
+            message += `💡 چون این کلاس جلسات برگزار شده دارد، برای این افراد آمار پایه‌ای (متناسب با کلاس) ثبت شد تا در فرایند انتخاب اختلالی ایجاد نشود.`;
+        }
 
         // Appending duplicate info if any
         if (extraMessage) {
