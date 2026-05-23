@@ -7,9 +7,17 @@
 
 
 import * as state from "./state";
-import { confirmModalCancelBtn, confirmModalConfirmBtn, confirmModalMessage, openModal, secureConfirmCode, secureConfirmConfirmBtn, secureConfirmInput, secureConfirmMessage, undoMessage, undoToast } from "./ui";
+
+import {
+    confirmModalCancelBtn, confirmModalConfirmBtn, confirmModalMessage, openModal,
+    secureConfirmCode, secureConfirmConfirmBtn, secureConfirmInput,
+    secureConfirmMessage, showPage, undoMessage, undoToast
+} from "./ui";
+
 import { setPastAttendanceCallback, setPastAttendanceCancelCallback } from './state.js';
+
 import { setActiveModal } from './state.js';
+import { settingsPage } from './ui.js'
 
 
 export function showUndoToast(message) {
@@ -136,6 +144,7 @@ export function showPastAttendanceChoiceModal(onConfirm, onCancel = null) {
             onConfirm(chosenStatus);
         }
         closeModal(AttendanceModal);
+        showPage('settings-page');
     };
 
     cancelBtn.onclick = () => {
@@ -143,6 +152,7 @@ export function showPastAttendanceChoiceModal(onConfirm, onCancel = null) {
             onCancel();
         }
         closeModal(AttendanceModal);
+        showPage('settings-page');
     };
 
     openModal('past-attendance-modal');
