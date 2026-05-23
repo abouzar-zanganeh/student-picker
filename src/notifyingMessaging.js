@@ -115,12 +115,12 @@ export function showSecureConfirm(message, onConfirm) {
  * @param {Function} onCancel - Optional callback if user cancels
  */
 export function showPastAttendanceChoiceModal(onConfirm, onCancel = null) {
-    const modal = document.getElementById('past-attendance-modal');
+    const AttendanceModal = document.getElementById('past-attendance-modal');
     const confirmBtn = document.getElementById('past-attendance-confirm-btn');
     const cancelBtn = document.getElementById('past-attendance-cancel-btn');
     const select = document.getElementById('past-attendance-select');
 
-    if (!modal) {
+    if (!AttendanceModal) {
         console.error("past-attendance-modal not found in DOM");
         return;
     }
@@ -135,14 +135,14 @@ export function showPastAttendanceChoiceModal(onConfirm, onCancel = null) {
         if (typeof onConfirm === 'function') {
             onConfirm(chosenStatus);
         }
-        closeModal(modal);
+        closeModal(AttendanceModal);
     };
 
     cancelBtn.onclick = () => {
         if (typeof onCancel === 'function') {
             onCancel();
         }
-        closeModal(modal);
+        closeModal(AttendanceModal);
     };
 
     openModal('past-attendance-modal');
