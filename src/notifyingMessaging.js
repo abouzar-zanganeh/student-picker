@@ -145,6 +145,7 @@ export function showPastAttendanceChoiceModal(onConfirm, onCancel = null) {
         }
         closeModal(AttendanceModal);
         showPage('settings-page');
+
     };
 
     cancelBtn.onclick = () => {

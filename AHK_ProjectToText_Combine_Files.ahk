@@ -31,6 +31,7 @@ C:\Documents\GitHub\student-picker\src\backup.js
 C:\Documents\GitHub\student-picker\src\screensaver.js
 C:\Documents\GitHub\student-picker\src\demo.js
 C:\Documents\GitHub\student-picker\src\style.css
+C:\Documents\GitHub\student-picker\src\dark-mode.css
 C:\Documents\GitHub\student-picker\package.json
 C:\Documents\GitHub\student-picker\src\notifyingMessaging.js
 )

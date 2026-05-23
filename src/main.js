@@ -738,12 +738,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const newStudent = new Student(parsedName);
-            state.currentClassroom.addStudent(newStudent);
 
+            debugger;
             if (state.hasPastFinishedSessions(state.currentClassroom)) {
                 // Show modal, then continue in callback
                 notifyingMessaging.showPastAttendanceChoiceModal(
                     (chosenStatus) => {
+                        state.currentClassroom.addStudent(newStudent);
                         state.applyAttendanceToPastSessions(
                             newStudent.identity.studentId,
                             state.currentClassroom,
@@ -765,7 +766,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         processNextStudent(); // Continue to next student
                     }
                 );
+
                 return; // Wait for modal callback
+
             } else {
                 onboardNewStudent(newStudent, state.currentClassroom);
                 onboardingOccurred = true;
@@ -1551,10 +1554,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function showOnboardingNotification(addedCount, extraMessage = '') {
-        const studentWord = addedCount > 1 ? 'دانش‌آموزان جدید' : 'دانش‌آموز جدید';
 
         // success header
-        let message = `✅ ${addedCount} ${studentWord} با موفقیت اضافه شدند.\n`;
+        let message = `✅ ${addedCount} دانش آموز جدید با موفقیت اضافه شد.\n`;
 
 
 

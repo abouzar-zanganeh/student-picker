@@ -1,5 +1,10 @@
-/* Dark Mode */
-/* --- Dark Mode Styles --- */
+/* ==========================================================================
+   dark-mode.css introduction
+   --------------------------------------------------------------------------
+   This CSS file defines the styles used in the app dark mode.
+   ========================================================================== */
+
+
 body.dark-mode {
     --color-background: #1a1a2e;
     --color-surface: #16213e;
