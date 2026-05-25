@@ -12,8 +12,8 @@
     <meta name="apple-mobile-web-app-title" content="دستیار معلم">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="images/icon-192.png" type="image/png">
-  <script type="module" crossorigin src="/assets/index-T73WhijH.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BU79WZV9.css">
+  <script type="module" crossorigin src="/assets/index-B9Rbsd8M.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-EjZ8LhS6.css">
 <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
 
 <body>
@@ -574,6 +574,27 @@
             <div class="modal-actions" style="margin-top: 20px;">
                 <button id="cancel-add-class-btn" class="modal-action-btn">لغو</button>
                 <button id="confirm-add-class-btn" class="modal-action-btn btn-primary">ایجاد کلاس</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="past-attendance-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>تعیین وضعیت حضور در جلسات گذشته</h3>
+            <p>
+                این کلاس دارای جلسات برگزار شده است. لطفاً وضعیت حضور دانش‌آموز جدید را برای تمام جلسات گذشته مشخص کنید:
+            </p>
+            <div class="input-group centered-input-group" style="justify-content: center; margin-bottom: 20px;">
+                <select id="past-attendance-select" class="settings-select"
+                    style="width: auto; min-width: 150px; text-align: center;">
+                    <option value="present">✅ حاضر</option>
+                    <option value="absent">❌ غایب</option>
+                    <option value="unknown">❓ نامشخص</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button id="past-attendance-cancel-btn" class="btn-secondary">لغو</button>
+                <button id="past-attendance-confirm-btn" class="btn-success">تایید</button>
             </div>
         </div>
     </div>
