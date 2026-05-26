@@ -890,6 +890,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        //Warn if the user hasn't separated the first name and last name using a dot
         const dotIndex = studentName.indexOf('.');
         if (dotIndex <= 0 || dotIndex >= studentName.length - 1) {
             notifyingMessaging.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید.⚠️ مثال: علی . احمدی", 5000);
