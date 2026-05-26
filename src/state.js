@@ -553,10 +553,10 @@ export function resetAllStudentCounters() {
     saveData();
 }
 
-
+/**  This function filters those  * items (students, sessions, categories, etc) which are not 
+ * deleted and return an array of them.*/
 export function getActiveItems(items) {
-    // This function filters those items (students, sessions, categories, etc) who are not deleted and return an array of them.
-    // ----------------
+
 
     // A safeguard to ensure we're always working with an array.
     if (!Array.isArray(items)) {
@@ -565,6 +565,13 @@ export function getActiveItems(items) {
     return items.filter(item => !item.isDeleted);
 }
 
+/**
+ * Maps internal session numbers to sequential display numbers (1, 2, 3...)
+ * Cancelled sessions are excluded from the sequence.
+ * 
+ * @param {Object} classroom - Classroom containing sessions
+ * @returns {Map<number, number>} Internal number → Display number
+ */
 export function getSessionDisplayMap(classroom) {
     const sessionDisplayMap = new Map();
     if (!classroom) return sessionDisplayMap; // Return an empty map if no classroom is provided
@@ -773,7 +780,7 @@ export function permanentlyDeleteFromTrash(entry) {
 }
 
 /**
- * Checks if a classroom has any finished, non-cancelled sessions.
+ * Checks if a classroom has any finished, non-cancelled sessions (also rules out deleted ones).
  */
 export function hasPastFinishedSessions(classroom) {
     if (!classroom || !classroom.sessions) return false;
