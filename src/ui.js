@@ -15,7 +15,7 @@ import {
     getActiveItems, getSessionDisplayMap, permanentlyDeleteStudent,
     permanentlyDeleteSession, permanentlyDeleteCategory,
     permanentlyDeleteScore, permanentlyDeleteNote, setDisplayedWinnerID,
-    displayedWinnerID, currentClassroom
+    displayedWinnerID, currentClassroom, selectedSession, saveData
 } from './state.js';
 
 import {
@@ -203,7 +203,7 @@ export function setFromAssessmentToNormalSelection(value) {
 
 // Renders the session dashboard page with the specified initial tab
 export function renderSessionDashboard(initialTab = 'selector') {
-    if (!currentClassroom || !state.selectedSession) {
+    if (!currentClassroom || !selectedSession) {
         showPage('class-management-page');
         return;
     }
@@ -561,7 +561,7 @@ export function showRenameStudentModal(student, classroom) {
 
                 logManager.addLog(classroom.info.name, `نام دانش‌آموز «${oldName}» به «${cleanNewName}» تغییر یافت.`, { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
 
-                state.saveData();
+                saveData();
 
                 renderSettingsStudentList();
                 renderStudentStatsList();
@@ -721,7 +721,7 @@ export function showMassCommentModal() {
 
     if (selectedCount > 0) {
         hasExistingComments = studentIds.some(id =>
-            state.selectedSession.studentRecords[id]?.homework.comment
+            selectedSession.studentRecords[id]?.homework.comment
         );
     }
 
@@ -757,11 +757,11 @@ export function showMassCommentModal() {
  * @param {boolean} append If true, append to existing comment; otherwise, replace.
  */
 export function processMassHomeworkComment(commentText, append) {
-    if (!currentClassroom || !state.selectedSession) return;
+    if (!currentClassroom || !selectedSession) return;
 
     let studentsUpdatedCount = 0;
     const studentIds = state.selectedStudentsForMassComment;
-    const session = state.selectedSession;
+    const session = selectedSession;
 
     studentIds.forEach(studentId => {
         const record = session.studentRecords[studentId];
@@ -794,7 +794,7 @@ export function processMassHomeworkComment(commentText, append) {
     state.setSelectedStudentsForMassComment([]);
 
     // Save data and re-render
-    state.saveData();
+    saveData();
     renderAttendancePage(); // Re-render to clear checkboxes and update counts
 
     logManager.addLog(currentClassroom.info.name,
@@ -839,7 +839,7 @@ export function showClassNoteModal(classroom) {
     newNoteContent.value = classroom.note || '';
     state.setSaveNoteCallback((content) => {
         classroom.note = content;
-        state.saveData();
+        saveData();
         // We've moved the log call here as well
         logManager.addLog(classroom.info.name, `یادداشت کلاس ذخیره شد.`, { type: 'VIEW_CLASS_NOTE' });
         renderClassList();
@@ -859,7 +859,7 @@ export function showSessionNoteModal(session, displaySessionNumber) {
     // 2. Define what happens on "Save"
     state.setSaveNoteCallback((content) => {
         session.note = content;
-        state.saveData();
+        saveData();
 
         logManager.addLog(currentClassroom.info.name,
             `یادداشت جلسه ${displaySessionNumber} ذخیره شد.`,
@@ -1048,9 +1048,9 @@ export function renderBreadcrumbs() {
 
         if (activePage === 'settings-page') {
             path.push({ label: 'تنظیمات' });
-        } else if (state.selectedSession) {
+        } else if (selectedSession) {
             const sessionMap = getSessionDisplayMap(currentClassroom);
-            const displayNumber = sessionMap.get(state.selectedSession.sessionNumber) || ` (#${state.selectedSession.sessionNumber})`;
+            const displayNumber = sessionMap.get(selectedSession.sessionNumber) || ` (#${selectedSession.sessionNumber})`;
             path.push({
                 label: `جلسه ${displayNumber}`,
                 handler: () => {
@@ -1279,7 +1279,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     attendanceToggleBtn.addEventListener('mousedown', () => attLongPress = false);
     attendanceToggleBtn.addEventListener('touchstart', () => attLongPress = false, { passive: true });
 
-    const currentStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
+    const currentStatus = selectedSession.studentRecords[student.identity.studentId]?.attendance || 'present';
 
     const updateButtonUI = (status) => {
         if (status === 'present') {
@@ -1300,16 +1300,16 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     attendanceToggleBtn.addEventListener('click', (e) => {
         if (attLongPress) { e.stopPropagation(); return; } // Block if long press occurred
 
-        const oldStatus = state.selectedSession.studentRecords[student.identity.studentId]?.attendance || 'unknown';
+        const oldStatus = selectedSession.studentRecords[student.identity.studentId]?.attendance || 'unknown';
         // Cycle through 3 states: unknown → present → absent → unknown
         const cycleMap = { 'unknown': 'present', 'present': 'absent', 'absent': 'unknown' };
         const newStatus = cycleMap[oldStatus] ?? 'unknown';
 
-        state.selectedSession.setAttendance(student.identity.studentId, newStatus);
+        selectedSession.setAttendance(student.identity.studentId, newStatus);
         if (newStatus === 'absent') {
-            state.selectedSession.studentRecords[student.identity.studentId].hadIssue = false;
+            selectedSession.studentRecords[student.identity.studentId].hadIssue = false;
         }
-        state.saveData();
+        saveData();
 
         updateButtonUI(newStatus);
         renderStudentAbsenceInfo(student, sessionDisplayNumberMap, absenceSpan);
@@ -1330,12 +1330,12 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
             `آیا مطمئن هستید که می‌خواهید وضعیت حضور تمام دانش‌آموزان را به «${targetLabel}» تغییر دهید؟`,
             () => {
                 getActiveItems(currentClassroom.students).forEach(s => {
-                    state.selectedSession.setAttendance(s.identity.studentId, targetStatus);
+                    selectedSession.setAttendance(s.identity.studentId, targetStatus);
                     if (targetStatus === 'absent') {
-                        state.selectedSession.studentRecords[s.identity.studentId].hadIssue = false;
+                        selectedSession.studentRecords[s.identity.studentId].hadIssue = false;
                     }
                 });
-                state.saveData();
+                saveData();
                 renderAttendancePage(); // Re-render whole list
                 showNotification(`✅ وضعیت تمام دانش‌آموزان به «${targetLabel}» تغییر یافت.`);
             },
@@ -1360,7 +1360,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     homeworkBtn.addEventListener('mousedown', () => hwStatusLongPress = false);
     homeworkBtn.addEventListener('touchstart', () => hwStatusLongPress = false, { passive: true });
 
-    const homeworkStatus = state.selectedSession.studentRecords[student.identity.studentId]?.homework.status || 'none';
+    const homeworkStatus = selectedSession.studentRecords[student.identity.studentId]?.homework.status || 'none';
     homeworkBtn.className = `homework-status-btn ${homeworkStatus}`;
     homeworkBtn.title = homeworkTooltipMap[homeworkStatus];
 
@@ -1368,12 +1368,12 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     homeworkBtn.addEventListener('click', (e) => {
         if (hwStatusLongPress) { e.stopPropagation(); return; }
 
-        const homework = state.selectedSession.studentRecords[student.identity.studentId].homework;
+        const homework = selectedSession.studentRecords[student.identity.studentId].homework;
         const statusCycle = { 'none': 'incomplete', 'incomplete': 'complete', 'complete': 'none' };
         const nextStatus = statusCycle[homework.status];
 
-        state.selectedSession.setHomeworkStatus(student.identity.studentId, nextStatus);
-        state.saveData();
+        selectedSession.setHomeworkStatus(student.identity.studentId, nextStatus);
+        saveData();
 
         homeworkBtn.className = `homework-status-btn ${nextStatus}`;
         homeworkBtn.title = homeworkTooltipMap[nextStatus];
@@ -1391,9 +1391,9 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
             `آیا از تغییر وضعیت تکلیف تمام دانش‌آموزان به «${targetLabel}» مطمئن هستید؟`,
             () => {
                 getActiveItems(currentClassroom.students).forEach(s => {
-                    state.selectedSession.setHomeworkStatus(s.identity.studentId, targetStatus);
+                    selectedSession.setHomeworkStatus(s.identity.studentId, targetStatus);
                 });
-                state.saveData();
+                saveData();
                 renderAttendancePage();
                 showNotification(`✅ وضعیت تکلیف همه به «${targetLabel}» تغییر یافت.`);
             },
@@ -1412,7 +1412,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     homeworkNoteBtn.innerHTML = '✍️';
     homeworkNoteBtn.title = 'افزودن یادداشت برای تکلیف';
 
-    const homeworkComment = state.selectedSession.studentRecords[student.identity.studentId]?.homework.comment;
+    const homeworkComment = selectedSession.studentRecords[student.identity.studentId]?.homework.comment;
     if (!homeworkComment) homeworkNoteBtn.innerHTML = '🧾';
 
     // Normal Click
@@ -1420,7 +1420,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         if (hwNoteLongPress) { e.stopPropagation(); return; }
 
         // ... (Existing logic for single note) ...
-        const homework = state.selectedSession.studentRecords[student.identity.studentId].homework;
+        const homework = selectedSession.studentRecords[student.identity.studentId].homework;
 
 
         newNoteContent.value = homework.comment || '';
@@ -1431,8 +1431,8 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
 
             // Logic to sync with profile note
             const sessionDisplayNumberMap = getSessionDisplayMap(currentClassroom);
-            const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
-            const noteSource = { type: 'fromSession', sessionNumber: state.selectedSession.sessionNumber };
+            const displayNumber = sessionDisplayNumberMap.get(selectedSession.sessionNumber);
+            const noteSource = { type: 'fromSession', sessionNumber: selectedSession.sessionNumber };
             const notePrefix = `یادداشت جلسه ${displayNumber}:\n`;
 
             const existingNote = student.profile.notes.find(n => !n.isDeleted && n.source && n.source.type === 'fromSession' && n.source.sessionNumber === noteSource.sessionNumber);
@@ -1444,7 +1444,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
                 student.addNote(notePrefix + content, noteSource);
             }
 
-            state.saveData();
+            saveData();
             showNotification("✅یادداشت تکلیف ذخیره شد.");
             homeworkNoteBtn.innerHTML = content ? '✍️' : '🧾';
             renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
@@ -1497,7 +1497,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
 function getRealSessionNumber() {
     // Use this function to get the active session number. This function filters out cancelled and deleted sessions
     const sessionDisplayNumberMap = getSessionDisplayMap(currentClassroom);
-    const displayNumber = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
+    const displayNumber = sessionDisplayNumberMap.get(selectedSession.sessionNumber);
     return displayNumber;
 
 }
@@ -1507,10 +1507,10 @@ export function renderAttendancePage() {
     const allStudents = getActiveItems(currentClassroom.students);
     const sortedStudents = sortStudents(allStudents);
 
-    if (!currentClassroom || !state.selectedSession) return;
+    if (!currentClassroom || !selectedSession) return;
 
     sortedStudents.forEach(student => {
-        state.selectedSession.initializeStudentRecord(student.identity.studentId);
+        selectedSession.initializeStudentRecord(student.identity.studentId);
     });
 
     state.setSelectedStudentsForMassComment([]);
@@ -1634,8 +1634,8 @@ export function renderStudentStatsList() {
         row.dataset.studentId = student.identity.studentId;
 
         // Highlight absent students' rows
-        if (state.selectedSession) {
-            const studentRecord = state.selectedSession.studentRecords[student.identity.studentId];
+        if (selectedSession) {
+            const studentRecord = selectedSession.studentRecords[student.identity.studentId];
             if (studentRecord && studentRecord.attendance === 'absent') {
                 row.classList.add('absent-row-highlight');
             }
@@ -1752,7 +1752,7 @@ export function displayWinner(manualWinner = null, manualCategoryName = null) {
 
     const resultDiv = document.getElementById('selected-student-result');
     const isHistoryMode = !manualWinner;
-    const studentRecord = state.selectedSession.studentRecords[winner.identity.studentId];
+    const studentRecord = selectedSession.studentRecords[winner.identity.studentId];
 
     // 3. Render Header (Arrows, Name, New Student Badge, Undo)
     const { nameContainer } = renderWinnerHeader(winner, categoryName, isHistoryMode);
@@ -1821,7 +1821,7 @@ function renderCategoryPills() {
             pill.dataset.tooltip = category.description;
         }
         // --- REGULAR CLICK EVENT ---
-        if (state.selectedSession.isFinished) {
+        if (selectedSession.isFinished) {
             pill.classList.add('disabled');
         } else {
             pill.addEventListener('click', () => {
@@ -1846,8 +1846,8 @@ function renderCategoryPills() {
                 selectStudentBtnWrapper.classList.remove('disabled-wrapper');
 
 
-                selectStudentBtn.disabled = state.selectedSession.isFinished;
-                const lastWinnerId = state.selectedSession.lastWinnerByCategory[category.name];
+                selectStudentBtn.disabled = selectedSession.isFinished;
+                const lastWinnerId = selectedSession.lastWinnerByCategory[category.name];
                 if (lastWinnerId) {
                     const lastWinner = currentClassroom.students.find(s => s.identity.studentId === lastWinnerId);
                     if (lastWinner) {
@@ -1869,7 +1869,7 @@ function renderCategoryPills() {
         }
 
         // --- CONTEXT MENU (RIGHT-CLICK) EVENT ---
-        if (!state.selectedSession.isFinished) {
+        if (!selectedSession.isFinished) {
             attachUniversalContextMenu(pill, () => {
                 return [
                     {
@@ -1883,7 +1883,7 @@ function renderCategoryPills() {
                                 if (result.success) {
                                     category.isGradedCategory = newIsGraded;
                                     category.weight = newWeight;
-                                    state.saveData();
+                                    saveData();
                                     logManager.addLog(
                                         currentClassroom.info.name,
                                         `نام دسته‌بندی «${category.name}» به «${newName}» تغییر یافت.`
@@ -1955,7 +1955,7 @@ function renderCategoryPills() {
                                         { type: 'VIEW_TRASH' }
                                     );
 
-                                    state.saveData();
+                                    saveData();
                                     renderCategoryPills();
                                     renderStudentStatsList();
                                     showNotification(`✅ دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`);
@@ -1978,7 +1978,7 @@ function renderCategoryPills() {
     addPill.textContent = '+';
     addPill.title = 'افزودن دسته‌بندی جدید';
 
-    if (!state.selectedSession.isFinished) {
+    if (!selectedSession.isFinished) {
         addPill.addEventListener('click', () => {
 
             syncWeightGroupVisibility();
@@ -1996,7 +1996,7 @@ function renderCategoryPills() {
                 const newCategory = new Category(categoryName, '', isGraded, weight);
                 currentClassroom.categories.push(newCategory);
 
-                state.saveData();
+                saveData();
                 logManager.addLog(currentClassroom.info.name,
                     `دسته‌بندی جدید «${categoryName}» اضافه شد.`, {
                     type: 'VIEW_CLASS_SETTINGS'
@@ -2021,11 +2021,11 @@ function setStyleForGradedCategoryPill(category, pill) {
 }
 
 function restoreSessionState() {
-    if (state.selectedSession.lastUsedCategoryId) {
+    if (selectedSession.lastUsedCategoryId) {
 
-        if (state.selectedSession.isFinished) return;
+        if (selectedSession.isFinished) return;
 
-        const lastCategoryPill = categoryPillsContainer.querySelector(`.pill[data-category-id="${state.selectedSession.lastUsedCategoryId}"]`);
+        const lastCategoryPill = categoryPillsContainer.querySelector(`.pill[data-category-id="${selectedSession.lastUsedCategoryId}"]`);
         if (lastCategoryPill) {
 
 
@@ -2033,9 +2033,9 @@ function restoreSessionState() {
         }
     }
     // Checks the winner history to restore the last displayed winner
-    if (state.selectedSession.winnerHistory && state.selectedSession.winnerHistory.length > 0) {
+    if (selectedSession.winnerHistory && selectedSession.winnerHistory.length > 0) {
         // Point the index to the last winner in the history
-        state.setWinnerHistoryIndex(state.selectedSession.winnerHistory.length - 1);
+        state.setWinnerHistoryIndex(selectedSession.winnerHistory.length - 1);
         // Call displayWinner to show them
         displayWinner();
     }
@@ -2094,7 +2094,7 @@ export function updateQualitativeStatsLabel(student, currentCategory) {
 
 export function updateQuickGradeUIForCategory(category) {
 
-    if (state.selectedSession.isFinished) {
+    if (selectedSession.isFinished) {
 
 
         quickScoreInput.disabled = true;
@@ -2257,7 +2257,7 @@ export function showStudentProfile(student) {
 
                     studentToDelete.isDeleted = true;
                     logManager.addLog(currentClass.info.name, `دانش‌آموز «${studentToDelete.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
-                    state.saveData();
+                    saveData();
 
                     // Refresh the UI in the background
                     renderSettingsStudentList();
@@ -2296,7 +2296,7 @@ export function showStudentProfile(student) {
     addNoteBtn.innerHTML = '<span>📝</span><span>یادداشت</span>';
 
     //Disable button if no session is selected (profile opened from settings/class list)
-    if (!state.selectedSession) {
+    if (!selectedSession) {
         addNoteBtn.disabled = true;
         addNoteBtn.title = 'یادداشت فقط در هنگام برگزاری جلسه قابل ثبت است';
         addNoteBtn.style.opacity = '0.5';
@@ -2306,7 +2306,7 @@ export function showStudentProfile(student) {
     addNoteBtn.addEventListener('click', () => {
         const studentForNote = state.selectedStudentForProfile;
         //Capture the current session context before modal closes
-        const currentSession = state.selectedSession;
+        const currentSession = selectedSession;
         const sessionNumber = currentSession ? currentSession.sessionNumber : null;
 
         newNoteContent.value = '';
@@ -2317,7 +2317,7 @@ export function showStudentProfile(student) {
                 //Create source object if we're in a session context
                 const source = sessionNumber ? { type: 'fromSession', sessionNumber } : null;
                 studentForNote.addNote(content, source);
-                state.saveData();
+                saveData();
 
                 logManager.addLog(currentClassroom.info.name, `یادداشت جدیدی برای دانش‌آموز «${studentForNote.identity.name}» ثبت شد.`, { type: 'VIEW_STUDENT_PROFILE', studentId: studentForNote.identity.studentId });
 
@@ -2442,7 +2442,7 @@ function renderProfileScoringSection(container) {
         }
 
         state.selectedStudentForProfile.addScore(skill, parseFloat(value), comment);
-        state.saveData();
+        saveData();
 
         logManager.addLog(currentClassroom.info.name, `نمره ${value} در ${skill} برای «${state.selectedStudentForProfile.identity.name}» ثبت شد.`, {
             type: 'VIEW_STUDENT_PROFILE',
@@ -2729,7 +2729,7 @@ export function renderScoresHistory(scoresContainer) {
                     // 2. Define what "Save" does
                     state.setSaveNoteCallback((newText) => {
                         score.comment = newText;
-                        state.saveData();
+                        saveData();
 
                         logManager.addLog(currentClassroom.info.name,
                             `توضیحات نمره ${score.value} (${score.skill}) برای دانش‌آموز «${student.identity.name}» به‌روزرسانی شد.`, {
@@ -2772,7 +2772,7 @@ export function renderScoresHistory(scoresContainer) {
                             state.addToTrashBin(trashEntry);
 
                             score.isDeleted = true; // Mark as deleted
-                            state.saveData();
+                            saveData();
 
                             logManager.addLog(currentClassroom.info.name, `نمره ${score.value} (${score.skill}) دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
 
@@ -2877,7 +2877,7 @@ export function renderStudentNotes(notesContainer) {
 
                             note.isDeleted = true;
                             logManager.addLog(currentClassroom.info.name, `یادداشت دانش‌آموز «${studentForNote.identity.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
-                            state.saveData();
+                            saveData();
 
                             showStudentProfile(studentForNote);
                             showNotification('✅ یادداشت به سطل زباله منتقل شد.');
@@ -2907,7 +2907,7 @@ export function renderStudentNotes(notesContainer) {
 
                 state.setSaveNoteCallback((newText) => {
                     note.content = newText;
-                    state.saveData();
+                    saveData();
 
                     logManager.addLog(currentClassroom.info.name,
                         `یادداشت دانش‌آموز «${studentForNote.identity.name}» به‌روزرسانی شد.`,
@@ -3209,7 +3209,7 @@ function createClassListItem(classroom) {
                             { type: 'VIEW_TRASH' }
                         );
 
-                        state.saveData();
+                        saveData();
                         renderClassList();
                         showNotification(`✅ کلاس «${classroom.info.name}» به سطل زباله منتقل شد.`);
                     },
@@ -3247,7 +3247,7 @@ function createClassListItem(classroom) {
                         });
 
                         state.setSelectedClassIds([]);
-                        state.saveData();
+                        saveData();
                         renderClassList();
                         showNotification(`✅ ${selectedCount} کلاس به سطل زباله منتقل شدند.`);
                     },
@@ -3321,7 +3321,7 @@ function createClassListItem(classroom) {
                                     `نام کلاس از «${oldName}» به «${trimmedNewName}» تغییر یافت.`,
                                     { type: 'VIEW_SESSIONS' }
                                 );
-                                state.saveData();
+                                saveData();
                                 renderClassList();
                                 showNotification(`✅نام کلاس به «${trimmedNewName}» تغییر یافت.`);
                             } else {
@@ -3534,7 +3534,7 @@ export function renderSettingsStudentList() {
                                     { type: 'VIEW_TRASH' }
                                 );
 
-                                state.saveData();
+                                saveData();
 
                                 // Refresh UI
                                 renderSettingsStudentList();
@@ -3608,7 +3608,7 @@ export function renderSettingsCategories() {
 
                     category.isDeleted = true;
                     logManager.addLog(currentClassroom.info.name, `دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
-                    state.saveData();
+                    saveData();
                     renderSettingsCategories();
                     showNotification(`✅ دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`);
                 },
@@ -3642,14 +3642,14 @@ export function renderSettingsOther() {
 
 
         classroom.info.level = settingsLevelSelect.value;
-        state.saveData();
+        saveData();
     });
 
     settingsLevelSelect.addEventListener('change', () => {
 
 
         classroom.info.level = settingsLevelSelect.value;
-        state.saveData();
+        saveData();
     });
 
     // --- 3. Class Type Logic  ---
@@ -3714,8 +3714,8 @@ export function showPage(pageId, options = {}) {
     if (currentClassroom) {
         params.set('class', currentClassroom.info.name);
     }
-    if (state.selectedSession) {
-        params.set('session', state.selectedSession.sessionNumber);
+    if (selectedSession) {
+        params.set('session', selectedSession.sessionNumber);
     }
     if (state.selectedStudentForProfile) {
         params.set('student', state.selectedStudentForProfile.identity.studentId);
@@ -3781,7 +3781,7 @@ function createSessionActionButtons(session, displaySessionNumber) {
                 `جلسه شماره ${displaySessionNumber} خاتمه پیدا خواهد کرد!`,
                 () => {
                     currentClassroom.endSpecificSession(session.sessionNumber);
-                    state.saveData();
+                    saveData();
 
                     logManager.addLog(currentClassroom.info.name,
                         `جلسه ${displaySessionNumber} خاتمه یافت.`, { type: 'VIEW_SESSIONS' });
@@ -3924,7 +3924,7 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                                 { type: 'VIEW_SESSIONS' }
                             );
 
-                            state.saveData();
+                            saveData();
                             renderSessions();
 
                             showNotification(
@@ -3943,7 +3943,7 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                 icon: '🔄',
                 action: () => {
                     currentClassroom.markAsMakeup(session.sessionNumber);
-                    state.saveData();
+                    saveData();
 
                     const logMessage = session.isMakeup
                         ? `جلسه ${displaySessionNumber} به عنوان جبرانی علامت‌گذاری شد.`
@@ -3990,7 +3990,7 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                                 { type: 'VIEW_TRASH' }
                             );
 
-                            state.saveData();
+                            saveData();
                             renderSessions();
 
                             showNotification(`✅ جلسه ${displayNumText} به سطل زباله منتقل شد.`);
@@ -4078,7 +4078,7 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                             { type: 'VIEW_SESSIONS' }
                         );
 
-                        state.saveData();
+                        saveData();
                         renderSessions();
                         showNotification(`✅ تاریخ جلسه به ${newDateStr} تغییر یافت.`);
                     });
@@ -4332,7 +4332,7 @@ export function renderTrashPage() {
 
             if (success) {
                 state.trashBin.splice(index, 1);
-                state.saveData();
+                saveData();
                 renderTrashPage();
                 if (entry.type === 'classroom') {
                     renderClassList(); // Update the class list if a class was restored
@@ -4398,7 +4398,7 @@ export function renderTrashPage() {
                     }
 
                     state.trashBin.splice(index, 1);
-                    state.saveData();
+                    saveData();
                     renderTrashPage();
                     showNotification('✅ آیتم برای همیشه حذف شد.');
                 },
@@ -4446,14 +4446,14 @@ function renderAbsenteesSummary() {
     }
 
     // 1. Make sure we are in a valid session
-    if (!currentClassroom || !state.selectedSession) {
+    if (!currentClassroom || !selectedSession) {
         summaryBox.classList.remove('visible');
         return;
     }
 
     // 2. Get a list of all students marked as absent
     const absentStudents = getActiveItems(currentClassroom.students).filter(student => {
-        const record = state.selectedSession.studentRecords[student.identity.studentId];
+        const record = selectedSession.studentRecords[student.identity.studentId];
         return record && record.attendance === 'absent';
     });
 
@@ -4462,7 +4462,7 @@ function renderAbsenteesSummary() {
     const totalAbsent = absentStudents.length;
     // Count each state explicitly now that 'unknown' is a third state
     const totalPresent = allActiveStudents.filter(s => {
-        const record = state.selectedSession.studentRecords[s.identity.studentId];
+        const record = selectedSession.studentRecords[s.identity.studentId];
         return record && record.attendance === 'present';
     }).length;
 
@@ -4475,7 +4475,7 @@ function renderAbsenteesSummary() {
 
     // 3. Update the session number in the title
     const sessionDisplayNumberMap = getSessionDisplayMap(currentClassroom);
-    sessionNumberSpan.textContent = sessionDisplayNumberMap.get(state.selectedSession.sessionNumber);
+    sessionNumberSpan.textContent = sessionDisplayNumberMap.get(selectedSession.sessionNumber);
 
     // 4. Show or hide the box based on whether there are any absentees
     if (absentStudents.length > 0) {
@@ -4503,8 +4503,8 @@ function renderAbsenteesSummary() {
         nameTag.addEventListener('click', () => {
             nameTag.classList.add('fading-out');
             setTimeout(() => {
-                state.selectedSession.setAttendance(student.identity.studentId, 'present');
-                state.saveData();
+                selectedSession.setAttendance(student.identity.studentId, 'present');
+                saveData();
                 renderAttendancePage();
             }, 200);
         });
@@ -4524,7 +4524,7 @@ function setupAbsenteesCopyButton() {
     }
 
     copyBtn.addEventListener('click', () => {
-        if (!currentClassroom || !state.selectedSession) return;
+        if (!currentClassroom || !selectedSession) return;
 
         if (getAbsentStudents().length === 0) {
             showNotification('⚠️لیست غایبین خالی است.');
@@ -4548,7 +4548,7 @@ function setupAbsenteesCopyButton() {
 
         let textToCopy = `گزارش حضور و غیاب جلسه شماره ${getRealSessionNumber()}:\n\n`;
         textToCopy += `کلاس ${currentClassroom.info.name}\n`;
-        textToCopy += ` تاریخ ${formatPersianDate(state.selectedSession.createdAt)}\n\n`;
+        textToCopy += ` تاریخ ${formatPersianDate(selectedSession.createdAt)}\n\n`;
         textToCopy += `✅ حاضرین: ${totalPresent.toLocaleString('fa-IR')}\n`;
         textToCopy += `❌ غایبین: ${totalAbsent.toLocaleString('fa-IR')}\n\n`;
         textToCopy += `لیست اسامی غایبین:\n\n`;
@@ -4773,12 +4773,12 @@ function createQualitativeButtons(student, categoryName) {
 
     // 1. Determine Context: Are we in History Mode or Manual Mode?
     const historyIndex = state.winnerHistoryIndex;
-    const isHistoryMode = historyIndex !== -1 && state.selectedSession.winnerHistory[historyIndex];
+    const isHistoryMode = historyIndex !== -1 && selectedSession.winnerHistory[historyIndex];
 
     // We prioritize the History Entry if available. 
     // If Manual selection (index -1), we fall back to the session record (or just null if you prefer).
-    const historyEntry = isHistoryMode ? state.selectedSession.winnerHistory[historyIndex] : null;
-    const sessionRecord = state.selectedSession.studentRecords[student.identity.studentId];
+    const historyEntry = isHistoryMode ? selectedSession.winnerHistory[historyIndex] : null;
+    const sessionRecord = selectedSession.studentRecords[student.identity.studentId];
 
     // Initialize stats containers if missing
     if (!student.qualitativeStats) student.qualitativeStats = {};
@@ -4792,7 +4792,7 @@ function createQualitativeButtons(student, categoryName) {
     const currentRating = isHistoryMode ? historyEntry.rating : sessionRecord.performanceRatings[categoryName];
 
     // Check lock state
-    const isLocked = state.selectedSession.isFinished ||
+    const isLocked = selectedSession.isFinished ||
         sessionRecord.attendance === 'absent' ||
         sessionRecord.hadIssue ||
         sessionRecord.wasOutOfClass;
@@ -4840,7 +4840,7 @@ function createQualitativeButtons(student, categoryName) {
                 else delete sessionRecord.performanceRatings[categoryName];
             }
 
-            state.saveData();
+            saveData();
 
             // Fix: If we are in Manual/Assessment mode (not history), 
             // we must explicitly pass the student back to displayWinner 
@@ -4997,10 +4997,10 @@ function resolveWinnerState(manualWinner, manualCategoryName) {
         updateCategoryColumnHighlight(null);
 
         // 2. Fallback: Original logic for showing a historical winner
-        if (!state.selectedSession || state.winnerHistoryIndex < 0 || !state.selectedSession.winnerHistory[state.winnerHistoryIndex]) {
+        if (!selectedSession || state.winnerHistoryIndex < 0 || !selectedSession.winnerHistory[state.winnerHistoryIndex]) {
             return null; // No winner to display
         }
-        const historyEntry = state.selectedSession.winnerHistory[state.winnerHistoryIndex];
+        const historyEntry = selectedSession.winnerHistory[state.winnerHistoryIndex];
         winner = historyEntry.winner;
         categoryName = historyEntry.categoryName;
     }
@@ -5074,7 +5074,7 @@ function renderWinnerHeader(winner, categoryName, isHistoryMode) {
     });
 
     // --- Winner Name ---
-    const studentRecord = state.selectedSession.studentRecords[winner.identity.studentId];
+    const studentRecord = selectedSession.studentRecords[winner.identity.studentId];
     const isAbsent = studentRecord?.attendance === 'absent';
 
     const winnerNameEl = document.createElement('div');
@@ -5119,7 +5119,7 @@ function renderWinnerHeader(winner, categoryName, isHistoryMode) {
     forwardBtn.className = 'btn-icon';
     forwardBtn.innerHTML = '˄';
     forwardBtn.title = 'برنده بعدی';
-    forwardBtn.classList.toggle('is-disabled', !isHistoryMode || state.winnerHistoryIndex >= state.selectedSession.winnerHistory.length - 1);
+    forwardBtn.classList.toggle('is-disabled', !isHistoryMode || state.winnerHistoryIndex >= selectedSession.winnerHistory.length - 1);
     forwardBtn.addEventListener('click', () => {
         if (forwardBtn.classList.contains('is-disabled')) {
             forwardBtn.classList.add('shake-animation');
@@ -5135,7 +5135,7 @@ function renderWinnerHeader(winner, categoryName, isHistoryMode) {
     nameContainer.appendChild(winnerNameEl);
 
     // New Student Badge
-    if (winner.onboardingSession === state.selectedSession.sessionNumber) {
+    if (winner.onboardingSession === selectedSession.sessionNumber) {
         const newStudentBadge = document.createElement('div');
         newStudentBadge.className = 'new-student-badge';
         newStudentBadge.textContent = 'دانش آموز جدید';
@@ -5149,7 +5149,7 @@ function renderWinnerHeader(winner, categoryName, isHistoryMode) {
 
     // Determine if the student was absent in the immediately previous session
     let wasAbsentInPreviousSession = false;
-    const currentSessionNum = state.selectedSession.sessionNumber;
+    const currentSessionNum = selectedSession.sessionNumber;
     const prevSessionNum = currentClassroom.sessions
         .filter(s => s.sessionNumber < currentSessionNum && !s.isDeleted && !s.isCancelled)
         .sort((a, b) => b.sessionNumber - a.sessionNumber)[0]?.sessionNumber ?? -1;
@@ -5219,11 +5219,11 @@ function renderWinnerStatusControls(winner, studentRecord, categoryName) {
                 displayWinner(winner, categoryName);
             }
         }, 0);
-        state.saveData();
+        saveData();
     };
 
     // 3. Event Listeners (Logic for updating counters and state)
-    if (state.selectedSession.isFinished) {
+    if (selectedSession.isFinished) {
         // Disable all if session is finished
         [absentBtn, issueBtn, exitBtn, profileBtn].forEach(btn => btn.disabled = true);
     } else {
@@ -5249,12 +5249,12 @@ function renderWinnerStatusControls(winner, studentRecord, categoryName) {
                 }
                 // Activate Absent
                 absentBtn.classList.add('active');
-                state.selectedSession.setAttendance(winner.identity.studentId, 'absent');
+                selectedSession.setAttendance(winner.identity.studentId, 'absent');
                 winner.statusCounters.missedChances++;
             } else {
                 // Deactivate Absent
                 absentBtn.classList.remove('active');
-                state.selectedSession.setAttendance(winner.identity.studentId, 'present');
+                selectedSession.setAttendance(winner.identity.studentId, 'present');
                 winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
             }
             refreshAfterChange();
@@ -5274,7 +5274,7 @@ function renderWinnerStatusControls(winner, studentRecord, categoryName) {
             if (!isCurrentlyActive) {
                 if (absentBtn.classList.contains('active')) {
                     absentBtn.classList.remove('active');
-                    state.selectedSession.setAttendance(winner.identity.studentId, 'present');
+                    selectedSession.setAttendance(winner.identity.studentId, 'present');
                     winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
                 }
                 // Activate Issue
@@ -5305,7 +5305,7 @@ function renderWinnerStatusControls(winner, studentRecord, categoryName) {
                 // Deactivate Absent if active
                 if (absentBtn.classList.contains('active')) {
                     absentBtn.classList.remove('active');
-                    state.selectedSession.setAttendance(winner.identity.studentId, 'present');
+                    selectedSession.setAttendance(winner.identity.studentId, 'present');
                     winner.statusCounters.missedChances = Math.max(0, winner.statusCounters.missedChances - 1);
                 }
                 // Deactivate Issue if active
@@ -5437,11 +5437,11 @@ function renderWinnerDetails(winner, categoryName) {
     addNoteBtn.innerHTML = '📝';
     addNoteBtn.title = 'افزودن یادداشت جدید';
 
-    if (state.selectedSession.isFinished) {
+    if (selectedSession.isFinished) {
         addNoteBtn.disabled = true;
     } else {
         // Capture current session (we're definitely in one on selector tab)
-        const currentSession = state.selectedSession;
+        const currentSession = selectedSession;
         const sessionNumber = currentSession ? currentSession.sessionNumber : null;
 
         addNoteBtn.addEventListener('click', () => {
@@ -5453,7 +5453,7 @@ function renderWinnerDetails(winner, categoryName) {
                     //Attach session source if available
                     const source = sessionNumber ? { type: 'fromSession', sessionNumber } : null;
                     winner.addNote(content, source);
-                    state.saveData();
+                    saveData();
                     displayWinner();
                     showNotification('✅ یادداشت با موفقیت ثبت شد.');
                 }

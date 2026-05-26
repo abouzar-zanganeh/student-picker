@@ -8,7 +8,10 @@
 
 
 import JSZip from "jszip";
-import { classrooms, rehydrateData, saveData, setTrashBin, setUserSettings, trashBin, userSettings } from "./state";
+import {
+    classrooms, rehydrateData, saveData, setTrashBin,
+    setUserSettings, trashBin, userSettings
+} from "./state";
 import { addBackupSnapshot } from "./db";
 import * as state from "./state";
 import { renderClassManagementStats } from "./ui";
@@ -340,7 +343,7 @@ export function restoreButtonMainFunction(restoreFileInput) {
                             state.rehydrateData(classroomsDataToRestore);
                             state.setTrashBin(trashDataToRestore);
                             state.setUserSettings({ lastRestoreTimestamp: new Date().toISOString() });
-                            state.saveData();
+                            saveData();
                             ui.renderClassList();
                             ui.showPage('class-management-page');
                             showNotification("✅اطلاعات با موفقیت بازیابی شد.");

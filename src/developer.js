@@ -8,7 +8,7 @@
 
 
 import * as state from './state.js';
-import { currentClassroom } from './state.js';
+import { currentClassroom, saveData } from './state.js';
 import * as ui from './ui.js';
 import * as notifyingMessaging from './notifyingMessaging.js';
 import * as utils from './otherUtils.js';
@@ -81,7 +81,7 @@ export function activateDeveloperAccessOnConsole() {
 
         notifyingMessaging.showCustomConfirm("آیا از خروج از حالت توسعه‌دهنده مطمئن هستید؟", () => {
             state.setUserSettings({ isDeveloperMode: false });
-            state.saveData(true);
+            saveData(true);
             // Refresh to cleanly wipe global objects and reset styles
             window.location.reload();
         }, { confirmText: 'بله', confirmClass: 'btn-warning' });

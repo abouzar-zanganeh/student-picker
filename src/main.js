@@ -8,7 +8,7 @@
 
 
 import * as state from './state.js';
-import { currentClassroom } from './state.js';
+import { currentClassroom, selectedSession, saveData } from './state.js';
 import * as demo from './demo.js';
 import * as ui from './ui.js';
 import * as notifyingMessaging from './notifyingMessaging.js';
@@ -89,7 +89,7 @@ function navigateSilently(pageId) {
     // 2. Update the URL to match the parent without pushing a new history item
     const params = new URLSearchParams();
     if (currentClassroom) params.set('class', currentClassroom.info.name);
-    if (state.selectedSession) params.set('session', state.selectedSession.sessionNumber);
+    if (selectedSession) params.set('session', selectedSession.sessionNumber);
 
     const newHash = `#${pageId}${params.toString() ? '?' + params.toString() : ''}`;
 
@@ -498,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ui.displayWinner(winner, state.selectedCategory.name);
                 updateQualitativeStatsLabel(winner, state.selectedCategory);
                 ui.updateCategoryColumnHighlight(state.selectedCategory.name);
-                state.saveData();
+                saveData();
             } else {
                 // THE DETECTION: This runs when pickAssessmentWinner returns null
                 notifyingMessaging.showCustomConfirm(
@@ -516,15 +516,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             // 3. Standard Mode Logic
-            if (!currentClassroom || !state.selectedSession || !state.selectedCategory) return;
+            if (!currentClassroom || !selectedSession || !state.selectedCategory) return;
 
-            const winner = currentClassroom.selectNextWinner(state.selectedCategory.name, state.selectedSession);
+            const winner = currentClassroom.selectNextWinner(state.selectedCategory.name, selectedSession);
 
             if (winner) {
                 playSuccessSound();
 
                 // Increment standard counters
-                const studentRecord = state.selectedSession.studentRecords[winner.identity.studentId];
+                const studentRecord = selectedSession.studentRecords[winner.identity.studentId];
                 if (studentRecord?.attendance === 'absent') winner.statusCounters.missedChances++;
                 if (studentRecord?.hadIssue) {
                     winner.statusCounters.missedChances++;
@@ -537,19 +537,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Update History
                 const historyEntry = { winner, categoryName: state.selectedCategory.name };
-                state.selectedSession.winnerHistory.push(historyEntry);
-                if (state.selectedSession.winnerHistory.length > 10) state.selectedSession.winnerHistory.shift();
-                state.setWinnerHistoryIndex(state.selectedSession.winnerHistory.length - 1);
+                selectedSession.winnerHistory.push(historyEntry);
+                if (selectedSession.winnerHistory.length > 10) selectedSession.winnerHistory.shift();
+                state.setWinnerHistoryIndex(selectedSession.winnerHistory.length - 1);
 
-                state.selectedSession.lastUsedCategoryId = state.selectedCategory.id;
-                state.selectedSession.lastSelectedWinnerId = winner.identity.studentId;
+                selectedSession.lastUsedCategoryId = state.selectedCategory.id;
+                selectedSession.lastSelectedWinnerId = winner.identity.studentId;
 
                 ui.renderStudentStatsList();
                 setTimeout(() => {
                     ui.displayWinner();
                     updateQualitativeStatsLabel(winner, state.selectedCategory);
                 }, 0);
-                state.saveData();
+                saveData();
             } else {
                 showNotification("❌دانش‌آموز واجد شرایطی برای انتخاب یافت نشد.");
             }
@@ -581,7 +581,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     // --- ON CONFIRM ---
                     // This is the original logic
                     currentClassroom.info.type = newType;
-                    state.saveData();
+                    saveData();
 
                     logManager.addLog(currentClassroom.info.name, `نوع کلاس به «${newTypeText}» تغییر یافت.`, { type: 'VIEW_CLASS_SETTINGS' });
                     ui.renderClassList();
@@ -624,7 +624,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 .map(cb => parseInt(cb.value));
 
             currentClassroom.info.scheduleDays = selectedDays;
-            state.saveData();
+            saveData();
         });
     });
 
@@ -636,7 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         currentClassroom.info.scheduleEndTime = scheduleEndTimeInput.value;
-        state.saveData();
+        saveData();
     };
 
     scheduleStartTimeInput.addEventListener('change', handleTimeChange);
@@ -755,7 +755,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         onboardNewStudent(newStudent, currentClassroom);
                         onboardingOccurred = true;
                         addedCount++;
-                        state.saveData();
+                        saveData();
                         currentIndex++;
                         processNextStudent(); // Continue to next student
                     },
@@ -775,7 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 onboardNewStudent(newStudent, currentClassroom);
                 onboardingOccurred = true;
                 addedCount++;
-                state.saveData();
+                saveData();
                 currentIndex++;
                 processNextStudent(); // Continue to next
             }
@@ -963,7 +963,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // --- CORRECT ORDER ---
                     // 1. Save the new session data.
-                    state.saveData();
+                    saveData();
 
                     // 2. Create the log entry.
                     const sessionMap = getSessionDisplayMap(currentClassroom);
@@ -1109,7 +1109,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // --- Persist state (ONCE) ---
                 state.classrooms[newClassName] = newClassroom;
-                state.saveData();
+                saveData();
 
                 // --- Update UI (ONCE) ---
                 ui.renderClassList();
@@ -1236,7 +1236,7 @@ document.addEventListener('DOMContentLoaded', () => {
             student = state.manualSelection.student;
         } else {
             // Fallback to the original history logic
-            const historyEntry = state.selectedSession?.winnerHistory[state.winnerHistoryIndex];
+            const historyEntry = selectedSession?.winnerHistory[state.winnerHistoryIndex];
             student = historyEntry?.winner;
         }
 
@@ -1269,7 +1269,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 `نمره ${scoreValue} در ${category.name} برای «${student.identity.name}» ثبت شد.`,
                 { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
 
-            state.saveData();
+            saveData();
             ui.renderStudentStatsList(); // Refreshes the stats table to show the new score.
             showNotification(`✅نمره برای ${student.identity.name} در مهارت ${category.name} ثبت شد.`);
             state.markStudentAsPickedForAssessmentInSession(state.selectedCategory.id, student.identity.studentId);
@@ -1357,7 +1357,7 @@ document.addEventListener('DOMContentLoaded', () => {
             logManager.addLog(sourceClassForMove.info.name, `دانش‌آموز «${studentToMove.identity.name}» به کلاس «${destinationClassName}» منتقل شد.`, { type: 'VIEW_SESSIONS' });
             logManager.addLog(destinationClassName, `دانش‌آموز «${studentToMove.identity.name}» از کلاس «${sourceClassForMove.info.name}» به این کلاس منتقل شد.`, { type: 'VIEW_SESSIONS' });
 
-            state.saveData();
+            saveData();
             ui.renderSettingsStudentList();
             ui.renderStudentStatsList();
             ui.renderAttendancePage();
@@ -1543,7 +1543,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //this clears the input area, logs the addition, and does necessary renders for ui to update itself
     function completeStudentAddition(student, nameInputElement) {
-        state.saveData();
+        saveData();
         logManager.addLog(currentClassroom.info.name,
             `دانش‌آموز «${student.identity.name}» به کلاس اضافه شد.`, {
             type: 'VIEW_STUDENT_PROFILE',
@@ -1800,7 +1800,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             currentClassroom.categories.push(new Category(name, '', isGraded, weight));
-            state.saveData();
+            saveData();
             ui.renderSettingsCategories();
         });
         ui.openAddCategoryModal();
@@ -1829,7 +1829,7 @@ export function closeSideNav() {
 export function handleUndoLastSelection(student, categoryName) {
 
     // 1. Check if we are in a valid state
-    if (!state.selectedSession || state.selectedSession.isFinished) {
+    if (!selectedSession || selectedSession.isFinished) {
         showNotification("⚠️ امکان لغو انتخاب در جلسه خاتمه یافته وجود ندارد.");
         return;
     }
@@ -1851,7 +1851,7 @@ export function handleUndoLastSelection(student, categoryName) {
             ui.renderStudentStatsList();
             ui.displayWinner(); // Clears the display because there is no history entry to show.
 
-            state.saveData();
+            saveData();
             showNotification(`✅ «${student.identity.name}» به لیست انتظار نمره بازگشت.`);
         });
         return; // Stop here so we don't run the standard history undo logic.
@@ -1859,7 +1859,7 @@ export function handleUndoLastSelection(student, categoryName) {
 
     // 2. Check if we are viewing the MOST RECENT winner.
     // We use winnerHistoryIndex to know if the user is browsing past winners.
-    const history = state.selectedSession.winnerHistory;
+    const history = selectedSession.winnerHistory;
     const isLastWinner = state.winnerHistoryIndex === history.length - 1;
 
     if (!isLastWinner || history.length === 0) {
@@ -1877,7 +1877,7 @@ export function handleUndoLastSelection(student, categoryName) {
     notifyingMessaging.showCustomConfirm(
         `آیا از حذف انتخاب «${student.identity.name}» برای «${categoryName}» مطمئن هستید؟ آمار این انتخاب بازگردانی خواهد شد.`,
         () => {
-            const history = state.selectedSession.winnerHistory;
+            const history = selectedSession.winnerHistory;
 
             // 1. Pop the last winner off the history stack
             const undoneEntry = history.pop();
@@ -1894,7 +1894,7 @@ export function handleUndoLastSelection(student, categoryName) {
             }
 
             // 3. Decrement session-specific stats
-            const record = state.selectedSession.studentRecords[studentId];
+            const record = selectedSession.studentRecords[studentId];
             if (record && record.selections[categoryName]) {
                 record.selections[categoryName] = Math.max(0, record.selections[categoryName] - 1);
             }
@@ -1923,10 +1923,10 @@ export function handleUndoLastSelection(student, categoryName) {
             }
 
             if (newLastWinnerId) {
-                state.selectedSession.lastWinnerByCategory[categoryName] = newLastWinnerId;
+                selectedSession.lastWinnerByCategory[categoryName] = newLastWinnerId;
             } else {
                 // No one else was selected for this category in the history
-                delete state.selectedSession.lastWinnerByCategory[categoryName];
+                delete selectedSession.lastWinnerByCategory[categoryName];
             }
 
             // --- Step 6: Refresh UI ---
@@ -1939,7 +1939,7 @@ export function handleUndoLastSelection(student, categoryName) {
             ui.displayWinner(); // This will now show the new last winner (or nothing if history is empty)
 
             // 7. Save and notify
-            state.saveData();
+            saveData();
             showNotification(`✅ انتخاب «${student.identity.name}» لغو شد.`);
         },
         { confirmText: 'بله', confirmClass: 'btn-warning' }

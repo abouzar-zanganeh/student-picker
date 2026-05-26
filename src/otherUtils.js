@@ -8,7 +8,7 @@
 
 
 import * as state from './state.js';
-import { userSettings } from './state.js';
+import { userSettings, saveData } from './state.js';
 import * as ui from './ui.js';
 import { openContextMenu } from './ui.js';
 import { switchDashboardTab } from './ui.js';
@@ -317,7 +317,7 @@ function cleanupOrphanedData() {
 
     // Final Report
     if (totalOrphansFound > 0) {
-        state.saveData();
+        saveData();
         console.log(`✅ Cleanup complete! Found and removed ${totalOrphansFound} orphaned references. Data saved.`);
     } else {
         console.log("✅ No orphaned data found. Your data is clean!");

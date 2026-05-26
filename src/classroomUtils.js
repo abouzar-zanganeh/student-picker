@@ -1,11 +1,11 @@
 // @ts-nocheck
 import * as state from './state.js'
-import { getActiveItems, currentClassroom } from './state.js';
+import { getActiveItems, currentClassroom, selectedSession } from './state.js';
 
 export function getAbsentStudents() {
 
     const absentStudents = getActiveItems(currentClassroom.students).filter(student => {
-        const record = state.selectedSession.studentRecords[student.identity.studentId];
+        const record = selectedSession.studentRecords[student.identity.studentId];
         return record && record.attendance === 'absent';
     });
 
@@ -15,7 +15,7 @@ export function getAbsentStudents() {
 export function getPresentStudents() {
 
     const presentStudents = getActiveItems(currentClassroom.students).filter(student => {
-        const record = state.selectedSession.studentRecords[student.identity.studentId];
+        const record = selectedSession.studentRecords[student.identity.studentId];
         return record && record.attendance === 'present';
     });
 
