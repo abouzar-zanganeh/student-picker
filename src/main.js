@@ -881,7 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addStudentBtn.addEventListener('click', () => {
         if (!state.currentClassroom) return;
 
-        const studentName = newStudentNameInput.value.trim();
+        const studentName = normalizeText(newStudentNameInput.value.trim());
 
         // If the student name field is empty, use flashElement to draw user's attention to the empty field
         if (!studentName) {
@@ -899,6 +899,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const parsed = parseStudentName(studentName);
         const normalizedNewName = normalizeText(parsed.name);
+
 
         const isDuplicate = getActiveItems(state.currentClassroom.students).some(s =>
             normalizeText(s.identity.name) === normalizedNewName
