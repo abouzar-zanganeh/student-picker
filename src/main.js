@@ -882,11 +882,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!state.currentClassroom) return;
 
         const studentName = newStudentNameInput.value.trim();
+
+        // If the student name field is empty, use flashElement to draw user's attention to the empty field
         if (!studentName) {
             flashElement(newStudentNameInput, 3000);
             notifyingMessaging.showNotification("لطفاً نام دانش‌آموز را وارد کنید.");
             return;
         }
+
         const dotIndex = studentName.indexOf('.');
         if (dotIndex <= 0 || dotIndex >= studentName.length - 1) {
             notifyingMessaging.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید.⚠️ مثال: علی . احمدی", 5000);
