@@ -14,8 +14,9 @@ import { openContextMenu } from './ui.js';
 import { switchDashboardTab } from './ui.js';
 import * as jalaali from 'jalaali-js';
 
-// normalizeText() standardizes Persian/Arabic text so visually similar characters 
-// are treated as equal. Important: It also removes any whitespaces and zero-width non-joiner
+/**  normalizeText() standardizes Persian/Arabic text so visually similar characters 
+ * are treated as equal. Important: It also removes any whitespaces and zero-width non-joiner
+ */
 export function normalizeText(str) {
     // A safeguard to ensure we're always working with a string
     if (typeof str !== 'string') {
