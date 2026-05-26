@@ -909,7 +909,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const newStudent = new Student(parsedName);
-        state.currentClassroom.addStudent(newStudent);
 
         if (state.hasPastFinishedSessions(state.currentClassroom)) {
             notifyingMessaging.showPastAttendanceChoiceModal(
@@ -919,20 +918,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         state.currentClassroom,
                         chosenStatus
                     );
+                    state.currentClassroom.addStudent(newStudent);
                     onboardNewStudent(newStudent, state.currentClassroom);
                     showOnboardingNotification(1);
                     completeStudentAddition(newStudent, newStudentNameInput);
                 },
                 () => {
-                    // User cancelled - don't add the student, clean up
                     notifyingMessaging.showNotification("❌ افزودن دانش‌آموز لغو شد.");
-                    // Remove the student that was already added to the classroom
-                    const index = state.currentClassroom.students.findIndex(s => s.identity.studentId === newStudent.identity.studentId);
-                    if (index > -1) state.currentClassroom.students.splice(index, 1);
                 }
             );
             return; // Exit early, wait for modal
         } else {
+            state.currentClassroom.addStudent(newStudent);
             onboardNewStudent(newStudent, state.currentClassroom);
             showOnboardingNotification(1);
             completeStudentAddition(newStudent, newStudentNameInput);
@@ -1541,6 +1538,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    //this clears the input area, logs the addition, and does necessary renders for ui to update itself
     function completeStudentAddition(student, nameInputElement) {
         state.saveData();
         logManager.addLog(state.currentClassroom.info.name,
