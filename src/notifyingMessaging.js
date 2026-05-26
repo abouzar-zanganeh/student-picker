@@ -14,11 +14,8 @@ import {
     secureConfirmMessage, showPage, undoMessage, undoToast
 } from "./ui";
 
-import { setPastAttendanceCallback, setPastAttendanceCancelCallback } from './state.js';
-
 import { setActiveModal } from './state.js';
 import { settingsPage } from './ui.js'
-
 
 export function showUndoToast(message) {
 
@@ -131,19 +128,17 @@ export function showSecureConfirm(message, onConfirm) {
  * @param {Function} onCancel - Optional callback if user cancels
  */
 export function showPastAttendanceChoiceModal(onConfirm, onCancel = null) {
-    const AttendanceModal = document.getElementById('past-attendance-modal');
+    const pastAttendanceModal = document.getElementById('past-attendance-modal');
     const confirmBtn = document.getElementById('past-attendance-confirm-btn');
     const cancelBtn = document.getElementById('past-attendance-cancel-btn');
     const select = document.getElementById('past-attendance-select');
 
-    if (!AttendanceModal) {
+    if (!pastAttendanceModal) {
         console.error("past-attendance-modal not found in DOM");
         return;
     }
 
-    // Store callbacks in state (similar to other modals)
-    setPastAttendanceCallback(onConfirm);
-    setPastAttendanceCancelCallback(onCancel);
+
 
     // Clean up and open modal
     confirmBtn.onclick = () => {
@@ -151,7 +146,7 @@ export function showPastAttendanceChoiceModal(onConfirm, onCancel = null) {
         if (typeof onConfirm === 'function') {
             onConfirm(chosenStatus);
         }
-        closeModal(AttendanceModal);
+        closeModal(pastAttendanceModal);
         showPage('settings-page');
 
     };
@@ -160,7 +155,7 @@ export function showPastAttendanceChoiceModal(onConfirm, onCancel = null) {
         if (typeof onCancel === 'function') {
             onCancel();
         }
-        closeModal(AttendanceModal);
+        closeModal(pastAttendanceModal);
         showPage('settings-page');
     };
 
