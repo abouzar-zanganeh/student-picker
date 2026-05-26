@@ -897,7 +897,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const parsed = parseStudentName(newStudentNameInput.value);
+        const parsed = parseStudentName(studentName);
         const normalizedNewName = normalizeText(parsed.name);
 
         const isDuplicate = getActiveItems(state.currentClassroom.students).some(s =>
