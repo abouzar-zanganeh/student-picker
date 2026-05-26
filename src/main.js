@@ -11,6 +11,7 @@ import * as state from './state.js';
 import * as demo from './demo.js';
 import * as ui from './ui.js';
 import * as notifyingMessaging from './notifyingMessaging.js';
+import { showNotification } from './notifyingMessaging.js';
 import * as utils from './otherUtils.js';
 import * as logManager from './logManager.js';
 import * as db from './db.js';
@@ -313,7 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!categoryName) {
             flashElement(newCategoryModalNameInput, 3000);
-            notifyingMessaging.showNotification('⚠️ نام دسته‌بندی نمی‌تواند خالی باشد.');
+            showNotification('⚠️ نام دسته‌بندی نمی‌تواند خالی باشد.');
             return;
         }
 
@@ -323,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         ui.closeActiveModal();
-        notifyingMessaging.showNotification(`✅ دسته‌بندی جدید ${categoryName} با موفقیت اضافه شد.`);
+        showNotification(`✅ دسته‌بندی جدید ${categoryName} با موفقیت اضافه شد.`);
         ui.renderSettingsCategories(); // Refresh list
         ui.renderStudentStatsList();
     });
@@ -392,7 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     resetAllStudentCounters();
                     ui.renderStudentStatsList();
-                    notifyingMessaging.showNotification("تمام آمارها صفر شدند ✅.");
+                    showNotification("تمام آمارها صفر شدند ✅.");
                 },
                 { confirmText: 'بله', confirmClass: 'btn-warning' }
             );
@@ -436,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
             state.datePickerCallback({ jy, jm, jd });
             ui.closeActiveModal();
         } else {
-            notifyingMessaging.showNotification("⚠️ خطا در انتخاب تاریخ.");
+            showNotification("⚠️ خطا در انتخاب تاریخ.");
         }
         state.setDatePickerCallback(null);
     });
@@ -478,7 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         if (ui.quickScoreInput.value.trim() !== '' || ui.quickNoteTextarea.value.trim() !== '') {
-            notifyingMessaging.showNotification("⚠️لطفاً ابتدا با دکمه «ثبت»، تغییرات را ذخیره کنید و یا نمره و یادداشت را پاک کنید.", 4200);
+            showNotification("⚠️لطفاً ابتدا با دکمه «ثبت»، تغییرات را ذخیره کنید و یا نمره و یادداشت را پاک کنید.", 4200);
 
             flashElement(ui.quickScoreInput);
             flashElement(ui.quickNoteTextarea);
@@ -549,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }, 0);
                 state.saveData();
             } else {
-                notifyingMessaging.showNotification("❌دانش‌آموز واجد شرایطی برای انتخاب یافت نشد.");
+                showNotification("❌دانش‌آموز واجد شرایطی برای انتخاب یافت نشد.");
             }
         }
     });
@@ -583,7 +584,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     logManager.addLog(state.currentClassroom.info.name, `نوع کلاس به «${newTypeText}» تغییر یافت.`, { type: 'VIEW_CLASS_SETTINGS' });
                     ui.renderClassList();
-                    notifyingMessaging.showNotification(`✅ نوع کلاس به «${newTypeText}» تغییر یافت.`);
+                    showNotification(`✅ نوع کلاس به «${newTypeText}» تغییر یافت.`);
                 },
                 {
                     confirmText: 'بله',
@@ -645,7 +646,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     confirmColumnBtn.addEventListener('click', () => {
         if (!state.importedFileContent) {
-            notifyingMessaging.showNotification("❌خطایی رخ داده است. لطفاً فایل را دوباره انتخاب کنید.");
+            showNotification("❌خطایی رخ داده است. لطفاً فایل را دوباره انتخاب کنید.");
             ui.showPage('settings-page');
             return;
         }
@@ -664,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.renderImportPreview();
             ui.showPage('csv-preview-page');
         } else {
-            notifyingMessaging.showNotification("هیچ نامی در ستون انتخاب شده پیدا نشد. لطفاً ستون دیگری را امتحان کنید یا فایل خود را بررسی کنید.");
+            showNotification("هیچ نامی در ستون انتخاب شده پیدا نشد. لطفاً ستون دیگری را امتحان کنید یا فایل خود را بررسی کنید.");
         }
         state.setImportedFileContent(null);
     });
@@ -834,7 +835,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const dotIndex = currentLine.indexOf('.');
             if (currentLine && (dotIndex <= 0 || dotIndex >= currentLine.length - 1)) {
                 e.preventDefault(); // Prevents the new line from being created
-                notifyingMessaging.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید.⚠️ مثال: علی . احمدی", 5000);
+                showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید.⚠️ مثال: علی . احمدی", 5000);
             }
         }
     });
@@ -845,7 +846,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = pasteArea.value.trim();
         if (!text) {
             flashElement(pasteArea, 3000);
-            notifyingMessaging.showNotification("کادر متنی خالی است. لطفاً اسامی را وارد کنید.");
+            showNotification("کادر متنی خالی است. لطفاً اسامی را وارد کنید.");
             return;
         }
         const names = text.split('\n').map(name => name.trim()).filter(name => name.length > 0);
@@ -857,7 +858,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (invalidName) {
-            notifyingMessaging.showNotification(`فرمت نام «${invalidName}» صحیح نیست. لطفا نام و نام خانوادگی را با نقطه جدا کنید⚠️.`, 5000);
+            showNotification(`فرمت نام «${invalidName}» صحیح نیست. لطفا نام و نام خانوادگی را با نقطه جدا کنید⚠️.`, 5000);
             return;
         }
 
@@ -866,7 +867,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.renderImportPreview();
             ui.showPage('csv-preview-page');
         } else {
-            notifyingMessaging.showNotification("هیچ نام معتبری برای ورود پیدا نشد.");
+            showNotification("هیچ نام معتبری برای ورود پیدا نشد.");
         }
     });
 
@@ -886,14 +887,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // If the student name field is empty, use flashElement to draw user's attention to the empty field
         if (!studentName) {
             flashElement(newStudentNameInput, 3000);
-            notifyingMessaging.showNotification("لطفاً نام دانش‌آموز را وارد کنید.");
+            showNotification("لطفاً نام دانش‌آموز را وارد کنید.");
             return;
         }
 
         //Warn if the user hasn't separated the first name and last name using a dot
         const dotIndex = studentName.indexOf('.');
         if (dotIndex <= 0 || dotIndex >= studentName.length - 1) {
-            notifyingMessaging.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید.⚠️ مثال: علی . احمدی", 5000);
+            showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید.⚠️ مثال: علی . احمدی", 5000);
             return;
         }
 
@@ -904,7 +905,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         if (isDuplicate) {
-            notifyingMessaging.showNotification(`دانش‌آموز «${parsedName.name}» قبلاً در لیست وجود دارد.`, 4000);
+            showNotification(`دانش‌آموز «${parsedName.name}» قبلاً در لیست وجود دارد ⚠️`, 4000);
             return;
         }
         // checks if the class has passed finished sessions and if yes, it will show a modal for 
@@ -924,7 +925,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     completeStudentAddition(newStudent, newStudentNameInput);
                 },
                 () => {
-                    notifyingMessaging.showNotification("❌ افزودن دانش‌آموز لغو شد.");
+                    showNotification("❌ افزودن دانش‌آموز لغو شد.");
                 }
             );
             return; // Exit early, wait for modal
@@ -941,7 +942,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.currentClassroom) {
             const unfinishedSession = state.currentClassroom.sessions.find(session => !session.isFinished && !session.isCancelled && !session.isDeleted);
             if (unfinishedSession) {
-                notifyingMessaging.showNotification(`⚠️ جلسه ${unfinishedSession.sessionNumber} هنوز تمام نشده است. لطفاً ابتدا با دکمه «پایان جلسه» آن را خاتمه دهید.`, 4500);
+                showNotification(`⚠️ جلسه ${unfinishedSession.sessionNumber} هنوز تمام نشده است. لطفاً ابتدا با دکمه «پایان جلسه» آن را خاتمه دهید.`, 4500);
                 const endSessionBtn = document.querySelector('#session-list > li:nth-child(1) > div.list-item-buttons > button.btn-success');
                 if (endSessionBtn) {
                     flashElement(endSessionBtn);
@@ -1034,12 +1035,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // Basic Validation
             if (!name) {
                 flashElement(nameInput, 3000);
-                notifyingMessaging.showNotification('لطفاً نام کلاس را وارد کنید.');
+                showNotification('لطفاً نام کلاس را وارد کنید.');
                 return;
             }
             if (state.classrooms[name]) {
                 flashElement(nameInput, 3000);
-                notifyingMessaging.showNotification('کلاسی با این نام قبلاً ایجاد شده است.');
+                showNotification('کلاسی با این نام قبلاً ایجاد شده است.');
                 return;
             }
 
@@ -1049,11 +1050,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const newClassName = ui.modalNewClassNameInput.value.trim();
                 if (!newClassName) {
-                    notifyingMessaging.showNotification('⚠️ لطفاً نام کلاس را وارد کنید.');
+                    showNotification('⚠️ لطفاً نام کلاس را وارد کنید.');
                     return;
                 }
                 if (state.classrooms[newClassName]) {
-                    notifyingMessaging.showNotification('⚠️ کلاسی با این نام وجود دارد.');
+                    showNotification('⚠️ کلاسی با این نام وجود دارد.');
                     return;
                 }
 
@@ -1112,11 +1113,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 // --- Update UI (ONCE) ---
                 ui.renderClassList();
                 ui.closeAddClassModal();
-                notifyingMessaging.showNotification(`✅ کلاس «${newClassName}» ایجاد شد.`);
+                showNotification(`✅ کلاس «${newClassName}» ایجاد شد.`);
 
             } catch (error) {
                 console.error('CRASH ERROR:', error);
-                notifyingMessaging.showNotification('خطایی رخ داد: ' + error.message);
+                showNotification('خطایی رخ داد: ' + error.message);
             }
         });
     } else {
@@ -1239,23 +1240,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (!student) {
-            notifyingMessaging.showNotification("❌خطا: دانش‌آموز معتبری برای ثبت نمره یافت نشد.");
+            showNotification("❌خطا: دانش‌آموز معتبری برای ثبت نمره یافت نشد.");
             return;
         }
         const category = state.selectedCategory;
 
         if (!student || !category) {
-            notifyingMessaging.showNotification("⚠️لطفاً ابتدا یک دانش‌آموز و یک دسته‌بندی را انتخاب کنید.");
+            showNotification("⚠️لطفاً ابتدا یک دانش‌آموز و یک دسته‌بندی را انتخاب کنید.");
             return;
         }
 
         if (!scoreValue) {
-            notifyingMessaging.showNotification("⚠️لطفاً مقدار نمره را وارد کنید.");
+            showNotification("⚠️لطفاً مقدار نمره را وارد کنید.");
             return;
         }
 
         if (scoreValue > 100 || scoreValue < 0) {
-            notifyingMessaging.showNotification("❌نمره نباید از ۱۰۰ بیشتر و از صفر کمتر باشد");
+            showNotification("❌نمره نباید از ۱۰۰ بیشتر و از صفر کمتر باشد");
             return;
         }
 
@@ -1269,7 +1270,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             state.saveData();
             ui.renderStudentStatsList(); // Refreshes the stats table to show the new score.
-            notifyingMessaging.showNotification(`✅نمره برای ${student.identity.name} در مهارت ${category.name} ثبت شد.`);
+            showNotification(`✅نمره برای ${student.identity.name} در مهارت ${category.name} ثبت شد.`);
             state.markStudentAsPickedForAssessmentInSession(state.selectedCategory.id, student.identity.studentId);
             // Clear inputs for the next entry
 
@@ -1343,7 +1344,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const { studentToMove, sourceClassForMove } = state;
 
         if (!studentToMove || !sourceClassForMove || !destinationClassroom) {
-            notifyingMessaging.showNotification('خطایی رخ داد. لطفاً دوباره امتحان کنید⚠️.');
+            showNotification('خطایی رخ داد. لطفاً دوباره امتحان کنید⚠️.');
             ui.closeActiveModal();
             return;
         }
@@ -1359,9 +1360,9 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.renderSettingsStudentList();
             ui.renderStudentStatsList();
             ui.renderAttendancePage();
-            notifyingMessaging.showNotification(`دانش‌آموز «${studentToMove.identity.name}» با موفقیت به کلاس «${destinationClassName}» منتقل شد✅.`);
+            showNotification(`دانش‌آموز «${studentToMove.identity.name}» با موفقیت به کلاس «${destinationClassName}» منتقل شد✅.`);
         } else {
-            notifyingMessaging.showNotification(result.message);
+            showNotification(result.message);
         }
 
         ui.closeActiveModal();
@@ -1600,7 +1601,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const classroom = state.classrooms[action.classroomName];
         if (!classroom) {
-            notifyingMessaging.showNotification('⚠️ کلاس مربوط به این گزارش یافت نشد.');
+            showNotification('⚠️ کلاس مربوط به این گزارش یافت نشد.');
             return;
         }
 
@@ -1616,7 +1617,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (student) {
                         ui.showStudentProfile(student);
                     } else {
-                        notifyingMessaging.showNotification('⚠️ دانش‌آموز مورد نظر یافت نشد.');
+                        showNotification('⚠️ دانش‌آموز مورد نظر یافت نشد.');
                     }
                     break;
                 }
@@ -1669,7 +1670,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     { confirmText: 'پاک کردن', confirmClass: 'btn-warning' }
                 );
             } else {
-                notifyingMessaging.showNotification('⚠️ لطفاً متن یادداشت را وارد کنید.');
+                showNotification('⚠️ لطفاً متن یادداشت را وارد کنید.');
             }
             return;
         }
@@ -1794,7 +1795,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.setSaveCategoryCallback((name, isGraded, weight) => {
             if (!name) return;
             if (state.currentClassroom.categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
-                notifyingMessaging.showNotification('⚠️ این دسته‌بندی قبلاً اضافه شده است.');
+                showNotification('⚠️ این دسته‌بندی قبلاً اضافه شده است.');
                 return;
             }
             state.currentClassroom.categories.push(new Category(name, '', isGraded, weight));
@@ -1828,7 +1829,7 @@ export function handleUndoLastSelection(student, categoryName) {
 
     // 1. Check if we are in a valid state
     if (!state.selectedSession || state.selectedSession.isFinished) {
-        notifyingMessaging.showNotification("⚠️ امکان لغو انتخاب در جلسه خاتمه یافته وجود ندارد.");
+        showNotification("⚠️ امکان لغو انتخاب در جلسه خاتمه یافته وجود ندارد.");
         return;
     }
 
@@ -1850,7 +1851,7 @@ export function handleUndoLastSelection(student, categoryName) {
             ui.displayWinner(); // Clears the display because there is no history entry to show.
 
             state.saveData();
-            notifyingMessaging.showNotification(`✅ «${student.identity.name}» به لیست انتظار نمره بازگشت.`);
+            showNotification(`✅ «${student.identity.name}» به لیست انتظار نمره بازگشت.`);
         });
         return; // Stop here so we don't run the standard history undo logic.
     }
@@ -1861,7 +1862,7 @@ export function handleUndoLastSelection(student, categoryName) {
     const isLastWinner = state.winnerHistoryIndex === history.length - 1;
 
     if (!isLastWinner || history.length === 0) {
-        notifyingMessaging.showNotification("⚠️ فقط آخرین انتخاب قابل لغو است.");
+        showNotification("⚠️ فقط آخرین انتخاب قابل لغو است.");
         return;
     }
 
@@ -1938,7 +1939,7 @@ export function handleUndoLastSelection(student, categoryName) {
 
             // 7. Save and notify
             state.saveData();
-            notifyingMessaging.showNotification(`✅ انتخاب «${student.identity.name}» لغو شد.`);
+            showNotification(`✅ انتخاب «${student.identity.name}» لغو شد.`);
         },
         { confirmText: 'بله', confirmClass: 'btn-warning' }
     );
@@ -1994,12 +1995,12 @@ export function pickAssessmentWinner(classroom, category) {
 
 export function toggleSelectionModes() {
     if (!state.selectedCategory) {
-        notifyingMessaging.showNotification("⚠️ ابتدا یک دسته‌بندی انتخاب کنید.");
+        showNotification("⚠️ ابتدا یک دسته‌بندی انتخاب کنید.");
         return;
     }
 
     if (!state.selectedCategory.isGradedCategory) {
-        notifyingMessaging.showNotification("⚠️ این دسته‌بندی نمره‌دار نیست.");
+        showNotification("⚠️ این دسته‌بندی نمره‌دار نیست.");
         return;
     }
 
@@ -2015,10 +2016,10 @@ export function toggleSelectionModes() {
 
     if (!ui.fromAssessmentToNormalSelection) {
         ui.clearWinnerDisplay();
-        notifyingMessaging.showNotification(msg);
+        showNotification(msg);
     } else {
         ui.clearWinnerDisplay();
-        notifyingMessaging.showNotification("حالت انتخاب برای نمره‌دهی غیرفعال شد. دسته‌بندی انتخاب شده قابل نمره دهی نیست.⚠️", 4500);
+        showNotification("حالت انتخاب برای نمره‌دهی غیرفعال شد. دسته‌بندی انتخاب شده قابل نمره دهی نیست.⚠️", 4500);
         ui.setFromAssessmentToNormalSelection(false);
 
     }

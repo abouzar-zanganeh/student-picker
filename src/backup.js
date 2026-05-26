@@ -286,7 +286,7 @@ export function prepareBackupBtn(backupDataBtn) {
     backupDataBtn.addEventListener('click', () => {
 
         if (state.isDemoMode) {
-            notifyingMessaging.showNotification("⚠️ پشتیبان‌گیری در حالت نمایش (Demo) غیرفعال است.");
+            showNotification("⚠️ پشتیبان‌گیری در حالت نمایش (Demo) غیرفعال است.");
             closeSideNav();
             return;
         }
@@ -299,7 +299,7 @@ export function prepareRestoreBtn(restoreDataBtn, restoreFileInput) {
     restoreDataBtn.addEventListener('click', () => {
 
         if (state.isDemoMode) {
-            notifyingMessaging.showNotification("⚠️ بازیابی اطلاعات در حالت نمایش (Demo) غیرفعال است.");
+            showNotification("⚠️ بازیابی اطلاعات در حالت نمایش (Demo) غیرفعال است.");
             closeSideNav();
             return;
         }
@@ -343,7 +343,7 @@ export function restoreButtonMainFunction(restoreFileInput) {
                             state.saveData();
                             ui.renderClassList();
                             ui.showPage('class-management-page');
-                            notifyingMessaging.showNotification("✅اطلاعات با موفقیت بازیابی شد.");
+                            showNotification("✅اطلاعات با موفقیت بازیابی شد.");
                         },
                         { confirmText: 'بازیابی کن', confirmClass: 'btn-warning' }
                     );
@@ -381,7 +381,7 @@ export function restoreButtonMainFunction(restoreFileInput) {
 
                 } catch (zipError) {
                     // This catches errors from zipping or Base64 decoding
-                    notifyingMessaging.showNotification("❌خطا در خواندن فایل. لطفاً فایل پشتیبان معتبر انتخاب کنید.");
+                    showNotification("❌خطا در خواندن فایل. لطفاً فایل پشتیبان معتبر انتخاب کنید.");
                     console.error("Restore error (zip/base64):", zipError);
                 }
             }
