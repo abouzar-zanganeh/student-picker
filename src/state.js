@@ -856,9 +856,3 @@ export function markStudentAsPickedForAssessmentInSession(categoryId, studentId)
         assessmentPools[categoryId].pickedCandidatesThisSession.push(studentId);
     }
 }
-
-export let pastAttendanceCallback = null;
-export let pastAttendanceCancelCallback = null;
-
-export function setPastAttendanceCallback(callback) { pastAttendanceCallback = callback; }
-export function setPastAttendanceCancelCallback(callback) { pastAttendanceCancelCallback = callback; }
