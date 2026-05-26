@@ -1461,6 +1461,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // this function's main job is to copy the necessary stats to the new already added student
     function onboardNewStudent(newStudent, classroom) {
         const existingStudents = getActiveItems(classroom.students).filter(s => s.identity.studentId !== newStudent.identity.studentId);
         if (existingStudents.length === 0) return;
