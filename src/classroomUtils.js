@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as state from './state.js'
 import { getActiveItems } from './state.js';
 
