@@ -46,7 +46,10 @@ export function normalizeKeyboard(str) {
     return result;
 }
 
+//parseStudentName() splits a student's full name into firstName and lastName using the dot (.) as a separator.
 export function parseStudentName(input) {
+
+
     if (!input || typeof input !== 'string') {
         return { name: '', firstName: '', lastName: '' };
     }
