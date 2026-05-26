@@ -8,6 +8,7 @@
 
 
 import * as state from './state.js';
+import { currentClassroom } from './state.js';
 import * as ui from './ui.js';
 import * as notifyingMessaging from './notifyingMessaging.js';
 import * as utils from './otherUtils.js';
@@ -46,7 +47,7 @@ export function bootstrapDeveloperMode() {
 }
 
 function getCurrentStudents() {
-    const classroom = state.currentClassroom;
+    const classroom = currentClassroom;
     if (!classroom) return console.error("❌ No class selected");
 
     const names = state.getActiveItems(classroom.students).map(s => s.identity.name);

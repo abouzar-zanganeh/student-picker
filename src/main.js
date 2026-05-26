@@ -8,6 +8,7 @@
 
 
 import * as state from './state.js';
+import { currentClassroom } from './state.js';
 import * as demo from './demo.js';
 import * as ui from './ui.js';
 import * as notifyingMessaging from './notifyingMessaging.js';
@@ -80,14 +81,14 @@ function navigateSilently(pageId) {
     else if (pageId === 'session-page') {
         state.setSelectedSession(null);
         // Ensure UI is refreshed for the classroom we are still in
-        if (state.currentClassroom) {
+        if (currentClassroom) {
             ui.renderSessions();
         }
     }
 
     // 2. Update the URL to match the parent without pushing a new history item
     const params = new URLSearchParams();
-    if (state.currentClassroom) params.set('class', state.currentClassroom.info.name);
+    if (currentClassroom) params.set('class', currentClassroom.info.name);
     if (state.selectedSession) params.set('session', state.selectedSession.sessionNumber);
 
     const newHash = `#${pageId}${params.toString() ? '?' + params.toString() : ''}`;
@@ -139,12 +140,12 @@ function restoreStateFromURL() {
     if (className && state.classrooms[className]) {
         state.setCurrentClassroom(state.classrooms[className]);
 
-        if (sessionNumber && state.currentClassroom.getSession(sessionNumber)) {
-            state.setSelectedSession(state.currentClassroom.getSession(sessionNumber));
+        if (sessionNumber && currentClassroom.getSession(sessionNumber)) {
+            state.setSelectedSession(currentClassroom.getSession(sessionNumber));
         }
 
-        if (studentId && state.currentClassroom.students.find(s => s.identity.studentId === studentId)) {
-            state.setSelectedStudentForProfile(state.currentClassroom.students.find(s => s.identity.studentId === studentId));
+        if (studentId && currentClassroom.students.find(s => s.identity.studentId === studentId)) {
+            state.setSelectedStudentForProfile(currentClassroom.students.find(s => s.identity.studentId === studentId));
         }
     } else {
         // If there's a hash but no valid class, can't restore the state.
@@ -167,7 +168,7 @@ function restoreStateFromURL() {
             break;
 
         case 'settings-page':
-            ui.showSettingsPage(state.currentClassroom);
+            ui.showSettingsPage(currentClassroom);
             break;
 
 
@@ -488,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (isAssessmentModeActive) {
-            const winner = pickAssessmentWinner(state.currentClassroom, state.selectedCategory);
+            const winner = pickAssessmentWinner(currentClassroom, state.selectedCategory);
 
             if (winner) {
                 playSuccessSound();
@@ -515,9 +516,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else {
             // 3. Standard Mode Logic
-            if (!state.currentClassroom || !state.selectedSession || !state.selectedCategory) return;
+            if (!currentClassroom || !state.selectedSession || !state.selectedCategory) return;
 
-            const winner = state.currentClassroom.selectNextWinner(state.selectedCategory.name, state.selectedSession);
+            const winner = currentClassroom.selectNextWinner(state.selectedCategory.name, state.selectedSession);
 
             if (winner) {
                 playSuccessSound();
@@ -561,10 +562,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     classTypeSettingRadios.forEach(radio => {
         radio.addEventListener('change', () => {
-            if (!state.currentClassroom) return;
+            if (!currentClassroom) return;
 
             const newType = radio.value;
-            const oldType = state.currentClassroom.info.type || 'in-person';
+            const oldType = currentClassroom.info.type || 'in-person';
 
             // If the type hasn't actually changed, do nothing.
             if (newType === oldType) return;
@@ -579,10 +580,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 () => {
                     // --- ON CONFIRM ---
                     // This is the original logic
-                    state.currentClassroom.info.type = newType;
+                    currentClassroom.info.type = newType;
                     state.saveData();
 
-                    logManager.addLog(state.currentClassroom.info.name, `نوع کلاس به «${newTypeText}» تغییر یافت.`, { type: 'VIEW_CLASS_SETTINGS' });
+                    logManager.addLog(currentClassroom.info.name, `نوع کلاس به «${newTypeText}» تغییر یافت.`, { type: 'VIEW_CLASS_SETTINGS' });
                     ui.renderClassList();
                     showNotification(`✅ نوع کلاس به «${newTypeText}» تغییر یافت.`);
                 },
@@ -611,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     scheduleDayCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', () => {
-            if (!state.currentClassroom) return;
+            if (!currentClassroom) return;
 
             // Create an array of selected days (e.g., [6, 0])
             const selectedDays = Array.from(scheduleDayCheckboxes)
@@ -622,19 +623,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 .map(cb => parseInt(cb.value));
 
-            state.currentClassroom.info.scheduleDays = selectedDays;
+            currentClassroom.info.scheduleDays = selectedDays;
             state.saveData();
         });
     });
 
     const handleTimeChange = () => {
-        if (!state.currentClassroom) return;
+        if (!currentClassroom) return;
 
 
-        state.currentClassroom.info.scheduleStartTime = scheduleStartTimeInput.value;
+        currentClassroom.info.scheduleStartTime = scheduleStartTimeInput.value;
 
 
-        state.currentClassroom.info.scheduleEndTime = scheduleEndTimeInput.value;
+        currentClassroom.info.scheduleEndTime = scheduleEndTimeInput.value;
         state.saveData();
     };
 
@@ -722,14 +723,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const parsedName = parseStudentName(name);
             const normalizedNewName = normalizeText(parsedName.name);
 
-            const existingStudent = state.currentClassroom.students.find(student => {
+            const existingStudent = currentClassroom.students.find(student => {
                 const normalizedExisting = normalizeText(student.identity.name);
                 return normalizedExisting === normalizedNewName && normalizedNewName !== '';
             });
 
             if (existingStudent) {
                 if (existingStudent.isDeleted) {
-                    permanentlyDeleteStudent(existingStudent, state.currentClassroom);
+                    permanentlyDeleteStudent(existingStudent, currentClassroom);
                 } else {
                     skippedNames.push(parsedName.name);
                     currentIndex++;
@@ -741,17 +742,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const newStudent = new Student(parsedName);
 
             debugger;
-            if (state.hasPastFinishedSessions(state.currentClassroom)) {
+            if (state.hasPastFinishedSessions(currentClassroom)) {
                 // Show modal, then continue in callback
                 notifyingMessaging.showPastAttendanceChoiceModal(
                     (chosenStatus) => {
-                        state.currentClassroom.addStudent(newStudent);
+                        currentClassroom.addStudent(newStudent);
                         state.applyAttendanceToPastSessions(
                             newStudent.identity.studentId,
-                            state.currentClassroom,
+                            currentClassroom,
                             chosenStatus
                         );
-                        onboardNewStudent(newStudent, state.currentClassroom);
+                        onboardNewStudent(newStudent, currentClassroom);
                         onboardingOccurred = true;
                         addedCount++;
                         state.saveData();
@@ -761,8 +762,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     () => {
                         // User cancelled - skip this student
                         // Remove the student that was added
-                        const index = state.currentClassroom.students.findIndex(s => s.identity.studentId === newStudent.identity.studentId);
-                        if (index > -1) state.currentClassroom.students.splice(index, 1);
+                        const index = currentClassroom.students.findIndex(s => s.identity.studentId === newStudent.identity.studentId);
+                        if (index > -1) currentClassroom.students.splice(index, 1);
                         currentIndex++;
                         processNextStudent(); // Continue to next student
                     }
@@ -771,7 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return; // Wait for modal callback
 
             } else {
-                onboardNewStudent(newStudent, state.currentClassroom);
+                onboardNewStudent(newStudent, currentClassroom);
                 onboardingOccurred = true;
                 addedCount++;
                 state.saveData();
@@ -783,12 +784,12 @@ document.addEventListener('DOMContentLoaded', () => {
         function finalizeImport(addedCount, skippedNames, onboardingOccurred) {
             // ثبت در گزارش فعالیت‌ها
             if (addedCount > 0) {
-                logManager.addLog(state.currentClassroom.info.name,
+                logManager.addLog(currentClassroom.info.name,
                     `${addedCount} دانش‌آموز جدید از لیست ورودی به کلاس اضافه شدند.`,
                     { type: 'VIEW_SESSIONS' });
             }
 
-            ui.showSettingsPage(state.currentClassroom);
+            ui.showSettingsPage(currentClassroom);
 
             let duplicateInfo = skippedNames.length > 0
                 ? `⚠️ موارد زیر به دلیل تکراری بودن نادیده گرفته شدند:\n- ${skippedNames.join('\n- ')}`
@@ -880,7 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupAutoSelectOnFocus(newStudentNameInput);
 
     addStudentBtn.addEventListener('click', () => {
-        if (!state.currentClassroom) return;
+        if (!currentClassroom) return;
 
         const studentName = normalizeText(newStudentNameInput.value.trim());
 
@@ -900,7 +901,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         //duplication check
         const parsedName = parseStudentName(studentName);
-        const isDuplicate = getActiveItems(state.currentClassroom.students).some(s =>
+        const isDuplicate = getActiveItems(currentClassroom.students).some(s =>
             normalizeText(s.identity.name) === normalizeText(parsedName.name)
         );
 
@@ -911,16 +912,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // checks if the class has passed finished sessions and if yes, it will show a modal for 
         // the user to decide on previous sessions attendance state for the new student
         const newStudent = new Student(parsedName);
-        if (state.hasPastFinishedSessions(state.currentClassroom)) {
+        if (state.hasPastFinishedSessions(currentClassroom)) {
             notifyingMessaging.showPastAttendanceChoiceModal(
                 (chosenStatus) => {
                     state.applyAttendanceToPastSessions(
                         newStudent.identity.studentId,
-                        state.currentClassroom,
+                        currentClassroom,
                         chosenStatus
                     );
-                    state.currentClassroom.addStudent(newStudent);
-                    onboardNewStudent(newStudent, state.currentClassroom);
+                    currentClassroom.addStudent(newStudent);
+                    onboardNewStudent(newStudent, currentClassroom);
                     showOnboardingNotification(1);
                     completeStudentAddition(newStudent, newStudentNameInput);
                 },
@@ -930,8 +931,8 @@ document.addEventListener('DOMContentLoaded', () => {
             );
             return; // Exit early, wait for modal
         } else {
-            state.currentClassroom.addStudent(newStudent);
-            onboardNewStudent(newStudent, state.currentClassroom);
+            currentClassroom.addStudent(newStudent);
+            onboardNewStudent(newStudent, currentClassroom);
             showOnboardingNotification(1);
             completeStudentAddition(newStudent, newStudentNameInput);
         }
@@ -939,8 +940,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     newSessionBtn.addEventListener('click', () => {
 
-        if (state.currentClassroom) {
-            const unfinishedSession = state.currentClassroom.sessions.find(session => !session.isFinished && !session.isCancelled && !session.isDeleted);
+        if (currentClassroom) {
+            const unfinishedSession = currentClassroom.sessions.find(session => !session.isFinished && !session.isCancelled && !session.isDeleted);
             if (unfinishedSession) {
                 showNotification(`⚠️ جلسه ${unfinishedSession.sessionNumber} هنوز تمام نشده است. لطفاً ابتدا با دکمه «پایان جلسه» آن را خاتمه دهید.`, 4500);
                 const endSessionBtn = document.querySelector('#session-list > li:nth-child(1) > div.list-item-buttons > button.btn-success');
@@ -953,10 +954,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // This function encapsulates the original logic of asking about attendance.
             const askAboutAttendanceAndStart = () => {
                 const startSession = (takeAttendance) => {
-                    const newSession = state.currentClassroom.startNewSession();
+                    const newSession = currentClassroom.startNewSession();
                     state.setLiveSession(newSession);
                     state.setSelectedSession(newSession);
-                    state.currentClassroom.students.forEach(student => {
+                    currentClassroom.students.forEach(student => {
                         state.liveSession.setAttendance(student.identity.studentId, 'unknown');
                     });
 
@@ -965,9 +966,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     state.saveData();
 
                     // 2. Create the log entry.
-                    const sessionMap = getSessionDisplayMap(state.currentClassroom);
+                    const sessionMap = getSessionDisplayMap(currentClassroom);
                     const displayNumber = sessionMap.get(newSession.sessionNumber);
-                    logManager.addLog(state.currentClassroom.info.name, `جلسه ${displayNumber} شروع شد.`, { type: 'VIEW_SESSIONS' });
+                    logManager.addLog(currentClassroom.info.name, `جلسه ${displayNumber} شروع شد.`, { type: 'VIEW_SESSIONS' });
 
                     // 3. Navigate to the tabbed dashboard
                     ui.renderSessionDashboard(takeAttendance ? 'attendance' : 'selector');
@@ -985,7 +986,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             //checks if a session exists for today.
-            if (state.currentClassroom.hasSessionToday()) {
+            if (currentClassroom.hasSessionToday()) {
                 notifyingMessaging.showCustomConfirm(
                     "شما امروز یک جلسه برای این کلاس ثبت کرده‌اید. آیا از شروع یک جلسه جدید دیگر مطمئن هستید؟",
                     askAboutAttendanceAndStart, // On confirm, it proceeds to ask about attendance.
@@ -1195,7 +1196,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const lowerCaseSearchTerm = searchTerm.toLowerCase();
         const keyboardNormalizedTerm = normalizeKeyboard(lowerCaseSearchTerm);
-        const allStudents = getActiveItems(state.currentClassroom.students);
+        const allStudents = getActiveItems(currentClassroom.students);
 
         const foundStudents = allStudents.filter(student => {
             const normalizedStudentName = normalizeText(student.identity.name.toLowerCase());
@@ -1264,7 +1265,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (student) {
             student.addScore(category.name, parseFloat(scoreValue), noteText);
 
-            logManager.addLog(state.currentClassroom.info.name,
+            logManager.addLog(currentClassroom.info.name,
                 `نمره ${scoreValue} در ${category.name} برای «${student.identity.name}» ثبت شد.`,
                 { type: 'VIEW_STUDENT_PROFILE', studentId: student.identity.studentId });
 
@@ -1383,8 +1384,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const headerSettingsBtn = document.getElementById('header-settings-btn');
     if (headerSettingsBtn) {
         headerSettingsBtn.addEventListener('click', () => {
-            if (state.currentClassroom) {
-                ui.showSettingsPage(state.currentClassroom);
+            if (currentClassroom) {
+                ui.showSettingsPage(currentClassroom);
             }
         });
     }
@@ -1543,7 +1544,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //this clears the input area, logs the addition, and does necessary renders for ui to update itself
     function completeStudentAddition(student, nameInputElement) {
         state.saveData();
-        logManager.addLog(state.currentClassroom.info.name,
+        logManager.addLog(currentClassroom.info.name,
             `دانش‌آموز «${student.identity.name}» به کلاس اضافه شد.`, {
             type: 'VIEW_STUDENT_PROFILE',
             studentId: student.identity.studentId
@@ -1562,7 +1563,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         // onboarding explanation
-        if (state.hasPastFinishedSessions(state.currentClassroom)) {
+        if (state.hasPastFinishedSessions(currentClassroom)) {
             message += `💡 چون این کلاس جلسات برگزار شده دارد، برای این افراد آمار پایه‌ای (متناسب با کلاس) ثبت شد تا در فرایند انتخاب اختلالی ایجاد نشود.`;
         }
 
@@ -1794,11 +1795,11 @@ document.addEventListener('DOMContentLoaded', () => {
     openAddCategoryBtn.addEventListener('click', () => {
         state.setSaveCategoryCallback((name, isGraded, weight) => {
             if (!name) return;
-            if (state.currentClassroom.categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
+            if (currentClassroom.categories.some(c => c.name.toLowerCase() === name.toLowerCase())) {
                 showNotification('⚠️ این دسته‌بندی قبلاً اضافه شده است.');
                 return;
             }
-            state.currentClassroom.categories.push(new Category(name, '', isGraded, weight));
+            currentClassroom.categories.push(new Category(name, '', isGraded, weight));
             state.saveData();
             ui.renderSettingsCategories();
         });
