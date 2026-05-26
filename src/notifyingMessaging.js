@@ -37,6 +37,13 @@ export function showUndoToast(message) {
     }, 5000));
 }
 
+/**
+ * The main function for app's notifications. These notifications pop up from the button
+ * of the screen.
+ * @param {*} message the message the notification should display
+ * @param {*} duration duration after which the notification hides
+ * @returns null
+ */
 export function showNotification(message, duration = 3000) {
     const notificationToast = document.getElementById('notification-toast');
     if (!notificationToast) return;
@@ -116,6 +123,7 @@ export function showSecureConfirm(message, onConfirm) {
         secureConfirmInput.removeEventListener('input', validationHandler);
     };
 }
+
 
 /**
  * Shows a modal asking the teacher to choose attendance status for all past sessions.
