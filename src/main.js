@@ -897,6 +897,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        //duplication check
         const parsedName = parseStudentName(studentName);
         const isDuplicate = getActiveItems(state.currentClassroom.students).some(s =>
             normalizeText(s.identity.name) === normalizeText(parsedName.name)
@@ -907,9 +908,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Use the helper to parse the name (looks for dot signal)
-        const parsedIdentity = parseStudentName(studentName);
-        const newStudent = new Student(parsedIdentity);
+        const newStudent = new Student(parsedName);
         state.currentClassroom.addStudent(newStudent);
 
         if (state.hasPastFinishedSessions(state.currentClassroom)) {
