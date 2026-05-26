@@ -907,9 +907,9 @@ document.addEventListener('DOMContentLoaded', () => {
             notifyingMessaging.showNotification(`دانش‌آموز «${parsedName.name}» قبلاً در لیست وجود دارد.`, 4000);
             return;
         }
-
+        // checks if the class has passed finished sessions and if yes, it will show a modal for 
+        // the user to decide on previous sessions attendance state for the new student
         const newStudent = new Student(parsedName);
-
         if (state.hasPastFinishedSessions(state.currentClassroom)) {
             notifyingMessaging.showPastAttendanceChoiceModal(
                 (chosenStatus) => {
