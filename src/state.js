@@ -9,7 +9,7 @@
 
 import { Classroom, Student, Session, Category, Homework, Note } from './models.js';
 import LZString from 'lz-string';
-// @ts-ignore
+
 import CompressionWorker from './compression.worker.js?worker';
 
 // --- وضعیت کلی برنامه (Global State) ---
@@ -476,7 +476,7 @@ export function moveStudent(studentToMove, sourceClassroom, destinationClassroom
         if (latestActiveSession) {
             const sessionDisplayMap = getSessionDisplayMap(destinationClassroom);
             displaySessionNumber = sessionDisplayMap.get(latestActiveSession.sessionNumber) || latestActiveSession.sessionNumber;
-            // @ts-ignore
+
             noteSource = { type: 'fromSession', sessionNumber: latestActiveSession.sessionNumber };
         }
 

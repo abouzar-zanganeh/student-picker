@@ -284,10 +284,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const matchesMapped = normalizedStudentName.includes(normalizeText(keyboardNormalizedTerm));
 
                 if (matchesOriginal || matchesMapped) {
-                    // @ts-ignore
+
                     item.style.display = 'flex';
                 } else {
-                    // @ts-ignore
+
                     item.style.display = 'none';
                 }
             }
@@ -304,11 +304,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     categoryModalSaveBtn.addEventListener('click', () => {
-        // @ts-ignore
+
         const categoryName = newCategoryModalNameInput.value.trim();
-        // @ts-ignore
+
         const isGraded = newCategoryModalIsGradedCheckbox.checked;
-        // @ts-ignore
+
         const weight = parseInt(newCategoryModalWeightInput.value, 10) || 1;
 
         if (!categoryName) {
@@ -333,21 +333,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // REPLACE the old document click listener with this one
     document.addEventListener('click', (e) => {
         // Close context menu if visible
-        // @ts-ignore
+
 
         if (ui.contextMenu.classList.contains('visible') && !ui.contextMenu.contains(e.target)) {
             ui.closeContextMenu();
         }
 
         // Hide student search dropdown
-        // @ts-ignore
+
 
         if (!studentSearchInput.contains(e.target)) {
             studentSearchResultsDiv.style.display = 'none';
         }
 
         // Handle clicks on log links
-        // @ts-ignore
+
 
         const logLink = e.target.closest('.log-action-link');
         if (logLink && logLink.dataset.action) {
@@ -362,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ui.selectStudentBtnWrapper.addEventListener('click', () => {
         // Check for either of the two conditions that make the button disabled.
-        // @ts-ignore
+
 
         if (ui.selectStudentBtnWrapper.classList.contains('disabled-wrapper') || ui.selectStudentBtn.disabled) {
 
@@ -421,13 +421,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     datePickerConfirmBtn.addEventListener('click', () => {
         // Collect values
-        // @ts-ignore
+
 
         const jy = dpYear.value;
-        // @ts-ignore
+
 
         const jm = dpMonth.value;
-        // @ts-ignore
+
 
         const jd = dpDay.value;
 
@@ -470,12 +470,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     ui.selectStudentBtn.addEventListener('click', () => {
-        // @ts-ignore
+
 
         scrollToElement(ui.quickNoteTextarea, 0.02);
 
         // 1. Guard check: Prevent selection if there's unsaved data (Applies to both modes)
-        // @ts-ignore
+
 
         if (ui.quickScoreInput.value.trim() !== '' || ui.quickNoteTextarea.value.trim() !== '') {
             notifyingMessaging.showNotification("⚠️لطفاً ابتدا با دکمه «ثبت»، تغییرات را ذخیره کنید و یا نمره و یادداشت را پاک کنید.", 4200);
@@ -561,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
     classTypeSettingRadios.forEach(radio => {
         radio.addEventListener('change', () => {
             if (!state.currentClassroom) return;
-            // @ts-ignore
+
             const newType = radio.value;
             const oldType = state.currentClassroom.info.type || 'in-person';
 
@@ -593,7 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         // Revert the radio button check to the old value
                         const oldRadio = document.querySelector(`#settings-page input[name="class-type-setting"][value="${oldType}"]`);
                         if (oldRadio) {
-                            // @ts-ignore
+
 
                             oldRadio.checked = true;
                         }
@@ -614,10 +614,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Create an array of selected days (e.g., [6, 0])
             const selectedDays = Array.from(scheduleDayCheckboxes)
-                // @ts-ignore
+
 
                 .filter(cb => cb.checked)
-                // @ts-ignore
+
 
                 .map(cb => parseInt(cb.value));
 
@@ -628,10 +628,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const handleTimeChange = () => {
         if (!state.currentClassroom) return;
-        // @ts-ignore
+
 
         state.currentClassroom.info.scheduleStartTime = scheduleStartTimeInput.value;
-        // @ts-ignore
+
 
         state.currentClassroom.info.scheduleEndTime = scheduleEndTimeInput.value;
         state.saveData();
@@ -649,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.showPage('settings-page');
             return;
         }
-        // @ts-ignore
+
 
         const selectedColumnIndex = parseInt(columnSelectDropdown.value, 10);
         const lines = state.importedFileContent.split('\n');
@@ -674,7 +674,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     csvFileInput.addEventListener('change', (event) => {
-        // @ts-ignore
+
 
         const file = event.target.files[0];
         if (!file) return;
@@ -682,7 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reader.onload = (e) => {
             const text = e.target.result;
             state.setImportedFileContent(text);
-            // @ts-ignore
+
 
             const firstLine = text.split('\n')[0];
             const headers = firstLine.split(',');
@@ -690,7 +690,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ui.showPage('column-mapping-page');
         };
         reader.readAsText(file);
-        // @ts-ignore
+
 
         event.target.value = null;
     });
@@ -822,10 +822,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     pasteArea.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
-            // @ts-ignore
+
 
             const value = pasteArea.value;
-            // @ts-ignore
+
 
             const cursorPosition = pasteArea.selectionStart;
             const lastNewLineIndex = value.lastIndexOf('\n', cursorPosition - 1);
@@ -840,7 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     processPasteBtn.addEventListener('click', () => {
-        // @ts-ignore
+
 
         const text = pasteArea.value.trim();
         if (!text) {
@@ -880,7 +880,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     addStudentBtn.addEventListener('click', () => {
         if (!state.currentClassroom) return;
-        // @ts-ignore
+
         const studentName = newStudentNameInput.value.trim();
         if (!studentName) {
             flashElement(newStudentNameInput, 3000);
@@ -892,7 +892,7 @@ document.addEventListener('DOMContentLoaded', () => {
             notifyingMessaging.showNotification("لطفا یک نقطه بین نام و نام خانوادگی قرار دهید.⚠️ مثال: علی . احمدی", 5000);
             return;
         }
-        // @ts-ignore
+
         const parsed = parseStudentName(newStudentNameInput.value);
         const normalizedNewName = normalizeText(parsed.name);
 
@@ -1029,7 +1029,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("❌ DEBUG: Name Input element is missing!");
                 return;
             }
-            // @ts-ignore
+
 
             const name = nameInput.value.trim();
 
@@ -1047,7 +1047,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 // --- Read & validate class name ---
-                // @ts-ignore
+
 
                 const newClassName = ui.modalNewClassNameInput.value.trim();
                 if (!newClassName) {
@@ -1065,33 +1065,33 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error('Class type radio not selected');
                     return;
                 }
-                // @ts-ignore
+
 
                 const classType = typeRadio.value;
 
                 // --- Read educational info ---
-                // @ts-ignore
+
 
                 const eduSystem = ui.modalAddClassSystemSelect.value;
-                // @ts-ignore
+
 
                 const level = ui.modalAddClassLevelSelect.value || null;
 
                 // --- Read schedule info ---
 
-                // @ts-ignore
+
                 const scheduleText = ui.modalScheduleTextInput.value.trim() || null;
                 const scheduleDays = Array.from(
                     ui.modalScheduleDaysContainer.querySelectorAll('input:checked')
 
-                    // @ts-ignore
+
                 ).map(cb => parseInt(cb.value, 10));
 
 
-                // @ts-ignore
+
 
                 const scheduleStartTime = ui.modalScheduleStartTimeInput.value || null;
-                // @ts-ignore
+
 
                 const scheduleEndTime = ui.modalScheduleEndTimeInput.value || null;
 
@@ -1129,7 +1129,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     globalStudentSearchInput.addEventListener('input', (e) => {
-        // @ts-ignore
+
 
         const searchTerm = e.target.value;
         if (searchTerm.length < 2) {
@@ -1185,7 +1185,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     studentSearchInput.addEventListener('input', (e) => {
-        // @ts-ignore
+
 
         const searchTerm = e.target.value;
 
@@ -1214,20 +1214,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     studentSearchInput.addEventListener('focus', () => {
-        // @ts-ignore
+
 
         if (studentSearchInput.value) {
-            // @ts-ignore
+
 
             ui.renderSearchResults(studentSearchInput.value);
         }
     });
 
     quickGradeSubmitBtn.addEventListener('click', () => {
-        // @ts-ignore
+
 
         const scoreValue = ui.quickScoreInput.value;
-        // @ts-ignore
+
 
         const noteText = ui.quickNoteTextarea.value.trim();
         let student;
@@ -1274,10 +1274,10 @@ document.addEventListener('DOMContentLoaded', () => {
             notifyingMessaging.showNotification(`✅نمره برای ${student.identity.name} در مهارت ${category.name} ثبت شد.`);
             state.markStudentAsPickedForAssessmentInSession(state.selectedCategory.id, student.identity.studentId);
             // Clear inputs for the next entry
-            // @ts-ignore
+
 
             ui.quickScoreInput.value = '';
-            // @ts-ignore
+
 
             ui.quickNoteTextarea.value = '';
 
@@ -1303,7 +1303,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     classSaveNoteBtn.addEventListener('click', () => {
-        // @ts-ignore
+
 
         const content = newNoteContent.value.trim();
         const callback = state.saveNoteCallback;
@@ -1338,7 +1338,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     moveStudentConfirmBtn.addEventListener('click', () => {
-        // @ts-ignore
+
 
         const destinationClassName = classSelectDropdown.value;
         const destinationClassroom = state.classrooms[destinationClassName];
@@ -1582,11 +1582,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Displaying app version and build count
-    // @ts-ignore
+
     const appVersion = import.meta.env.VITE_APP_VERSION;
 
     // Checking if the build count exists (injected by Vite)
-    // @ts-ignore
+
 
     const buildCount = typeof __APP_BUILD_COUNT__ !== 'undefined' ? __APP_BUILD_COUNT__ : '';
 
@@ -1651,10 +1651,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     massCommentSaveBtn.addEventListener('click', () => {
-        // @ts-ignore
+
 
         const commentText = massCommentContent.value.trim();
-        // @ts-ignore
+
         const append = massCommentAppendCheckbox.checked;
 
         if (!commentText) {
@@ -1709,13 +1709,13 @@ document.addEventListener('DOMContentLoaded', () => {
             closeSideNav();
 
             // Sync UI with current state
-            // @ts-ignore
+
 
             soundToggle.checked = state.userSettings.isSoundEnabled;
-            // @ts-ignore
+
 
             vibrationToggle.checked = state.userSettings.isVibrationEnabled;
-            // @ts-ignore
+
 
             screensaverToggle.checked = state.userSettings.isScreenSaverEnabled;
 
@@ -1732,11 +1732,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Handle Sound Toggle
     soundToggle.addEventListener('change', (e) => {
-        // @ts-ignore
+
 
         state.setUserSettings({ isSoundEnabled: e.target.checked });
         // Optional: Play a test sound so user knows it's on
-        // @ts-ignore
+
 
         if (e.target.checked) {
             playSuccessSound();
@@ -1745,11 +1745,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 4. Handle Vibration Toggle
     vibrationToggle.addEventListener('change', (e) => {
-        // @ts-ignore
+
 
         state.setUserSettings({ isVibrationEnabled: e.target.checked });
         // Optional: Trigger a test vibration
-        // @ts-ignore
+
 
         if (e.target.checked && navigator.vibrate) {
             navigator.vibrate(50);
