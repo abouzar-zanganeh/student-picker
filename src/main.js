@@ -897,16 +897,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const parsed = parseStudentName(studentName);
-        const normalizedNewName = normalizeText(parsed.name);
-
-
+        const parsedName = parseStudentName(studentName);
         const isDuplicate = getActiveItems(state.currentClassroom.students).some(s =>
-            normalizeText(s.identity.name) === normalizedNewName
+            normalizeText(s.identity.name) === normalizeText(parsedName.name)
         );
 
         if (isDuplicate) {
-            notifyingMessaging.showNotification(`دانش‌آموز «${parsed.name}» قبلاً در لیست وجود دارد.`, 4000);
+            notifyingMessaging.showNotification(`دانش‌آموز «${parsedName.name}» قبلاً در لیست وجود دارد.`, 4000);
             return;
         }
 
