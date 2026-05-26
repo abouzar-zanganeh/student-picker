@@ -920,9 +920,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         currentClassroom,
                         chosenStatus
                     );
+
                     currentClassroom.addStudent(newStudent);
                     onboardNewStudent(newStudent, currentClassroom);
-                    showOnboardingNotification(1);
+                    setTimeout(() => {
+                        //this is to remove the racing issue between this modal and the previous open modal
+                        showOnboardingNotification(1);
+
+                    }, 100);
                     completeStudentAddition(newStudent, newStudentNameInput);
                 },
                 () => {
