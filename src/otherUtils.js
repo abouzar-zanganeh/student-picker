@@ -50,7 +50,8 @@ export function normalizeKeyboard(str) {
 }
 
 /**
- * Parses student name using dot (.) as separator between first and last name.
+ * Parses student name using dot (.) as separator between first and last name and returns an object
+ * with three keys: first name, last name, name.
  * @param {string} input - Raw name input (e.g., "علی . احمدی")
  * @returns {{name: string, firstName: string, lastName: string}}
  */
