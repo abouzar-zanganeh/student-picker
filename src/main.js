@@ -741,7 +741,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const newStudent = new Student(parsedName);
 
-            debugger;
             if (state.hasPastFinishedSessions(currentClassroom)) {
                 // Show modal, then continue in callback
                 notifyingMessaging.showPastAttendanceChoiceModal(
