@@ -914,14 +914,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.hasPastFinishedSessions(currentClassroom)) {
             notifyingMessaging.showPastAttendanceChoiceModal(
                 (chosenStatus) => {
-                    state.applyAttendanceToPastSessions(
-                        newStudent.identity.studentId,
-                        currentClassroom,
-                        chosenStatus
-                    );
-
-                    currentClassroom.addStudent(newStudent);
-                    onboardNewStudent(newStudent, currentClassroom);
+                    applyPastSessionAndOnboard(newStudent, currentClassroom, chosenStatus);
                     setTimeout(() => {
                         //this is to remove the racing issue between this modal and the previous open modal
                         showOnboardingNotification(1);
@@ -941,6 +934,18 @@ document.addEventListener('DOMContentLoaded', () => {
             completeStudentAddition(newStudent, newStudentNameInput);
         }
     });
+
+    function applyPastSessionAndOnboard(newStudent, currentClassroom, chosenStatus) {
+        currentClassroom.addStudent(newStudent);
+        state.applyAttendanceToPastSessions(
+            newStudent.identity.studentId,
+            currentClassroom,
+            chosenStatus
+        );
+        onboardNewStudent(newStudent, currentClassroom);
+        saveData();
+    }
+
 
     newSessionBtn.addEventListener('click', () => {
 
