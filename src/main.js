@@ -745,13 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Show modal, then continue in callback
                 notifyingMessaging.showPastAttendanceChoiceModal(
                     (chosenStatus) => {
-                        currentClassroom.addStudent(newStudent);
-                        state.applyAttendanceToPastSessions(
-                            newStudent.identity.studentId,
-                            currentClassroom,
-                            chosenStatus
-                        );
-                        onboardNewStudent(newStudent, currentClassroom);
+                        applyPastSessionAndOnboard(newStudent, currentClassroom, chosenStatus);
                         onboardingOccurred = true;
                         addedCount++;
                         saveData();
@@ -759,12 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         processNextStudent(); // Continue to next student
                     },
                     () => {
-                        // User cancelled - skip this student
-                        // Remove the student that was added
-                        const index = currentClassroom.students.findIndex(s => s.identity.studentId === newStudent.identity.studentId);
-                        if (index > -1) currentClassroom.students.splice(index, 1);
-                        currentIndex++;
-                        processNextStudent(); // Continue to next student
+                        showNotification("❌ افزودن دانش‌آموز لغو شد.");
                     }
                 );
 
@@ -928,22 +917,24 @@ document.addEventListener('DOMContentLoaded', () => {
             );
             return; // Exit early, wait for modal
         } else {
-            currentClassroom.addStudent(newStudent);
-            onboardNewStudent(newStudent, currentClassroom);
+            applyPastSessionAndOnboard(newStudent, currentClassroom);
             showOnboardingNotification(1);
             completeStudentAddition(newStudent, newStudentNameInput);
         }
     });
 
-    function applyPastSessionAndOnboard(newStudent, currentClassroom, chosenStatus) {
-        currentClassroom.addStudent(newStudent);
-        state.applyAttendanceToPastSessions(
-            newStudent.identity.studentId,
-            currentClassroom,
-            chosenStatus
-        );
-        onboardNewStudent(newStudent, currentClassroom);
-        saveData();
+    function applyPastSessionAndOnboard(newStudent, currentClassroom, chosenStatus = null) {
+        if (chosenStatus === !null) {
+            state.applyAttendanceToPastSessions(
+                newStudent.identity.studentId,
+                currentClassroom,
+                chosenStatus
+            );
+        } else {
+            onboardNewStudent(newStudent, currentClassroom);
+            saveData();
+            currentClassroom.addStudent(newStudent);
+        }
     }
 
 
