@@ -924,7 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function applyPastSessionAndOnboard(newStudent, currentClassroom, chosenStatus = null) {
-        if (chosenStatus === !null) {
+        if (chosenStatus !== null) {
             state.applyAttendanceToPastSessions(
                 newStudent.identity.studentId,
                 currentClassroom,
