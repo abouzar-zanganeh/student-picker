@@ -933,6 +933,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    /**
+     * Adds a new student to a classroom and optionally applies attendance status for past sessions.
+     * @param {Object} newStudent - Student instance to add
+     * @param {Object} classroom - Target classroom
+     * @param {string|null} chosenStatus - 'present', 'absent', 'unknown', or null if no past sessions
+     */
     function applyPastSessionAndOnboard(newStudent, currentClassroom, chosenStatus = null) {
 
         currentClassroom.addStudent(newStudent);
@@ -1478,7 +1484,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // this function's main job is to copy the necessary stats to the new already added student
+    /**
+     * Copies participation statistics from the most active student in the classroom to a new student.
+     * Includes total selections, missed chances, category counts, and category issues.
+     * @param {Object} newStudent - Student instance to onboard
+     * @param {Object} classroom - Classroom containing existing students as templates
+     */
     function onboardNewStudent(newStudent, classroom) {
         const existingStudents = getActiveItems(classroom.students).filter(s => s.identity.studentId !== newStudent.identity.studentId);
         if (existingStudents.length === 0) return;
@@ -1555,8 +1566,11 @@ document.addEventListener('DOMContentLoaded', () => {
             newStudent.addNote(noteContent);
         }
     }
-
-    //this clears the input area, logs the addition, and does necessary renders for ui to update itself
+    /**
+     * Completes the student addition process by saving data, logging, and refreshing UI.
+     * @param {Object} student - The added student
+     * @param {HTMLElement} nameInputElement - Input field to clear and refocus
+     */
     function completeStudentAddition(student, nameInputElement) {
         saveData();
         logManager.addLog(currentClassroom.info.name,
@@ -1569,7 +1583,12 @@ document.addEventListener('DOMContentLoaded', () => {
         nameInputElement.value = '';
         nameInputElement.focus();
     }
-
+    /**
+     * Displays a confirmation notification after student(s) are added.
+     * Shows the number added and explains that base statistics were copied if the class has past sessions.
+     * @param {number} addedCount - Number of students successfully added
+     * @param {string} extraMessage - Optional additional info (e.g., duplicate warnings)
+     */
     function showOnboardingNotification(addedCount, extraMessage = '') {
 
         // success header

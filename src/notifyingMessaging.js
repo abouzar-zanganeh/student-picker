@@ -124,8 +124,9 @@ export function showSecureConfirm(message, onConfirm) {
 
 /**
  * Shows a modal asking the teacher to choose attendance status for all past sessions.
- * @param {Function} onConfirm - Callback that receives the chosen status ('present', 'absent', or 'unknown')
- * @param {Function} onCancel - Optional callback if user cancels
+ * Used when adding a new student to a class that already has completed sessions.
+ * @param {Function} onConfirm - Callback receiving chosen status ('present', 'absent', or 'unknown')
+ * @param {Function|null} onCancel - Optional callback if user cancels
  */
 export function showPastAttendanceChoiceModal(onConfirm, onCancel = null) {
     const pastAttendanceModal = document.getElementById('past-attendance-modal');

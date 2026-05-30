@@ -30,6 +30,12 @@ export function normalizeText(str) {
         .replace(/[\s\u200c]/g, ''); // Removes all whitespace (\s) and the zero-width non-joiner (\u200c)
 }
 
+/**
+ * Maps Latin keyboard keystrokes to their Persian equivalents for search functionality.
+ * Example: 'q' → 'ض', 'd' → 'ی'
+ * @param {string} str - Input string with Latin characters
+ * @returns {string} String with Latin characters mapped to Persian
+ */
 export function normalizeKeyboard(str) {
     if (typeof str !== 'string') {
         return '';

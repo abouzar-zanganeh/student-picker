@@ -553,8 +553,12 @@ export function resetAllStudentCounters() {
     saveData();
 }
 
-/**  This function filters those  * items (students, sessions, categories, etc) which are not 
- * deleted and return an array of them.*/
+/**
+ * Filters an array to return only items marked as not deleted. The items include students, 
+ * sessions, classes, scores, comments, notes, categories or any object with isDeleted propery.
+ * @param {Array} items - Array of objects that may have an 'isDeleted' property
+ * @returns {Array} Filtered array containing only active items
+ */
 export function getActiveItems(items) {
 
 
@@ -595,6 +599,11 @@ export function setWinnerHistoryIndex(index) {
 
 export function setSaveNoteCallback(callback) { saveNoteCallback = callback; }
 
+/**
+ * Permanently removes a student from a classroom and cleans up all session references.
+ * @param {Object} student - Student instance to delete
+ * @param {Object} classroom - Classroom containing the student
+ */
 export function permanentlyDeleteStudent(studentToDelete, classroom) {
     if (!studentToDelete || !classroom) return;
 
@@ -780,7 +789,9 @@ export function permanentlyDeleteFromTrash(entry) {
 }
 
 /**
- * Checks if a classroom has any finished, non-cancelled sessions (also rules out deleted ones).
+ * Checks if a classroom has any finished, non-cancelled sessions.
+ * @param {Object} classroom - Classroom to check
+ * @returns {boolean} True if at least one finished session exists
  */
 export function hasPastFinishedSessions(classroom) {
     if (!classroom || !classroom.sessions) return false;
@@ -789,6 +800,9 @@ export function hasPastFinishedSessions(classroom) {
 
 /**
  * Applies the same attendance status to a student for all past finished sessions.
+ * @param {string} studentId - Unique ID of the student
+ * @param {Object} classroom - Classroom containing sessions
+ * @param {string} status - 'present', 'absent', or 'unknown'
  */
 export function applyAttendanceToPastSessions(studentId, classroom, status) {
     if (!classroom || !studentId) return;
