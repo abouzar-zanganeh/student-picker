@@ -1127,4 +1127,8 @@ body.dark-mode #student-stats-table-container {
     font-size: 14px;
 }
 
+#absentees-summary-list>div {
+    color: var(--color-text-muted)
+}
+
 /* End of Dark Mode */
