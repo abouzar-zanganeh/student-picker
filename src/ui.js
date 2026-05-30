@@ -4558,17 +4558,32 @@ function setupAbsenteesCopyButton() {
             textToCopy += `✅ ${student.identity.name} (تعداد غیبت‌ها: ${totalAbsences})\n`;
         });
 
-        //  Homework 'none' section ---
+        // --- New: Homework 'none' section ---
         const studentsWithNoHomework = getActiveItems(currentClassroom.students).filter(student => {
             const record = selectedSession.studentRecords[student.identity.studentId];
             return record && record.homework && record.homework.status === 'none';
         });
 
         if (studentsWithNoHomework.length > 0) {
-            textToCopy += `\n📖⚠️ دانش‌آموزانی که تکلیف ندارند:\n\n`;
+            textToCopy += `\n🟠 دانش‌آموزانی که تکلیف ندارند:\n\n`;
+
             studentsWithNoHomework.forEach(student => {
-                const totalAbsences = calculateTotalAbsences(student);
-                textToCopy += `⚠️ ${student.identity.name}\n`;
+                // Find sessions where this student had homework status 'none'
+                const noneHomeworkSessions = currentClassroom.sessions
+                    .filter(session => {
+                        if (session.isDeleted || session.isCancelled) return false;
+                        const record = session.studentRecords[student.identity.studentId];
+                        return record && record.homework && record.homework.status === 'none';
+                    })
+                    .map(session => {
+                        const sessionMap = getSessionDisplayMap(currentClassroom);
+                        return sessionMap.get(session.sessionNumber);
+                    })
+                    .filter(num => num !== undefined)
+                    .sort((a, b) => a - b);
+
+                const sessionNumbers = noneHomeworkSessions.join('، ');
+                textToCopy += `⚠️ ${student.identity.name} (نقص تکلیف در جلسات: ${sessionNumbers})\n`;
             });
         }
 
