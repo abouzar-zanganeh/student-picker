@@ -934,16 +934,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function applyPastSessionAndOnboard(newStudent, currentClassroom, chosenStatus = null) {
+
+        currentClassroom.addStudent(newStudent);
+
         if (chosenStatus !== null) {
+            onboardNewStudent(newStudent, currentClassroom);
             state.applyAttendanceToPastSessions(
                 newStudent.identity.studentId,
                 currentClassroom,
                 chosenStatus
             );
+            saveData();
         } else {
             onboardNewStudent(newStudent, currentClassroom);
             saveData();
-            currentClassroom.addStudent(newStudent);
+
         }
     }
 
