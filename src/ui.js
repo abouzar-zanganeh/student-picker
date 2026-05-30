@@ -4434,33 +4434,27 @@ function createAbsenteesSummaryBox() {
 }
 
 function renderAbsenteesSummary() {
-    // --- NEW: Get references to elements just-in-time ---
     const summaryBox = document.getElementById('absentees-summary-box');
     const summaryList = document.getElementById('absentees-summary-list');
     const sessionNumberSpan = document.getElementById('absentee-summary-session-number');
 
-    // --- NEW: Defensive check to ensure all elements exist before proceeding ---
     if (!summaryBox || !summaryList || !sessionNumberSpan) {
         console.error('Could not find all absentee summary elements.');
         return;
     }
 
-    // 1. Make sure we are in a valid session
     if (!currentClassroom || !selectedSession) {
         summaryBox.classList.remove('visible');
         return;
     }
 
-    // 2. Get a list of all students marked as absent
     const absentStudents = getActiveItems(currentClassroom.students).filter(student => {
         const record = selectedSession.studentRecords[student.identity.studentId];
         return record && record.attendance === 'absent';
     });
 
-    // --- NEW LOGIC START ---
     const allActiveStudents = getActiveItems(currentClassroom.students);
     const totalAbsent = absentStudents.length;
-    // Count each state explicitly now that 'unknown' is a third state
     const totalPresent = allActiveStudents.filter(s => {
         const record = selectedSession.studentRecords[s.identity.studentId];
         return record && record.attendance === 'present';
@@ -4471,21 +4465,21 @@ function renderAbsenteesSummary() {
 
     if (presentEl) presentEl.textContent = totalPresent.toLocaleString('fa-IR');
     if (absentEl) absentEl.textContent = totalAbsent.toLocaleString('fa-IR');
-    // --- NEW LOGIC END ---
 
-    // 3. Update the session number in the title
     const sessionDisplayNumberMap = getSessionDisplayMap(currentClassroom);
     sessionNumberSpan.textContent = sessionDisplayNumberMap.get(selectedSession.sessionNumber);
 
-    // 4. Show or hide the box based on whether there are any absentees
-    if (absentStudents.length > 0) {
-        summaryBox.classList.add('visible');
-    } else {
-        summaryBox.classList.remove('visible');
+    // Always show the box
+    summaryBox.classList.add('visible');
+    summaryList.innerHTML = '';
+
+    // Handle empty case FIRST
+    if (absentStudents.length === 0) {
+        summaryList.innerHTML = '<div class="all-present-message">✅ تمام دانش‌آموزان حاضر هستند</div>';
+        return;
     }
 
-    // 5. Clear the old list and build the new one
-    summaryList.innerHTML = '';
+    // Then render absent students
     absentStudents.forEach(student => {
         const calculateTotalAbsences = (s) => {
             return currentClassroom.sessions.reduce((count, session) => {
