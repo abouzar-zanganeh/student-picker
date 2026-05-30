@@ -70,7 +70,7 @@ export function activateDeveloperAccessOnConsole() {
         if (devModeClicks === 10) {
             state.setUserSettings({ isDeveloperMode: true });
             bootstrapDeveloperMode();
-            showNotification("🛠️ حالت توسعه‌دهنده فعال شد.");
+            notifyingMessaging.showNotification("🛠️ حالت توسعه‌دهنده فعال شد.");
             devModeClicks = 0;
         }
     });
