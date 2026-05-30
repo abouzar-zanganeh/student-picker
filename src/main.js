@@ -703,26 +703,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     csvConfirmBtn.addEventListener('click', () => {
+        // 1. Get selected students from preview list
         const checkboxes = Array.from(csvPreviewList.querySelectorAll('input[type="checkbox"]:checked'));
-        let addedCount = 0;
-        let skippedNames = [];
-        let onboardingOccurred = false;
 
-        // Get the current index (start at 0)
-        let currentIndex = 0;
+        if (checkboxes.length === 0) {
+            showNotification("⚠️ هیچ دانش‌آموزی برای افزودن انتخاب نشده است.");
+            return;
+        }
 
-        function processNextStudent() {
-            if (currentIndex >= checkboxes.length) {
-                // All done - finalize
-                finalizeImport(addedCount, skippedNames, onboardingOccurred);
-                return;
-            }
+        // 2. Parse all names and check for duplicates FIRST
+        const studentsToAdd = [];
+        const skippedNames = [];
 
-            const checkbox = checkboxes[currentIndex];
+        for (const checkbox of checkboxes) {
             const name = checkbox.dataset.name;
             const parsedName = parseStudentName(name);
             const normalizedNewName = normalizeText(parsedName.name);
 
+            // Check for existing active student
             const existingStudent = currentClassroom.students.find(student => {
                 const normalizedExisting = normalizeText(student.identity.name);
                 return normalizedExisting === normalizedNewName && normalizedNewName !== '';
@@ -730,79 +728,91 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (existingStudent) {
                 if (existingStudent.isDeleted) {
+                    // Permanently delete the soft-deleted one first
                     permanentlyDeleteStudent(existingStudent, currentClassroom);
+                    studentsToAdd.push({ parsedName, rawName: name });
                 } else {
                     skippedNames.push(parsedName.name);
-                    currentIndex++;
-                    processNextStudent(); // Continue to next
-                    return;
                 }
+            } else {
+                studentsToAdd.push({ parsedName, rawName: name });
+            }
+        }
+
+        if (studentsToAdd.length === 0) {
+            showNotification("⚠️ هیچ دانش‌آموز جدیدی برای افزودن وجود ندارد.");
+            return;
+        }
+
+        // 3. Handle past sessions (show modal ONCE at the beginning if needed)
+        const hasPastSessions = state.hasPastFinishedSessions(currentClassroom);
+
+        const addStudents = (attendanceStatusForPast = null) => {
+            let addedCount = 0;
+
+            // Add all students
+            for (const studentData of studentsToAdd) {
+                const newStudent = new Student(studentData.parsedName);
+                currentClassroom.addStudent(newStudent);
+                onboardNewStudent(newStudent, currentClassroom);
+
+                // Apply past session attendance if status provided
+                if (attendanceStatusForPast !== null) {
+                    state.applyAttendanceToPastSessions(
+                        newStudent.identity.studentId,
+                        currentClassroom,
+                        attendanceStatusForPast
+                    );
+                }
+
+                addedCount++;
             }
 
-            const newStudent = new Student(parsedName);
+            // 4. Save and show final confirmation
+            saveData();
 
-            if (state.hasPastFinishedSessions(currentClassroom)) {
-                // Show modal, then continue in callback
-                notifyingMessaging.showPastAttendanceChoiceModal(
-                    (chosenStatus) => {
-                        applyPastSessionAndOnboard(newStudent, currentClassroom, chosenStatus);
-                        onboardingOccurred = true;
-                        addedCount++;
-                        saveData();
-                        currentIndex++;
-                        processNextStudent(); // Continue to next student
-                    },
-                    () => {
-                        showNotification("❌ افزودن دانش‌آموز لغو شد.");
+            // Build confirmation message
+            let message = `✅ ${addedCount} دانش‌آموز با موفقیت اضافه شدند.`;
+            if (skippedNames.length > 0) {
+                message += `\n\n⚠️ موارد زیر به دلیل تکراری بودن نادیده گرفته شدند:\n- ${skippedNames.join('\n- ')}`;
+            }
+            if (hasPastSessions && attendanceStatusForPast !== null) {
+                const statusText = attendanceStatusForPast === 'present' ? 'حاضر' :
+                    attendanceStatusForPast === 'absent' ? 'غایب' : 'نامشخص';
+                message += `\n\n💡 وضعیت حضور در جلسات گذشته برای دانش‌آموزان جدید: "${statusText}"`;
+            }
+
+            setTimeout(() => {
+                notifyingMessaging.showCustomConfirm(
+                    message,
+                    () => { },
+                    {
+                        confirmText: 'متوجه شدم',
+                        confirmClass: 'btn-success',
+                        onCancel: null
                     }
                 );
+            }, 200);
 
-                return; // Wait for modal callback
-
-            } else {
-                onboardNewStudent(newStudent, currentClassroom);
-                onboardingOccurred = true;
-                addedCount++;
-                saveData();
-                currentIndex++;
-                processNextStudent(); // Continue to next
-            }
-        }
-
-        function finalizeImport(addedCount, skippedNames, onboardingOccurred) {
-            // ثبت در گزارش فعالیت‌ها
-            if (addedCount > 0) {
-                logManager.addLog(currentClassroom.info.name,
-                    `${addedCount} دانش‌آموز جدید از لیست ورودی به کلاس اضافه شدند.`,
-                    { type: 'VIEW_SESSIONS' });
-            }
-
+            // Refresh UI
             ui.showSettingsPage(currentClassroom);
-
-            let duplicateInfo = skippedNames.length > 0
-                ? `⚠️ موارد زیر به دلیل تکراری بودن نادیده گرفته شدند:\n- ${skippedNames.join('\n- ')}`
-                : '';
-
-            if (onboardingOccurred) {
-                showOnboardingNotification(addedCount, duplicateInfo);
-            } else if (skippedNames.length > 0 || addedCount > 0) {
-                const finalMsg = addedCount > 0
-                    ? `✅ ${addedCount} دانش‌آموز با موفقیت اضافه شدند.\n${duplicateInfo}`
-                    : duplicateInfo;
-
-                notifyingMessaging.showCustomConfirm(finalMsg, () => { }, {
-                    confirmText: 'متوجه شدم',
-                    confirmClass: 'btn-success',
-                    onCancel: null
-                });
-            }
-
             pasteArea.value = '';
             state.setNamesToImport([]);
-        }
+        };
 
-        // Start processing
-        processNextStudent();
+        // 4. Show modal if needed, otherwise add directly
+        if (hasPastSessions) {
+            notifyingMessaging.showPastAttendanceChoiceModal(
+                (chosenStatus) => {
+                    addStudents(chosenStatus);
+                },
+                () => {
+                    showNotification("❌ افزودن دانش‌آموزان لغو شد.");
+                }
+            );
+        } else {
+            addStudents(); // No past sessions, add normally
+        }
     });
 
     csvCancelBtn.addEventListener('click', () => {
