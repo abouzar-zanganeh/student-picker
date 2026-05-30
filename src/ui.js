@@ -4558,7 +4558,19 @@ function setupAbsenteesCopyButton() {
             textToCopy += `✅ ${student.identity.name} (تعداد غیبت‌ها: ${totalAbsences})\n`;
         });
 
+        //  Homework 'none' section ---
+        const studentsWithNoHomework = getActiveItems(currentClassroom.students).filter(student => {
+            const record = selectedSession.studentRecords[student.identity.studentId];
+            return record && record.homework && record.homework.status === 'none';
+        });
 
+        if (studentsWithNoHomework.length > 0) {
+            textToCopy += `\n📖⚠️ دانش‌آموزانی که تکلیف ندارند:\n\n`;
+            studentsWithNoHomework.forEach(student => {
+                const totalAbsences = calculateTotalAbsences(student);
+                textToCopy += `⚠️ ${student.identity.name}\n`;
+            });
+        }
 
         // Use the modern Clipboard API to copy the text
         navigator.clipboard.writeText(textToCopy).then(() => {
