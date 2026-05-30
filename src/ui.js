@@ -4535,7 +4535,6 @@ function setupAbsenteesCopyButton() {
         };
 
         // Build the formatted string for the clipboard
-        // Build the formatted string for the clipboard
         const allActiveStudents = getActiveItems(currentClassroom.students);
         const totalAbsent = getAbsentStudents().length;
         const totalPresent = allActiveStudents.length - totalAbsent;
