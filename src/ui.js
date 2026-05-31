@@ -1171,7 +1171,7 @@ function renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkSpa
         });
     } else {
         if (includePrefix) {
-            homeworkSpan.textContent = 'تکالیف ناقص: ندارد';
+            homeworkSpan.textContent = 'تکالیف ناقص: ندارد ⭐';
         } else {
             homeworkSpan.textContent = 'ندارد';
         }
