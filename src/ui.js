@@ -3888,7 +3888,8 @@ function createSessionInfoContainer(session, displaySessionNumber) {
         infoContainer.style.cursor = 'pointer';
         infoContainer.addEventListener('click', () => {
             state.setSelectedSession(session);
-            renderSessionDashboard();
+            renderSessionDashboard('attendance');
+            window.scrollTo(0, 0);
         });
     }
     // comment for test
