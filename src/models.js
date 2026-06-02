@@ -232,7 +232,7 @@ export class Note {
 
 export class Homework {
     constructor(status = 'complete', comment = '') {
-        this.status = status; // 'none', 'incomplete', 'complete'
+        this.status = status; // 'notChecked', 'complete', 'incomplete', 'none'
         this.comment = comment;
         this.timestamp = new Date();
     }

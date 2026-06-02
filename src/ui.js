@@ -1348,9 +1348,10 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     homeworkControls.className = 'homework-controls';
 
     const homeworkTooltipMap = {
-        none: 'بدون تکلیف',
+        notChecked: 'تکلیف بررسی نشده',
         complete: 'تکلیف کامل',
-        incomplete: 'تکلیف ناقص'
+        incomplete: 'تکلیف ناقص',
+        none: 'بدون تکلیف'
     };
 
     // HW Status Button
@@ -1369,7 +1370,12 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         if (hwStatusLongPress) { e.stopPropagation(); return; }
 
         const homework = selectedSession.studentRecords[student.identity.studentId].homework;
-        const statusCycle = { 'none': 'incomplete', 'incomplete': 'complete', 'complete': 'none' };
+        const statusCycle = {
+            'notChecked': 'complete',
+            'complete': 'incomplete',
+            'incomplete': 'none',
+            'none': 'notChecked'
+        };
         const nextStatus = statusCycle[homework.status];
 
         selectedSession.setHomeworkStatus(student.identity.studentId, nextStatus);
