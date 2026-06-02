@@ -1363,6 +1363,19 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
 
     const homeworkStatus = selectedSession.studentRecords[student.identity.studentId]?.homework.status || 'none';
     homeworkBtn.className = `homework-status-btn ${homeworkStatus}`;
+
+    // Set button text content for 'notChecked' state (otherwise use CSS pseudo-element)
+    // Set initial button display based on status
+    if (homeworkStatus === 'notChecked') {
+        homeworkBtn.textContent = 'تکلیف؟';
+        homeworkBtn.style.fontSize = '12px';
+        homeworkBtn.style.padding = '4px 8px';
+    } else {
+        homeworkBtn.textContent = '';
+        homeworkBtn.style.fontSize = '';
+        homeworkBtn.style.padding = '';
+    }
+
     homeworkBtn.title = homeworkTooltipMap[homeworkStatus];
 
     // Normal Click
@@ -1378,9 +1391,24 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         };
         const nextStatus = statusCycle[homework.status];
 
+
+
         selectedSession.setHomeworkStatus(student.identity.studentId, nextStatus);
         saveData();
         renderAbsenteesSummary();
+
+        // Clear text content and reset styles for all cases
+        homeworkBtn.textContent = '';
+        homeworkBtn.style.fontSize = '';
+        homeworkBtn.style.padding = '';
+
+        // Handle 'notChecked' state specifically
+        if (nextStatus === 'notChecked') {
+            homeworkBtn.textContent = 'تکلیف؟';
+            homeworkBtn.style.fontSize = '12px';
+            homeworkBtn.style.padding = '4px 8px';
+        }
+
         homeworkBtn.className = `homework-status-btn ${nextStatus}`;
         homeworkBtn.title = homeworkTooltipMap[nextStatus];
         renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
