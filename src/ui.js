@@ -1290,7 +1290,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
             attendanceToggleBtn.className = 'attendance-status-btn absent active';
         } else {
             // AI_COMMENT: Default/unknown state — neutral appearance
-            attendanceToggleBtn.textContent = '؟';
+            attendanceToggleBtn.textContent = 'حضور؟';
             attendanceToggleBtn.className = 'attendance-status-btn unknown active';
         }
     };

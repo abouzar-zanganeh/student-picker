@@ -978,7 +978,7 @@ button:disabled:hover {
 }
 
 .attendance-status-btn {
-    max-width: 57px;
+    max-width: 70px;
     max-height: 33px;
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius-main);
