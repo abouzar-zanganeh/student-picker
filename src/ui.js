@@ -40,7 +40,7 @@ import JSZip from 'jszip';
 import { toJalaali, toGregorian } from 'jalaali-js';
 import { showReportConfigModal } from './reports.js';
 import { showCustomConfirm, showNotification } from './notifyingMessaging.js';
-import { getAbsentStudents, getPresentStudents } from './classroomUtils.js';
+import { getAbsentStudents, getPresentStudents, countHomeworkStatus } from './classroomUtils.js';
 
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');
@@ -4538,7 +4538,8 @@ function renderAbsenteesSummary() {
         homeworkNoneStudents.forEach(student => {
             const nameTag = document.createElement('span');
             nameTag.className = 'summary-name';
-            nameTag.textContent = student.identity.name;
+            const totalNoneCount = countHomeworkStatus(student, currentClassroom, 'none');
+            nameTag.textContent = `${student.identity.name} (نقص تکلیف در ${totalNoneCount} جلسه)`;
 
             nameTag.addEventListener('click', () => {
                 nameTag.classList.add('fading-out');
