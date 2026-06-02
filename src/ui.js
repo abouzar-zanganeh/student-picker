@@ -4505,6 +4505,14 @@ function renderAbsenteesSummary() {
         summaryList.appendChild(nameTag);
     });
 
+    // Remove any existing homework section elements from previous render
+    const existingSeparator = summaryList.parentElement.querySelector('.homework-section-separator');
+    const existingHeader = summaryList.parentElement.querySelector('.homework-section-header');
+    const existingList = summaryList.parentElement.querySelector('.homework-section-list');
+    if (existingSeparator) existingSeparator.remove();
+    if (existingHeader) existingHeader.remove();
+    if (existingList) existingList.remove();
+
     // --- Homework "None" Section ---
     const homeworkNoneStudents = getActiveItems(currentClassroom.students).filter(student => {
         const record = selectedSession.studentRecords[student.identity.studentId];
@@ -4514,18 +4522,18 @@ function renderAbsenteesSummary() {
     if (homeworkNoneStudents.length > 0) {
         // Add separator line
         const separator = document.createElement('hr');
-        separator.className = 'separator-light';
+        separator.className = 'homework-section-separator';
         summaryList.parentElement.appendChild(separator);
 
         // Add section header
         const homeworkHeader = document.createElement('div');
-        homeworkHeader.className = 'absentees-summary-header';
+        homeworkHeader.className = 'absentees-summary-header homework-section-header';
         homeworkHeader.innerHTML = '<h4>📋 لیست افراد با نقص تکلیف</h4>';
         summaryList.parentElement.appendChild(homeworkHeader);
 
         // Create container for homework list
         const homeworkList = document.createElement('div');
-        homeworkList.className = 'summary-list';
+        homeworkList.className = 'summary-list homework-section-list';
 
         homeworkNoneStudents.forEach(student => {
             const nameTag = document.createElement('span');
