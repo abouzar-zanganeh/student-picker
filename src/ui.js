@@ -1374,10 +1374,11 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
 
         selectedSession.setHomeworkStatus(student.identity.studentId, nextStatus);
         saveData();
-
+        renderAbsenteesSummary();
         homeworkBtn.className = `homework-status-btn ${nextStatus}`;
         homeworkBtn.title = homeworkTooltipMap[nextStatus];
         renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
+        renderAbsenteesSummary();
     });
 
     // Long Press (Mass Action)
@@ -4476,7 +4477,6 @@ function renderAbsenteesSummary() {
     // Handle empty case FIRST
     if (absentStudents.length === 0) {
         summaryList.innerHTML = '<div class="all-present-message">✅ تمام دانش‌آموزان حاضر هستند</div>';
-        return;
     }
 
     // Then render absent students
@@ -4504,6 +4504,50 @@ function renderAbsenteesSummary() {
         });
         summaryList.appendChild(nameTag);
     });
+
+    // --- Homework "None" Section ---
+    const homeworkNoneStudents = getActiveItems(currentClassroom.students).filter(student => {
+        const record = selectedSession.studentRecords[student.identity.studentId];
+        return record && record.homework && record.homework.status === 'none';
+    });
+
+    if (homeworkNoneStudents.length > 0) {
+        // Add separator line
+        const separator = document.createElement('hr');
+        separator.className = 'separator-light';
+        summaryList.parentElement.appendChild(separator);
+
+        // Add section header
+        const homeworkHeader = document.createElement('div');
+        homeworkHeader.className = 'absentees-summary-header';
+        homeworkHeader.innerHTML = '<h4>📋 لیست افراد با نقص تکلیف</h4>';
+        summaryList.parentElement.appendChild(homeworkHeader);
+
+        // Create container for homework list
+        const homeworkList = document.createElement('div');
+        homeworkList.className = 'summary-list';
+
+        homeworkNoneStudents.forEach(student => {
+            const nameTag = document.createElement('span');
+            nameTag.className = 'summary-name';
+            nameTag.textContent = student.identity.name;
+
+            nameTag.addEventListener('click', () => {
+                nameTag.classList.add('fading-out');
+                setTimeout(() => {
+                    const record = selectedSession.studentRecords[student.identity.studentId];
+                    if (record && record.homework) {
+                        record.homework.status = 'complete';
+                        saveData();
+                        renderAttendancePage();
+                    }
+                }, 200);
+            });
+            homeworkList.appendChild(nameTag);
+        });
+
+        summaryList.parentElement.appendChild(homeworkList);
+    }
 }
 
 function setupAbsenteesCopyButton() {
