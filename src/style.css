@@ -1368,6 +1368,11 @@ button:disabled:hover {
 }
 
 .incomplete-homework {
+    color: var(--color-warning);
+    font-weight: bold;
+}
+
+.none-homework {
     color: var(--color-strong-warning);
     font-weight: bold;
 }

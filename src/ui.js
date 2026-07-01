@@ -1162,6 +1162,8 @@ function renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkSpa
             numberSpan.textContent = sessionInfo.number;
             if (sessionInfo.status === 'incomplete') {
                 numberSpan.classList.add('incomplete-homework');
+            } else if (sessionInfo.status === 'none') {
+                numberSpan.classList.add('none-homework');
             }
             homeworkSpan.appendChild(numberSpan);
 
