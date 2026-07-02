@@ -1278,6 +1278,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     });
 
     row1.appendChild(checkbox);
+    row1.appendChild(warningIcon);
     row1.appendChild(nameSpan);
 
 
