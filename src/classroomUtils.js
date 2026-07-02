@@ -38,3 +38,15 @@ export function countHomeworkStatus(student, classroom, status) {
         return count + (record && record.homework && record.homework.status === status ? 1 : 0);
     }, 0);
 }
+
+/**
+ * Checks if a student has a homework 'none' warning in the current session.
+ * @param {Object} student - Student instance
+ * @param {Object} session - Current session
+ * @returns {boolean} True if homework status is 'none'
+ */
+export function hasHomeworkNoneWarning(student, session) {
+    if (!student || !session) return false;
+    const record = session.studentRecords[student.identity.studentId];
+    return record && record.homework && record.homework.status === 'none';
+}
