@@ -1541,6 +1541,20 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     li.appendChild(row2);
     li.appendChild(row3);
 
+    // --- Attach context menu for reporting ---
+    attachUniversalContextMenu(li, () => {
+        return [
+            {
+                label: '📨 گزارش به مدیریت',
+                icon: '📨',
+                action: () => {
+                    // AI_COMMENT: MVP - placeholder report action
+                    showReportToAdminModal(student, selectedSession, 'homework_none');
+                }
+            }
+        ];
+    });
+
     return li;
 }
 
