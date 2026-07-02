@@ -55,27 +55,61 @@ export function showNotification(message, duration = 3000) {
 }
 export function showCustomConfirm(message, onConfirm, options = {}) {
     const {
-        confirmText = 'تایید', cancelText = 'لغو', confirmClass = 'btn-success', onCancel = () => { }, isDelete = false
+        confirmText = 'تایید',
+        cancelText = 'لغو',
+        confirmClass = 'btn-success',
+        onCancel = () => { },
+        isDelete = false,
+        textarea = false,      // NEW: if true, show a textarea
+        textareaValue = '',    // NEW: initial value for the textarea
+        textareaPlaceholder = '' // NEW: placeholder text
     } = options;
 
-    // Determine the correct confirm action based on the isDelete flag.
-    // If it's a delete action, the callback will be to open the next modal.
-    // Otherwise, it's the original onConfirm function passed into this function.
+    // Determine the correct confirm action
     const confirmAction = isDelete
         ? () => showSecureConfirm(message, onConfirm)
         : onConfirm;
 
-    // --- This part sets up the modal's appearance and is now used for all cases ---
-    confirmModalMessage.innerHTML = message.replace(/\n/g, '<br>');
+    // --- Set up the modal content ---
+    let modalContent = message.replace(/\n/g, '<br>');
+
+    // If textarea is requested, append it to the message
+    if (textarea) {
+        modalContent += `
+            <div style="margin: 15px 0;">
+                <textarea id="custom-confirm-textarea" 
+                          rows="5" 
+                          style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--color-border); font-family: var(--font-family-main);"
+                          placeholder="${textareaPlaceholder}">${textareaValue}</textarea>
+            </div>
+        `;
+    }
+
+    confirmModalMessage.innerHTML = modalContent;
     confirmModalConfirmBtn.textContent = confirmText;
     confirmModalCancelBtn.textContent = cancelText;
 
-    // Reset classes before adding the new one to avoid style conflicts
+    // Reset classes before adding the new one
     confirmModalConfirmBtn.className = 'modal-action-btn';
     confirmModalConfirmBtn.classList.add(confirmClass);
 
-    // Set the appropriate callbacks in the global state
-    state.setConfirmCallback(confirmAction);
+    // Set the appropriate callbacks
+    state.setConfirmCallback(() => {
+        // If textarea exists, pass its value to the callback
+        if (textarea) {
+            const textareaEl = document.getElementById('custom-confirm-textarea');
+            const textValue = textareaEl ? textareaEl.value : '';
+            // Call the original onConfirm with the textarea value
+            if (typeof onConfirm === 'function') {
+                onConfirm(textValue);
+            }
+        } else {
+            // Original behavior
+            if (typeof confirmAction === 'function') {
+                confirmAction();
+            }
+        }
+    });
     state.setCancelCallback(onCancel);
 
     const modalActions = confirmModalConfirmBtn.parentElement;
@@ -83,6 +117,17 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
     modalActions.style.justifyContent = onCancel === null ? 'center' : 'space-between';
 
     openModal('custom-confirm-modal');
+
+    // Focus the textarea if it exists
+    if (textarea) {
+        setTimeout(() => {
+            const textareaEl = document.getElementById('custom-confirm-textarea');
+            if (textareaEl) {
+                textareaEl.focus();
+                textareaEl.select();
+            }
+        }, 100);
+    }
 }
 export function showSecureConfirm(message, onConfirm) {
     const randomCode = Math.floor(10000 + Math.random() * 90000).toString();

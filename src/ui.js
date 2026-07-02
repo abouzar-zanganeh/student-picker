@@ -1240,6 +1240,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     // --- Warning Icon for Homework 'none' ---
     const warningIcon = document.createElement('span');
     warningIcon.className = 'warning-icon';
+    warningIcon.id = `warning-icon-${student.identity.studentId}`;
     warningIcon.textContent = '⚠️';
     warningIcon.title = 'تکلیف این دانش‌آموز در جلسه فعلی ثبت نشده است';
     warningIcon.style.display = 'none'; // Hidden by default
@@ -1411,6 +1412,17 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
 
         selectedSession.setHomeworkStatus(student.identity.studentId, nextStatus);
         saveData();
+
+        // --- Update warning icon visibility ---
+        const icon = document.getElementById(`warning-icon-${student.identity.studentId}`);
+        if (icon) {
+            if (nextStatus === 'none') {
+                icon.style.display = 'inline';
+            } else {
+                icon.style.display = 'none';
+            }
+        }
+
         renderAbsenteesSummary();
 
         // Clear text content and reset styles for all cases

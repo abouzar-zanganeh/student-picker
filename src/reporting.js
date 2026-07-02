@@ -7,12 +7,12 @@
    ========================================================================== */
 
 import * as state from './state.js';
-import { openModal, closeActiveModal } from './ui.js';
+import { showCustomConfirm } from './notifyingMessaging.js';
 import { showNotification } from './notifyingMessaging.js';
 import { saveData } from './state.js';
 
 /**
- * Shows the report-to-admin modal with a preset message.
+ * Shows the report-to-admin modal with an editable message.
  * @param {Object} student - The student being reported
  * @param {Object} session - The current session
  * @param {string} warningType - 'homework_none' (MVP) or other types later
@@ -23,46 +23,22 @@ export function showReportToAdminModal(student, session, warningType) {
     const sessionNumber = session.sessionNumber;
     const message = generatePresetMessage(studentName, sessionNumber, warningType);
 
-    // 2. Get the modal elements
-    const modal = document.getElementById('report-modal');
-    if (!modal) {
-        console.error('report-modal not found in DOM');
-        return;
-    }
-
-    // 3. Populate the modal
-    const messageTextarea = document.getElementById('report-message-textarea');
-    if (messageTextarea) {
-        messageTextarea.value = message;
-        messageTextarea.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-
-    // 4. Set the send button action
-    const sendBtn = document.getElementById('report-send-btn');
-    const cancelBtn = document.getElementById('report-cancel-btn');
-
-    // Remove old listeners to avoid duplicates
-    const newSendBtn = sendBtn.cloneNode(true);
-    sendBtn.parentNode.replaceChild(newSendBtn, sendBtn);
-    const newCancelBtn = cancelBtn.cloneNode(true);
-    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
-
-    newSendBtn.addEventListener('click', () => {
-        const finalMessage = messageTextarea ? messageTextarea.value : message;
-        handleSendReport(student, session, warningType, finalMessage);
-        closeActiveModal();
-    });
-
-    newCancelBtn.addEventListener('click', () => {
-        closeActiveModal();
-    });
-
-    // 5. Open the modal
-    openModal('report-modal');
-    if (messageTextarea) {
-        messageTextarea.focus();
-        messageTextarea.select();
-    }
+    // 2. Show the custom confirm modal with a textarea
+    showCustomConfirm(
+        'پیام زیر برای مدیریت ارسال خواهد شد. می‌توانید آن را ویرایش کنید:',
+        (editedMessage) => {
+            // On confirm: send the report with the edited message
+            handleSendReport(student, session, warningType, editedMessage);
+        },
+        {
+            confirmText: 'ارسال',
+            cancelText: 'لغو',
+            confirmClass: 'btn-success',
+            textarea: true,
+            textareaValue: message,
+            textareaPlaceholder: 'پیام خود را وارد کنید...'
+        }
+    );
 }
 
 /**
