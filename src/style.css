@@ -4700,3 +4700,10 @@ body.dark-mode #student-stats-table-container {
 }
 
 /* End of Dark Mode */
+
+.warning-icon {
+    font-size: 16px;
+    margin-left: 8px;
+    color: var(--color-warning);
+    cursor: default;
+}
