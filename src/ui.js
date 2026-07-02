@@ -1235,6 +1235,18 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         : student.identity.name;
 
     // Normal Click: Profile (Blocked if long press occurred)
+
+    // --- Warning Icon for Homework 'none' ---
+    const warningIcon = document.createElement('span');
+    warningIcon.className = 'warning-icon';
+    warningIcon.textContent = '⚠️';
+    warningIcon.title = 'تکلیف این دانش‌آموز در جلسه فعلی ثبت نشده است';
+    warningIcon.style.display = 'none'; // Hidden by default
+
+    // Check if warning applies
+    if (hasHomeworkNoneWarning(student, selectedSession)) {
+        warningIcon.style.display = 'inline';
+    }
     nameSpan.addEventListener('click', (e) => {
         if (longPressOccurred) {
             // It was a long press, so consume this click and do nothing
