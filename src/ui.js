@@ -40,7 +40,7 @@ import JSZip from 'jszip';
 import { toJalaali, toGregorian } from 'jalaali-js';
 import { showReportConfigModal } from './reports.js';
 import { showCustomConfirm, showNotification } from './notifyingMessaging.js';
-import { getAbsentStudents, getPresentStudents, countHomeworkStatus } from './classroomUtils.js';
+import { getAbsentStudents, getPresentStudents, countHomeworkStatus, hasHomeworkNoneWarning } from './classroomUtils.js';
 
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');
