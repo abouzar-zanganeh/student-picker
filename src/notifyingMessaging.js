@@ -141,25 +141,33 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
 
     // Set the appropriate callbacks
     state.setConfirmCallback(() => {
-        // If dropdown exists, get its value
+        // Collect values from dropdown and textarea
         let dropdownValue = null;
         if (dropdown) {
             const dropdownEl = document.getElementById('custom-confirm-dropdown');
             dropdownValue = dropdownEl ? dropdownEl.value : null;
         }
 
-        // If textarea exists, get its value
         let textValue = null;
         if (textarea) {
             const textareaEl = document.getElementById('custom-confirm-textarea');
             textValue = textareaEl ? textareaEl.value : '';
         }
 
-        // Call the original onConfirm with all collected values
-        if (typeof onConfirm === 'function') {
-            onConfirm(textValue, dropdownValue);
-        } else if (typeof confirmAction === 'function') {
-            confirmAction();
+        // Define the final action (the actual work to be done)
+        const finalAction = () => {
+            if (typeof onConfirm === 'function') {
+                onConfirm(textValue, dropdownValue);
+            }
+        };
+
+        // If isDelete is true, wrap the action with secure confirm
+        if (isDelete) {
+            // Show secure confirm, and if successful, run finalAction
+            showSecureConfirm(message, finalAction);
+        } else {
+            // Otherwise, run the action directly
+            finalAction();
         }
     });
     state.setCancelCallback(onCancel);
