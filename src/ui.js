@@ -3754,6 +3754,51 @@ export function renderSettingsOther() {
     document.getElementById('settings-schedule-end').value = classroom.info.scheduleEndTime || '';
 }
 
+/**
+ * Renders the list of admin contacts in the app settings modal.
+ */
+export function renderAdminContacts() {
+    const list = document.getElementById('admin-contact-list');
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    const contacts = state.userSettings.adminContacts || [];
+
+    if (contacts.length === 0) {
+        list.innerHTML = '<li style="text-align: center; color: var(--color-text-muted); font-size: 14px;">هیچ تماسی ثبت نشده است.</li>';
+        return;
+    }
+
+    contacts.forEach(contact => {
+        const li = document.createElement('li');
+        li.style.display = 'flex';
+        li.style.justifyContent = 'space-between';
+        li.style.alignItems = 'center';
+
+        const infoSpan = document.createElement('span');
+        let infoText = contact.name || 'بدون نام';
+        if (contact.phone) infoText += ` | 📱 ${contact.phone}`;
+        if (contact.email) infoText += ` | ✉️ ${contact.email}`;
+        infoSpan.textContent = infoText;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn-icon';
+        deleteBtn.innerHTML = '🗑️';
+        deleteBtn.style.color = 'var(--color-strong-warning)';
+        deleteBtn.addEventListener('click', () => {
+            state.userSettings.adminContacts = state.userSettings.adminContacts.filter(c => c.id !== contact.id);
+            state.saveData();
+            renderAdminContacts();
+            showNotification('✅ تماس حذف شد.');
+        });
+
+        li.appendChild(infoSpan);
+        li.appendChild(deleteBtn);
+        list.appendChild(li);
+    });
+}
+
 export function _internalShowPage(pageId) {
     setDisplayedWinnerID(null);
     // 1. Visual Toggle: Hide all pages and show the target

@@ -1757,6 +1757,8 @@ document.addEventListener('DOMContentLoaded', () => {
             screensaverToggle.checked = state.userSettings.isScreenSaverEnabled;
 
             ui.openModal('app-settings-modal');
+
+            ui.renderAdminContacts();
         });
     }
 
@@ -1817,6 +1819,43 @@ document.addEventListener('DOMContentLoaded', () => {
             if (preference === 'system') {
                 watchSystemTheme();
             }
+        });
+    }
+
+    // --- Admin Contact Management ---
+    const addContactBtn = document.getElementById('add-admin-contact-btn');
+    const adminNameInput = document.getElementById('admin-name-input');
+    const adminPhoneInput = document.getElementById('admin-phone-input');
+    const adminEmailInput = document.getElementById('admin-email-input');
+
+    if (addContactBtn) {
+        addContactBtn.addEventListener('click', () => {
+            const name = adminNameInput.value.trim();
+            const phone = adminPhoneInput.value.trim();
+            const email = adminEmailInput.value.trim();
+
+            if (!name && !phone && !email) {
+                showNotification('⚠️ حداقل یکی از فیلدهای نام، شماره یا ایمیل را پر کنید.');
+                return;
+            }
+
+            const newContact = {
+                id: `contact_${Date.now()}`,
+                name: name || 'بدون نام',
+                phone: phone || '',
+                email: email || ''
+            };
+
+            state.userSettings.adminContacts = [...(state.userSettings.adminContacts || []), newContact];
+            state.saveData();
+            ui.renderAdminContacts();
+
+            // Clear inputs
+            adminNameInput.value = '';
+            adminPhoneInput.value = '';
+            adminEmailInput.value = '';
+
+            showNotification('✅ تماس مدیریت با موفقیت اضافه شد.');
         });
     }
 

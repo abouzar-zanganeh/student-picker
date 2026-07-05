@@ -55,25 +55,48 @@ function generatePresetMessage(studentName, sessionNumber, warningType) {
 }
 
 /**
- * Handles sending the report: logs to console (MVP), adds a note to the student's profile,
- * and shows a confirmation notification.
+ * Handles sending the report: opens SMS or email with the message.
  */
 function handleSendReport(student, session, warningType, message) {
-    // 1. Console log placeholder for actual sending
-    console.log('📨 Report sent to admin:');
-    console.log(`Student: ${student.identity.name}`);
-    console.log(`Session: ${session.sessionNumber}`);
-    console.log(`Warning Type: ${warningType}`);
-    console.log(`Message: ${message}`);
-    console.log('📨 [MVP] Admin contact: placeholder (no actual SMS/email sent yet)');
+    // 1. Get the first admin contact (or use a default if none exists)
+    const contacts = state.userSettings.adminContacts || [];
+    let contact = contacts[0];
 
-    // 2. Add a note to the student's profile
+    // If no contact is saved, use a fallback
+    if (!contact) {
+        // Fallback: prompt the user to add a contact
+        showNotification('⚠️ ابتدا یک تماس مدیریت در تنظیمات برنامه اضافه کنید.');
+        return;
+    }
+
+    // 2. Encode the message for URL
+    const encodedMessage = encodeURIComponent(message);
+
+    // 3. Send via SMS or email
+    if (contact.phone) {
+        // SMS: opens messaging app with number and message pre-filled
+        const smsUrl = `sms:${contact.phone}?body=${encodedMessage}`;
+        window.location.href = smsUrl;
+        console.log(`📨 SMS sent to ${contact.phone}: ${message}`);
+    } else if (contact.email) {
+        // Email: opens email client with address and message pre-filled
+        const subject = encodeURIComponent(`گزارش وضعیت دانش‌آموز - ${student.identity.name}`);
+        const emailUrl = `mailto:${contact.email}?subject=${subject}&body=${encodedMessage}`;
+        window.location.href = emailUrl;
+        console.log(`📨 Email sent to ${contact.email}: ${message}`);
+    } else {
+        showNotification('⚠️ تماس مدیریت فاقد شماره موبایل یا ایمیل است.');
+        return;
+    }
+
+    // 4. Add a note to the student's profile
     const noteContent = `[ADMIN_NOTIFIED] ${new Date().toLocaleDateString('fa-IR')} - ${warningType}: ${message}`;
     student.addNote(noteContent, { type: 'fromAttendance', sessionNumber: session.sessionNumber });
 
-    // 3. Save data
+    // 5. Save data
     saveData();
 
-    // 4. Show confirmation
-    showNotification('✅ گزارش به مدیریت ثبت شد. (نسخه MVP - ارسال واقعی فعال نیست)');
+    // 6. Show confirmation
+    const contactInfo = contact.name || 'مدیریت';
+    showNotification(`✅ گزارش به «${contactInfo}» ارسال شد.`);
 }

@@ -79,6 +79,24 @@
                         <option value="system">💻 پیروی از سیستم</option>
                     </select>
                 </li>
+
+                <li>
+                    <span>📇 اطلاعات تماس مدیریت</span>
+                    <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 10px;">
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <input type="text" id="admin-name-input" placeholder="نام"
+                                style="flex: 1; min-width: 80px; text-align: center;">
+                            <input type="text" id="admin-phone-input" placeholder="شماره موبایل"
+                                style="flex: 1; min-width: 100px; text-align: center;">
+                            <input type="email" id="admin-email-input" placeholder="ایمیل"
+                                style="flex: 1; min-width: 100px; text-align: center;">
+                            <button id="add-admin-contact-btn" class="btn-success" style="white-space: nowrap;">➕
+                                افزودن</button>
+                        </div>
+                        <ul id="admin-contact-list" class="list-container" style="margin-top: 5px;"></ul>
+                    </div>
+                </li>
+
             </ul>
             <div class="modal-actions">
                 <button id="close-settings-btn" class="btn-secondary">بستن</button>

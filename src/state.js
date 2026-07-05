@@ -85,6 +85,7 @@ export let userSettings = {
     isDeveloperMode: false,
     lastRestoreTimestamp: null,
     lastBackupTimestamp: null,
+    adminContacts: []
 };
 
 export let isAssessmentModeActive = false;
