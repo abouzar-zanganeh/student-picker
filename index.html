@@ -80,20 +80,23 @@
                     </select>
                 </li>
 
-                <li>
-                    <span>📇 اطلاعات تماس مدیریت</span>
-                    <div style="display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 10px;">
-                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                            <input type="text" id="admin-name-input" placeholder="نام"
-                                style="flex: 1; min-width: 80px; text-align: center;">
-                            <input type="text" id="admin-phone-input" placeholder="شماره موبایل"
-                                style="flex: 1; min-width: 100px; text-align: center;">
-                            <input type="email" id="admin-email-input" placeholder="ایمیل"
-                                style="flex: 1; min-width: 100px; text-align: center;">
-                            <button id="add-admin-contact-btn" class="btn-success" style="white-space: nowrap;">➕
-                                افزودن</button>
+                <li style="flex-direction: column; align-items: stretch; gap: 10px;">
+                    <span class="admin-contact-title">📇 اطلاعات تماس مدیریت</span>
+                    <div class="admin-contact-section">
+                        <div class="admin-contact-field">
+                            <label for="admin-name-input">نام</label>
+                            <input type="text" id="admin-name-input" placeholder="مثال: فرزان نژاد">
                         </div>
-                        <ul id="admin-contact-list" class="list-container" style="margin-top: 5px;"></ul>
+                        <div class="admin-contact-field">
+                            <label for="admin-phone-input">شماره موبایل</label>
+                            <input type="text" id="admin-phone-input" placeholder="مثال: 09117724836">
+                        </div>
+                        <div class="admin-contact-field">
+                            <label for="admin-email-input">ایمیل</label>
+                            <input type="email" id="admin-email-input" placeholder="مثال: admin@school.com">
+                        </div>
+                        <button id="add-admin-contact-btn" class="btn-success admin-contact-add-btn">➕ افزودن</button>
+                        <ul id="admin-contact-list" class="list-container admin-contact-list"></ul>
                     </div>
                 </li>
 

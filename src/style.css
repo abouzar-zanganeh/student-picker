@@ -4707,3 +4707,96 @@ body.dark-mode #student-stats-table-container {
     color: var(--color-warning);
     cursor: default;
 }
+
+/* --- Admin Contact Management Styles --- */
+.admin-contact-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.admin-contact-title {
+    font-weight: bold;
+    font-size: 15px;
+    color: var(--color-text-dark);
+    margin-bottom: 4px;
+}
+
+.admin-contact-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+}
+
+.admin-contact-field label {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    font-weight: 500;
+}
+
+.admin-contact-field input {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius-main);
+    background-color: var(--color-surface);
+    color: var(--color-text-dark);
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.admin-contact-field input:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.admin-contact-add-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 4px;
+}
+
+.admin-contact-list {
+    margin-top: 8px;
+}
+
+.admin-contact-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+}
+
+.admin-contact-info {
+    flex: 1;
+    font-size: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    color: var(--color-text-dark);
+}
+
+.admin-contact-delete-btn {
+    flex-shrink: 0;
+    margin-right: 10px;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+.admin-contact-delete-btn:hover {
+    opacity: 1;
+}
+
+.admin-contact-empty {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 14px;
+    padding: 12px;
+}
+
+/* End of Admin Contact Styles */
