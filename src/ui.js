@@ -3779,10 +3779,25 @@ export function renderAdminContacts() {
         const infoSpan = document.createElement('span');
         infoSpan.className = 'admin-contact-info';
 
-        let infoText = contact.name || 'بدون نام';
-        if (contact.phone) infoText += ` | 📱 ${contact.phone}`;
-        if (contact.email) infoText += ` | ✉️ ${contact.email}`;
-        infoSpan.textContent = infoText;
+        const nameSpan = document.createElement('div');
+        nameSpan.className = 'contact-name';
+        nameSpan.textContent = contact.name || 'بدون نام';
+
+        infoSpan.appendChild(nameSpan);
+
+        if (contact.phone) {
+            const phoneSpan = document.createElement('div');
+            phoneSpan.className = 'contact-phone';
+            phoneSpan.textContent = `📱 ${contact.phone}`;
+            infoSpan.appendChild(phoneSpan);
+        }
+
+        if (contact.email) {
+            const emailSpan = document.createElement('div');
+            emailSpan.className = 'contact-email';
+            emailSpan.textContent = `✉️ ${contact.email}`;
+            infoSpan.appendChild(emailSpan);
+        }
 
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'btn-icon admin-contact-delete-btn';

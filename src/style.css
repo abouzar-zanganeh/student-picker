@@ -4776,9 +4776,23 @@ body.dark-mode #student-stats-table-container {
     flex: 1;
     font-size: 14px;
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px 16px;
+    flex-direction: column;
+    gap: 2px;
     color: var(--color-text-dark);
+}
+
+.admin-contact-info .contact-name {
+    font-weight: 600;
+}
+
+.admin-contact-info .contact-phone {
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+.admin-contact-info .contact-email {
+    color: var(--color-text-muted);
+    font-size: 13px;
 }
 
 .admin-contact-delete-btn {
