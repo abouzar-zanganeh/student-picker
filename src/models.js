@@ -406,6 +406,7 @@ export class Classroom {
             scheduleDays: info.scheduleDays || [], // 0=Sunday, 1=Monday, ..., 6=Saturday
             scheduleStartTime: info.scheduleStartTime || null,
             scheduleEndTime: info.scheduleEndTime || null,
+            lastReportedAdminId: info.lastReportedAdminId || null
         };
         this.students = [];
         this.sessions = [];

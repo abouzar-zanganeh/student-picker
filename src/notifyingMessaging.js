@@ -53,6 +53,7 @@ export function showNotification(message, duration = 3000) {
         notificationToast.classList.remove('show');
     }, duration));
 }
+
 export function showCustomConfirm(message, onConfirm, options = {}) {
     const {
         confirmText = 'تایید',
@@ -60,9 +61,15 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
         confirmClass = 'btn-success',
         onCancel = () => { },
         isDelete = false,
-        textarea = false,      // NEW: if true, show a textarea
-        textareaValue = '',    // NEW: initial value for the textarea
-        textareaPlaceholder = '' // NEW: placeholder text
+        textarea = false,
+        textareaValue = '',
+        textareaPlaceholder = '',
+        dropdown = false,
+        dropdownOptions = [],
+        dropdownLabel = '',
+        dropdownSelected = '',
+        disableConfirm = false,
+        confirmWarning = ''
     } = options;
 
     // Determine the correct confirm action
@@ -73,13 +80,30 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
     // --- Set up the modal content ---
     let modalContent = message.replace(/\n/g, '<br>');
 
-    // If textarea is requested, append it to the message
+    // If dropdown is requested, add it
+    if (dropdown) {
+        let optionsHtml = dropdownOptions.map(opt =>
+            `<option value="${opt.value}" ${opt.value === dropdownSelected ? 'selected' : ''}>${opt.label}</option>`
+        ).join('');
+
+        modalContent += `
+            <div style="margin: 15px 0;">
+                <label style="display: block; font-size: 14px; color: var(--color-text-muted); margin-bottom: 5px;">${dropdownLabel}</label>
+                <select id="custom-confirm-dropdown" 
+                        style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--color-border); font-family: var(--font-family-main); font-size: 14px; background-color: var(--color-surface); color: var(--color-text-dark);">
+                    ${optionsHtml}
+                </select>
+            </div>
+        `;
+    }
+
+    // If textarea is requested, add it
     if (textarea) {
         modalContent += `
             <div style="margin: 15px 0;">
                 <textarea id="custom-confirm-textarea" 
                           rows="5" 
-                          style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--color-border); font-family: var(--font-family-main);"
+                          style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--color-border); font-family: var(--font-family-main); background-color: var(--color-surface); color: var(--color-text-dark);"
                           placeholder="${textareaPlaceholder}">${textareaValue}</textarea>
             </div>
         `;
@@ -92,27 +116,54 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
     // Reset classes before adding the new one
     confirmModalConfirmBtn.className = 'modal-action-btn';
     confirmModalConfirmBtn.classList.add(confirmClass);
+    confirmModalConfirmBtn.disabled = disableConfirm;
+
+    // Get modal actions container
+    const modalActions = confirmModalConfirmBtn.parentElement;
+
+    // --- Handle warning text (remove existing and add new if needed) ---
+    const existingWarning = document.querySelector('.confirm-warning-text');
+    if (existingWarning) existingWarning.remove();
+
+    if (confirmWarning) {
+        const warningDiv = document.createElement('div');
+        warningDiv.className = 'confirm-warning-text';
+        warningDiv.style.marginTop = '15px';
+        warningDiv.style.color = 'var(--color-strong-warning)';
+        warningDiv.style.fontSize = '14px';
+        warningDiv.style.textAlign = 'center';
+        warningDiv.style.fontWeight = '500';
+        warningDiv.textContent = `⚠️ ${confirmWarning}`;
+
+        // Insert it after the modal actions
+        modalActions.parentElement.insertBefore(warningDiv, modalActions.nextSibling);
+    }
 
     // Set the appropriate callbacks
     state.setConfirmCallback(() => {
-        // If textarea exists, pass its value to the callback
+        // If dropdown exists, get its value
+        let dropdownValue = null;
+        if (dropdown) {
+            const dropdownEl = document.getElementById('custom-confirm-dropdown');
+            dropdownValue = dropdownEl ? dropdownEl.value : null;
+        }
+
+        // If textarea exists, get its value
+        let textValue = null;
         if (textarea) {
             const textareaEl = document.getElementById('custom-confirm-textarea');
-            const textValue = textareaEl ? textareaEl.value : '';
-            // Call the original onConfirm with the textarea value
-            if (typeof onConfirm === 'function') {
-                onConfirm(textValue);
-            }
-        } else {
-            // Original behavior
-            if (typeof confirmAction === 'function') {
-                confirmAction();
-            }
+            textValue = textareaEl ? textareaEl.value : '';
+        }
+
+        // Call the original onConfirm with all collected values
+        if (typeof onConfirm === 'function') {
+            onConfirm(textValue, dropdownValue);
+        } else if (typeof confirmAction === 'function') {
+            confirmAction();
         }
     });
     state.setCancelCallback(onCancel);
 
-    const modalActions = confirmModalConfirmBtn.parentElement;
     confirmModalCancelBtn.style.display = onCancel === null ? 'none' : 'inline-block';
     modalActions.style.justifyContent = onCancel === null ? 'center' : 'space-between';
 
@@ -129,6 +180,7 @@ export function showCustomConfirm(message, onConfirm, options = {}) {
         }, 100);
     }
 }
+
 export function showSecureConfirm(message, onConfirm) {
     const randomCode = Math.floor(10000 + Math.random() * 90000).toString();
     secureConfirmMessage.textContent = message;

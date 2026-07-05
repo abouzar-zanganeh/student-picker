@@ -1902,8 +1902,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Extract email
                 const email = contact.email?.[0] || '';
 
-                if (!name && !phone && !email) {
-                    showNotification('⚠️ مخاطب انتخاب شده فاقد اطلاعات قابل استفاده است.');
+                // Check if the contact has at least a phone number (required for SMS)
+                if (!phone) {
+                    showNotification('⚠️ مخاطب انتخاب شده فاقد شماره موبایل است. لطفاً مخاطب دیگری انتخاب کنید.', 5000);
+                    return;
+                }
+
+                if (!name && !email) {
+                    showNotification('⚠️ مخاطب انتخاب شده فاقد اطلاعات قابل استفاده است.', 5000);
                     return;
                 }
 
@@ -1916,7 +1922,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (phoneInput && phone) phoneInput.value = phone;
                 if (emailInput && email) emailInput.value = email;
 
-                showNotification('✅ اطلاعات مخاطب در فرم قرار گرفت. برای ذخیره، دکمه افزودن را بزنید.');
+                showNotification('✅ اطلاعات مخاطب در فرم قرار گرفت. برای ذخیره، دکمه افزودن را بزنید.', 5000);
+
+                const addBtn = document.getElementById('add-admin-contact-btn');
+                if (addBtn) {
+                    flashElement(addBtn, 3000);
+                }
+
 
             } catch (error) {
                 // User cancelled or permission denied
