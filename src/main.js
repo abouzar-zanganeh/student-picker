@@ -1859,6 +1859,77 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Pick Contact from Device ---
+    const pickContactBtn = document.getElementById('pick-contact-btn');
+
+    if (pickContactBtn) {
+        pickContactBtn.addEventListener('click', async () => {
+            // Check if the Contact Picker API is supported
+            if (!('contacts' in navigator) || !navigator.contacts) {
+                showNotification('⚠️ این قابلیت فقط در مرورگر کروم روی اندروید پشتیبانی می‌شود.');
+                return;
+            }
+
+            try {
+                // Request permission and pick a contact
+                const contacts = await navigator.contacts.select(
+                    ['name', 'tel', 'email'],
+                    { multiple: false }
+                );
+
+                if (contacts.length === 0) {
+                    showNotification('❌ هیچ مخاطبی انتخاب نشد.');
+                    return;
+                }
+
+                const contact = contacts[0];
+
+
+                // Extract name
+                const name = contact.name?.[0] || '';
+
+                // Extract phone number
+                let phone = '';
+                if (contact.tel && contact.tel.length > 0) {
+                    // The API may return strings directly or objects with a 'value' property
+                    const firstTel = contact.tel[0];
+                    // If it's a string, use it directly. If it's an object, use its value property.
+                    phone = typeof firstTel === 'string' ? firstTel : (firstTel.value || '');
+                    // Remove any spaces
+                    phone = phone.replace(/\s/g, '');
+                }
+
+                // Extract email
+                const email = contact.email?.[0] || '';
+
+                if (!name && !phone && !email) {
+                    showNotification('⚠️ مخاطب انتخاب شده فاقد اطلاعات قابل استفاده است.');
+                    return;
+                }
+
+                // Auto-fill the form fields
+                const nameInput = document.getElementById('admin-name-input');
+                const phoneInput = document.getElementById('admin-phone-input');
+                const emailInput = document.getElementById('admin-email-input');
+
+                if (nameInput && name) nameInput.value = name;
+                if (phoneInput && phone) phoneInput.value = phone;
+                if (emailInput && email) emailInput.value = email;
+
+                showNotification('✅ اطلاعات مخاطب در فرم قرار گرفت. برای ذخیره، دکمه افزودن را بزنید.');
+
+            } catch (error) {
+                // User cancelled or permission denied
+                if (error.name === 'AbortError' || error.name === 'NotAllowedError') {
+                    console.log('Contact picker cancelled or permission denied.');
+                } else {
+                    console.error('Contact picker error:', error);
+                    showNotification('❌ خطا در دسترسی به مخاطبین.');
+                }
+            }
+        });
+    }
+
 
     utils.setupLongPress(selectStudentBtn, () => {
 
