@@ -34,6 +34,7 @@ C:\Documents\GitHub\student-picker\src\style.css
 C:\Documents\GitHub\student-picker\src\dark-mode.css
 C:\Documents\GitHub\student-picker\package.json
 C:\Documents\GitHub\student-picker\src\notifyingMessaging.js
+C:\Documents\GitHub\student-picker\src\reporting.js
 )
 
 ; =================================================================
