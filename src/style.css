@@ -4820,3 +4820,9 @@ body.dark-mode #student-stats-table-container {
 }
 
 /* End of Admin Contact Styles */
+
+.threshold-description {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    margin-top: 2px;
+}

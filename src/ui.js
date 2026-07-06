@@ -40,7 +40,7 @@ import JSZip from 'jszip';
 import { toJalaali, toGregorian } from 'jalaali-js';
 import { showReportConfigModal } from './reports.js';
 import { showCustomConfirm, showNotification } from './notifyingMessaging.js';
-import { getAbsentStudents, getPresentStudents, countHomeworkStatus, hasHomeworkNoneWarning } from './classroomUtils.js';
+import { getAbsentStudents, getPresentStudents, countHomeworkStatus, getStudentWarnings } from './classroomUtils.js';
 import { showReportToAdminModal } from './reporting.js';
 
 // --- HTML Elements ---
@@ -1237,18 +1237,36 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
 
     // Normal Click: Profile (Blocked if long press occurred)
 
-    // --- Warning Icon for Homework 'none' ---
+    // --- Warning Icon for active warnings ---
+    const warnings = getStudentWarnings(student, currentClassroom, selectedSession);
+    const hasWarnings = warnings.length > 0;
+
     const warningIcon = document.createElement('span');
     warningIcon.className = 'warning-icon';
     warningIcon.id = `warning-icon-${student.identity.studentId}`;
     warningIcon.textContent = '⚠️';
-    warningIcon.title = 'تکلیف این دانش‌آموز در جلسه فعلی ثبت نشده است';
-    warningIcon.style.display = 'none'; // Hidden by default
+    warningIcon.title = hasWarnings ? `${warnings.length} هشدار فعال` : '';
+    warningIcon.style.display = hasWarnings ? 'inline' : 'none';
+    warningIcon.style.cursor = 'pointer';
 
-    // Check if warning applies
-    if (hasHomeworkNoneWarning(student, selectedSession)) {
-        warningIcon.style.display = 'inline';
-    }
+    // Click handler to show warning details
+    warningIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (warnings.length === 0) return;
+
+        const warningMessages = warnings.map(w => `• ${w.message}`).join('\n');
+        showCustomConfirm(
+            `⚠️ هشدارهای دانش‌آموز «${student.identity.name}»:\n\n${warningMessages}`,
+            () => { },
+            {
+                confirmText: 'متوجه شدم',
+                cancelText: null,
+                confirmClass: 'btn-warning',
+                onCancel: null
+            }
+        );
+    });
+
     nameSpan.addEventListener('click', (e) => {
         if (longPressOccurred) {
             // It was a long press, so consume this click and do nothing
@@ -1414,12 +1432,15 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
         saveData();
 
         // --- Update warning icon visibility ---
+        const updatedWarnings = getStudentWarnings(student, currentClassroom, selectedSession);
         const icon = document.getElementById(`warning-icon-${student.identity.studentId}`);
         if (icon) {
-            if (nextStatus === 'none') {
+            if (updatedWarnings.length > 0) {
                 icon.style.display = 'inline';
+                icon.title = `${updatedWarnings.length} هشدار فعال`;
             } else {
                 icon.style.display = 'none';
+                icon.title = '';
             }
         }
 

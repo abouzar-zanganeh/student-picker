@@ -1822,6 +1822,45 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- Warning Thresholds ---
+    const thresholdTotalAbsences = document.getElementById('threshold-total-absences');
+    const thresholdConsecutiveAbsences = document.getElementById('threshold-consecutive-absences');
+    const thresholdHomeworkFailures = document.getElementById('threshold-homework-failures');
+
+    // Load current values from settings
+    if (thresholdTotalAbsences) {
+        thresholdTotalAbsences.value = state.userSettings.warningThresholds?.totalAbsences || 4;
+        thresholdTotalAbsences.addEventListener('change', () => {
+            const val = parseInt(thresholdTotalAbsences.value, 10);
+            if (val > 0) {
+                state.userSettings.warningThresholds.totalAbsences = val;
+                state.saveData();
+            }
+        });
+    }
+
+    if (thresholdConsecutiveAbsences) {
+        thresholdConsecutiveAbsences.value = state.userSettings.warningThresholds?.consecutiveAbsences || 2;
+        thresholdConsecutiveAbsences.addEventListener('change', () => {
+            const val = parseInt(thresholdConsecutiveAbsences.value, 10);
+            if (val > 0) {
+                state.userSettings.warningThresholds.consecutiveAbsences = val;
+                state.saveData();
+            }
+        });
+    }
+
+    if (thresholdHomeworkFailures) {
+        thresholdHomeworkFailures.value = state.userSettings.warningThresholds?.homeworkFailures || 4;
+        thresholdHomeworkFailures.addEventListener('change', () => {
+            const val = parseInt(thresholdHomeworkFailures.value, 10);
+            if (val > 0) {
+                state.userSettings.warningThresholds.homeworkFailures = val;
+                state.saveData();
+            }
+        });
+    }
+
     // --- Admin Contact Management ---
     const addContactBtn = document.getElementById('add-admin-contact-btn');
     const adminNameInput = document.getElementById('admin-name-input');

@@ -85,7 +85,13 @@ export let userSettings = {
     isDeveloperMode: false,
     lastRestoreTimestamp: null,
     lastBackupTimestamp: null,
-    adminContacts: []
+    adminContacts: [],
+
+    warningThresholds: {
+        totalAbsences: 4,
+        consecutiveAbsences: 2,
+        homeworkFailures: 4
+    }
 };
 
 export let isAssessmentModeActive = false;
