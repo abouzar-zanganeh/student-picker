@@ -1249,22 +1249,14 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     warningIcon.style.display = hasWarnings ? 'inline' : 'none';
     warningIcon.style.cursor = 'pointer';
 
-    // Click handler to show warning details
+
+    // Click handler to open settlement modal (placeholder - will be implemented in Step 5)
     warningIcon.addEventListener('click', (e) => {
         e.stopPropagation();
         if (warnings.length === 0) return;
 
-        const warningMessages = warnings.map(w => `• ${w.message}`).join('\n');
-        showCustomConfirm(
-            `⚠️ هشدارهای دانش‌آموز «${student.identity.name}»:\n\n${warningMessages}`,
-            () => { },
-            {
-                confirmText: 'متوجه شدم',
-                cancelText: null,
-                confirmClass: 'btn-warning',
-                onCancel: null
-            }
-        );
+        // Temporary: Show a message that settlement is coming
+        showNotification('⚙️ قابلیت تسویه هشدار در حال پیاده‌سازی است...');
     });
 
     nameSpan.addEventListener('click', (e) => {
