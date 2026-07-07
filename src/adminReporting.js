@@ -16,14 +16,11 @@ import { saveData, currentClassroom } from './state.js';
  * Shows the report-to-admin modal with an editable message.
  * @param {Object} student - The student being reported
  * @param {Object} session - The current session
- * @param {string} warningType - 'homework_none' (MVP) or other types later
  */
-export function showReportToAdminModal(student, session, warningType) {
+export function showReportToAdminModal(student, session) {
     // 1. Generate the preset message
     const studentName = student.identity.name;
-    const sessionNumber = session.sessionNumber;
-    const message = generatePresetMessage(studentName, sessionNumber, warningType);
-
+    const message = `مدیریت محترم،\nلطفاً برای دانش‌آموز «${studentName}» مورد زیر را پیگیری بفرمایید:`;
 
 
     // 2. Build dropdown options (if contacts exist)
@@ -50,7 +47,7 @@ export function showReportToAdminModal(student, session, warningType) {
             // On confirm: send the report
             const selectedContact = contacts.find(c => c.id === selectedAdminId);
             if (selectedContact) {
-                handleSendReport(student, session, warningType, editedMessage, selectedContact);
+                handleSendReport(student, session, editedMessage, selectedContact);
             } else {
                 showNotification('⚠️ تماس مدیریت انتخاب شده معتبر نیست.');
             }
@@ -76,11 +73,10 @@ export function showReportToAdminModal(student, session, warningType) {
  * Shows the report-to-admin modal with a callback for successful send.
  * @param {Object} student - The student being reported
  * @param {Object} session - The current session
- * @param {string} warningType - Type of warning (e.g., 'warning_settlement')
  * @param {string} preFilledMessage - Pre-filled message for the textarea
  * @param {Function} onReportSent - Callback after report is successfully sent
  */
-export function showReportToAdminModalWithCallback(student, session, warningType, preFilledMessage, onReportSent) {
+export function showReportToAdminModalWithCallback(student, session, preFilledMessage, onReportSent) {
     // 1. Build dropdown options (if contacts exist)
     const contacts = state.userSettings.adminContacts || [];
     let dropdownOptions = [];
@@ -155,25 +151,11 @@ export function showReportToAdminModalWithCallback(student, session, warningType
 }
 
 /**
- * Generates a preset message based on the warning type.
- */
-function generatePresetMessage(studentName, sessionNumber, warningType) {
-    const dateStr = new Date().toLocaleDateString('fa-IR');
-    switch (warningType) {
-        case 'homework_none':
-            return `دانش‌آموز «${studentName}» در جلسه ${sessionNumber} (تاریخ ${dateStr}) تکلیف خود را ارائه نکرده است. لطفاً بررسی فرمایید.`;
-        default:
-            return `دانش‌آموز «${studentName}» نیازمند توجه است. لطفاً بررسی فرمایید.`;
-    }
-}
-
-
-/**
  * Handles sending the report: opens SMS or email with the message,
  * saves the selected admin as the last used for this class,
  * and adds a note to the student's profile.
  */
-function handleSendReport(student, session, warningType, message, contact) {
+function handleSendReport(student, session, message, contact) {
 
     // 0. Check if any admin contacts exist
     const contacts = state.userSettings.adminContacts || [];
@@ -206,8 +188,7 @@ function handleSendReport(student, session, warningType, message, contact) {
     }
 
     // 3. Add a note to the student's profile
-    const noteContent = `[ADMIN_NOTIFIED] ${new Date().toLocaleDateString('fa-IR')} - ${warningType}: ${message}`;
-    student.addNote(noteContent, { type: 'fromAttendance', sessionNumber: session.sessionNumber });
+    const noteContent = `[گزارش به مدیریت] ${new Date().toLocaleDateString('fa-IR')}\n${message}`; student.addNote(noteContent, { type: 'fromAttendance', sessionNumber: session.sessionNumber });
 
     // 4. Save data (again, to ensure the note is saved)
     saveData();

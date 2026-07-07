@@ -520,7 +520,6 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
                 // Pre-fill the report message with clean warning details
                 const preFilledMessage = `گزارش هشدارهای دانش‌آموز «${student.identity.name}»:\n\n${warningMessages}`;
 
-                // Show the report modal
                 module.showReportToAdminModalWithCallback(
                     student,
                     { sessionNumber: sessionNumber },
@@ -528,15 +527,38 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
                     preFilledMessage,
                     (finalMessage, contact) => {
                         // This callback runs after the report is sent
-                        // Settle the warnings
-                        const finalNote = finalMessage || preFilledMessage;
-                        settleWarnings(selectedWarnings, finalNote, 'reported');
+                        // Settle the warnings - pass the teacher's final message
+                        const teacherNote = finalMessage || preFilledMessage;
+
+                        // Settle with the teacher's note included
+                        if (!student.settledWarnings) {
+                            student.settledWarnings = {};
+                        }
+                        if (!student.settledWarnings[sessionNumber]) {
+                            student.settledWarnings[sessionNumber] = {};
+                        }
+
+                        selectedWarnings.forEach(type => {
+                            student.settledWarnings[sessionNumber][type] = {
+                                action: 'reported',
+                                note: teacherNote
+                            };
+                        });
+
+                        // Build the profile note with only the teacher's message
+                        const dateStr = new Date().toLocaleDateString('fa-IR');
+                        const noteContent = `[گزارش به مدیریت] تاریخ: ${dateStr}\n${teacherNote}`;
+                        student.addNote(noteContent, { type: 'fromSession', sessionNumber: sessionNumber });
+
+                        state.saveData();
+
                         if (typeof onSettled === 'function') {
                             onSettled();
                         }
                         showNotification(`✅ ${selectedWarnings.length} هشدار گزارش و تسویه شد.`);
                     }
                 );
+
             }).catch(err => {
                 console.error('Failed to load report modal:', err);
                 showNotification('❌ خطا در باز کردن پنجره گزارش.');
