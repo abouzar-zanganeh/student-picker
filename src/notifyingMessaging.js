@@ -518,12 +518,11 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
                 }).join('\n');
 
                 // Pre-fill the report message with clean warning details
-                const preFilledMessage = `گزارش هشدارهای دانش‌آموز «${student.identity.name}»:\n\n${warningMessages}`;
+                const preFilledMessage = `گزارش وضعیت دانش‌آموز «${student.identity.name}»:\n\n${warningMessages}`;
 
                 module.showReportToAdminModalWithCallback(
                     student,
                     { sessionNumber: sessionNumber },
-                    'warning_settlement',
                     preFilledMessage,
                     (finalMessage, contact) => {
                         // This callback runs after the report is sent
