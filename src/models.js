@@ -138,6 +138,8 @@ export class Student {
             outOfClassCount: 0,
         };
 
+        this.settledWarnings = {};
+
         this.categoryCounts = {};
         this.categoryIssues = {};
 
