@@ -306,7 +306,7 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
                 <textarea id="settlement-note-textarea" 
                           rows="4" 
                           style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--color-border); font-family: var(--font-family-main); background-color: var(--color-surface); color: var(--color-text-dark); box-sizing: border-box;"
-                          placeholder="یادداشت خود را وارد کنید...">${defaultNote}</textarea>
+                          placeholder="یادداشت خود را وارد کنید..."></textarea>
             </div>
         </div>
     `;
@@ -315,6 +315,10 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
     showCustomConfirm(
         modalContent,
         (noteText) => {
+            // Get the textarea value directly from the DOM
+            const textarea = document.getElementById('settlement-note-textarea');
+            const finalNote = textarea ? textarea.value : noteText || defaultNote;
+
             // Get selected warning types
             const selectedWarnings = [];
             warnings.forEach((w, index) => {
@@ -341,12 +345,12 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
             selectedWarnings.forEach(type => {
                 student.settledWarnings[sessionNumber][type] = {
                     action: 'ignored',
-                    note: noteText || defaultNote
+                    note: finalNote || defaultNote
                 };
             });
 
             // Add the note to the student's profile
-            const noteContent = `[تسویه هشدار] ${noteText || defaultNote}`;
+            const noteContent = `[تسویه هشدار] ${finalNote || defaultNote}`;
             student.addNote(noteContent, { type: 'fromSession', sessionNumber: sessionNumber });
 
             // Save and refresh
@@ -360,10 +364,18 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
             confirmText: 'ثبت یادداشت و تسویه',
             cancelText: 'لغو',
             confirmClass: 'btn-success',
-            textarea: false, // We handle textarea inside the custom content
+            textarea: false,
             onCancel: () => {
                 showNotification('❌ تسویه هشدار لغو شد.');
             }
         }
     );
+
+    // Set the textarea value after the modal is rendered
+    setTimeout(() => {
+        const textarea = document.getElementById('settlement-note-textarea');
+        if (textarea) {
+            textarea.value = defaultNote;
+        }
+    }, 50);
 }
