@@ -44,6 +44,26 @@
     --border-radius-main: 5px;
 }
 
+/* Dark mode applied to html element for early rendering */
+html.dark-mode body {
+    --color-background: #1a1a2e;
+    --color-surface: #16213e;
+    --color-border: #2c3e66;
+    --color-text-dark: #e0e0e0;
+    --color-text-muted: #a0a0a0;
+    --color-primary: #3a79c0;
+    --color-primary-hover: #1e88e5;
+    --color-secondary: #5c6bc0;
+    --color-secondary-hover: #3f51b5;
+    --color-success: #2e7d32;
+    --color-success-hover: #1b5e20;
+    --color-warning: #ffb74d;
+    --color-warning-hover: #ffa726;
+    --color-strong-warning: #ef5350;
+    --color-toast-bg: #2d2d44;
+    --color-toast-action: #bb86fc;
+}
+
 body {
     font-family: var(--font-family-main);
     max-width: 600px;

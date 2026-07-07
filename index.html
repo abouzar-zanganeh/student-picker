@@ -2,6 +2,24 @@
 <html lang="fa" dir="rtl">
 
 <head>
+    <script>
+        // Apply dark mode immediately
+        (function () {
+            const preference = localStorage.getItem('darkModePreference') || 'system';
+            let isDark = false;
+            if (preference === 'dark') {
+                isDark = true;
+            } else if (preference === 'system') {
+                isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            }
+            if (isDark) {
+                document.documentElement.classList.add('dark-mode');
+                // Force body to be dark immediately
+                document.documentElement.style.backgroundColor = '#1a1a2e';
+                document.documentElement.style.color = '#e0e0e0';
+            }
+        })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>دستیار هوشمند معلم</title>
@@ -653,6 +671,7 @@
 
 
     <script type="module" src="/src/main.js"></script>
+
 </body>
 
 </html>

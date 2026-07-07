@@ -856,6 +856,10 @@ export function setSelectedStudentsForMassComment(studentIds) {
 
 export function setUserSettings(newSettings) {
     userSettings = { ...userSettings, ...newSettings };
+    // Also store dark mode preference separately for quick access
+    if (newSettings.darkModePreference !== undefined) {
+        localStorage.setItem('darkModePreference', newSettings.darkModePreference);
+    }
     saveData();
 }
 
