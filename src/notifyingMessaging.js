@@ -56,137 +56,34 @@ export function showNotification(message, duration = 3000) {
 
 export function showCustomConfirm(message, onConfirm, options = {}) {
     const {
-        confirmText = 'تایید',
-        cancelText = 'لغو',
-        confirmClass = 'btn-success',
-        onCancel = () => { },
-        isDelete = false,
-        textarea = false,
-        textareaValue = '',
-        textareaPlaceholder = '',
-        dropdown = false,
-        dropdownOptions = [],
-        dropdownLabel = '',
-        dropdownSelected = '',
-        disableConfirm = false,
-        confirmWarning = ''
+        confirmText = 'تایید', cancelText = 'لغو', confirmClass = 'btn-success', onCancel = () => { }, isDelete = false
     } = options;
 
-    // Determine the correct confirm action
+    // Determine the correct confirm action based on the isDelete flag.
+    // If it's a delete action, the callback will be to open the next modal.
+    // Otherwise, it's the original onConfirm function passed into this function.
     const confirmAction = isDelete
         ? () => showSecureConfirm(message, onConfirm)
         : onConfirm;
 
-    // --- Set up the modal content ---
-    let modalContent = message.replace(/\n/g, '<br>');
-
-    // If dropdown is requested, add it
-    if (dropdown) {
-        let optionsHtml = dropdownOptions.map(opt =>
-            `<option value="${opt.value}" ${opt.value === dropdownSelected ? 'selected' : ''}>${opt.label}</option>`
-        ).join('');
-
-        modalContent += `
-            <div style="margin: 15px 0;">
-                <label style="display: block; font-size: 14px; color: var(--color-text-muted); margin-bottom: 5px;">${dropdownLabel}</label>
-                <select id="custom-confirm-dropdown" 
-                        style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--color-border); font-family: var(--font-family-main); font-size: 14px; background-color: var(--color-surface); color: var(--color-text-dark);">
-                    ${optionsHtml}
-                </select>
-            </div>
-        `;
-    }
-
-    // If textarea is requested, add it
-    if (textarea) {
-        modalContent += `
-            <div style="margin: 15px 0;">
-                <textarea id="custom-confirm-textarea" 
-                          rows="5" 
-                          style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--color-border); font-family: var(--font-family-main); background-color: var(--color-surface); color: var(--color-text-dark);"
-                          placeholder="${textareaPlaceholder}">${textareaValue}</textarea>
-            </div>
-        `;
-    }
-
-    confirmModalMessage.innerHTML = modalContent;
+    // --- This part sets up the modal's appearance and is now used for all cases ---
+    confirmModalMessage.innerHTML = message.replace(/\n/g, '<br>');
     confirmModalConfirmBtn.textContent = confirmText;
     confirmModalCancelBtn.textContent = cancelText;
 
-    // Reset classes before adding the new one
+    // Reset classes before adding the new one to avoid style conflicts
     confirmModalConfirmBtn.className = 'modal-action-btn';
     confirmModalConfirmBtn.classList.add(confirmClass);
-    confirmModalConfirmBtn.disabled = disableConfirm;
 
-    // Get modal actions container
-    const modalActions = confirmModalConfirmBtn.parentElement;
-
-    // --- Handle warning text (remove existing and add new if needed) ---
-    const existingWarning = document.querySelector('.confirm-warning-text');
-    if (existingWarning) existingWarning.remove();
-
-    if (confirmWarning) {
-        const warningDiv = document.createElement('div');
-        warningDiv.className = 'confirm-warning-text';
-        warningDiv.style.marginTop = '15px';
-        warningDiv.style.color = 'var(--color-strong-warning)';
-        warningDiv.style.fontSize = '14px';
-        warningDiv.style.textAlign = 'center';
-        warningDiv.style.fontWeight = '500';
-        warningDiv.textContent = `⚠️ ${confirmWarning}`;
-
-        // Insert it after the modal actions
-        modalActions.parentElement.insertBefore(warningDiv, modalActions.nextSibling);
-    }
-
-    // Set the appropriate callbacks
-    state.setConfirmCallback(() => {
-        // Collect values from dropdown and textarea
-        let dropdownValue = null;
-        if (dropdown) {
-            const dropdownEl = document.getElementById('custom-confirm-dropdown');
-            dropdownValue = dropdownEl ? dropdownEl.value : null;
-        }
-
-        let textValue = null;
-        if (textarea) {
-            const textareaEl = document.getElementById('custom-confirm-textarea');
-            textValue = textareaEl ? textareaEl.value : '';
-        }
-
-        // Define the final action (the actual work to be done)
-        const finalAction = () => {
-            if (typeof onConfirm === 'function') {
-                onConfirm(textValue, dropdownValue);
-            }
-        };
-
-        // If isDelete is true, wrap the action with secure confirm
-        if (isDelete) {
-            // Show secure confirm, and if successful, run finalAction
-            showSecureConfirm(message, finalAction);
-        } else {
-            // Otherwise, run the action directly
-            finalAction();
-        }
-    });
+    // Set the appropriate callbacks in the global state
+    state.setConfirmCallback(confirmAction);
     state.setCancelCallback(onCancel);
 
+    const modalActions = confirmModalConfirmBtn.parentElement;
     confirmModalCancelBtn.style.display = onCancel === null ? 'none' : 'inline-block';
     modalActions.style.justifyContent = onCancel === null ? 'center' : 'space-between';
 
     openModal('custom-confirm-modal');
-
-    // Focus the textarea if it exists
-    if (textarea) {
-        setTimeout(() => {
-            const textareaEl = document.getElementById('custom-confirm-textarea');
-            if (textareaEl) {
-                textareaEl.focus();
-                textareaEl.select();
-            }
-        }, 100);
-    }
 }
 
 export function showSecureConfirm(message, onConfirm) {
