@@ -500,76 +500,66 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
             return;
         }
 
+        // Build clean warning messages without threshold info
+        const warningMessages = selectedWarnings.map(type => {
+            const w = warnings.find(w => w.type === type);
+            if (w) {
+                // Remove the threshold part (آستانه: X)
+                const cleanMessage = w.message.split('(آستانه:')[0].trim();
+                return cleanMessage;
+            }
+            return type;
+        }).join('\n');
+
+        // Pre-fill the report message with clean warning details
+        const preFilledMessage = `گزارش وضعیت دانش‌آموز «${student.identity.name}»:\n\n${warningMessages}`;
+
         // Close the settlement modal first
         closeSettlementModal();
 
         // Delay opening the report modal to ensure the settlement modal is fully closed
         setTimeout(() => {
             import('./adminReporting').then(module => {
-                // Build clean warning messages without threshold info
-                const warningMessages = selectedWarnings.map(type => {
-                    const w = warnings.find(w => w.type === type);
-                    if (w) {
-                        // Remove the threshold part (آستانه: X)
-                        const cleanMessage = w.message.split('(آستانه:')[0].trim();
-                        return cleanMessage;
-                    }
-                    return type;
-                }).join('\n');
-
-                // Pre-fill the report message with clean warning details
-                const preFilledMessage = `گزارش وضعیت دانش‌آموز «${student.identity.name}»:\n\n${warningMessages}`;
-
-                module.showReportToAdminModalWithCallback(
+                module.showReportModal(
                     student,
                     { sessionNumber: sessionNumber },
                     preFilledMessage,
                     (finalMessage, contact) => {
-                        // This callback runs after the SMS/email is triggered
-                        // Show confirmation dialog before saving
+                        // This callback runs after the report is successfully sent and confirmed
                         const teacherNote = finalMessage || preFilledMessage;
 
-                        showReportSentConfirmation(
-                            () => {
-                                // User confirmed: settle warnings and save note
-                                if (!student.settledWarnings) {
-                                    student.settledWarnings = {};
-                                }
-                                if (!student.settledWarnings[sessionNumber]) {
-                                    student.settledWarnings[sessionNumber] = {};
-                                }
+                        // Settle warnings and save note
+                        if (!student.settledWarnings) {
+                            student.settledWarnings = {};
+                        }
+                        if (!student.settledWarnings[sessionNumber]) {
+                            student.settledWarnings[sessionNumber] = {};
+                        }
 
-                                selectedWarnings.forEach(type => {
-                                    student.settledWarnings[sessionNumber][type] = {
-                                        action: 'reported',
-                                        note: teacherNote
-                                    };
-                                });
+                        selectedWarnings.forEach(type => {
+                            student.settledWarnings[sessionNumber][type] = {
+                                action: 'reported',
+                                note: teacherNote
+                            };
+                        });
 
-                                const dateStr = new Date().toLocaleDateString('fa-IR');
-                                const noteContent = `[گزارش به مدیریت] تاریخ: ${dateStr}\n${teacherNote}`;
-                                student.addNote(noteContent, { type: 'fromSession', sessionNumber: sessionNumber });
+                        const dateStr = new Date().toLocaleDateString('fa-IR');
+                        const noteContent = `[گزارش به مدیریت] تاریخ: ${dateStr}\n${teacherNote}`;
+                        student.addNote(noteContent, { type: 'fromSession', sessionNumber: sessionNumber });
 
-                                state.saveData();
+                        state.saveData();
 
-                                if (typeof onSettled === 'function') {
-                                    onSettled();
-                                }
-                                showNotification(`✅ ${selectedWarnings.length} هشدار گزارش و تسویه شد.`);
-                            },
-                            () => {
-                                // User cancelled: don't save anything
-                                showNotification('❌ ثبت گزارش لغو شد.');
-                            }
-                        );
+                        if (typeof onSettled === 'function') {
+                            onSettled();
+                        }
+                        showNotification(`✅ ${selectedWarnings.length} هشدار گزارش و تسویه شد.`);
                     }
                 );
-
             }).catch(err => {
                 console.error('Failed to load report modal:', err);
                 showNotification('❌ خطا در باز کردن پنجره گزارش.');
             });
-        }, 350); // Wait for the settlement modal close animation to complete (300ms + small buffer)
+        }, 350);
     });
 
     // Prevent body scroll
