@@ -7,6 +7,7 @@
 
 
 import * as state from "./state";
+import { setActiveModal } from './state.js';
 
 import {
     confirmModalCancelBtn, confirmModalConfirmBtn, confirmModalMessage, openModal,
@@ -14,7 +15,6 @@ import {
     secureConfirmMessage, showPage, undoMessage, undoToast
 } from "./ui";
 
-import { setActiveModal } from './state.js';
 import { settingsPage } from './ui.js'
 
 export function showUndoToast(message) {
@@ -272,4 +272,98 @@ function closeModal(modal) {
     modal.classList.remove('modal-visible');
     setActiveModal(null);
     document.body.style.overflow = 'auto';
+}
+
+/**
+ * Shows a modal for settling student warnings.
+ * @param {Object} student - The student instance
+ * @param {Array} warnings - Array of warning objects from getStudentWarnings()
+ * @param {number} sessionNumber - Current session number
+ * @param {Function} onSettled - Callback after settlement is complete
+ */
+export function showWarningSettlementModal(student, warnings, sessionNumber, onSettled) {
+    // Build the warning list with checkboxes
+    let warningsHtml = warnings.map((w, index) => `
+        <div style="display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--color-border);">
+            <input type="checkbox" id="settle-warning-${index}" checked data-warning-type="${w.type}">
+            <label for="settle-warning-${index}" style="cursor: pointer; font-size: 14px; flex: 1;">⚠️ ${w.message}</label>
+        </div>
+    `).join('');
+
+    // Pre-filled note message
+    const defaultNote = `تسویه هشدار برای دانش‌آموز «${student.identity.name}» در تاریخ ${new Date().toLocaleDateString('fa-IR')}`;
+
+    const modalContent = `
+        <div style="margin-bottom: 15px;">
+            <p style="font-size: 14px; color: var(--color-text-muted); margin-bottom: 10px;">
+                هشدارهای زیر برای این دانش‌آموز ثبت شده است. لطفاً اقدام مورد نظر را انتخاب کنید:
+            </p>
+            <div style="background-color: #f8f9fa; border-radius: 5px; padding: 10px; margin-bottom: 15px;">
+                ${warningsHtml}
+            </div>
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 14px; color: var(--color-text-muted); margin-bottom: 5px;">یادداشت (اختیاری - قابل ویرایش):</label>
+                <textarea id="settlement-note-textarea" 
+                          rows="4" 
+                          style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--color-border); font-family: var(--font-family-main); background-color: var(--color-surface); color: var(--color-text-dark); box-sizing: border-box;"
+                          placeholder="یادداشت خود را وارد کنید...">${defaultNote}</textarea>
+            </div>
+        </div>
+    `;
+
+    // Use showCustomConfirm with our custom content
+    showCustomConfirm(
+        modalContent,
+        (noteText) => {
+            // Get selected warning types
+            const selectedWarnings = [];
+            warnings.forEach((w, index) => {
+                const checkbox = document.getElementById(`settle-warning-${index}`);
+                if (checkbox && checkbox.checked) {
+                    selectedWarnings.push(w.type);
+                }
+            });
+
+            if (selectedWarnings.length === 0) {
+                showNotification('⚠️ هیچ هشدار انتخاب نشده است.');
+                return;
+            }
+
+            // Initialize settledWarnings for this session
+            if (!student.settledWarnings) {
+                student.settledWarnings = {};
+            }
+            if (!student.settledWarnings[sessionNumber]) {
+                student.settledWarnings[sessionNumber] = {};
+            }
+
+            // Mark each selected warning as settled with 'ignored' action
+            selectedWarnings.forEach(type => {
+                student.settledWarnings[sessionNumber][type] = {
+                    action: 'ignored',
+                    note: noteText || defaultNote
+                };
+            });
+
+            // Add the note to the student's profile
+            const noteContent = `[تسویه هشدار] ${noteText || defaultNote}`;
+            student.addNote(noteContent, { type: 'fromSession', sessionNumber: sessionNumber });
+
+            // Save and refresh
+            state.saveData();
+            if (typeof onSettled === 'function') {
+                onSettled();
+            }
+            showNotification(`✅ ${selectedWarnings.length} هشدار تسویه شد.`);
+        },
+        {
+            confirmText: 'ثبت یادداشت و تسویه',
+            cancelText: 'لغو',
+            confirmClass: 'btn-success',
+            textarea: false, // We handle textarea inside the custom content
+            onCancel: () => {
+                showNotification('❌ تسویه هشدار لغو شد.');
+            }
+        }
+    );
 }
