@@ -421,6 +421,6 @@ export function triggerFileDownload(fileObject) {
             },
             { confirmText: 'بله، ذخیره شد', cancelText: 'خیر', confirmClass: 'btn-success' }
         );
-    }, 500);
+    }, 2000);
 }
 

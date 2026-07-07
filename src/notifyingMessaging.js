@@ -604,5 +604,5 @@ export function showReportSentConfirmation(onConfirm, onCancel) {
                 }
             }
         );
-    }, 1000); // 1.5 second delay
+    }, 2000);
 }
