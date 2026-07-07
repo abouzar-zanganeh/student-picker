@@ -113,5 +113,25 @@ export function getStudentWarnings(student, classroom, currentSession) {
         });
     }
 
-    return warnings;
+    // Filter out warnings that have already been settled in this session
+    const settled = getSettledWarningsForSession(student, currentSession?.sessionNumber);
+    const settledTypes = Object.keys(settled);
+
+    const filteredWarnings = warnings.filter(w => !settledTypes.includes(w.type));
+
+    return filteredWarnings;
+}
+}
+
+/**
+ * Gets the settled warnings for a student in a specific session.
+ * @param {Object} student - Student instance
+ * @param {number} sessionNumber - The session number to check
+ * @returns {Object} The settledWarnings object for that session, or empty object if none
+ */
+export function getSettledWarningsForSession(student, sessionNumber) {
+    if (!student || !student.settledWarnings || !sessionNumber) {
+        return {};
+    }
+    return student.settledWarnings[sessionNumber] || {};
 }

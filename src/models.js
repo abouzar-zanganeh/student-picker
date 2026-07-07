@@ -138,7 +138,7 @@ export class Student {
             outOfClassCount: 0,
         };
 
-        this.settledWarnings = {};
+        this.settledWarnings = {}; // { sessionNumber: { warningType: { action, note } } }
 
         this.categoryCounts = {};
         this.categoryIssues = {};
