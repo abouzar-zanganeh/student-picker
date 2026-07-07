@@ -525,36 +525,43 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
                     { sessionNumber: sessionNumber },
                     preFilledMessage,
                     (finalMessage, contact) => {
-                        // This callback runs after the report is sent
-                        // Settle the warnings - pass the teacher's final message
+                        // This callback runs after the SMS/email is triggered
+                        // Show confirmation dialog before saving
                         const teacherNote = finalMessage || preFilledMessage;
 
-                        // Settle with the teacher's note included
-                        if (!student.settledWarnings) {
-                            student.settledWarnings = {};
-                        }
-                        if (!student.settledWarnings[sessionNumber]) {
-                            student.settledWarnings[sessionNumber] = {};
-                        }
+                        showReportSentConfirmation(
+                            () => {
+                                // User confirmed: settle warnings and save note
+                                if (!student.settledWarnings) {
+                                    student.settledWarnings = {};
+                                }
+                                if (!student.settledWarnings[sessionNumber]) {
+                                    student.settledWarnings[sessionNumber] = {};
+                                }
 
-                        selectedWarnings.forEach(type => {
-                            student.settledWarnings[sessionNumber][type] = {
-                                action: 'reported',
-                                note: teacherNote
-                            };
-                        });
+                                selectedWarnings.forEach(type => {
+                                    student.settledWarnings[sessionNumber][type] = {
+                                        action: 'reported',
+                                        note: teacherNote
+                                    };
+                                });
 
-                        // Build the profile note with only the teacher's message
-                        const dateStr = new Date().toLocaleDateString('fa-IR');
-                        const noteContent = `[گزارش به مدیریت] تاریخ: ${dateStr}\n${teacherNote}`;
-                        student.addNote(noteContent, { type: 'fromSession', sessionNumber: sessionNumber });
+                                const dateStr = new Date().toLocaleDateString('fa-IR');
+                                const noteContent = `[گزارش به مدیریت] تاریخ: ${dateStr}\n${teacherNote}`;
+                                student.addNote(noteContent, { type: 'fromSession', sessionNumber: sessionNumber });
 
-                        state.saveData();
+                                state.saveData();
 
-                        if (typeof onSettled === 'function') {
-                            onSettled();
-                        }
-                        showNotification(`✅ ${selectedWarnings.length} هشدار گزارش و تسویه شد.`);
+                                if (typeof onSettled === 'function') {
+                                    onSettled();
+                                }
+                                showNotification(`✅ ${selectedWarnings.length} هشدار گزارش و تسویه شد.`);
+                            },
+                            () => {
+                                // User cancelled: don't save anything
+                                showNotification('❌ ثبت گزارش لغو شد.');
+                            }
+                        );
                     }
                 );
 
@@ -568,4 +575,34 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
     // Prevent body scroll
     document.body.style.overflow = 'hidden';
     state.setActiveModal('settlement-modal');
+}
+
+/**
+ * Shows a confirmation dialog after a report is sent.
+ * Asks the user if the report was successfully sent.
+ * @param {Function} onConfirm - Callback when user confirms "بله"
+ * @param {Function} onCancel - Callback when user confirms "خیر"
+ */
+export function showReportSentConfirmation(onConfirm, onCancel) {
+    // Delay the confirmation to avoid UI glitch when returning from messaging app
+    setTimeout(() => {
+        showCustomConfirm(
+            'آیا پیام با موفقیت ارسال شد؟',
+            () => {
+                if (typeof onConfirm === 'function') {
+                    onConfirm();
+                }
+            },
+            {
+                confirmText: 'بله',
+                cancelText: 'خیر',
+                confirmClass: 'btn-success',
+                onCancel: () => {
+                    if (typeof onCancel === 'function') {
+                        onCancel();
+                    }
+                }
+            }
+        );
+    }, 1000); // 1.5 second delay
 }

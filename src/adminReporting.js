@@ -7,8 +7,7 @@
    ========================================================================== */
 
 import * as state from './state.js';
-import { showCustomConfirm } from './notifyingMessaging.js';
-import { showNotification } from './notifyingMessaging.js';
+import { showCustomConfirm, showReportSentConfirmation, showNotification } from './notifyingMessaging.js';
 import { saveData, currentClassroom } from './state.js';
 
 
@@ -47,7 +46,42 @@ export function showReportToAdminModal(student, session) {
             // On confirm: send the report
             const selectedContact = contacts.find(c => c.id === selectedAdminId);
             if (selectedContact) {
-                handleSendReport(student, session, editedMessage, selectedContact);
+                // Send the report (SMS/email) first
+                if (selectedContact.phone) {
+                    const encodedMessage = encodeURIComponent(editedMessage);
+                    const smsUrl = `sms:${selectedContact.phone}?body=${encodedMessage}`;
+                    window.location.href = smsUrl;
+                } else if (selectedContact.email) {
+                    const encodedMessage = encodeURIComponent(editedMessage);
+                    const subject = encodeURIComponent(`گزارش وضعیت دانش‌آموز - ${student.identity.name}`);
+                    const emailUrl = `mailto:${selectedContact.email}?subject=${subject}&body=${encodedMessage}`;
+                    window.location.href = emailUrl;
+                } else {
+                    showNotification('⚠️ تماس مدیریت فاقد شماره موبایل یا ایمیل است.');
+                    return;
+                }
+
+                // Save the selected admin as the last used for this class
+                if (currentClassroom) {
+                    currentClassroom.info.lastReportedAdminId = selectedContact.id;
+                    saveData();
+                }
+
+                // Show confirmation dialog
+                showReportSentConfirmation(
+                    () => {
+                        // User confirmed: save the note
+                        const noteContent = `[گزارش به مدیریت] ${new Date().toLocaleDateString('fa-IR')}\n${editedMessage}`;
+                        student.addNote(noteContent, { type: 'fromAttendance', sessionNumber: session.sessionNumber });
+                        saveData();
+                        const contactInfo = selectedContact.name || 'مدیریت';
+                        showNotification(`✅ گزارش به «${contactInfo}» ارسال و ثبت شد.`);
+                    },
+                    () => {
+                        // User cancelled: don't save anything
+                        showNotification('❌ ثبت گزارش لغو شد.');
+                    }
+                );
             } else {
                 showNotification('⚠️ تماس مدیریت انتخاب شده معتبر نیست.');
             }
@@ -148,52 +182,4 @@ export function showReportToAdminModalWithCallback(student, session, preFilledMe
             }
         }
     );
-}
-
-/**
- * Handles sending the report: opens SMS or email with the message,
- * saves the selected admin as the last used for this class,
- * and adds a note to the student's profile.
- */
-function handleSendReport(student, session, message, contact) {
-
-    // 0. Check if any admin contacts exist
-    const contacts = state.userSettings.adminContacts || [];
-    if (contacts.length === 0) {
-        showNotification('⚠️ ابتدا یک تماس مدیریت در تنظیمات برنامه اضافه کنید.');
-        return;
-    }
-
-    // 1. Save the selected admin as the last used for this class
-    if (currentClassroom) {
-        currentClassroom.info.lastReportedAdminId = contact.id;
-        saveData();
-    }
-
-    // 2. Send via SMS or email
-    if (contact.phone) {
-        const encodedMessage = encodeURIComponent(message);
-        const smsUrl = `sms:${contact.phone}?body=${encodedMessage}`;
-        window.location.href = smsUrl;
-        console.log(`📨 SMS sent to ${contact.phone}: ${message}`);
-    } else if (contact.email) {
-        const encodedMessage = encodeURIComponent(message);
-        const subject = encodeURIComponent(`گزارش وضعیت دانش‌آموز - ${student.identity.name}`);
-        const emailUrl = `mailto:${contact.email}?subject=${subject}&body=${encodedMessage}`;
-        window.location.href = emailUrl;
-        console.log(`📨 Email sent to ${contact.email}: ${message}`);
-    } else {
-        showNotification('⚠️ تماس مدیریت فاقد شماره موبایل یا ایمیل است.');
-        return;
-    }
-
-    // 3. Add a note to the student's profile
-    const noteContent = `[گزارش به مدیریت] ${new Date().toLocaleDateString('fa-IR')}\n${message}`; student.addNote(noteContent, { type: 'fromAttendance', sessionNumber: session.sessionNumber });
-
-    // 4. Save data (again, to ensure the note is saved)
-    saveData();
-
-    // 5. Show confirmation
-    const contactInfo = contact.name || 'مدیریت';
-    showNotification(`✅ گزارش به «${contactInfo}» ارسال شد.`);
 }
