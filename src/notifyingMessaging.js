@@ -350,7 +350,13 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
             });
 
             // Add the note to the student's profile
-            const noteContent = `[تسویه هشدار] ${finalNote || defaultNote}`;
+            // Build a detailed note with all settled warnings
+            const settledWarningDetails = selectedWarnings.map(type => {
+                const warningObj = warnings.find(w => w.type === type);
+                return `- ${warningObj ? warningObj.message : type}`;
+            }).join('\n');
+
+            const noteContent = `[تسویه هشدار] ${finalNote || defaultNote}\n\nموارد زیر برای دانش‌آموز «${student.identity.name}» در تاریخ ${new Date().toLocaleDateString('fa-IR')} پیگیری شد:\n${settledWarningDetails}`;
             student.addNote(noteContent, { type: 'fromSession', sessionNumber: sessionNumber });
 
             // Save and refresh
