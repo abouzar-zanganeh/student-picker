@@ -255,6 +255,8 @@ function _rehydrateStudent(plainStudent) {
 
     studentInstance.onboardingSession = plainStudent.onboardingSession || null;
 
+    studentInstance.settledWarnings = plainStudent.settledWarnings || {};
+
     return studentInstance;
 }
 

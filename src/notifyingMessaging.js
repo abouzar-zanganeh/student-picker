@@ -290,98 +290,183 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
         </div>
     `).join('');
 
-    // Pre-filled note message
-    const defaultNote = `تسویه هشدار برای دانش‌آموز «${student.identity.name}» در تاریخ ${new Date().toLocaleDateString('fa-IR')}`;
+    // Create modal overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay modal-visible';
+    overlay.style.display = 'flex';
 
-    const modalContent = `
-        <div style="margin-bottom: 15px;">
-            <p style="font-size: 14px; color: var(--color-text-muted); margin-bottom: 10px;">
-                هشدارهای زیر برای این دانش‌آموز ثبت شده است. لطفاً اقدام مورد نظر را انتخاب کنید:
-            </p>
-            <div style="background-color: #f8f9fa; border-radius: 5px; padding: 10px; margin-bottom: 15px;">
-                ${warningsHtml}
-            </div>
-            <div style="margin-bottom: 15px;">
-                <label style="display: block; font-size: 14px; color: var(--color-text-muted); margin-bottom: 5px;">یادداشت (اختیاری - قابل ویرایش):</label>
-                <textarea id="settlement-note-textarea" 
-                          rows="4" 
-                          style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--color-border); font-family: var(--font-family-main); background-color: var(--color-surface); color: var(--color-text-dark); box-sizing: border-box;"
-                          placeholder="یادداشت خود را وارد کنید..."></textarea>
-            </div>
-        </div>
-    `;
+    // Create modal content
+    const modalContent = document.createElement('div');
+    modalContent.className = 'modal-content';
+    modalContent.style.maxWidth = '500px';
+    modalContent.style.position = 'relative';
 
-    // Use showCustomConfirm with our custom content
-    showCustomConfirm(
-        modalContent,
-        (noteText) => {
-            // Get the textarea value directly from the DOM
-            const textarea = document.getElementById('settlement-note-textarea');
-            const finalNote = textarea ? textarea.value : noteText || defaultNote;
+    // Close button (X)
+    const closeBtn = document.createElement('button');
+    closeBtn.style.position = 'absolute';
+    closeBtn.style.top = '5px';
+    closeBtn.style.left = '15px';
+    closeBtn.style.fontSize = '28px';
+    closeBtn.style.background = 'none';
+    closeBtn.style.border = 'none';
+    closeBtn.style.cursor = 'pointer';
+    closeBtn.style.color = 'var(--color-text-muted)';
+    closeBtn.style.padding = '0 8px';
+    closeBtn.style.zIndex = '10';
+    closeBtn.textContent = '×';
+    closeBtn.title = 'بستن';
+    modalContent.appendChild(closeBtn);
 
-            // Get selected warning types
-            const selectedWarnings = [];
-            warnings.forEach((w, index) => {
-                const checkbox = document.getElementById(`settle-warning-${index}`);
-                if (checkbox && checkbox.checked) {
-                    selectedWarnings.push(w.type);
-                }
-            });
+    // Header
+    const headerP = document.createElement('p');
+    headerP.style.fontSize = '14px';
+    headerP.style.color = 'var(--color-text-muted)';
+    headerP.style.marginBottom = '10px';
+    headerP.style.marginTop = '10px';
+    headerP.textContent = `هشدارهای زیر برای دانش‌آموز «${student.identity.name}» ثبت شده است. لطفاً اقدام مورد نظر را انتخاب کنید:`;
+    modalContent.appendChild(headerP);
 
-            if (selectedWarnings.length === 0) {
-                showNotification('⚠️ هیچ هشدار انتخاب نشده است.');
-                return;
+    // Warnings container
+    const warningsDiv = document.createElement('div');
+    warningsDiv.style.backgroundColor = '#f8f9fa';
+    warningsDiv.style.borderRadius = '5px';
+    warningsDiv.style.padding = '10px';
+    warningsDiv.style.marginBottom = '15px';
+    warningsDiv.innerHTML = warningsHtml;
+    modalContent.appendChild(warningsDiv);
+
+    // Note section
+    const noteDiv = document.createElement('div');
+    noteDiv.style.marginBottom = '15px';
+
+    const label = document.createElement('label');
+    label.style.display = 'block';
+    label.style.fontSize = '14px';
+    label.style.color = 'var(--color-text-muted)';
+    label.style.marginBottom = '5px';
+    label.textContent = 'یادداشت (اختیاری - قابل ویرایش):';
+    noteDiv.appendChild(label);
+
+    const textarea = document.createElement('textarea');
+    textarea.id = 'settlement-note-textarea';
+    textarea.rows = 4;
+    textarea.style.width = '100%';
+    textarea.style.padding = '8px';
+    textarea.style.borderRadius = '4px';
+    textarea.style.border = '1px solid var(--color-border)';
+    textarea.style.fontFamily = 'var(--font-family-main)';
+    textarea.style.backgroundColor = 'var(--color-surface)';
+    textarea.style.color = 'var(--color-text-dark)';
+    textarea.style.boxSizing = 'border-box';
+    textarea.placeholder = 'یادداشت خود را وارد کنید...';
+    noteDiv.appendChild(textarea);
+    modalContent.appendChild(noteDiv);
+
+    // Action buttons
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'modal-actions';
+    actionsDiv.style.display = 'flex';
+    actionsDiv.style.justifyContent = 'center';
+    actionsDiv.style.gap = '15px';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'btn-secondary';
+    cancelBtn.textContent = 'لغو';
+    cancelBtn.style.width = '120px';
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = 'btn-success';
+    confirmBtn.textContent = 'ثبت یادداشت و تسویه';
+    confirmBtn.style.width = '120px';
+
+    actionsDiv.appendChild(cancelBtn);
+    actionsDiv.appendChild(confirmBtn);
+    modalContent.appendChild(actionsDiv);
+
+    overlay.appendChild(modalContent);
+    document.body.appendChild(overlay);
+
+    // --- Event Handlers ---
+
+    // Close function
+    const closeModal = () => {
+        overlay.classList.remove('modal-visible');
+        overlay.classList.add('modal-closing');
+        setTimeout(() => {
+            overlay.remove();
+            document.body.style.overflow = 'auto';
+            state.setActiveModal(null);
+        }, 300);
+    };
+
+    // X button
+    closeBtn.addEventListener('click', () => {
+        closeModal();
+        showNotification('❌ تسویه هشدار لغو شد.');
+    });
+
+    // Cancel button
+    cancelBtn.addEventListener('click', () => {
+        closeModal();
+        showNotification('❌ تسویه هشدار لغو شد.');
+    });
+
+    // Confirm button
+    confirmBtn.addEventListener('click', () => {
+        const finalNote = textarea.value.trim();
+
+        // Get selected warning types
+        const selectedWarnings = [];
+        warnings.forEach((w, index) => {
+            const checkbox = document.getElementById(`settle-warning-${index}`);
+            if (checkbox && checkbox.checked) {
+                selectedWarnings.push(w.type);
             }
+        });
 
-            // Initialize settledWarnings for this session
-            if (!student.settledWarnings) {
-                student.settledWarnings = {};
-            }
-            if (!student.settledWarnings[sessionNumber]) {
-                student.settledWarnings[sessionNumber] = {};
-            }
-
-            // Mark each selected warning as settled with 'ignored' action
-            selectedWarnings.forEach(type => {
-                student.settledWarnings[sessionNumber][type] = {
-                    action: 'ignored',
-                    note: finalNote || defaultNote
-                };
-            });
-
-            // Add the note to the student's profile
-            // Build a detailed note with all settled warnings
-            const settledWarningDetails = selectedWarnings.map(type => {
-                const warningObj = warnings.find(w => w.type === type);
-                return `- ${warningObj ? warningObj.message : type}`;
-            }).join('\n');
-
-            const noteContent = `[تسویه هشدار] ${finalNote || defaultNote}\n\nموارد زیر برای دانش‌آموز «${student.identity.name}» در تاریخ ${new Date().toLocaleDateString('fa-IR')} پیگیری شد:\n${settledWarningDetails}`;
-            student.addNote(noteContent, { type: 'fromSession', sessionNumber: sessionNumber });
-
-            // Save and refresh
-            state.saveData();
-            if (typeof onSettled === 'function') {
-                onSettled();
-            }
-            showNotification(`✅ ${selectedWarnings.length} هشدار تسویه شد.`);
-        },
-        {
-            confirmText: 'ثبت یادداشت و تسویه',
-            cancelText: 'لغو',
-            confirmClass: 'btn-success',
-            textarea: false,
-            onCancel: () => {
-                showNotification('❌ تسویه هشدار لغو شد.');
-            }
+        if (selectedWarnings.length === 0) {
+            showNotification('⚠️ هیچ هشدار انتخاب نشده است.');
+            return;
         }
-    );
 
-    // Set the textarea value after the modal is rendered
-    setTimeout(() => {
-        const textarea = document.getElementById('settlement-note-textarea');
-        if (textarea) {
-            textarea.value = defaultNote;
+        // Initialize settledWarnings for this session
+        if (!student.settledWarnings) {
+            student.settledWarnings = {};
         }
-    }, 50);
+        if (!student.settledWarnings[sessionNumber]) {
+            student.settledWarnings[sessionNumber] = {};
+        }
+
+        // Mark each selected warning as settled with 'ignored' action
+        selectedWarnings.forEach(type => {
+            student.settledWarnings[sessionNumber][type] = {
+                action: 'ignored',
+                note: finalNote || ''
+            };
+        });
+
+        // Build a clean note with settled warnings
+        const settledWarningDetails = selectedWarnings.map(type => {
+            const warningObj = warnings.find(w => w.type === type);
+            const messageParts = warningObj ? warningObj.message.split('(آستانه:') : [type];
+            const cleanMessage = messageParts[0].trim();
+            return `- ${cleanMessage}`;
+        }).join('\n');
+
+        const dateStr = new Date().toLocaleDateString('fa-IR');
+        const noteContent = `[تسویه هشدار] تاریخ: ${dateStr}\n${finalNote ? finalNote + '\n' : ''}موارد زیر پیگیری شد:\n${settledWarningDetails}`;
+        student.addNote(noteContent, { type: 'fromSession', sessionNumber: sessionNumber });
+
+        // Save and refresh
+        state.saveData();
+        closeModal();
+        if (typeof onSettled === 'function') {
+            onSettled();
+        }
+        showNotification(`✅ ${selectedWarnings.length} هشدار تسویه شد.`);
+    });
+
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
+    state.setActiveModal('settlement-modal');
 }
