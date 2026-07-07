@@ -1769,6 +1769,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 2.1 Close Settings Modal via X button
+    const appSettingsCloseBtn = document.getElementById('app-settings-close-btn');
+    if (appSettingsCloseBtn) {
+        appSettingsCloseBtn.addEventListener('click', () => {
+            ui.closeActiveModal();
+        });
+    }
+
     // 3. Handle Sound Toggle
     soundToggle.addEventListener('change', (e) => {
 
