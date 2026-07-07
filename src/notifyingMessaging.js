@@ -326,7 +326,7 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
 
     // Warnings container
     const warningsDiv = document.createElement('div');
-    warningsDiv.style.backgroundColor = '#f8f9fa';
+    warningsDiv.style.backgroundColor = 'var(--color-surface-secondary)';
     warningsDiv.style.borderRadius = '5px';
     warningsDiv.style.padding = '10px';
     warningsDiv.style.marginBottom = '15px';
@@ -381,7 +381,7 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
 
     const reportBtn = document.createElement('button');
     reportBtn.className = 'btn-warning';
-    reportBtn.textContent = 'گزارش به مدیریت';
+    reportBtn.textContent = 'گزارش به مدیر';
     reportBtn.style.minWidth = '100px';
 
     actionsDiv.appendChild(cancelBtn);

@@ -17,11 +17,12 @@ body.dark-mode {
     --color-secondary-hover: #3f51b5;
     --color-success: #2e7d32;
     --color-success-hover: #1b5e20;
-    --color-warning: #ffb74d;
+    --color-warning: #99620f;
     --color-warning-hover: #ffa726;
     --color-strong-warning: #ef5350;
     --color-toast-bg: #2d2d44;
     --color-toast-action: #bb86fc;
+    --color-surface-secondary: #2a3a5c;
 }
 
 /* Additional overrides for specific elements in dark mode */
@@ -615,30 +616,59 @@ body.dark-mode .btn-icon-label[title="حذف دانش‌آموز"]:hover {
     color: #ffcccc;
 }
 
-/*  profile modal scrollbar in dark mode */
-body.dark-mode #modal-profile-content-container::-webkit-scrollbar {
+/* modal scrollbar in dark mode */
+/* Dark mode scrollbar styles for all modals */
+body.dark-mode .modal-content::-webkit-scrollbar {
     width: 8px;
 }
 
-body.dark-mode #modal-profile-content-container::-webkit-scrollbar-track {
+body.dark-mode .modal-content::-webkit-scrollbar-track {
     background: #1a2a4a;
     border-radius: 4px;
 }
 
-body.dark-mode #modal-profile-content-container::-webkit-scrollbar-thumb {
+body.dark-mode .modal-content::-webkit-scrollbar-thumb {
     background: #3a5a8a;
     border-radius: 4px;
 }
 
-body.dark-mode #modal-profile-content-container::-webkit-scrollbar-thumb:hover {
+body.dark-mode .modal-content::-webkit-scrollbar-thumb:hover {
     background: #5a8aba;
 }
 
-/* Firefox scrollbar support */
-body.dark-mode #modal-profile-content-container {
+/* Scroll Bars in DropDowns */
+/* Firefox support */
+body.dark-mode .modal-content {
     scrollbar-width: thin;
     scrollbar-color: #3a5a8a #1a2a4a;
 }
+
+/* Dark mode scrollbar styles for dropdowns */
+body.dark-mode select::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.dark-mode select::-webkit-scrollbar-track {
+    background: #1a2a4a;
+    border-radius: 4px;
+}
+
+body.dark-mode select::-webkit-scrollbar-thumb {
+    background: #3a5a8a;
+    border-radius: 4px;
+}
+
+body.dark-mode select::-webkit-scrollbar-thumb:hover {
+    background: #5a8aba;
+}
+
+/* Firefox support */
+body.dark-mode select {
+    scrollbar-width: thin;
+    scrollbar-color: #3a5a8a #1a2a4a;
+}
+
+/* End of scroll bars in dropdown */
 
 /*  profile page pill hover in dark mode */
 body.dark-mode .scoring-section .pill {
@@ -737,6 +767,11 @@ body.dark-mode #restore-confirm-modal .btn-warning {
     background-color: #5a2a2a;
     color: #ffaaaa;
     border: 1px solid #8a3a3a;
+}
+
+.btn-warning {
+    background-color: var(--color-warning);
+    color: var(--color-background);
 }
 
 body.dark-mode #restore-confirm-modal .btn-warning:hover {
@@ -1131,4 +1166,7 @@ body.dark-mode #student-stats-table-container {
     color: var(--color-text-muted)
 }
 
-/* End of Dark Mode */
+#move-student-class-select {
+    background-color: var(--color-background);
+    color: var(--color-text-dark);
+}

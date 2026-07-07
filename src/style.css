@@ -42,6 +42,7 @@
     --color-toast-bg: #323232;
     --color-toast-action: #bb86fc;
     --border-radius-main: 5px;
+    --color-surface-secondary: #f8f9fa;
 }
 
 /* Dark mode applied to html element for early rendering */

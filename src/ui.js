@@ -1584,7 +1584,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     attachUniversalContextMenu(li, () => {
         return [
             {
-                label: '📨 گزارش به مدیریت',
+                label: 'گزارش به مدیریت',
                 icon: '📨',
                 action: () => {
                     // AI_COMMENT: MVP - placeholder report action
