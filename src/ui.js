@@ -41,7 +41,7 @@ import { toJalaali, toGregorian } from 'jalaali-js';
 import { showReportConfigModal } from './reports.js';
 import { showCustomConfirm, showNotification } from './notifyingMessaging.js';
 import { getAbsentStudents, getPresentStudents, countHomeworkStatus, getStudentWarnings } from './classroomUtils.js';
-import { showReportToAdminModal } from './reporting.js';
+import { showReportToAdminModal } from './adminReporting.js';
 
 // --- HTML Elements ---
 export const classManagementPage = document.getElementById('class-management-page');

@@ -16,7 +16,7 @@ import { showNotification } from './notifyingMessaging.js';
 import * as utils from './otherUtils.js';
 import * as logManager from './logManager.js';
 import * as db from './db.js';
-import * as reporting from './reporting.js';
+import * as reporting from './adminReporting.js';
 
 import {
     resetAllStudentCounters, getActiveItems, permanentlyDeleteStudent,

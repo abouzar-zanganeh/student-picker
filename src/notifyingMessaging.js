@@ -264,20 +264,28 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
     actionsDiv.className = 'modal-actions';
     actionsDiv.style.display = 'flex';
     actionsDiv.style.justifyContent = 'center';
-    actionsDiv.style.gap = '15px';
+    actionsDiv.style.gap = '10px';
+    actionsDiv.style.flexWrap = 'wrap';
 
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'btn-secondary';
     cancelBtn.textContent = 'لغو';
-    cancelBtn.style.width = '120px';
+    cancelBtn.style.minWidth = '100px';
 
-    const confirmBtn = document.createElement('button');
-    confirmBtn.className = 'btn-success';
-    confirmBtn.textContent = 'ثبت یادداشت و تسویه';
-    confirmBtn.style.width = '120px';
+    const ignoreBtn = document.createElement('button');
+    ignoreBtn.className = 'btn-secondary';
+    ignoreBtn.textContent = 'چشم‌پوشی';
+    ignoreBtn.style.minWidth = '100px';
+    ignoreBtn.style.backgroundColor = '#6c757d';
+
+    const reportBtn = document.createElement('button');
+    reportBtn.className = 'btn-warning';
+    reportBtn.textContent = 'گزارش به مدیریت';
+    reportBtn.style.minWidth = '100px';
 
     actionsDiv.appendChild(cancelBtn);
-    actionsDiv.appendChild(confirmBtn);
+    actionsDiv.appendChild(ignoreBtn);
+    actionsDiv.appendChild(reportBtn);
     modalContent.appendChild(actionsDiv);
 
     overlay.appendChild(modalContent);
@@ -286,7 +294,7 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
     // --- Event Handlers ---
 
     // Close function
-    const closeModal = () => {
+    const closeSettlementModal = () => {
         overlay.classList.remove('modal-visible');
         overlay.classList.add('modal-closing');
         setTimeout(() => {
@@ -296,37 +304,20 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
         }, 300);
     };
 
-    // X button
-    closeBtn.addEventListener('click', () => {
-        closeModal();
-        showNotification('❌ تسویه هشدار لغو شد.');
-    });
-
-    // Cancel button
-    cancelBtn.addEventListener('click', () => {
-        closeModal();
-        showNotification('❌ تسویه هشدار لغو شد.');
-    });
-
-    // Confirm button
-    confirmBtn.addEventListener('click', () => {
-        const finalNote = textarea.value.trim();
-
-        // Get selected warning types
-        const selectedWarnings = [];
+    // Helper to get selected warning types
+    const getSelectedWarnings = () => {
+        const selected = [];
         warnings.forEach((w, index) => {
             const checkbox = document.getElementById(`settle-warning-${index}`);
             if (checkbox && checkbox.checked) {
-                selectedWarnings.push(w.type);
+                selected.push(w.type);
             }
         });
+        return selected;
+    };
 
-        if (selectedWarnings.length === 0) {
-            showNotification('⚠️ هیچ هشدار انتخاب نشده است.');
-            return;
-        }
-
-        // Initialize settledWarnings for this session
+    // Helper to settle warnings
+    const settleWarnings = (selectedWarnings, finalNote, action) => {
         if (!student.settledWarnings) {
             student.settledWarnings = {};
         }
@@ -334,15 +325,14 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
             student.settledWarnings[sessionNumber] = {};
         }
 
-        // Mark each selected warning as settled with 'ignored' action
         selectedWarnings.forEach(type => {
             student.settledWarnings[sessionNumber][type] = {
-                action: 'ignored',
+                action: action,
                 note: finalNote || ''
             };
         });
 
-        // Build a clean note with settled warnings
+        // Build note content
         const settledWarningDetails = selectedWarnings.map(type => {
             const warningObj = warnings.find(w => w.type === type);
             const messageParts = warningObj ? warningObj.message.split('(آستانه:') : [type];
@@ -351,16 +341,103 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
         }).join('\n');
 
         const dateStr = new Date().toLocaleDateString('fa-IR');
-        const noteContent = `[تسویه هشدار] تاریخ: ${dateStr}\n${finalNote ? finalNote + '\n' : ''}موارد زیر پیگیری شد:\n${settledWarningDetails}`;
+        const actionLabel = action === 'reported' ? 'گزارش به مدیریت' : 'چشم‌پوشی';
+        const noteContent = `[تسویه هشدار - ${actionLabel}] تاریخ: ${dateStr}\n${finalNote ? finalNote + '\n' : ''}موارد زیر پیگیری شد:\n${settledWarningDetails}`;
         student.addNote(noteContent, { type: 'fromSession', sessionNumber: sessionNumber });
 
-        // Save and refresh
         state.saveData();
-        closeModal();
+    };
+
+    // X button
+    closeBtn.addEventListener('click', () => {
+        closeSettlementModal();
+        showNotification('❌ تسویه هشدار لغو شد.');
+    });
+
+    // Cancel button
+    cancelBtn.addEventListener('click', () => {
+        closeSettlementModal();
+        showNotification('❌ تسویه هشدار لغو شد.');
+    });
+
+    // Ignore button (چشم‌پوشی)
+    ignoreBtn.addEventListener('click', () => {
+        const finalNote = textarea.value.trim();
+        const selectedWarnings = getSelectedWarnings();
+
+        if (selectedWarnings.length === 0) {
+            showNotification('⚠️ هیچ هشدار انتخاب نشده است.');
+            return;
+        }
+
+        settleWarnings(selectedWarnings, finalNote, 'ignored');
+        closeSettlementModal();
         if (typeof onSettled === 'function') {
             onSettled();
         }
-        showNotification(`✅ ${selectedWarnings.length} هشدار تسویه شد.`);
+        showNotification(`✅ ${selectedWarnings.length} هشدار با چشم‌پوشی تسویه شد.`);
+    });
+
+    // Report button (گزارش به مدیریت)
+    reportBtn.addEventListener('click', () => {
+        const selectedWarnings = getSelectedWarnings();
+
+        if (selectedWarnings.length === 0) {
+            showNotification('⚠️ هیچ هشدار انتخاب نشده است.');
+            return;
+        }
+
+        // Close the settlement modal first
+        closeSettlementModal();
+
+        // Open the report modal with pre-filled warning details
+        import('./adminReporting.js').then(module => {
+            const warningMessages = selectedWarnings.map(type => {
+                const w = warnings.find(w => w.type === type);
+                return w ? w.message : type;
+            }).join('\n');
+
+            // Create a temporary student object with a custom report function
+            // that settles the warnings after successful report
+            const reportStudent = {
+                ...student,
+                _pendingWarnings: selectedWarnings,
+                _warningsList: warnings,
+                _sessionNumber: sessionNumber,
+                _onSettled: onSettled,
+                _settleAfterReport: function (finalNote) {
+                    settleWarnings(this._pendingWarnings, finalNote, 'reported');
+                    if (typeof this._onSettled === 'function') {
+                        this._onSettled();
+                    }
+                    showNotification(`✅ ${this._pendingWarnings.length} هشدار گزارش و تسویه شد.`);
+                }
+            };
+
+            // Pre-fill the report message with warning details
+            const preFilledMessage = `گزارش هشدارهای دانش‌آموز «${student.identity.name}»:\n\n${warningMessages}`;
+
+            // Show the report modal
+            module.showReportToAdminModalWithCallback(
+                student,
+                { sessionNumber: sessionNumber },
+                'warning_settlement',
+                preFilledMessage,
+                (finalMessage, contact) => {
+                    // This callback runs after the report is sent
+                    // Settle the warnings
+                    const finalNote = finalMessage || preFilledMessage;
+                    settleWarnings(selectedWarnings, finalNote, 'reported');
+                    if (typeof onSettled === 'function') {
+                        onSettled();
+                    }
+                    showNotification(`✅ ${selectedWarnings.length} هشدار گزارش و تسویه شد.`);
+                }
+            );
+        }).catch(err => {
+            console.error('Failed to load report modal:', err);
+            showNotification('❌ خطا در باز کردن پنجره گزارش.');
+        });
     });
 
     // Prevent body scroll
