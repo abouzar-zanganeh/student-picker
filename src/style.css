@@ -894,6 +894,11 @@ button:disabled:hover {
     margin-top: 0;
 }
 
+/* Remove tap highlight on attendance list items */
+.attendance-list-item {
+    -webkit-tap-highlight-color: transparent;
+}
+
 /* --- Card Layout for Attendance --- */
 .attendance-list-item {
     display: flex;
