@@ -121,7 +121,7 @@ export function getStudentWarnings(student, classroom, currentSession) {
 
     return filteredWarnings;
 }
-}
+
 
 /**
  * Gets the settled warnings for a student in a specific session.

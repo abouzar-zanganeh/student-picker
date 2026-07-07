@@ -1247,16 +1247,29 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
     warningIcon.textContent = '⚠️';
     warningIcon.title = hasWarnings ? `${warnings.length} هشدار فعال` : '';
     warningIcon.style.display = hasWarnings ? 'inline' : 'none';
-    warningIcon.style.cursor = 'pointer';
+    warningIcon.style.cursor = hasWarnings ? 'pointer' : 'default';
 
 
-    // Click handler to open settlement modal (placeholder - will be implemented in Step 5)
+    // Click handler to open settlement modal
     warningIcon.addEventListener('click', (e) => {
         e.stopPropagation();
         if (warnings.length === 0) return;
 
-        // Temporary: Show a message that settlement is coming
-        showNotification('⚙️ قابلیت تسویه هشدار در حال پیاده‌سازی است...');
+        // Import the settlement modal function and show it
+        import('./notifyingMessaging.js').then(module => {
+            module.showWarningSettlementModal(
+                student,
+                warnings,
+                selectedSession.sessionNumber,
+                () => {
+                    // Callback after settlement: re-render attendance page
+                    renderAttendancePage();
+                }
+            );
+        }).catch(err => {
+            console.error('Failed to load settlement modal:', err);
+            showNotification('❌ خطا در باز کردن پنجره تسویه هشدار.');
+        });
     });
 
     nameSpan.addEventListener('click', (e) => {
