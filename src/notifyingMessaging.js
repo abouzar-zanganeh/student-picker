@@ -56,34 +56,135 @@ export function showNotification(message, duration = 3000) {
 
 export function showCustomConfirm(message, onConfirm, options = {}) {
     const {
-        confirmText = 'تایید', cancelText = 'لغو', confirmClass = 'btn-success', onCancel = () => { }, isDelete = false
+        confirmText = 'تایید',
+        cancelText = 'لغو',
+        confirmClass = 'btn-success',
+        onCancel = () => { },
+        isDelete = false,
+        textarea = false,
+        textareaValue = '',
+        textareaPlaceholder = '',
+        dropdown = false,
+        dropdownOptions = [],
+        dropdownLabel = '',
+        dropdownSelected = '',
+        disableConfirm = false,
+        confirmWarning = ''
     } = options;
 
-    // Determine the correct confirm action based on the isDelete flag.
-    // If it's a delete action, the callback will be to open the next modal.
-    // Otherwise, it's the original onConfirm function passed into this function.
+    // Determine the correct confirm action
     const confirmAction = isDelete
         ? () => showSecureConfirm(message, onConfirm)
         : onConfirm;
 
-    // --- This part sets up the modal's appearance and is now used for all cases ---
-    confirmModalMessage.innerHTML = message.replace(/\n/g, '<br>');
+    // --- Set up the modal content ---
+    let modalContent = message.replace(/\n/g, '<br>');
+
+    // If dropdown is requested, add it
+    if (dropdown) {
+        let optionsHtml = dropdownOptions.map(opt =>
+            `<option value="${opt.value}" ${opt.value === dropdownSelected ? 'selected' : ''}>${opt.label}</option>`
+        ).join('');
+
+        modalContent += `
+            <div style="margin: 15px 0;">
+                <label style="display: block; font-size: 14px; color: var(--color-text-muted); margin-bottom: 5px;">${dropdownLabel}</label>
+                <select id="custom-confirm-dropdown" 
+                        style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--color-border); font-family: var(--font-family-main); font-size: 14px; background-color: var(--color-surface); color: var(--color-text-dark);">
+                    ${optionsHtml}
+                </select>
+            </div>
+        `;
+    }
+
+    // If textarea is requested, add it
+    if (textarea) {
+        modalContent += `
+            <div style="margin: 15px 0;">
+                <textarea id="custom-confirm-textarea" 
+                          rows="5" 
+                          style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--color-border); font-family: var(--font-family-main); background-color: var(--color-surface); color: var(--color-text-dark);"
+                          placeholder="${textareaPlaceholder}">${textareaValue}</textarea>
+            </div>
+        `;
+    }
+
+    confirmModalMessage.innerHTML = modalContent;
     confirmModalConfirmBtn.textContent = confirmText;
     confirmModalCancelBtn.textContent = cancelText;
 
-    // Reset classes before adding the new one to avoid style conflicts
+    // Reset classes before adding the new one
     confirmModalConfirmBtn.className = 'modal-action-btn';
     confirmModalConfirmBtn.classList.add(confirmClass);
+    confirmModalConfirmBtn.disabled = disableConfirm;
 
-    // Set the appropriate callbacks in the global state
-    state.setConfirmCallback(confirmAction);
+    // Get modal actions container
+    const modalActions = confirmModalConfirmBtn.parentElement;
+
+    // --- Handle warning text (remove existing and add new if needed) ---
+    const existingWarning = document.querySelector('.confirm-warning-text');
+    if (existingWarning) existingWarning.remove();
+
+    if (confirmWarning) {
+        const warningDiv = document.createElement('div');
+        warningDiv.className = 'confirm-warning-text';
+        warningDiv.style.marginTop = '15px';
+        warningDiv.style.color = 'var(--color-strong-warning)';
+        warningDiv.style.fontSize = '14px';
+        warningDiv.style.textAlign = 'center';
+        warningDiv.style.fontWeight = '500';
+        warningDiv.textContent = `⚠️ ${confirmWarning}`;
+
+        // Insert it after the modal actions
+        modalActions.parentElement.insertBefore(warningDiv, modalActions.nextSibling);
+    }
+
+    // Set the appropriate callbacks
+    state.setConfirmCallback(() => {
+        // Collect values from dropdown and textarea
+        let dropdownValue = null;
+        if (dropdown) {
+            const dropdownEl = document.getElementById('custom-confirm-dropdown');
+            dropdownValue = dropdownEl ? dropdownEl.value : null;
+        }
+
+        let textValue = null;
+        if (textarea) {
+            const textareaEl = document.getElementById('custom-confirm-textarea');
+            textValue = textareaEl ? textareaEl.value : '';
+        }
+
+        // Define the final action
+        const finalAction = () => {
+            if (typeof onConfirm === 'function') {
+                onConfirm(textValue, dropdownValue);
+            }
+        };
+
+        // If isDelete is true, wrap the action with secure confirm
+        if (isDelete) {
+            showSecureConfirm(message, finalAction);
+        } else {
+            finalAction();
+        }
+    });
     state.setCancelCallback(onCancel);
 
-    const modalActions = confirmModalConfirmBtn.parentElement;
     confirmModalCancelBtn.style.display = onCancel === null ? 'none' : 'inline-block';
     modalActions.style.justifyContent = onCancel === null ? 'center' : 'space-between';
 
     openModal('custom-confirm-modal');
+
+    // Focus the textarea if it exists
+    if (textarea) {
+        setTimeout(() => {
+            const textareaEl = document.getElementById('custom-confirm-textarea');
+            if (textareaEl) {
+                textareaEl.focus();
+                textareaEl.select();
+            }
+        }, 100);
+    }
 }
 
 export function showSecureConfirm(message, onConfirm) {
@@ -333,16 +434,28 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
         });
 
         // Build note content
-        const settledWarningDetails = selectedWarnings.map(type => {
-            const warningObj = warnings.find(w => w.type === type);
-            const messageParts = warningObj ? warningObj.message.split('(آستانه:') : [type];
-            const cleanMessage = messageParts[0].trim();
-            return `- ${cleanMessage}`;
-        }).join('\n');
-
         const dateStr = new Date().toLocaleDateString('fa-IR');
-        const actionLabel = action === 'reported' ? 'گزارش به مدیریت' : 'چشم‌پوشی';
-        const noteContent = `[تسویه هشدار - ${actionLabel}] تاریخ: ${dateStr}\n${finalNote ? finalNote + '\n' : ''}موارد زیر پیگیری شد:\n${settledWarningDetails}`;
+
+        let noteContent;
+        if (action === 'reported') {
+            // For reported warnings: just the warning messages, no extra headers
+            const warningLines = selectedWarnings.map(type => {
+                const warningObj = warnings.find(w => w.type === type);
+                const messageParts = warningObj ? warningObj.message.split('(آستانه:') : [type];
+                return messageParts[0].trim();
+            }).join('\n');
+
+            noteContent = `[گزارش به مدیریت] تاریخ: ${dateStr}\n${warningLines}`;
+        } else {
+            // For ignored warnings: include the teacher's note and a list
+            const settledWarningDetails = selectedWarnings.map(type => {
+                const warningObj = warnings.find(w => w.type === type);
+                const messageParts = warningObj ? warningObj.message.split('(آستانه:') : [type];
+                return `- ${messageParts[0].trim()}`;
+            }).join('\n');
+
+            noteContent = `[تسویه هشدار - چشم‌پوشی] تاریخ: ${dateStr}\n${finalNote ? finalNote + '\n' : ''}موارد زیر پیگیری شد:\n${settledWarningDetails}`;
+        }
         student.addNote(noteContent, { type: 'fromSession', sessionNumber: sessionNumber });
 
         state.saveData();
@@ -390,54 +503,45 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
         // Close the settlement modal first
         closeSettlementModal();
 
-        // Open the report modal with pre-filled warning details
-        import('./adminReporting.js').then(module => {
-            const warningMessages = selectedWarnings.map(type => {
-                const w = warnings.find(w => w.type === type);
-                return w ? w.message : type;
-            }).join('\n');
-
-            // Create a temporary student object with a custom report function
-            // that settles the warnings after successful report
-            const reportStudent = {
-                ...student,
-                _pendingWarnings: selectedWarnings,
-                _warningsList: warnings,
-                _sessionNumber: sessionNumber,
-                _onSettled: onSettled,
-                _settleAfterReport: function (finalNote) {
-                    settleWarnings(this._pendingWarnings, finalNote, 'reported');
-                    if (typeof this._onSettled === 'function') {
-                        this._onSettled();
+        // Delay opening the report modal to ensure the settlement modal is fully closed
+        setTimeout(() => {
+            import('./adminReporting').then(module => {
+                // Build clean warning messages without threshold info
+                const warningMessages = selectedWarnings.map(type => {
+                    const w = warnings.find(w => w.type === type);
+                    if (w) {
+                        // Remove the threshold part (آستانه: X)
+                        const cleanMessage = w.message.split('(آستانه:')[0].trim();
+                        return cleanMessage;
                     }
-                    showNotification(`✅ ${this._pendingWarnings.length} هشدار گزارش و تسویه شد.`);
-                }
-            };
+                    return type;
+                }).join('\n');
 
-            // Pre-fill the report message with warning details
-            const preFilledMessage = `گزارش هشدارهای دانش‌آموز «${student.identity.name}»:\n\n${warningMessages}`;
+                // Pre-fill the report message with clean warning details
+                const preFilledMessage = `گزارش هشدارهای دانش‌آموز «${student.identity.name}»:\n\n${warningMessages}`;
 
-            // Show the report modal
-            module.showReportToAdminModalWithCallback(
-                student,
-                { sessionNumber: sessionNumber },
-                'warning_settlement',
-                preFilledMessage,
-                (finalMessage, contact) => {
-                    // This callback runs after the report is sent
-                    // Settle the warnings
-                    const finalNote = finalMessage || preFilledMessage;
-                    settleWarnings(selectedWarnings, finalNote, 'reported');
-                    if (typeof onSettled === 'function') {
-                        onSettled();
+                // Show the report modal
+                module.showReportToAdminModalWithCallback(
+                    student,
+                    { sessionNumber: sessionNumber },
+                    'warning_settlement',
+                    preFilledMessage,
+                    (finalMessage, contact) => {
+                        // This callback runs after the report is sent
+                        // Settle the warnings
+                        const finalNote = finalMessage || preFilledMessage;
+                        settleWarnings(selectedWarnings, finalNote, 'reported');
+                        if (typeof onSettled === 'function') {
+                            onSettled();
+                        }
+                        showNotification(`✅ ${selectedWarnings.length} هشدار گزارش و تسویه شد.`);
                     }
-                    showNotification(`✅ ${selectedWarnings.length} هشدار گزارش و تسویه شد.`);
-                }
-            );
-        }).catch(err => {
-            console.error('Failed to load report modal:', err);
-            showNotification('❌ خطا در باز کردن پنجره گزارش.');
-        });
+                );
+            }).catch(err => {
+                console.error('Failed to load report modal:', err);
+                showNotification('❌ خطا در باز کردن پنجره گزارش.');
+            });
+        }, 350); // Wait for the settlement modal close animation to complete (300ms + small buffer)
     });
 
     // Prevent body scroll
