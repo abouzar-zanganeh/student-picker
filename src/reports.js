@@ -11,7 +11,7 @@
 
 import * as state from "./state";
 import { closeActiveModal, openModal, reportCancelBtn, reportColumnsContainer, reportPrintBtn } from "./ui";
-import { showNotification } from './notifyingMessaging';
+import { showBottomUpNotification } from './notifyingMessaging';
 import { sortStudents } from "./otherUtils";
 
 
@@ -111,7 +111,7 @@ export function generatePrintableReport(classroom, selectedColumns, sortMode = '
     if (!printWindow) {
         //@ts-ignore
 
-        showNotification('⚠️ مرورگر شما پنجره جدید را مسدود کرد. لطفاً اجازه دهید.', 'error');
+        showBottomUpNotification('⚠️ مرورگر شما پنجره جدید را مسدود کرد. لطفاً اجازه دهید.', 'error');
         return;
     }
 
@@ -318,7 +318,7 @@ export function generatePrintableReport(classroom, selectedColumns, sortMode = '
         });
 
         if (selected.length === 0) {
-            showNotification('⚠️ لطفاً حداقل یک ستون را انتخاب کنید.');
+            showBottomUpNotification('⚠️ لطفاً حداقل یک ستون را انتخاب کنید.');
             return;
         }
 

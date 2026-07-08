@@ -16,7 +16,7 @@ import { addBackupSnapshot } from "./db";
 import * as state from "./state";
 import { renderClassManagementStats } from "./ui";
 import { showCustomConfirm } from './notifyingMessaging';
-import { showNotification } from './notifyingMessaging';
+import { showBottomUpNotification } from './notifyingMessaging';
 import { closeSideNav } from "./main";
 import * as ui from "./ui";
 import * as notifyingMessaging from './notifyingMessaging';
@@ -220,7 +220,7 @@ export async function initiateBackupProcess(classNamesToBackup = []) {
 
     // 1b. Check if file creation succeeded
     if (!fileToShare) {
-        showNotification("❌ خطا در ایجاد فایل پشتیبان.");
+        showBottomUpNotification("❌ خطا در ایجاد فایل پشتیبان.");
         return;
     }
 
@@ -262,7 +262,7 @@ export async function initiateBackupProcess(classNamesToBackup = []) {
                                 () => {
                                     state.setLastBackupTimestamp();
                                     renderClassManagementStats();
-                                    showNotification("✅ تاریخ پشتیبان ثبت شد.");
+                                    showBottomUpNotification("✅ تاریخ پشتیبان ثبت شد.");
                                 },
                                 { confirmText: 'بله', cancelText: 'خیر', confirmClass: 'btn-success' }
                             );
@@ -270,7 +270,7 @@ export async function initiateBackupProcess(classNamesToBackup = []) {
                 } catch (error) {
                     console.error('Error during sharing process:', error);
                     triggerFileDownload(fileToShare);
-                    showNotification("⚠️خطا در فرآیند اشتراک‌گذاری. فایل در حال دانلود است.");
+                    showBottomUpNotification("⚠️خطا در فرآیند اشتراک‌گذاری. فایل در حال دانلود است.");
                 }
             },
             {
@@ -282,14 +282,14 @@ export async function initiateBackupProcess(classNamesToBackup = []) {
     } else {
         // 4b. On desktop, just trigger the download directly.
         triggerFileDownload(fileToShare);
-        showNotification("✅پشتیبان‌گیری با موفقیت انجام شد.");
+        showBottomUpNotification("✅پشتیبان‌گیری با موفقیت انجام شد.");
     }
 }
 export function prepareBackupBtn(backupDataBtn) {
     backupDataBtn.addEventListener('click', () => {
 
         if (state.isDemoMode) {
-            showNotification("⚠️ پشتیبان‌گیری در حالت نمایش (Demo) غیرفعال است.");
+            showBottomUpNotification("⚠️ پشتیبان‌گیری در حالت نمایش (Demo) غیرفعال است.");
             closeSideNav();
             return;
         }
@@ -302,7 +302,7 @@ export function prepareRestoreBtn(restoreDataBtn, restoreFileInput) {
     restoreDataBtn.addEventListener('click', () => {
 
         if (state.isDemoMode) {
-            showNotification("⚠️ بازیابی اطلاعات در حالت نمایش (Demo) غیرفعال است.");
+            showBottomUpNotification("⚠️ بازیابی اطلاعات در حالت نمایش (Demo) غیرفعال است.");
             closeSideNav();
             return;
         }
@@ -346,7 +346,7 @@ export function restoreButtonMainFunction(restoreFileInput) {
                             saveData();
                             ui.renderClassList();
                             ui.showPage('class-management-page');
-                            showNotification("✅اطلاعات با موفقیت بازیابی شد.");
+                            showBottomUpNotification("✅اطلاعات با موفقیت بازیابی شد.");
                         },
                         { confirmText: 'بازیابی کن', confirmClass: 'btn-warning' }
                     );
@@ -384,7 +384,7 @@ export function restoreButtonMainFunction(restoreFileInput) {
 
                 } catch (zipError) {
                     // This catches errors from zipping or Base64 decoding
-                    showNotification("❌خطا در خواندن فایل. لطفاً فایل پشتیبان معتبر انتخاب کنید.");
+                    showBottomUpNotification("❌خطا در خواندن فایل. لطفاً فایل پشتیبان معتبر انتخاب کنید.");
                     console.error("Restore error (zip/base64):", zipError);
                 }
             }
@@ -417,7 +417,7 @@ export function triggerFileDownload(fileObject) {
             () => {
                 state.setLastBackupTimestamp();
                 renderClassManagementStats();
-                showNotification("✅ تاریخ پشتیبان ثبت شد.");
+                showBottomUpNotification("✅ تاریخ پشتیبان ثبت شد.");
             },
             { confirmText: 'بله، ذخیره شد', cancelText: 'خیر', confirmClass: 'btn-success' }
         );

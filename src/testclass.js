@@ -43,7 +43,7 @@ export function testClassHook(classListHeader) {
                         ui.renderClassList();
                     }
                     createRandomClass();
-                    notifyingMessaging.showNotification("کلاس تستی با موفقیت ساخته شد ✅!");
+                    notifyingMessaging.showBottomUpNotification("کلاس تستی با موفقیت ساخته شد ✅!");
                 },
                 { confirmText: 'بساز', confirmClass: 'btn-success' }
             );

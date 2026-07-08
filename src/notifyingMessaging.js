@@ -41,7 +41,7 @@ export function showUndoToast(message) {
  * @param {*} duration duration after which the notification hides
  * @returns null
  */
-export function showNotification(message, duration = 3000) {
+export function showBottomUpNotification(message, duration = 3000) {
     const notificationToast = document.getElementById('notification-toast');
     if (!notificationToast) return;
 
@@ -464,13 +464,13 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
     // X button
     closeBtn.addEventListener('click', () => {
         closeSettlementModal();
-        showNotification('❌ تسویه هشدار لغو شد.');
+        showBottomUpNotification('❌ تسویه هشدار لغو شد.');
     });
 
     // Cancel button
     cancelBtn.addEventListener('click', () => {
         closeSettlementModal();
-        showNotification('❌ تسویه هشدار لغو شد.');
+        showBottomUpNotification('❌ تسویه هشدار لغو شد.');
     });
 
     // Ignore button (چشم‌پوشی)
@@ -479,7 +479,7 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
         const selectedWarnings = getSelectedWarnings();
 
         if (selectedWarnings.length === 0) {
-            showNotification('⚠️ هیچ هشدار انتخاب نشده است.');
+            showBottomUpNotification('⚠️ هیچ هشدار انتخاب نشده است.');
             return;
         }
 
@@ -488,7 +488,7 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
         if (typeof onSettled === 'function') {
             onSettled();
         }
-        showNotification(`✅ ${selectedWarnings.length} هشدار با چشم‌پوشی تسویه شد.`);
+        showBottomUpNotification(`✅ ${selectedWarnings.length} هشدار با چشم‌پوشی تسویه شد.`);
     });
 
     // Report button (گزارش به مدیریت)
@@ -496,7 +496,7 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
         const selectedWarnings = getSelectedWarnings();
 
         if (selectedWarnings.length === 0) {
-            showNotification('⚠️ هیچ هشدار انتخاب نشده است.');
+            showBottomUpNotification('⚠️ هیچ هشدار انتخاب نشده است.');
             return;
         }
 
@@ -552,12 +552,12 @@ export function showWarningSettlementModal(student, warnings, sessionNumber, onS
                         if (typeof onSettled === 'function') {
                             onSettled();
                         }
-                        showNotification(`✅ ${selectedWarnings.length} هشدار گزارش و تسویه شد.`);
+                        showBottomUpNotification(`✅ ${selectedWarnings.length} هشدار گزارش و تسویه شد.`);
                     }
                 );
             }).catch(err => {
                 console.error('Failed to load report modal:', err);
-                showNotification('❌ خطا در باز کردن پنجره گزارش.');
+                showBottomUpNotification('❌ خطا در باز کردن پنجره گزارش.');
             });
         }, 350);
     });

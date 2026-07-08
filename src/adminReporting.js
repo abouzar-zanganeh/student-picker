@@ -7,7 +7,7 @@
    ========================================================================== */
 
 import * as state from './state.js';
-import { showCustomConfirm, showReportSentConfirmation, showNotification } from './notifyingMessaging.js';
+import { showCustomConfirm, showReportSentConfirmation, showBottomUpNotification } from './notifyingMessaging.js';
 import { saveData, currentClassroom } from './state.js';
 
 
@@ -218,13 +218,13 @@ export function showReportModal(student, session, preFilledMessage, onReportSent
     // X button
     closeBtn.addEventListener('click', () => {
         closeReportModal();
-        showNotification('❌ گزارش لغو شد.');
+        showBottomUpNotification('❌ گزارش لغو شد.');
     });
 
     // Cancel button
     cancelBtn.addEventListener('click', () => {
         closeReportModal();
-        showNotification('❌ گزارش لغو شد.');
+        showBottomUpNotification('❌ گزارش لغو شد.');
     });
 
     // SMS button
@@ -234,7 +234,7 @@ export function showReportModal(student, session, preFilledMessage, onReportSent
         const selectedContact = contacts.find(c => c.id === selectedAdminId);
 
         if (!selectedContact) {
-            showNotification('⚠️ لطفاً یک مخاطب مدیریت انتخاب کنید.');
+            showBottomUpNotification('⚠️ لطفاً یک مخاطب مدیریت انتخاب کنید.');
             return;
         }
 
@@ -252,7 +252,7 @@ export function showReportModal(student, session, preFilledMessage, onReportSent
             const emailUrl = `mailto:${selectedContact.email}?subject=${subject}&body=${encodedMessage}`;
             window.location.href = emailUrl;
         } else {
-            showNotification('⚠️ تماس مدیریت فاقد شماره موبایل یا ایمیل است.');
+            showBottomUpNotification('⚠️ تماس مدیریت فاقد شماره موبایل یا ایمیل است.');
             return;
         }
 
@@ -270,13 +270,13 @@ export function showReportModal(student, session, preFilledMessage, onReportSent
                 student.addNote(noteContent, { type: 'fromAttendance', sessionNumber: session.sessionNumber });
                 state.saveData();
                 const contactInfo = selectedContact.name || 'مدیریت';
-                showNotification(`✅ گزارش به «${contactInfo}» ارسال و ثبت شد.`);
+                showBottomUpNotification(`✅ گزارش به «${contactInfo}» ارسال و ثبت شد.`);
                 if (typeof onReportSent === 'function') {
                     onReportSent(message, selectedContact);
                 }
             },
             () => {
-                showNotification('❌ ثبت گزارش لغو شد.');
+                showBottomUpNotification('❌ ثبت گزارش لغو شد.');
             }
         );
     });
@@ -308,29 +308,29 @@ export function showReportModal(student, session, preFilledMessage, onReportSent
                             state.saveData();
                         }
                         const contactInfo = selectedContact?.name || 'مدیریت';
-                        showNotification(`✅ گزارش ارسال و ثبت شد.`);
+                        showBottomUpNotification(`✅ گزارش ارسال و ثبت شد.`);
                         if (typeof onReportSent === 'function') {
                             onReportSent(message, selectedContact);
                         }
                     },
                     () => {
-                        showNotification('❌ ثبت گزارش لغو شد.');
+                        showBottomUpNotification('❌ ثبت گزارش لغو شد.');
                     }
                 );
             }).catch((err) => {
                 // User cancelled share or error
                 if (err.name !== 'AbortError') {
                     console.error('Share error:', err);
-                    showNotification('❌ خطا در اشتراک‌گذاری.');
+                    showBottomUpNotification('❌ خطا در اشتراک‌گذاری.');
                 } else {
-                    showNotification('❌ اشتراک‌گذاری لغو شد.');
+                    showBottomUpNotification('❌ اشتراک‌گذاری لغو شد.');
                 }
             });
         } else {
             // Fallback for browsers without share API
             // Copy to clipboard as fallback
             navigator.clipboard.writeText(message).then(() => {
-                showNotification('✅ پیام در کلیپ‌بورد کپی شد. می‌توانید آن را در هر برنامه‌ای قرار دهید.');
+                showBottomUpNotification('✅ پیام در کلیپ‌بورد کپی شد. می‌توانید آن را در هر برنامه‌ای قرار دهید.');
 
                 // Still allow saving the note
                 showReportSentConfirmation(
@@ -342,17 +342,17 @@ export function showReportModal(student, session, preFilledMessage, onReportSent
                             currentClassroom.info.lastReportedAdminId = selectedContact.id;
                             state.saveData();
                         }
-                        showNotification(`✅ گزارش ثبت شد.`);
+                        showBottomUpNotification(`✅ گزارش ثبت شد.`);
                         if (typeof onReportSent === 'function') {
                             onReportSent(message, selectedContact);
                         }
                     },
                     () => {
-                        showNotification('❌ ثبت گزارش لغو شد.');
+                        showBottomUpNotification('❌ ثبت گزارش لغو شد.');
                     }
                 );
             }).catch(() => {
-                showNotification('❌ خطا در کپی کردن پیام.');
+                showBottomUpNotification('❌ خطا در کپی کردن پیام.');
             });
         }
     });

@@ -39,7 +39,7 @@ import JSZip from 'jszip';
 
 import { toJalaali, toGregorian } from 'jalaali-js';
 import { showReportConfigModal } from './reports.js';
-import { showCustomConfirm, showNotification } from './notifyingMessaging.js';
+import { showCustomConfirm, showBottomUpNotification } from './notifyingMessaging.js';
 import { getAbsentStudents, getPresentStudents, countHomeworkStatus, getStudentWarnings } from './classroomUtils.js';
 import { showReportToAdminModal } from './adminReporting.js';
 
@@ -389,7 +389,7 @@ export function showRestoreConfirmModal(plainData) {
         showPage('class-management-page');
 
         const modeText = isCleanRestore ? "پاک‌سازی و بازیابی" : "همگام‌سازی هوشمند";
-        showNotification(`✅ اطلاعات با موفقیت بازیابی شد (${modeText}).`);
+        showBottomUpNotification(`✅ اطلاعات با موفقیت بازیابی شد (${modeText}).`);
     };
 
     const cancelHandler = () => {
@@ -436,7 +436,7 @@ export function showCategoryModal(onSave, options = {}) {
         const weight = parseFloat(newCategoryModalWeightInput.value) || 1;
         // Basic validation before executing the main callback
         if (!categoryName) {
-            showNotification('⚠️ لطفاً نام دسته‌بندی را وارد کنید.');
+            showBottomUpNotification('⚠️ لطفاً نام دسته‌بندی را وارد کنید.');
             return;
         }
         onSave(categoryName, isGraded, weight);
@@ -520,7 +520,7 @@ export function showRenameStudentModal(student, classroom) {
 
         const dotIndex = newName.indexOf('.');
         if (dotIndex <= 0 || dotIndex >= newName.length - 1) {
-            showNotification("لطفا نام و نام خانوادگی شخص را با یک نقطه از هم جدا کنید. مثال: علی . احمدی");
+            showBottomUpNotification("لطفا نام و نام خانوادگی شخص را با یک نقطه از هم جدا کنید. مثال: علی . احمدی");
             return false; // This prevents the modal from closing
         }
 
@@ -532,7 +532,7 @@ export function showRenameStudentModal(student, classroom) {
 
         // Guard: Dotted student missing dot
         if (student.identity.firstName && student.identity.lastName && !parsedIdentity.firstName) {
-            showNotification('⚠️ این دانش‌آموز دارای نام و نام‌خانوادگی تفکیک شده است. لطفاً حتماً از نقطه (.) بین نام و نام‌خانوادگی استفاده کنید.');
+            showBottomUpNotification('⚠️ این دانش‌آموز دارای نام و نام‌خانوادگی تفکیک شده است. لطفاً حتماً از نقطه (.) بین نام و نام‌خانوادگی استفاده کنید.');
             return false;
         }
 
@@ -553,7 +553,7 @@ export function showRenameStudentModal(student, classroom) {
             );
 
             if (isDuplicate) {
-                showNotification('دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.');
+                showBottomUpNotification('دانش‌آموزی با این نام از قبل در این کلاس وجود دارد.');
                 return false;
             } else {
                 student.identity.name = cleanNewName;
@@ -581,10 +581,10 @@ export function showRenameStudentModal(student, classroom) {
                     updatedRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
 
-                showNotification(`✅ نام دانش‌آموز به «${cleanNewName}» تغییر یافت.`);
+                showBottomUpNotification(`✅ نام دانش‌آموز به «${cleanNewName}» تغییر یافت.`);
             }
         } else if (!cleanNewName) {
-            showNotification('⚠️ نام نمی‌تواند خالی باشد.');
+            showBottomUpNotification('⚠️ نام نمی‌تواند خالی باشد.');
             return false;
         }
 
@@ -802,7 +802,7 @@ export function processMassHomeworkComment(commentText, append) {
         `${studentsUpdatedCount} دانش‌آموز به صورت گروهی یادداشت تکلیف گرفتند.`,
         { type: 'VIEW_SESSIONS' });
 
-    showNotification(`✅ یادداشت برای ${studentsUpdatedCount} دانش‌آموز ثبت شد.`);
+    showBottomUpNotification(`✅ یادداشت برای ${studentsUpdatedCount} دانش‌آموز ثبت شد.`);
 }
 
 
@@ -844,7 +844,7 @@ export function showClassNoteModal(classroom) {
         // We've moved the log call here as well
         logManager.addLog(classroom.info.name, `یادداشت کلاس ذخیره شد.`, { type: 'VIEW_CLASS_NOTE' });
         renderClassList();
-        showNotification('✅ یادداشت کلاس ذخیره شد.');
+        showBottomUpNotification('✅ یادداشت کلاس ذخیره شد.');
     });
     openModal('add-note-modal');
     newNoteContent.focus();
@@ -867,7 +867,7 @@ export function showSessionNoteModal(session, displaySessionNumber) {
             { type: 'VIEW_SESSIONS' });
 
         renderSessions();
-        showNotification("✅یادداشت جلسه ذخیره شد.");
+        showBottomUpNotification("✅یادداشت جلسه ذخیره شد.");
     });
 
     // 3. Open the modal
@@ -1268,7 +1268,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
             );
         }).catch(err => {
             console.error('Failed to load settlement modal:', err);
-            showNotification('❌ خطا در باز کردن پنجره تسویه هشدار.');
+            showBottomUpNotification('❌ خطا در باز کردن پنجره تسویه هشدار.');
         });
     });
 
@@ -1377,7 +1377,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
                 });
                 saveData();
                 renderAttendancePage(); // Re-render whole list
-                showNotification(`✅ وضعیت تمام دانش‌آموزان به «${targetLabel}» تغییر یافت.`);
+                showBottomUpNotification(`✅ وضعیت تمام دانش‌آموزان به «${targetLabel}» تغییر یافت.`);
             },
             { confirmText: 'بله، اعمال کن', confirmClass: 'btn-warning' }
         );
@@ -1484,7 +1484,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
                 });
                 saveData();
                 renderAttendancePage();
-                showNotification(`✅ وضعیت تکلیف همه به «${targetLabel}» تغییر یافت.`);
+                showBottomUpNotification(`✅ وضعیت تکلیف همه به «${targetLabel}» تغییر یافت.`);
             },
             { confirmText: 'بله', confirmClass: 'btn-warning' }
         );
@@ -1534,7 +1534,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
             }
 
             saveData();
-            showNotification("✅یادداشت تکلیف ذخیره شد.");
+            showBottomUpNotification("✅یادداشت تکلیف ذخیره شد.");
             homeworkNoteBtn.innerHTML = content ? '✍️' : '🧾';
             renderStudentHomeworkInfo(student, sessionDisplayNumberMap, homeworkInfoSpan);
         });
@@ -1994,9 +1994,9 @@ function renderCategoryPills() {
                                     renderCategoryPills();
                                     renderStudentStatsList();
                                     updateCategoryWeightLabel(category);
-                                    showNotification(`✅ نام دسته‌بندی به «${newName}» تغییر یافت.`);
+                                    showBottomUpNotification(`✅ نام دسته‌بندی به «${newName}» تغییر یافت.`);
                                 } else {
-                                    showNotification(`⚠️ ${result.message}`);
+                                    showBottomUpNotification(`⚠️ ${result.message}`);
                                 }
                             }, {
                                 title: 'ویرایش دسته‌بندی',
@@ -2061,7 +2061,7 @@ function renderCategoryPills() {
                                     saveData();
                                     renderCategoryPills();
                                     renderStudentStatsList();
-                                    showNotification(`✅ دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`);
+                                    showBottomUpNotification(`✅ دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`);
                                 },
                                 { confirmText: 'بله', confirmClass: 'btn-warning' }
                             );
@@ -2092,7 +2092,7 @@ function renderCategoryPills() {
                     cat => cat.name.toLowerCase() === categoryName.toLowerCase() && !cat.isDeleted
                 );
                 if (existingCategory) {
-                    showNotification("⚠️ این دسته‌بندی از قبل وجود دارد.");
+                    showBottomUpNotification("⚠️ این دسته‌بندی از قبل وجود دارد.");
                     return;
                 }
 
@@ -2105,7 +2105,7 @@ function renderCategoryPills() {
                     type: 'VIEW_CLASS_SETTINGS'
                 });
                 renderCategoryPills();
-                showNotification(`✅ دسته‌بندی «${categoryName}» اضافه شد.`);
+                showBottomUpNotification(`✅ دسته‌بندی «${categoryName}» اضافه شد.`);
             }, { initialWeight: 1 }); // Passing default weight to the modal options
         });
     } else {
@@ -2367,7 +2367,7 @@ export function showStudentProfile(student) {
                     renderStudentStatsList();
                     renderAttendancePage();
 
-                    showNotification(`✅ دانش‌آموز «${studentToDelete.identity.name}» به سطل زباله منتقل شد.`);
+                    showBottomUpNotification(`✅ دانش‌آموز «${studentToDelete.identity.name}» به سطل زباله منتقل شد.`);
                 },
                 {
                     confirmText: 'بله',
@@ -2388,7 +2388,7 @@ export function showStudentProfile(student) {
     statusReportBtn.title = 'گزارش وضعیت دانش‌آموز';
     statusReportBtn.innerHTML = '<span>📊</span><span>گزارش</span>';
     statusReportBtn.addEventListener('click', () => {
-        showNotification('🏗️ این قابلیت در نسخه‌های آینده فعال خواهد شد.');
+        showBottomUpNotification('🏗️ این قابلیت در نسخه‌های آینده فعال خواهد شد.');
     });
     actionButtonsContainer.appendChild(statusReportBtn);
 
@@ -2425,7 +2425,7 @@ export function showStudentProfile(student) {
                 logManager.addLog(currentClassroom.info.name, `یادداشت جدیدی برای دانش‌آموز «${studentForNote.identity.name}» ثبت شد.`, { type: 'VIEW_STUDENT_PROFILE', studentId: studentForNote.identity.studentId });
 
                 displayWinner();
-                showNotification('✅ یادداشت با موفقیت ثبت شد.');
+                showBottomUpNotification('✅ یادداشت با موفقیت ثبت شد.');
 
                 // Return a function to be run AFTER the note modal closes
                 return () => showStudentProfile(studentForNote);
@@ -2526,7 +2526,7 @@ function renderProfileScoringSection(container) {
     addScoreBtn.addEventListener('click', () => {
         const activeSkillPill = pillsContainer.querySelector('.pill.active');
         if (!activeSkillPill) {
-            showNotification("⚠️لطفاً یک مهارت را برای نمره‌دهی انتخاب کنید.");
+            showBottomUpNotification("⚠️لطفاً یک مهارت را برای نمره‌دهی انتخاب کنید.");
             return;
         }
 
@@ -2540,7 +2540,7 @@ function renderProfileScoringSection(container) {
         const comment = commentTextarea.value.trim();
 
         if (!value) {
-            showNotification("لطفاً مقدار نمره را وارد کنید.");
+            showBottomUpNotification("لطفاً مقدار نمره را وارد کنید.");
             return;
         }
 
@@ -2573,7 +2573,7 @@ function renderProfileScoringSection(container) {
         }
         renderHistorySection(modalContentContainer);
 
-        showNotification(`✅ نمره برای مهارت ${skill} برای دانش آموز ${state.selectedStudentForProfile.identity.name} با موفقیت ثبت شد.`);
+        showBottomUpNotification(`✅ نمره برای مهارت ${skill} برای دانش آموز ${state.selectedStudentForProfile.identity.name} با موفقیت ثبت شد.`);
     });
 
     // 5. Finally, append the entire new section to the provided container
@@ -2841,7 +2841,7 @@ export function renderScoresHistory(scoresContainer) {
                         });
 
                         showStudentProfile(student); // Re-open profile modal
-                        showNotification("✅ توضیحات نمره با موفقیت ویرایش شد.");
+                        showBottomUpNotification("✅ توضیحات نمره با موفقیت ویرایش شد.");
                     });
 
                     // 3. Close the profile modal, THEN open the note modal
@@ -2881,7 +2881,7 @@ export function renderScoresHistory(scoresContainer) {
 
                             // Re-open the profile modal to see the change
                             showStudentProfile(student);
-                            showNotification(`✅ نمره دانش آموز ${student.identity.name} به سطل زباله منتقل شد.`);
+                            showBottomUpNotification(`✅ نمره دانش آموز ${student.identity.name} به سطل زباله منتقل شد.`);
                         },
                         {
                             confirmText: 'تایید انتقال',
@@ -2983,7 +2983,7 @@ export function renderStudentNotes(notesContainer) {
                             saveData();
 
                             showStudentProfile(studentForNote);
-                            showNotification('✅ یادداشت به سطل زباله منتقل شد.');
+                            showBottomUpNotification('✅ یادداشت به سطل زباله منتقل شد.');
                         },
                         {
                             confirmText: 'تایید انتقال',
@@ -3020,7 +3020,7 @@ export function renderStudentNotes(notesContainer) {
                         });
 
                     showStudentProfile(studentForNote);
-                    showNotification("✅یادداشت با موفقیت ویرایش شد.");
+                    showBottomUpNotification("✅یادداشت با موفقیت ویرایش شد.");
                 });
 
                 closeActiveModal(() => {
@@ -3314,7 +3314,7 @@ function createClassListItem(classroom) {
 
                         saveData();
                         renderClassList();
-                        showNotification(`✅ کلاس «${classroom.info.name}» به سطل زباله منتقل شد.`);
+                        showBottomUpNotification(`✅ کلاس «${classroom.info.name}» به سطل زباله منتقل شد.`);
                     },
                     { confirmText: 'بله', confirmClass: 'btn-warning', isDelete: true }
                 );
@@ -3352,7 +3352,7 @@ function createClassListItem(classroom) {
                         state.setSelectedClassIds([]);
                         saveData();
                         renderClassList();
-                        showNotification(`✅ ${selectedCount} کلاس به سطل زباله منتقل شدند.`);
+                        showBottomUpNotification(`✅ ${selectedCount} کلاس به سطل زباله منتقل شدند.`);
                     },
                     { confirmText: 'بله', confirmClass: 'btn-warning', isDelete: true }
                 );
@@ -3426,9 +3426,9 @@ function createClassListItem(classroom) {
                                 );
                                 saveData();
                                 renderClassList();
-                                showNotification(`✅نام کلاس به «${trimmedNewName}» تغییر یافت.`);
+                                showBottomUpNotification(`✅نام کلاس به «${trimmedNewName}» تغییر یافت.`);
                             } else {
-                                showNotification(result.message);
+                                showBottomUpNotification(result.message);
                             }
                         }
 
@@ -3644,7 +3644,7 @@ export function renderSettingsStudentList() {
                                 renderStudentStatsList();
                                 renderAttendancePage();
 
-                                showNotification(`✅ دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`);
+                                showBottomUpNotification(`✅ دانش‌آموز «${student.identity.name}» به سطل زباله منتقل شد.`);
                             },
                             { confirmText: 'بله', confirmClass: 'btn-warning' }
                         );
@@ -3713,7 +3713,7 @@ export function renderSettingsCategories() {
                     logManager.addLog(currentClassroom.info.name, `دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`, { type: 'VIEW_TRASH' });
                     saveData();
                     renderSettingsCategories();
-                    showNotification(`✅ دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`);
+                    showBottomUpNotification(`✅ دسته‌بندی «${category.name}» به سطل زباله منتقل شد.`);
                 },
                 { confirmText: 'بله', confirmClass: 'btn-warning' }
             );
@@ -3833,7 +3833,7 @@ export function renderAdminContacts() {
             state.userSettings.adminContacts = state.userSettings.adminContacts.filter(c => c.id !== contact.id);
             state.saveData();
             renderAdminContacts();
-            showNotification('✅ تماس حذف شد.');
+            showBottomUpNotification('✅ تماس حذف شد.');
         });
 
         li.appendChild(infoSpan);
@@ -3957,11 +3957,11 @@ function createSessionActionButtons(session, displaySessionNumber) {
                         "جلسه با موفقیت خاتمه یافت. آیا مایل به ایجاد فایل پشتیبان هستید؟",
                         () => {
                             if (state.isDemoMode) {
-                                showNotification("⚠️ پشتیبان‌گیری در حالت نمایش (Demo) غیرفعال است.");
+                                showBottomUpNotification("⚠️ پشتیبان‌گیری در حالت نمایش (Demo) غیرفعال است.");
                                 return;
                             }
                             initiateBackupProcess();
-                            showNotification("✅فایل پشتیبان با موفقیت ایجاد شد.");
+                            showBottomUpNotification("✅فایل پشتیبان با موفقیت ایجاد شد.");
                         },
                         {
                             confirmText: 'بله',
@@ -4093,7 +4093,7 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                             saveData();
                             renderSessions();
 
-                            showNotification(
+                            showBottomUpNotification(
                                 session.isCancelled
                                     ? '✅جلسه لغو شد.'
                                     : '✅جلسه بازگردانی شد.'
@@ -4159,7 +4159,7 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
                             saveData();
                             renderSessions();
 
-                            showNotification(`✅ جلسه ${displayNumText} به سطل زباله منتقل شد.`);
+                            showBottomUpNotification(`✅ جلسه ${displayNumText} به سطل زباله منتقل شد.`);
                         },
                         { confirmText: 'بله', confirmClass: 'btn-warning', isDelete: true }
                     );
@@ -4246,7 +4246,7 @@ function createSessionListItem(session, sessionDisplayNumberMap) {
 
                         saveData();
                         renderSessions();
-                        showNotification(`✅ تاریخ جلسه به ${newDateStr} تغییر یافت.`);
+                        showBottomUpNotification(`✅ تاریخ جلسه به ${newDateStr} تغییر یافت.`);
                     });
 
                     openModal('date-picker-modal');
@@ -4503,12 +4503,12 @@ export function renderTrashPage() {
                 if (entry.type === 'classroom') {
                     renderClassList(); // Update the class list if a class was restored
                 }
-                showNotification('✅ آیتم با موفقیت بازیابی شد.');
+                showBottomUpNotification('✅ آیتم با موفقیت بازیابی شد.');
             } else {
                 if (errorMessage) {
-                    showNotification(`⚠️ ${errorMessage}`);
+                    showBottomUpNotification(`⚠️ ${errorMessage}`);
                 } else {
-                    showNotification('⚠️ آیتم اصلی برای بازیابی یافت نشد.');
+                    showBottomUpNotification('⚠️ آیتم اصلی برای بازیابی یافت نشد.');
                 }
             }
         });
@@ -4566,7 +4566,7 @@ export function renderTrashPage() {
                     state.trashBin.splice(index, 1);
                     saveData();
                     renderTrashPage();
-                    showNotification('✅ آیتم برای همیشه حذف شد.');
+                    showBottomUpNotification('✅ آیتم برای همیشه حذف شد.');
                 },
                 { confirmText: 'حذف دائمی', confirmClass: 'btn-warning' }
             );
@@ -4739,7 +4739,7 @@ function setupAbsenteesCopyButton() {
         if (!currentClassroom || !selectedSession) return;
 
         if (getAbsentStudents().length === 0) {
-            showNotification('⚠️لیست غایبین خالی است.');
+            showBottomUpNotification('⚠️لیست غایبین خالی است.');
             return;
         }
 
@@ -4807,10 +4807,10 @@ function setupAbsenteesCopyButton() {
 
         // Use the modern Clipboard API to copy the text
         navigator.clipboard.writeText(textToCopy).then(() => {
-            showNotification('✅لیست غایبین با موفقیت کپی شد.');
+            showBottomUpNotification('✅لیست غایبین با موفقیت کپی شد.');
         }).catch(err => {
             console.error('Failed to copy text: ', err);
-            showNotification('❌خطا در کپی کردن لیست.');
+            showBottomUpNotification('❌خطا در کپی کردن لیست.');
         });
     });
 }
@@ -4992,7 +4992,7 @@ export async function renderRestorePointsPage() {
 
                 } catch (err) {
                     console.error("Restore failed:", err);
-                    showNotification("❌ فایل پشتیبان معتبر نیست.");
+                    showBottomUpNotification("❌ فایل پشتیبان معتبر نیست.");
                 }
             });
 
@@ -5693,7 +5693,7 @@ function renderWinnerDetails(winner, categoryName) {
                     winner.addNote(content, source);
                     saveData();
                     displayWinner();
-                    showNotification('✅ یادداشت با موفقیت ثبت شد.');
+                    showBottomUpNotification('✅ یادداشت با موفقیت ثبت شد.');
                 }
             });
 
