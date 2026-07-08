@@ -166,7 +166,7 @@ export function showReportModal(student, session, preFilledMessage, onReportSent
         warningP.style.fontSize = '14px';
         warningP.style.textAlign = 'center';
         warningP.style.margin = '10px 0';
-        warningP.textContent = '⚠️ ابتدا یک شماره تماس برای مدیریت در تنظیمات برنامه اضافه کنید.';
+        warningP.textContent = '⚠️ برای ارسال‌پیامکی ابتدا یک شماره تماس برای مدیریت در تنظیمات برنامه اضافه کنید.';
         modalContent.appendChild(warningP);
     }
 
@@ -180,12 +180,12 @@ export function showReportModal(student, session, preFilledMessage, onReportSent
 
     const smsBtn = document.createElement('button');
     smsBtn.className = 'btn-success';
-    smsBtn.textContent = '📱 ارسال پیامکی';
+    smsBtn.textContent = 'ارسال پیامکی';
     smsBtn.style.minWidth = '100px';
 
     const shareBtn = document.createElement('button');
     shareBtn.className = 'btn-primary';
-    shareBtn.textContent = '📤 اشتراک‌گذاری';
+    shareBtn.textContent = 'اشتراک‌گذاری';
     shareBtn.style.minWidth = '100px';
     shareBtn.style.backgroundColor = '#17a2b8';
 

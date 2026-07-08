@@ -577,7 +577,7 @@ export function showReportSentConfirmation(onConfirm, onCancel) {
     // Delay the confirmation to avoid UI glitch when returning from messaging app
     setTimeout(() => {
         showCustomConfirm(
-            'آیا پیام با موفقیت ارسال شد؟',
+            'آیا پیام با موفقیت ارسال شد؟\n\nدر صورت تأیید، گزارش در پروفایل دانش‌آموز ثبت خواهد شد.',
             () => {
                 if (typeof onConfirm === 'function') {
                     onConfirm();
