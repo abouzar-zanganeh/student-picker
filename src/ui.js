@@ -2301,7 +2301,7 @@ export function showStudentProfile(student) {
     modalHeader.style.cursor = 'pointer';
     modalHeader.onclick = () => {
         const currentStudent = state.selectedStudentForProfile;
-        const currentClassroom = currentClassroom;
+        const currentClassroom = state.currentClassroom;
 
         closeActiveModal(() => {
             showRenameStudentModal(currentStudent, currentClassroom);
