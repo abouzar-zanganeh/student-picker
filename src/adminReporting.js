@@ -194,8 +194,14 @@ export function showReportModal(student, session, preFilledMessage, onReportSent
     cancelBtn.textContent = 'لغو';
     cancelBtn.style.minWidth = '100px';
 
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'btn-secondary';
+    copyBtn.textContent = '📋 کپی متن';
+    copyBtn.style.minWidth = '100px';
+
     actionsDiv.appendChild(smsBtn);
     actionsDiv.appendChild(shareBtn);
+    actionsDiv.appendChild(copyBtn);
     actionsDiv.appendChild(cancelBtn);
     modalContent.appendChild(actionsDiv);
 
@@ -355,6 +361,17 @@ export function showReportModal(student, session, preFilledMessage, onReportSent
                 showBottomUpNotification('❌ خطا در کپی کردن پیام.');
             });
         }
+    });
+
+    // Copy-to-clipboard button handler
+    copyBtn.addEventListener('click', () => {
+        const message = document.getElementById('report-message-textarea').value;
+
+        navigator.clipboard.writeText(message).then(() => {
+            showBottomUpNotification('✅ متن گزارش در کلیپ‌بورد کپی شد.');
+        }).catch(() => {
+            showBottomUpNotification('❌ خطا در کپی کردن متن.');
+        });
     });
 
     // Prevent body scroll
