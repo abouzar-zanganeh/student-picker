@@ -1257,7 +1257,7 @@ function createAttendanceListItem(student, sessionDisplayNumberMap) {
 
         // Import the settlement modal function and show it
         import('./notifyingMessaging.js').then(module => {
-            module.showWarningSettlementModal(
+            module.showWarningHandlerModal(
                 student,
                 warnings,
                 selectedSession.sessionNumber,

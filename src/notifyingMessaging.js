@@ -279,7 +279,7 @@ function closeModal(modal) {
  * @param {number} sessionNumber - Current session number
  * @param {Function} onSettled - Callback after settlement is complete
  */
-export function showWarningSettlementModal(student, warnings, sessionNumber, onSettled) {
+export function showWarningHandlerModal(student, warnings, sessionNumber, onSettled) {
     // Build the warning list with checkboxes
     let warningsHtml = warnings.map((w, index) => `
         <div style="display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--color-border);">
