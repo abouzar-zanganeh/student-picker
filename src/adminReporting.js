@@ -136,13 +136,32 @@ export function showReportModal(student, session, preFilledMessage, onReportSent
     const noteDiv = document.createElement('div');
     noteDiv.style.marginBottom = '15px';
 
+    const labelContainer = document.createElement('div');
+    labelContainer.style.display = 'flex';
+    labelContainer.style.justifyContent = 'space-between';
+    labelContainer.style.alignItems = 'center';
+    labelContainer.style.marginBottom = '5px';
+
     const label = document.createElement('label');
-    label.style.display = 'block';
     label.style.fontSize = '14px';
     label.style.color = 'var(--color-text-muted)';
-    label.style.marginBottom = '5px';
     label.textContent = 'متن پیام:';
-    noteDiv.appendChild(label);
+    labelContainer.appendChild(label);
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'btn-icon';
+    copyBtn.innerHTML = '📋';
+    copyBtn.title = 'کپی متن';
+    copyBtn.style.fontSize = '16px';
+    copyBtn.style.padding = '2px 6px';
+    copyBtn.style.background = 'none';
+    copyBtn.style.border = 'none';
+    copyBtn.style.cursor = 'pointer';
+    copyBtn.style.color = 'var(--color-text-muted)';
+    copyBtn.style.transition = 'color 0.2s';
+    labelContainer.appendChild(copyBtn);
+
+    noteDiv.appendChild(labelContainer);
 
     const textarea = document.createElement('textarea');
     textarea.id = 'report-message-textarea';
@@ -194,14 +213,8 @@ export function showReportModal(student, session, preFilledMessage, onReportSent
     cancelBtn.textContent = 'لغو';
     cancelBtn.style.minWidth = '100px';
 
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'btn-secondary';
-    copyBtn.textContent = '📋 کپی متن';
-    copyBtn.style.minWidth = '100px';
-
     actionsDiv.appendChild(smsBtn);
     actionsDiv.appendChild(shareBtn);
-    actionsDiv.appendChild(copyBtn);
     actionsDiv.appendChild(cancelBtn);
     modalContent.appendChild(actionsDiv);
 
